@@ -5,6 +5,7 @@ import { modules } from 'src/types/constants';
 import { IPaginationRes, TOneOrMany } from 'src/types/interfaces';
 import { Trash } from './global.schema';
 import { Document } from 'mongoose';
+import { FilterDto } from './global.dto';
 
 export type PopulateParam = { column: string; select?: any; match?: any; options?: any };
 export class IGetListParam {
@@ -14,7 +15,7 @@ export class IGetListParam {
   sortDir?: 'asc' | 'desc' = 'asc';
   search?: string = '';
   searchFields: string[] = [];
-  filter?: TOneOrMany<{ column: string; value: any }>;
+  filter?: TOneOrMany<FilterDto>;
   // allow single or multiple populate options
   populate?: TOneOrMany<PopulateParam>;
 }
@@ -44,18 +45,31 @@ export class GlobalService {
       conditions['$or'] = conditionList;
     }
 
-    // 🎯 Custom filter
+    // Flexible filter
     const addFilter = (filter) => {
-      if (filter?.column && filter.value !== undefined) {
-        if (Array.isArray((conditions as any)[filter.column])) {
-          (conditions as any)[filter.column].push(filter.value);
-        } else if ((conditions as any)[filter.column] !== undefined) {
-          (conditions as any)[filter.column] = { $in: [(conditions as any)[filter.column], filter.value] }; // This way we can filter a column with multiple value as keys
-        } else {
-          (conditions as any)[filter.column] = filter.value;
-        }
+      if (!filter?.column || filter.value === undefined) return;
+
+      const incomingValues = Array.isArray(filter.value)
+        ? filter.value
+        : [filter.value];
+
+      if ((conditions as any)[filter.column] !== undefined) {
+        const existing = (conditions as any)[filter.column];
+
+        const existingValues =
+          existing?.$in ? existing.$in : [existing];
+
+        (conditions as any)[filter.column] = {
+          $in: [...existingValues, ...incomingValues],
+        };
+      } else {
+        (conditions as any)[filter.column] =
+          incomingValues.length === 1
+            ? incomingValues[0]
+            : { $in: incomingValues };
       }
     };
+
 
     if (params.filter) {
       if (Array.isArray(params.filter)) {

@@ -2,6 +2,7 @@ import {
     IsArray,
     IsIn,
     IsInt,
+    IsNotEmpty,
     IsOptional,
     IsString,
     Min,
@@ -9,42 +10,49 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-class FilterDto {
-    @IsString()
-    column: string;
+export class FilterDto {
+  @IsString()
+  @IsNotEmpty()
+  column: string;
 
-    @IsString()
-    value: string;
+  @IsOptional()
+  value?: string | number | boolean | Array<string | number | boolean>;
 }
-
 export class PaginationDto {
-    @IsInt()
-    @Min(1)
-    page?: number;
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  page?: number;
 
-    @IsInt()
-    @Min(1)
-    size?: number;
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  size?: number;
 
-    @IsOptional()
-    @IsString()
-    sortBy?: string;
+  @IsOptional()
+  @IsString()
+  sortBy?: string;
 
-    @IsOptional()
-    @IsIn(['asc', 'desc'])
-    sortDir?: 'asc' | 'desc' = 'asc';
+  @IsOptional()
+  @IsIn(['asc', 'desc'])
+  sortDir?: 'asc' | 'desc' = 'asc';
 
-    @IsOptional()
-    @IsString()
-    search?: string;
+  @IsOptional()
+  @IsString()
+  search?: string;
 
-    @IsOptional()
-    @IsArray()
-    @IsString({ each: true })
-    searchFields?: string[];
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  searchFields?: string[];
 
-    @IsOptional()
-    @ValidateNested()
-    @Type(() => FilterDto)
-    filter?: FilterDto;
+  /**
+   * Accepts:
+   * - FilterDto
+   * - FilterDto[]
+   */
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => FilterDto)
+  filter?: FilterDto | FilterDto[];
 }
