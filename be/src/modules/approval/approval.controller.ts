@@ -1,81 +1,66 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, Res, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '../auth/auth.guard';
-import { Approval } from './approval.schema';
-import type { Response } from 'express';
-import { BaseResponse } from 'src/utils/base-response';
+import { Body, Controller, Get, Param, Put, Query, Res, UseGuards } from '@nestjs/common';
 import { PaginationDto } from 'src/global/global.dto';
+import { BaseResponse } from 'src/utils/base-response';
+import type { Response } from 'express';
 import { Types } from 'mongoose';
-import { ApprovalService } from './approval.service';
+import { PurchasingEn } from '../purchasing/purchasing.schema';
+import { PurchasingService } from '../purchasing/purchasing.service';
+import { AuthGuard } from '../auth/auth.guard';
 
 @UseGuards(AuthGuard)
 @Controller('approval')
 export class ApprovalController {
     constructor(
-        private readonly service: ApprovalService,
+        private readonly service: PurchasingService
     ) { }
 
-    @Post('')
-    async createApproval(
-        @Body() body: Approval,
-        @Res() res: Response,
-    ) {
-        try {
-            const approval = await this.service.createApproval(body);
-            return BaseResponse.success({ res, option: { message: "Success create approval", detail: approval } });
-        } catch (err) {
-            return BaseResponse.error({ res, err });
-        }
-    }
-
-    @Get('')
-    async listApproval(
+    @Get('purchasing')
+    async listApprovalPurchasing(
         @Query() query: PaginationDto,
         @Res() res: Response,
     ) {
         try {
-            const { data, meta } = await this.service.listApproval(query);
-            return BaseResponse.success({ res, option: { message: 'Success get list approval', list: data, meta } });
+            const allowedStat = [PurchasingEn.REQUEST, PurchasingEn.APPROVE, PurchasingEn.REJECT];
+            const filter = query.filter && Array.isArray(query.filter) ? query.filter.filter(it => it.value && allowedStat.includes(it.value as PurchasingEn)) : allowedStat.map(it => { return { column: 'status', value: it } })
+            const query2 = {
+                ...query,
+                filter
+            }
+            const { data, meta } = await this.service.listPurchasing(query2);
+            return BaseResponse.success({ res, option: { message: 'Success get list purchasing', list: data, meta } });
         } catch (err) {
             return BaseResponse.error({ res, err });
         }
     }
 
-    @Put(':approval_id')
-    async editApproval(
-        @Param('approval_id') approvalId: Types.ObjectId,
-        @Body() body: Approval,
+    @Put('purchasing/:purchasing_id/approve')
+    async purchaseOrderApprove(
+        @Param('purchasing_id') purchasingId: Types.ObjectId,
         @Res() res: Response,
     ) {
         try {
-            const approval = await this.service.editApproval(approvalId, body);
-            return BaseResponse.success({ res, option: { message: "Success edit approval", detail: approval } });
+            const purchasing = await this.service.purchasingApproval(purchasingId, PurchasingEn.APPROVE);
+            return BaseResponse.success({
+                res,
+                option: { message: `Purchase order approved`, detail: purchasing },
+            });
         } catch (err) {
             return BaseResponse.error({ res, err });
         }
     }
 
-    @Get(':approval_id')
-    async detailApproval(
-        @Param('approval_id') approvalId: Types.ObjectId,
+    @Put('purchasing/:purchasing_id/reject')
+    async purchaseOrderReject(
+        @Param('purchasing_id') purchasingId: Types.ObjectId,
+        @Body() dto: { reject_notes: string },
         @Res() res: Response,
     ) {
         try {
-            const approval = await this.service.detailApproval(approvalId);
-            return BaseResponse.success({ res, option: { message: "Success get detail approval", detail: approval } });
-        } catch (err) {
-            return BaseResponse.error({ res, err });
-        }
-    }
-
-
-    @Delete(':approval_id')
-    async deleteApproval(
-        @Param('approval_id') approvalId: Types.ObjectId,
-        @Res() res: Response,
-    ) {
-        try {
-            const approval = await this.service.deleteApproval(approvalId);
-            return BaseResponse.success({ res, option: { message: "Success get detail approval", detail: approval } });
+            const purchasing = await this.service.purchasingApproval(purchasingId, PurchasingEn.REJECT, dto.reject_notes);
+            return BaseResponse.success({
+                res,
+                option: { message: `Purchase order rejected`, detail: purchasing },
+            });
         } catch (err) {
             return BaseResponse.error({ res, err });
         }

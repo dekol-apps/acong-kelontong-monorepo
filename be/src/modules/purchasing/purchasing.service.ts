@@ -16,8 +16,6 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { decreaseDays } from 'src/utils/helper';
 import { cleanupDays } from 'src/types/constants';
 import * as fs from 'fs';
-import { ApprovalService } from '../approval/approval.service';
-import { ApprovalStatusEn, ApprovalTypeEn } from '../approval/approval.schema';
 
 @Injectable()
 export class PurchasingService {
@@ -25,8 +23,6 @@ export class PurchasingService {
   constructor(
     @Inject(forwardRef(() => GlobalService))
     private global: GlobalService,
-    @Inject(forwardRef(() => ApprovalService))
-    private approval: ApprovalService,
     private inventory: InventoryService,
     private purchaseItemSvc: PurchasingItemService,
     @InjectModel(Purchasing.name) private purchasingModel: Model<Purchasing>,
@@ -160,6 +156,7 @@ export class PurchasingService {
     sortBy,
     sortDir,
     search,
+    filter
   }: PaginationDto): Promise<{ data: Purchasing[]; meta: IPaginationRes }> {
     const searchFields: string[] = ['supplier_name'];
 
@@ -172,6 +169,7 @@ export class PurchasingService {
         sortDir,
         search,
         searchFields,
+        filter
       }
     )
   }
@@ -278,23 +276,30 @@ export class PurchasingService {
 
   async purchaseOrder(id: Types.ObjectId): Promise<Purchasing | undefined> {
     return this.global.withTransaction(async (session) => {
-      const purchase = await this.purchasingModel.findById(id).session(session);
-      if (!purchase) {
-        throw BaseResponse.notFound({ err: { text: 'purchaseOrder purchase not found' } });
-      }
-      purchase.status = PurchasingEn.REQUEST;
-      const approval = {
-        approval_type: ApprovalTypeEn.PURCHASING,
-        approval_status: ApprovalStatusEn.REQUEST,
-        approval_due_date: purchase.due_date,
-        approval_data: purchase,
-        approval_data_id: purchase._id,
-        approval_cost: purchase.total_purchase_price,
-      }
-      await this.approval.createApproval(approval, session)
-      await purchase.save({ session });
-      return purchase;
+      return await this.purchasingUpdateStat(id, PurchasingEn.REQUEST, undefined, session)
     });
+  }
+
+  async purchasingApproval(id: Types.ObjectId, status: PurchasingEn, notes?: string, sessionIn?: ClientSession): Promise<Purchasing | undefined> {
+    return this.global.withTransaction(async (session) => {
+      if (status === PurchasingEn.APPROVE) {
+        return await this.purchasingUpdateStat(id, status, undefined, session)
+      } else {
+        return await this.purchasingUpdateStat(id, status, notes, session)
+      }
+    }, sessionIn)
+  }
+
+  async purchasingExecute(id: Types.ObjectId, sessionIn?: ClientSession): Promise<Purchasing | undefined> {
+    return this.global.withTransaction(async (session) => {
+      return await this.purchasingUpdateStat(id, PurchasingEn.PROCESS, undefined, session);
+    }, sessionIn)
+  }
+
+  async purchasingDrop(id: Types.ObjectId, notes?: string, sessionIn?: ClientSession): Promise<Purchasing | undefined> {
+    return this.global.withTransaction(async (session) => {
+      return await this.purchasingUpdateStat(id, PurchasingEn.DROP, notes, session);
+    }, sessionIn)
   }
 
   async receiveOrder(id: Types.ObjectId, dto: ReceiveOrderDto, updateItems: PurchasingItemDto[]): Promise<Purchasing | undefined> {

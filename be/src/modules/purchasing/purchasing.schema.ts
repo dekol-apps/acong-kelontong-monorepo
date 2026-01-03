@@ -39,8 +39,13 @@ export class Purchasing {
 
   @Prop({ type: Number, default: 0 })
   total_purchase_price: number;
+
+  @Prop({ type: Number, default: 0 })
+  additional_cost: number;
+
   @Prop()
   reject_notes?: string;
+
   @Prop()
   receive_notes?: string;
 }

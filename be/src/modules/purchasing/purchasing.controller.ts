@@ -1,16 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, Res, UploadedFile } from '@nestjs/common';
 import { PaginationDto } from 'src/global/global.dto';
 import { BaseResponse } from 'src/utils/base-response';
 import { PurchasingService } from './purchasing.service';
 import type { Request, Response } from 'express';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { PurchasingDto, PurchaseOrderDto, ListPurchasingItemsDTO, ReceiveOrderDto } from './purchasing.dto';
+import { PurchasingDto, ListPurchasingItemsDTO, ReceiveOrderDto } from './purchasing.dto';
 import { Types } from 'mongoose';
-import { diskStorage } from 'multer';
-import { extname, join } from 'path';
 import { PurchasingEn } from './purchasing.schema';
 import { PurchasingItemDto } from '../purchasing-item/purchasing-item.dto';
-import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs';
 import { UploadInvoiceInterceptor } from './purchasing-invoice.interceptor';
 
@@ -138,37 +134,6 @@ export class PurchasingController {
     });
   }
 
-  @Put(':purchasing_id/approve')
-  async purchaseOrderApprove(
-    @Param('purchasing_id') purchasingId: Types.ObjectId,
-    @Req() req: Request,
-    @Res() res: Response,
-  ) {
-    return this.purchasingMutation({ req, res }, async () => {
-      const purchasing = await this.service.purchasingUpdateStat(purchasingId, PurchasingEn.APPROVE);
-      return BaseResponse.success({
-        res,
-        option: { message: `Purchase order approved`, detail: purchasing },
-      });
-    });
-  }
-
-  @Put(':purchasing_id/reject')
-  async purchaseOrderReject(
-    @Param('purchasing_id') purchasingId: Types.ObjectId,
-    @Req() req: Request,
-    @Body() dto: { reject_notes: string },
-    @Res() res: Response,
-  ) {
-    return this.purchasingMutation({ req, res }, async () => {
-      const purchasing = await this.service.purchasingUpdateStat(purchasingId, PurchasingEn.REJECT, dto.reject_notes);
-      return BaseResponse.success({
-        res,
-        option: { message: `Purchase order rejected`, detail: purchasing },
-      });
-    });
-  }
-
   @Put(':purchasing_id/process')
   async purchaseOrderProcess(
     @Param('purchasing_id') purchasingId: Types.ObjectId,
@@ -176,7 +141,7 @@ export class PurchasingController {
     @Res() res: Response,
   ) {
     return this.purchasingMutation({ req, res }, async () => {
-      const purchasing = await this.service.purchasingUpdateStat(purchasingId, PurchasingEn.PROCESS);
+      const purchasing = await this.service.purchasingExecute(purchasingId);
       return BaseResponse.success({
         res,
         option: { message: `Purchase order on process`, detail: purchasing },
@@ -191,7 +156,7 @@ export class PurchasingController {
     @Res() res: Response,
   ) {
     return this.purchasingMutation({ req, res }, async () => {
-      const purchasing = await this.service.purchasingUpdateStat(purchasingId, PurchasingEn.DROP);
+      const purchasing = await this.service.purchasingDrop(purchasingId, PurchasingEn.DROP);
       return BaseResponse.success({
         res,
         option: { message: `Purchase order on process`, detail: purchasing },
