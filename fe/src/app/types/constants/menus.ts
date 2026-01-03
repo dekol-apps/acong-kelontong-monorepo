@@ -70,7 +70,7 @@ export const BRANDS: IMenu = {
 export const PROCUREMENT: IMenu = {
     code: 'procurement',
     url: 'procurement',
-    icon: 'nav-icon bi bi-clipboard-check',
+    icon: 'nav-icon bi bi-clipboard-plus',
     labelKey: 'Procurement',
 }
 export const PURCHASE_ORDER: IMenu = {
@@ -188,10 +188,19 @@ export const DASHBOARD: IMenu = {
     permissions: ['dashboard.view']
 }
 
+export const APPROVAL: IMenu = {
+    code: 'approval',
+    url: 'approval',
+    icon: 'nav-icon bi bi-clipboard-check',
+    labelKey: 'Approval',
+    permissions: ['approval.view']
+}
+
 // This is to manage menu UI, please make sure routers are matched
 export const Menus: IMenu[] = [
     // TODO: remove this dummy later
     DASHBOARD,
+    APPROVAL,
     {
         ...SALES,
         children: [
