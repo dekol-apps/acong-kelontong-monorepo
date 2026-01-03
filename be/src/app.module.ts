@@ -10,7 +10,7 @@ import { toNumber } from './utils/helper';
 import { Auth, AuthSchema } from './modules/auth/auth.schema';
 import { AuthController } from './modules/auth/auth.controller';
 import { AuthService } from './modules/auth/auth.service';
-import { AuthGuard } from './modules/auth/auth.guard';
+import { UAuthGuard } from './modules/auth/auth.guard';
 import { UserController } from './modules/user/user.controller';
 import { UserService } from './modules/user/user.service';
 import { User, UserSchema } from './modules/user/user.schema';
@@ -114,7 +114,7 @@ import { ApprovalController } from './modules/approval/approval.controller';
   providers: [
     AppService, 
     AuthService, 
-    AuthGuard, 
+    UAuthGuard, 
     ModuleGuard, 
     UserService, 
     BrandService, 

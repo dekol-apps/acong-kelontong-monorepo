@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Res, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '../auth/auth.guard';
+import { UAuthGuard } from '../auth/auth.guard';
 import { Brand } from './brand.schema';
 import { BrandService } from './brand.service';
 import type { Response } from 'express';
@@ -7,7 +7,7 @@ import { BaseResponse } from 'src/utils/base-response';
 import { PaginationDto } from 'src/global/global.dto';
 import { Types } from 'mongoose';
 
-@UseGuards(AuthGuard)
+@UseGuards(UAuthGuard)
 @Controller('brand')
 export class BrandController {
     constructor(

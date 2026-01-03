@@ -5,9 +5,9 @@ import type { Response } from 'express';
 import { Types } from 'mongoose';
 import { PurchasingEn } from '../purchasing/purchasing.schema';
 import { PurchasingService } from '../purchasing/purchasing.service';
-import { AuthGuard } from '../auth/auth.guard';
+import { UAuthGuard } from '../auth/auth.guard';
 
-@UseGuards(AuthGuard)
+@UseGuards(UAuthGuard)
 @Controller('approval')
 export class ApprovalController {
     constructor(

@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Res, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
-import { AuthGuard } from '../auth/auth.guard';
+import { UAuthGuard } from '../auth/auth.guard';
 import { BaseResponse } from 'src/utils/base-response';
 import type { Response } from 'express';
 import { GetUserListDto, InviteUserDto } from './user.dto';
@@ -16,7 +16,7 @@ export class UserController {
     private readonly mailerService: MailerService
   ) { }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(UAuthGuard)
   @Permission(['user.view'])
   @Get('')
   async list(
@@ -34,7 +34,7 @@ export class UserController {
     }
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(UAuthGuard)
   @Permission(['user.create'])
   @Post('')
   async inviteUser(
@@ -70,7 +70,7 @@ export class UserController {
     }
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(UAuthGuard)
   @Get('detail/:user_id')
   async detail(
     @Param('user_id') user_id: Types.ObjectId,
@@ -87,7 +87,7 @@ export class UserController {
     }
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(UAuthGuard)
   @Put('detail/:user_id')
   async editProfile(
     @Param('user_id') user_id: Types.ObjectId,
@@ -108,7 +108,7 @@ export class UserController {
     }
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(UAuthGuard)
   @Permission(['user.delete'])
   @Delete('detail/:user_id')
   async deleteUser(
@@ -123,7 +123,7 @@ export class UserController {
     }
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(UAuthGuard)
   @Permission(['user.create', 'user.edit'])
   @Post('detail/:user_id/re-invite')
   async resendVerification(
@@ -158,7 +158,7 @@ export class UserController {
     }
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(UAuthGuard)
   @Permission(['user.create', 'user.edit'])
   @Put('detail/:user_id/role')
   async editRole(

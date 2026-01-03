@@ -5,7 +5,7 @@ import { BaseResponse } from 'src/utils/base-response';
 import { errCodes } from 'src/types/constants';
 
 @Injectable()
-export class AuthGuard implements CanActivate {
+export class UAuthGuard implements CanActivate {
   constructor(private readonly authService: AuthService) { }
 
   canActivate(context: ExecutionContext): boolean {

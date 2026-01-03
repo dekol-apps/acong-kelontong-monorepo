@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Put, Query, Res, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '../auth/auth.guard';
+import { UAuthGuard } from '../auth/auth.guard';
 import { InventoryService } from './inventory.service';
 import type { Response } from 'express';
 import { BaseResponse } from 'src/utils/base-response';
@@ -7,7 +7,7 @@ import { PaginationDto } from 'src/global/global.dto';
 import { Types } from 'mongoose';
 import { InventoryDto } from './inventory.dto';
 
-@UseGuards(AuthGuard)
+@UseGuards(UAuthGuard)
 @Controller('inventory')
 export class InventoryController {
   constructor(
