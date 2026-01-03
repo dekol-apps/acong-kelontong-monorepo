@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ClientSession, Model, Types } from 'mongoose';
 import { GlobalService } from 'src/global/global.service';
@@ -11,6 +11,7 @@ import { PurchasingItemDto } from './purchasing-item.dto';
 export class PurchasingItemService {
 
   constructor(
+    @Inject(forwardRef(() => GlobalService))
     private global: GlobalService,
     @InjectModel(Purchasing.name) private purchasingModel: Model<Purchasing>,
     @InjectModel(PurchasingItem.name) private purchasingItemModel: Model<PurchasingItem>,

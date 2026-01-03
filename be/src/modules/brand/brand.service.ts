@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Brand } from './brand.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -11,6 +11,7 @@ import { PaginationDto } from 'src/global/global.dto';
 export class BrandService {
     constructor(
         @InjectModel(Brand.name) private readonly brandModel: Model<Brand>,
+        @Inject(forwardRef(() => GlobalService))
         private global: GlobalService
     ) { }
 

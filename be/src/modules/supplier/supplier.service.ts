@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Supplier } from './supplier.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -11,6 +11,7 @@ import { BaseResponse } from 'src/utils/base-response';
 export class SupplierService {
   constructor(
     @InjectModel(Supplier.name) private readonly supplierModel: Model<Supplier>,
+    @Inject(forwardRef(() => GlobalService))
     private global: GlobalService
   ) { }
 

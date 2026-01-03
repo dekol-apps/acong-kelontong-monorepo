@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { ClientSession, Connection, Model, Types } from 'mongoose';
 import { PaginationDto } from 'src/global/global.dto';
@@ -23,9 +23,11 @@ import { ApprovalStatusEn, ApprovalTypeEn } from '../approval/approval.schema';
 export class PurchasingService {
 
   constructor(
+    @Inject(forwardRef(() => GlobalService))
     private global: GlobalService,
-    private inventory: InventoryService,
+    @Inject(forwardRef(() => ApprovalService))
     private approval: ApprovalService,
+    private inventory: InventoryService,
     private purchaseItemSvc: PurchasingItemService,
     @InjectModel(Purchasing.name) private purchasingModel: Model<Purchasing>,
     @InjectModel(PurchasingItem.name) private purchasingItemModel: Model<PurchasingItem>,

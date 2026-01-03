@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Approval, ApprovalStatusEn } from './approval.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { ClientSession, Model, Types } from 'mongoose';
@@ -13,7 +13,9 @@ import { PurchasingEn } from '../purchasing/purchasing.schema';
 export class ApprovalService {
   constructor(
     @InjectModel(Approval.name) private readonly approvalModel: Model<Approval>,
+    @Inject(forwardRef(() => GlobalService))
     private global: GlobalService,
+    @Inject(forwardRef(() => PurchasingService))
     private purchasing: PurchasingService
   ) { }
 
