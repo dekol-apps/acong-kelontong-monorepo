@@ -39,7 +39,7 @@ export class InventoryService {
     )
   }
 
-  async createInventory(body: InventoryDto, sessionIn: ClientSession): Promise<Inventory> {
+  async createInventory(body: InventoryDto, sessionIn?: ClientSession): Promise<Inventory> {
     return this.global.withTransaction(async (session) => {
       const poItem = await this.purchasingItemModel.findById(body.purchase_item).session(session);
       if (!poItem) throw BaseResponse.notFound({ err: 'createInventory poItem not found' });

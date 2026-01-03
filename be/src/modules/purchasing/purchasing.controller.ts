@@ -130,10 +130,10 @@ export class PurchasingController {
     @Res() res: Response,
   ) {
     return this.purchasingMutation({ req, res }, async () => {
-      const purchasing = await this.service.purchasingUpdateStat(purchasingId, PurchasingEn.REQUEST);
+      const purchasing = await this.service.purchaseOrder(purchasingId);
       return BaseResponse.success({
         res,
-        option: { message: `Purchase order on request`, detail: purchasing },
+        option: { message: `Purchase order on approval`, detail: purchasing },
       });
     });
   }

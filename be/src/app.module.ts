@@ -39,6 +39,9 @@ import { PurchasingItemController } from './modules/purchasing-item/purchasing-i
 import { PurchasingItemService } from './modules/purchasing-item/purchasing-item.service';
 import { PurchasingItem, PurchasingItemSchema } from './modules/purchasing-item/purchasing-item.schema';
 import { Trash, TrashSchema } from './global/global.schema';
+import { ApprovalController } from './modules/approval/approval.controller';
+import { ApprovalService } from './modules/approval/approval.service';
+import { Approval, ApprovalSchema } from './modules/approval/approval.schema';
 
 @Module({
   imports: [
@@ -90,14 +93,31 @@ import { Trash, TrashSchema } from './global/global.schema';
       { name: Role.name, schema: RoleSchema },
       { name: User.name, schema: UserSchema },
       { name: Brand.name, schema: BrandSchema },
+      { name: Approval.name, schema: ApprovalSchema },
       { name: Purchasing.name, schema: PurchasingSchema },
       { name: PurchasingItem.name, schema: PurchasingItemSchema },
       { name: Inventory.name, schema: InventorySchema },
     ]),
     SeederModule,
   ],
-  controllers: [AppController, AuthController, UserController, BrandController, RoleController, SupplierController, ProductController, PurchasingController, PurchasingItemController, GlobalController, InventoryController],
-  providers: [AppService, AuthService, AuthGuard, ModuleGuard, UserService, BrandService, BaseResponse, GlobalService, RoleService, SupplierService, ProductService, PurchasingService, InventoryService, PurchasingItemService]
+  controllers: [AppController, AuthController, UserController, BrandController, RoleController, SupplierController, ProductController, PurchasingController, PurchasingItemController, GlobalController, InventoryController, ApprovalController],
+  providers: [
+    AppService, 
+    AuthService, 
+    AuthGuard, 
+    ModuleGuard, 
+    UserService, 
+    BrandService, 
+    BaseResponse, 
+    GlobalService, 
+    RoleService, 
+    SupplierService, 
+    ProductService, 
+    PurchasingService, 
+    InventoryService, 
+    PurchasingItemService, 
+    ApprovalService
+  ]
 })
 export class AppModule implements OnModuleInit {
   constructor(private readonly seederService: SeederService) { }

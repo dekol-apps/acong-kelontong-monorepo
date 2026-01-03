@@ -6,7 +6,7 @@ import { GlobalService } from 'src/global/global.service';
 import { IPaginationRes } from 'src/types/interfaces';
 import { BaseResponse } from 'src/utils/base-response';
 import { Purchasing, PurchasingEn } from './purchasing.schema';
-import { ListPurchasingItemsDTO, PurchaseOrderDto, PurchasingDto, ReceiveOrderDto } from './purchasing.dto';
+import { ListPurchasingItemsDTO, PurchasingDto, ReceiveOrderDto } from './purchasing.dto';
 import { Supplier } from '../supplier/supplier.schema';
 import { InventoryService } from '../inventory/inventory.service';
 import { PurchasingItem } from '../purchasing-item/purchasing-item.schema';
@@ -16,6 +16,8 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { decreaseDays } from 'src/utils/helper';
 import { cleanupDays } from 'src/types/constants';
 import * as fs from 'fs';
+import { ApprovalService } from '../approval/approval.service';
+import { ApprovalStatusEn, ApprovalTypeEn } from '../approval/approval.schema';
 
 @Injectable()
 export class PurchasingService {
@@ -23,6 +25,7 @@ export class PurchasingService {
   constructor(
     private global: GlobalService,
     private inventory: InventoryService,
+    private approval: ApprovalService,
     private purchaseItemSvc: PurchasingItemService,
     @InjectModel(Purchasing.name) private purchasingModel: Model<Purchasing>,
     @InjectModel(PurchasingItem.name) private purchasingItemModel: Model<PurchasingItem>,
@@ -257,15 +260,36 @@ export class PurchasingService {
     }, sessionIn);
   }
 
-  async purchasingUpdateStat(id: Types.ObjectId, status: PurchasingEn, notes?: string): Promise<Purchasing | undefined> {
+  async purchasingUpdateStat(id: Types.ObjectId, status: PurchasingEn, notes?: string, sessionIn?: ClientSession): Promise<Purchasing | undefined> {
     return this.global.withTransaction(async (session) => {
       const purchase = await this.purchasingModel.findById(id).session(session);
       if (!purchase) {
         throw BaseResponse.notFound({ err: { text: 'purchaseOrder purchase not found' } });
       }
-      purchase.status = status ?? purchase.status;
+      purchase.status = status;
       if (status === PurchasingEn.REJECT) purchase.reject_notes = notes;
       if (status === PurchasingEn.RECEIVE) purchase.receive_notes = notes;
+      await purchase.save({ session });
+      return purchase;
+    }, sessionIn);
+  }
+
+  async purchaseOrder(id: Types.ObjectId): Promise<Purchasing | undefined> {
+    return this.global.withTransaction(async (session) => {
+      const purchase = await this.purchasingModel.findById(id).session(session);
+      if (!purchase) {
+        throw BaseResponse.notFound({ err: { text: 'purchaseOrder purchase not found' } });
+      }
+      purchase.status = PurchasingEn.REQUEST;
+      const approval = {
+        approval_type: ApprovalTypeEn.PURCHASING,
+        approval_status: ApprovalStatusEn.REQUEST,
+        approval_due_date: purchase.due_date,
+        approval_data: purchase,
+        approval_data_id: purchase._id,
+        approval_cost: purchase.total_purchase_price,
+      }
+      await this.approval.createApproval(approval, session)
       await purchase.save({ session });
       return purchase;
     });
