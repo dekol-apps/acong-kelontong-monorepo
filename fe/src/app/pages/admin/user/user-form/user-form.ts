@@ -10,6 +10,7 @@ type formType = 'new' | 'edit' | 'view';
 @Component({
   selector: 'app-user-form',
   imports: [ReactiveFormsModule, FormValidation],
+  standalone: true,
   templateUrl: './user-form.html',
   styleUrl: './user-form.scss',
 })

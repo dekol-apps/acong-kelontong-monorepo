@@ -1,0 +1,24 @@
+<div class="card mb-4 p-4">
+  <div class="card-header mb-4">
+    <div class="d-flex flex-row justify-content-between gap-4">
+      <h3 class="card-title">Investment</h3>
+      <!-- <a class="btn btn-primary pointer" routerLink="./form">New Purchase Order</a> -->
+    </div>
+  </div>
+  <ul ngbNav #nav="ngbNav" [(activeId)]="tab" class="nav-tabs">
+    <li [ngbNavItem]="1">
+      <button ngbNavLink>Deposit</button>
+      <ng-template ngbNavContent>
+        <app-deposit></app-deposit>
+      </ng-template>
+    </li>
+    <li [ngbNavItem]="2">
+      <button ngbNavLink>Withdrawal</button>
+      <ng-template ngbNavContent>
+        <app-withdrawal></app-withdrawal>
+      </ng-template>
+    </li>
+  </ul>
+
+  <div [ngbNavOutlet]="nav" class="mt-2"></div>
+</div>

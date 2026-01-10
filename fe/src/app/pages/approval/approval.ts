@@ -6,6 +6,7 @@ import { ApprovalExpenses } from './approval-expenses/approval-expenses';
 @Component({
   selector: 'app-approval',
 	imports: [NgbNavContent, NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLinkButton, NgbNavLinkBase, NgbNavOutlet, ApprovalPurchasing, ApprovalExpenses],
+  standalone: true,
   templateUrl: './approval.html',
   styleUrl: './approval.scss'
 })

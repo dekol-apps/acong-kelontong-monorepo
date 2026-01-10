@@ -196,11 +196,20 @@ export const APPROVAL: IMenu = {
     permissions: ['approval.view']
 }
 
+export const INVESTMENT: IMenu = {
+    code: 'investment',
+    url: 'investment',
+    icon: 'nav-icon bi bi-bank',
+    labelKey: 'Investment',
+    permissions: ['investment.view']
+}
+
 // This is to manage menu UI, please make sure routers are matched
 export const Menus: IMenu[] = [
     // TODO: remove this dummy later
     DASHBOARD,
     APPROVAL,
+    INVESTMENT,
     {
         ...SALES,
         children: [

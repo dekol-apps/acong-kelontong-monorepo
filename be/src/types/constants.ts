@@ -9,6 +9,7 @@ export const errCodes = {
 }
 
 export const modules: TModules[] = [
+  'investment.view', 'investment.create', 'investment.edit', 'investment.delete',
   'approval.view', 'approval.create', 'approval.edit', 'approval.delete',
   'inventory.view', 'inventory.create', 'inventory.edit', 'inventory.delete',
   'showcase.view', 'showcase.create', 'showcase.edit', 'showcase.delete',

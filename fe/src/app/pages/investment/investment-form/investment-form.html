@@ -1,0 +1,29 @@
+<div class="modal-header">
+  <h4 class="modal-title" id="modal-title">
+    <div class="card-title text-capitalize">{{type}} User</div>
+  </h4>
+  <button type="button" class="btn-close" aria-describedby="modal-title" (click)="close.emit()"></button>
+</div>
+<fieldset [disabled]="page==='view'">
+  <form [formGroup]="form" appFormValidation (ngSubmit)="submit()">
+    <div class="modal-body">
+      <div class="d-flex flex-row flex-wrap justify-content-between gap-2">
+        <div class="w-100">
+          <label for="amount" class="form-label required">Amount</label>
+          <input type="text" class="form-control" id="amount" formControlName="amount" [readOnly]="page==='view'" />
+        </div>
+        <div class="w-100">
+          <label for="invoice_photo" class="form-label">Invoice Photo</label>
+          <app-drag-drop-file [patchFileVal]="patchFileVal" [loading]="isLoading" (deleteHandler)="deleteFile()"
+            (fileChanged)="addFile($event)" message="Tambahkan Foto Sampul Kos"></app-drag-drop-file>
+        </div>
+      </div>
+    </div>
+    @if (page!=='view') {
+    <div class="modal-footer">
+      <button class="btn btn-secondary" type="button" (click)="close.emit()">Cancel</button>
+      <button class="btn btn-primary" type="submit">Submit</button>
+    </div>
+    }
+  </form>
+</fieldset>
