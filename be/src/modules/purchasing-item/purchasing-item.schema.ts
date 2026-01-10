@@ -26,12 +26,6 @@ export class PurchasingItem {
 
   @Prop({ type: Number, required: true })
   purchase_price: number;
-
-  @Prop({ type: Number, required: true })
-  sell_price: number;
-
-  @Prop({ type: Date })
-  exp_date?: Date;
 }
 
 export type PurchasingItemDocument = PurchasingItem & Document & { product: ProductDocument };

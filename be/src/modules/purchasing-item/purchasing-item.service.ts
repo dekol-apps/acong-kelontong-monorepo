@@ -34,7 +34,7 @@ export class PurchasingItemService {
         product_name: product.product_name,
       }
       const created = (await this.purchasingItemModel.create([data], { session }))[0];
-      if (!created) throw BaseResponse.notFound({ err: 'editPurchasingItem created not found' });
+      if (!created) throw BaseResponse.notFound({ err: 'createPurchasingItem created not found' });
       await this.updatePurchasingTotalPrice(created?.purchase_order, session);
       return created;
     }, sessionIn)
@@ -96,7 +96,7 @@ export class PurchasingItemService {
       if (!purchase) throw BaseResponse.notFound({ err: 'Purchasing not found' });
       const items = await this.purchasingItemModel.find({ purchase_order: purchase_order }).session(session).lean();
       if (!items || items.length < 1) {
-        return undefined;
+        return purchase;
       }
       const total_price = items.reduce((sum, item) => sum + item.purchase_qty * item.purchase_price, 0);
       purchase.total_purchase_price = total_price;

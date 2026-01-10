@@ -1,21 +1,17 @@
-import { IsDate, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { Types } from 'mongoose';
+import { PaginationDto } from 'src/global/global.dto';
 
 export class InventoryDto {
-  @IsMongoId()
-  @IsNotEmpty()
-  purchase_item: Types.ObjectId;
-  @IsNumber()
-  @IsOptional()
-  sell_price?: number;
-  @IsNumber()
-  @IsOptional()
-  item_qty?: number;
-  @IsNumber()
-  @IsOptional()
-  remaining_qty?: number;
   @IsString()
-  @IsDate()
+  @IsNotEmpty()
+  inventory_name: string;
+
+  @IsString()
   @IsOptional()
-  exp_date?: Date;
+  description?: string;
+}
+
+export class ListInventoryItemsDTO extends PaginationDto {
+  inventory_id: Types.ObjectId
 }

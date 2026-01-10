@@ -322,11 +322,7 @@ export class PurchasingService {
       if (!updatedPurchase)
         throw BaseResponse.unexpected({ err: { text: 'receiveOrder failed to editPurchasing' } });
       // ✅ Step 2: Update items with new values (optional)
-      const updatedItems = await this.bulkUpdatePurchasingItems(id, updateItems, session);
-      // ✅ Step 3: Safely loop and create inventory
-      await Promise.all(updatedItems.map(async item => {
-        await this.inventory.createInventory({ purchase_item: item._id }, session);
-      }))
+      await this.bulkUpdatePurchasingItems(id, updateItems, session);
       return updatedPurchase;
     });
   }

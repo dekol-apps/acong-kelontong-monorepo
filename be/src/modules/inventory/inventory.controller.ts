@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Put, Query, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Res, UseGuards } from '@nestjs/common';
 import { UAuthGuard } from '../auth/auth.guard';
 import { InventoryService } from './inventory.service';
 import type { Response } from 'express';
@@ -13,6 +13,19 @@ export class InventoryController {
   constructor(
     private readonly service: InventoryService,
   ) { }
+
+  @Post('')
+  async createInventory(
+    @Body() body: InventoryDto,
+    @Res() res: Response,
+  ) {
+    try {
+      const inventory = await this.service.createInventory(body);
+      return BaseResponse.success({ res, option: { message: "Success create inventory", detail: inventory } });
+    } catch (err) {
+      return BaseResponse.error({ res, err });
+    }
+  }
 
   @Get('')
   async listInventory(

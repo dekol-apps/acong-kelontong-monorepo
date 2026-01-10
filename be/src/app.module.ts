@@ -40,6 +40,9 @@ import { PurchasingItemService } from './modules/purchasing-item/purchasing-item
 import { PurchasingItem, PurchasingItemSchema } from './modules/purchasing-item/purchasing-item.schema';
 import { Trash, TrashSchema } from './global/global.schema';
 import { ApprovalController } from './modules/approval/approval.controller';
+import { InventoryItemController } from './modules/inventory-item/inventory-item.controller';
+import { InventoryItemService } from './modules/inventory-item/inventory-item.service';
+import { InventoryItem, InventoryItemSchema } from './modules/inventory-item/inventory-item.schema';
 
 @Module({
   imports: [
@@ -94,38 +97,41 @@ import { ApprovalController } from './modules/approval/approval.controller';
       { name: Purchasing.name, schema: PurchasingSchema },
       { name: PurchasingItem.name, schema: PurchasingItemSchema },
       { name: Inventory.name, schema: InventorySchema },
+      { name: InventoryItem.name, schema: InventoryItemSchema },
     ]),
     SeederModule,
   ],
   controllers: [
-    AppController, 
-    AuthController, 
-    UserController, 
-    BrandController, 
-    RoleController, 
-    SupplierController, 
-    ProductController, 
-    PurchasingController, 
-    PurchasingItemController, 
-    GlobalController, 
-    InventoryController, 
-    ApprovalController
+    AppController,
+    AuthController,
+    UserController,
+    BrandController,
+    RoleController,
+    SupplierController,
+    ProductController,
+    PurchasingController,
+    PurchasingItemController,
+    GlobalController,
+    InventoryController,
+    ApprovalController, 
+    InventoryItemController
   ],
   providers: [
-    AppService, 
-    AuthService, 
-    UAuthGuard, 
-    ModuleGuard, 
-    UserService, 
-    BrandService, 
-    BaseResponse, 
-    GlobalService, 
-    RoleService, 
-    SupplierService, 
-    ProductService, 
-    PurchasingService, 
-    InventoryService, 
+    AppService,
+    AuthService,
+    UAuthGuard,
+    ModuleGuard,
+    UserService,
+    BrandService,
+    BaseResponse,
+    GlobalService,
+    RoleService,
+    SupplierService,
+    ProductService,
+    PurchasingService,
+    InventoryService,
     PurchasingItemService, 
+    InventoryItemService,
   ]
 })
 export class AppModule implements OnModuleInit {

@@ -1,22 +1,34 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { Inventory, InventoryEn } from './inventory.schema';
+import { Inventory } from './inventory.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { ClientSession, Model, Types } from 'mongoose';
 import { PaginationDto } from 'src/global/global.dto';
 import { GlobalService } from 'src/global/global.service';
 import { IPaginationRes } from 'src/types/interfaces';
 import { BaseResponse } from 'src/utils/base-response';
-import { InventoryDto } from './inventory.dto';
-import { digitShortDate } from 'src/utils/helper';
-import { PurchasingItem } from '../purchasing-item/purchasing-item.schema';
+import { InventoryDto, ListInventoryItemsDTO } from './inventory.dto';
+import { InventoryItem } from '../inventory-item/inventory-item.schema';
 @Injectable()
 export class InventoryService {
   constructor(
     @InjectModel(Inventory.name) private readonly inventoryModel: Model<Inventory>,
-    @InjectModel(PurchasingItem.name) private purchasingItemModel: Model<PurchasingItem>,
+    @InjectModel(InventoryItem.name) private inventoryItemModel: Model<InventoryItem>,
     @Inject(forwardRef(() => GlobalService))
     private global: GlobalService
   ) { }
+
+  async createInventory(data: InventoryDto, sessionIn?: ClientSession): Promise<Inventory | undefined> {
+    return this.global.withTransaction(async (session) => {
+      const inventory = await this.inventoryModel.create([{  // use array + session
+        inventory_name: data.inventory_name,
+        description: data.description,
+        total_qty: 0,
+      }], { session });
+      const createdInventory = inventory[0];
+      await createdInventory.save({ session });
+      return this.detailInventory(createdInventory._id, session);
+    }, sessionIn);
+  }
 
   async listInventory({
     page,
@@ -40,34 +52,8 @@ export class InventoryService {
     )
   }
 
-  async createInventory(body: InventoryDto, sessionIn?: ClientSession): Promise<Inventory> {
+  async editInventory(id: Types.ObjectId, data: InventoryDto, sessionIn?: ClientSession): Promise<Inventory | undefined> {
     return this.global.withTransaction(async (session) => {
-      const poItem = await this.purchasingItemModel.findById(body.purchase_item).session(session);
-      if (!poItem) throw BaseResponse.notFound({ err: 'createInventory poItem not found' });
-
-      const batchCode = `${digitShortDate(new Date())}-${poItem.product_name.replace(/\s+/g, '_')}-${poItem._id.toString().slice(-4)}`;
-
-      const data: Inventory = {
-        purchase_item: body.purchase_item,
-        supplier_name: poItem.supplier_name,
-        product: poItem.product,
-        product_name: poItem.product_name,
-        exp_date: poItem.exp_date,
-        purchase_price: poItem.purchase_price,
-        sell_price: poItem.sell_price,
-        item_qty: poItem.recieved_qty,
-        remaining_qty: poItem.recieved_qty,
-        batch_code: batchCode,
-        status: InventoryEn.HALT,
-      };
-
-      return (await this.inventoryModel.create([data], { session }))[0];
-    }, sessionIn)
-  }
-
-
-  async editInventory(id: Types.ObjectId, data: InventoryDto): Promise<Inventory | undefined> {
-    try {
       const updatedInventory = await this.inventoryModel.findByIdAndUpdate(
         id,
         { $set: data },
@@ -75,33 +61,54 @@ export class InventoryService {
           new: true,         // return the updated doc
           runValidators: true, // validate before saving
         },
-      ).exec();
+      ).session(session);
       return updatedInventory || undefined;
-    } catch (err) {
-      throw BaseResponse.unexpected({ err: { text: 'editInventory catch', err } })
-    }
+    }, sessionIn);
   }
 
-  async detailInventory(id: Types.ObjectId): Promise<Inventory | undefined> {
-    try {
+  async detailInventory(id: Types.ObjectId, sessionIn?: ClientSession): Promise<Inventory | undefined> {
+    return this.global.withTransaction(async (session) => {
       const detailInventory = await this.inventoryModel.findById(id)
-        .populate(['purchase_item', 'product'])
+        .populate(['inventory_item', 'product'])
+        .session(session)
         .lean()
         .exec();
       return detailInventory || undefined;
-    } catch (err) {
-      throw BaseResponse.unexpected({ err: { text: 'detailInventory catch', err } })
-    }
+    }, sessionIn);
   }
 
-  async deleteInventory(id: Types.ObjectId): Promise<Inventory | undefined> {
-    try {
-      const inventory = await this.inventoryModel.findById(id);
+  async deleteInventory(id: Types.ObjectId, sessionIn?: ClientSession): Promise<Inventory | undefined> {
+    return this.global.withTransaction(async (session) => {
+      const inventory = await this.inventoryModel.findById(id).session(session);
       if (!inventory) throw BaseResponse.notFound()
-      await this.global.deleteData(inventory);
+      await this.global.deleteData(inventory, session);
       return inventory || undefined;
-    } catch (err) {
-      throw BaseResponse.unexpected({ err: { text: 'deleteInventory catch', err } })
-    }
+    }, sessionIn);
   }
+
+    async listInventoryItems({
+      inventory_id,
+      page,
+      size,
+      sortBy,
+      sortDir,
+      search,
+    }: ListInventoryItemsDTO): Promise<{ data: InventoryItem[]; meta: IPaginationRes }> {
+      const searchFields: string[] = ['product_name'];
+      const filter: { column: string, value: any } = { column: 'inventory', value: inventory_id }
+  
+      return this.global.getList<InventoryItem>(
+        this.inventoryItemModel,
+        {
+          page,
+          size,
+          sortBy,
+          sortDir,
+          search,
+          searchFields,
+          filter
+        }
+      )
+    }
+  
 }
