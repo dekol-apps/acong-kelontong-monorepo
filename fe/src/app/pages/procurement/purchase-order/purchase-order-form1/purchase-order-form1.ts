@@ -3,7 +3,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { FormValidation } from '../../../../shared/directives/form-validation/form-validation';
 import { AlertService } from '../../../../shared/components/alert/alert-service';
 import { IPurchasing, ISupplier } from '../../../../types/interfaces/procurement.interface';
-import { DragDropFileComponent } from '../../../../shared/components/drag-drop-file/drag-drop-file.component';
+import { DragDropFileComponent, IFielImg } from '../../../../shared/components/drag-drop-file/drag-drop-file.component';
 import { SupplierService } from '../../supplier/supplier.service';
 import { PurchaseOrderService } from '../purchase-order.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -25,7 +25,7 @@ export class PurchaseOrderForm1 implements OnInit {
   @Output() back: EventEmitter<unknown> = new EventEmitter<unknown>()
   @Input() type: formType = 'view';
   loading?: boolean;
-  invoicePhotoFile?: File;
+  patchFileVal?: string;
 
   form: FormGroup = new FormGroup({
     supplier: new FormControl(null, [Validators.required]),
@@ -57,6 +57,7 @@ export class PurchaseOrderForm1 implements OnInit {
           invoice_number: res.invoice_number,
           invoice_photo: res.invoice_photo
         }
+        this.patchFileVal = res.invoice_photo
         this.form.patchValue(valToPatch)
         console.log({ valToPatch })
         this.loading = false;
@@ -91,16 +92,16 @@ export class PurchaseOrderForm1 implements OnInit {
         this.alert.success(`Success ${this.purchase_id ? 'edit' : 'create'} purchasing!`);
         if (!this.purchase_id) {
           this.purchase_id = res._id;
-          this.router.navigate([`../form/${this.purchase_id}`], { relativeTo: this.route, queryParams: { type: 'edit' } })
+          this.router.navigate([`../form/${this.purchase_id}`], { relativeTo: this.route, queryParams: { type: 'edit' } }).then(() => {
+            setTimeout(() => {
+              this.submitPO.emit()
+            }, 100);
+          })
+        } else {
+          this.submitPO.emit()
         }
-        this.submitPO.emit()
       }
     })
-  }
-
-  addFile(file: File) {
-    this.deleteFile();
-    this.invoicePhotoFile = file;
   }
 
   createFormData(val) {
@@ -108,21 +109,18 @@ export class PurchaseOrderForm1 implements OnInit {
     if (val.supplier) fd.append('supplier', val.supplier);
     if (val.due_date) fd.append('due_date', ngbToNativeDate(val.due_date)!.toISOString());
     if (val.invoice_number) fd.append('invoice_number', val.invoice_number);
-    if (this.invoicePhotoFile) {
-      fd.append('invoice_photo', this.invoicePhotoFile)
-    } else {
-      fd.append('invoice_photo', val.invoice_photo)
-    };
+    if (val.invoice_photo) { fd.append('invoice_photo', val.invoice_photo) }
     return fd;
   }
 
-  previewFile() {
-    // this.importFile(this.docTypeFormMap[type].controls.file_id.value);
+  addFile(evt: IFielImg) {
+    this.deleteFile();
+    this.patchFileVal = evt.str;
+    this.form.controls.invoice_photo.patchValue(evt.file);
   }
 
   deleteFile() {
     this.form.controls.invoice_photo.reset();
-    this.invoicePhotoFile = undefined;
-    // this.cdRef.detectChanges();
+    this.patchFileVal = undefined;
   }
 }

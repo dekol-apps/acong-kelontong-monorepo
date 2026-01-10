@@ -1,13 +1,16 @@
-import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, EventEmitter, inject, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { TenMegaByte } from '../../../types/constants/common.constants';
-import { AlertService } from '../alert/alert-service';
+export interface IFielImg { file?: File | null, str?: string };
+
 @Component({
   selector: 'app-drag-drop-file',
   templateUrl: './drag-drop-file.component.html',
   styleUrls: ['./drag-drop-file.component.scss']
 })
 export class DragDropFileComponent implements OnChanges {
-  @Output() fileChanged: EventEmitter<File> = new EventEmitter<File>;
+  private cdRef = inject(ChangeDetectorRef);
+
+  @Output() fileChanged: EventEmitter<IFielImg> = new EventEmitter();
   @Output() deleteHandler: EventEmitter<Event> = new EventEmitter<Event>();
   @Output() previewHandler: EventEmitter<Event> = new EventEmitter<Event>();
 
@@ -15,22 +18,23 @@ export class DragDropFileComponent implements OnChanges {
   @Input() disabled?: boolean;
   @Input() elementId: string = '';
   @Input() error?: boolean;
-  @Input() fileTypes: string[] = ['jpg', 'jpeg', 'gif', 'bmp'];
+  @Input() fileTypes: string[] = ['jpg', 'jpeg', 'png'];
   @Input() maxSize: number = TenMegaByte; // Default 10 MB
-  @Input() patchFileName: string = '';
+  @Input() patchFileVal?: string = '';
   @Input() componentName: string = '';
   @Input() haveAction?: boolean = true;
   @Input() loading?: boolean;
+  @Input() message: string = 'Click to browse image';
 
   isDragging: boolean = false;
   dragEnter: boolean = false;
-  file: File | null = null;
-  fileName: string = '';
-  constructor(private toast: AlertService, private cdRef: ChangeDetectorRef) { }
+  file: IFielImg['file'] = null;
+  fileVal?: string = '';
+  constructor() { }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes.patchFileName) {
-      this.fileName = this.patchFileName;
+    if (changes.patchFileVal) {
+      this.fileVal = this.patchFileVal;
     }
   }
 
@@ -44,7 +48,7 @@ export class DragDropFileComponent implements OnChanges {
 
   reset() {
     this.file = null;
-    this.fileName = '';
+    this.fileVal = '';
     this.cdRef.detectChanges();
   }
 
@@ -54,25 +58,28 @@ export class DragDropFileComponent implements OnChanges {
       this.loading = true;
       const fileExtension = file.name.split('.').pop()?.toLowerCase() as string;
       if (!this.fileTypes.includes(fileExtension)) {
-        this.toast.error('Invalid file type!');
+        window.alert('Invalid file type!');
+        // this.toast.error('Invalid file type!');
       } else if (file.size > this.maxSize) {
-        this.toast.error('File size max 10MB!');
+        window.alert('File size max 10MB!');
+        // this.toast.error('File size max 10MB!');
       } else {
         this.loading = true;
         this.file = file;
-        this.fileChanged.emit(this.file);
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onloadend = () => {
           const base64 = reader.result;
           const source = base64!.toString();
-          this.fileName = source;
+          // this.fileVal = source;
+          this.fileChanged.emit({ file: this.file, str: source });
         };
       }
       this.loading = false;
     }
     catch (err) {
-      this.toast.error('UPLOAD_FILE.SYSTEM_ERROR');
+      window.alert('UPLOAD_FILE.SYSTEM_ERROR');
+      // this.toast.error('UPLOAD_FILE.SYSTEM_ERROR');
     } finally {
       this.isDragging = false;
     }
@@ -117,6 +124,18 @@ export class DragDropFileComponent implements OnChanges {
     link.download = filename;
     link.click();
     link = null;
+  }
+
+  @ViewChild('imgRef') imgRef!: ElementRef<HTMLImageElement>;
+
+  triggerFullscreen() {
+    const img = this.imgRef.nativeElement;
+
+    if (img.requestFullscreen) {
+      img.requestFullscreen();
+    } else if ((img as any).webkitRequestFullscreen) {
+      (img as any).webkitRequestFullscreen(); // iOS Safari / WKWebView
+    }
   }
 
 }

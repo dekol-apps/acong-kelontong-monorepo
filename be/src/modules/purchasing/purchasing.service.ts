@@ -107,10 +107,14 @@ export class PurchasingService {
       if (!supplier) throw BaseResponse.notFound({ err: 'Supplier not found' });
 
       const allowedFieldsByStatus = {
-        [PurchasingEn.DROP]: ['status'],
-        [PurchasingEn.RECEIVE]: ['status', 'invoice_number', 'invoice_photo'],
-        [PurchasingEn.PROCESS]: ['status', 'invoice_number', 'invoice_photo', 'due_date'],
-        [PurchasingEn.REQUEST]: ['status', 'invoice_number', 'invoice_photo', 'due_date', 'total_purchase_price', 'supplier_name', 'supplier'],
+        [PurchasingEn.EXPIRED]: [''],
+        [PurchasingEn.DROP]: [''],
+        [PurchasingEn.RECEIVE]: ['status'],
+        [PurchasingEn.PROCESS]: ['status', 'invoice_number', 'invoice_photo', 'due_date', 'additional_cost'],
+        [PurchasingEn.REJECT]: [''],
+        [PurchasingEn.APPROVE]: ['status', 'invoice_number', 'invoice_photo', 'due_date', 'additional_cost'],
+        [PurchasingEn.REQUEST]: ['status', 'reject_notes'],
+        [PurchasingEn.CREATE]: ['status', 'invoice_number', 'invoice_photo', 'due_date', 'total_purchase_price', 'supplier_name', 'supplier', 'additional_cost'],
       };
       // get allowed fields for this status
       const fields: string[] = purchase.status ? allowedFieldsByStatus[purchase.status] : [];
@@ -142,6 +146,8 @@ export class PurchasingService {
         if (field === 'due_date') purchase.due_date = data.due_date;
         if (field === 'invoice_number') purchase.invoice_number = data.invoice_number;
         if (field === 'invoice_photo') purchase.invoice_photo = data.invoice_photo;
+        if (field === 'additional_cost') purchase.additional_cost = data.additional_cost;
+        if (field === 'reject_notes') purchase.reject_notes = data.reject_notes;
         if (field === 'status') purchase.status = data.status ?? purchase.status;
       });
 
@@ -268,7 +274,7 @@ export class PurchasingService {
       }
       purchase.status = status;
       if (status === PurchasingEn.REJECT) purchase.reject_notes = notes;
-      if (status === PurchasingEn.RECEIVE) purchase.receive_notes = notes;
+      if (status === PurchasingEn.APPROVE) purchase.reject_notes = undefined;
       await purchase.save({ session });
       return purchase;
     }, sessionIn);

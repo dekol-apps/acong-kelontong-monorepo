@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsDate, IsOptional, IsMongoId } from 'class-validator';
+import { IsNotEmpty, IsString, IsDate, IsOptional, IsMongoId, IsNumber } from 'class-validator';
 import { Types } from 'mongoose';
 import { PaginationDto } from 'src/global/global.dto';
 export class PurchaseOrderDto {
@@ -8,6 +8,11 @@ export class PurchaseOrderDto {
   @IsOptional()
   @IsString()
   invoice_photo?: string;
+  @IsOptional()
+  @IsNumber()
+  additional_cost?: number;
+  @IsOptional()
+  reject_notes?: string;
 }
 export class PurchasingDto extends PurchaseOrderDto {
   @IsMongoId() // ✅ checks it's a valid ObjectId string

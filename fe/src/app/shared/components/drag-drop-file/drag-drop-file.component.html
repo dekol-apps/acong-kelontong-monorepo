@@ -1,26 +1,21 @@
 <div class="dropbox position-relative" [class.pointer]="!disabled" [class.error]="error" [class.dragging]="isDragging"
-  [class.pointer-events-none]="disabled" [class.disabled]="disabled" (click)="hiddenInput.click()"
-  (dragover)="handleDragOver($event)" (dragenter)="isDragging=true" (dragleave)="handleDragMove($event)"
-  (drop)="handleDrop($event)" onkeypress="hiddenInput.click()">
+  [class.pointer-events-none]="disabled" [class.disabled]="disabled"
+  (click)="fileVal ? triggerFullscreen() : hiddenInput.click()" (dragover)="handleDragOver($event)"
+  (dragenter)="isDragging=true" (dragleave)="handleDragMove($event)" (drop)="handleDrop($event)"
+  onkeypress="hiddenInput.click()">
   <input [id]="elementId" #hiddenInput type="file" [accept]="filterFileInput()" (change)="handleFileInput($event)">
   @if(loading) {
-  <div class="spinner-container position-absolute w-100 h-100 bg-light d-flex justify-content-center align-items-center">
+  <div
+    class="spinner-container position-absolute w-100 h-100 bg-light d-flex justify-content-center align-items-center">
     <div class="spinner-border text-secondary" style="width: 3rem; height: 3rem;" role="status">
       <span class="visually-hidden">Loading...</span>
     </div>
   </div>
   }
-  @if (fileName) {
-  <img class="h-100" [src]="fileName" alt="">
+  @if (fileVal) {
+  <img #imgRef class="h-100" [src]="fileVal" alt="">
   } @else {
   <div class="dropbox-guide">
-    <span>
-      @if (error) {
-      <i class="dropbox-guide-icon text-danger bi bi-x-square"></i>
-      } @else {
-      <i class="dropbox-guide-icon text-success bi bi-arrow-up-square"></i>
-      }
-    </span>
     <div class="dropbox-guide-text">
       <h3 class="m-0">Drop image here</h3>
       <p class="m-0">Click to browse image</p>
@@ -28,10 +23,9 @@
   </div>
   }
 </div>
-@if (fileName && haveAction) {
+@if (fileVal && haveAction) {
 <div class="d-flex flex-row align-items-center gap-2 mt-2">
-  <button (click)="download(fileName)" type="button"
-    class="btn btn-sm btn-outline btn-outline-primary">Download</button>
-  <button (click)="deleteClicked()" type="button" class="btn btn-sm btn-outline btn-outline-danger">Reset</button>
+  <button (click)="download(fileVal)" type="button" class="btn btn-sm btn-outline btn-outline-primary">Download</button>
+  <button (click)="deleteClicked()" type="button" class="btn btn-sm btn-outline btn-outline-danger">Remove</button>
 </div>
 }

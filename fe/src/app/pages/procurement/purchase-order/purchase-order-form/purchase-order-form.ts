@@ -14,7 +14,7 @@ import { IPurchasing, IPurchasingItem } from '../../../../types/interfaces/procu
   styleUrl: './purchase-order-form.scss'
 })
 export class PurchaseOrderForm {
-  type: formType = 'view';
+  type: formType = 'new';
   purchasingDetail?: IPurchasing;
   purchasingItems: IPurchasingItem[] = [];
   activeStep: number = 1;
@@ -29,11 +29,8 @@ export class PurchaseOrderForm {
     }
   }
 
-  submitPO() {
-    this.nextStep();
-  }
-
   nextStep() {
+    console.log('nextStep')
     if (this.activeStep < 3)
       this.activeStep += 1;
   }
