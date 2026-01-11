@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsDate, IsNumber, IsOptional, IsMongoId } from 'class-validator';
+import { IsNotEmpty, IsDate, IsNumber, IsOptional, IsMongoId, IsInt, Min } from 'class-validator';
 import { Types } from 'mongoose';
 export class PurchasOrderItemDto {
   @IsOptional()
@@ -6,8 +6,6 @@ export class PurchasOrderItemDto {
   recieved_qty?: number;
   @IsDate()
   exp_date?: Date;
-  @IsNumber()
-  sell_price?: number;
 }
 export class PurchasingItemDto extends PurchasOrderItemDto {
   @IsMongoId() // ✅ checks it's a valid ObjectId string
@@ -16,8 +14,10 @@ export class PurchasingItemDto extends PurchasOrderItemDto {
   @IsMongoId() // ✅ checks it's a valid ObjectId string
   @IsNotEmpty()
   product: Types.ObjectId;
-  @IsNumber()
+  @IsInt()
+  @Min(1)
   purchase_qty: number;
-  @IsNumber()
+  @IsInt()
+  @Min(1)
   purchase_price: number;
 }

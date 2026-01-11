@@ -45,6 +45,9 @@ export class Purchasing {
 
   @Prop()
   reject_notes?: string;
+
+  @Prop()
+  receive_notes?: string;
 }
 
 

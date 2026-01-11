@@ -3,7 +3,7 @@ import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { ClientSession, Connection, Model, Types } from 'mongoose';
 import { PaginationDto } from 'src/global/global.dto';
 import { GlobalService } from 'src/global/global.service';
-import { IPaginationRes } from 'src/types/interfaces';
+import { IListRes } from 'src/types/interfaces';
 import { BaseResponse } from 'src/utils/base-response';
 import { Purchasing, PurchasingEn } from './purchasing.schema';
 import { ListPurchasingItemsDTO, PurchasingDto, ReceiveOrderDto } from './purchasing.dto';
@@ -163,7 +163,7 @@ export class PurchasingService {
     sortDir,
     search,
     filter
-  }: PaginationDto): Promise<{ data: Purchasing[]; meta: IPaginationRes }> {
+  }: PaginationDto): Promise<IListRes<Purchasing>> {
     const searchFields: string[] = ['supplier_name'];
 
     return this.global.getList<Purchasing>(
@@ -196,7 +196,7 @@ export class PurchasingService {
     sortBy,
     sortDir,
     search,
-  }: ListPurchasingItemsDTO): Promise<{ data: PurchasingItem[]; meta: IPaginationRes }> {
+  }: ListPurchasingItemsDTO): Promise<IListRes<PurchasingItem>> {
     const searchFields: string[] = ['product_name'];
     const filter: { column: string, value: any } = { column: 'purchase_order', value: purchasing_id }
 
@@ -217,7 +217,11 @@ export class PurchasingService {
   async deletePurchasing(id: Types.ObjectId, sessionIn?: ClientSession): Promise<Purchasing | undefined> {
     return this.global.withTransaction(async (session) => {
       const purchasing = await this.purchasingModel.findById(id).session(session);
-      if (!purchasing) throw BaseResponse.notFound({ err: 'deletePurchasing failed', option: { message: 'Purchasing not found' } });
+      if (!purchasing) throw BaseResponse.notFound({ err: 'deletePurchasing !purchasing', option: { message: 'Purchasing not found' } });
+      const allowedStatus = [PurchasingEn.CREATE, PurchasingEn.REQUEST, PurchasingEn.REJECT, PurchasingEn.EXPIRED];
+      if (!allowedStatus.includes(purchasing.status)) {
+        BaseResponse.forbidden({ err: 'deletePurchasing !allowedStatus', option: { message: `Cannot delete item with status ${purchasing.status}` } });
+      }
       if (purchasing.invoice_photo) {
         try {
           const oldPath = new URL(purchasing.invoice_photo).pathname; // e.g. /uploads/invoices/<uuid>/<file>
@@ -236,14 +240,18 @@ export class PurchasingService {
     }, sessionIn);
   }
 
-  async bulkUpdatePurchasingItems(purchasing_id: Types.ObjectId, data: PurchasingItemDto[], sessionIn?: ClientSession): Promise<Array<PurchasingItem & { _id: Types.ObjectId }>> {
+  async bulkUpdatePurchasingItems(purchasing_id: Types.ObjectId, data: PurchasingItemDto[], sessionIn?: ClientSession): Promise<PurchasingItem[]> {
     return this.global.withTransaction(async (session) => {
       const existingItems = await this.purchasingItemModel.find({
         purchase_order: purchasing_id,
       }).session(session);
+      const itemMap = new Map( //make list of item with product id as key
+        existingItems.map(i => [i.product.toString(), i]),
+      );
 
+      // First filter: Delete purchasing items that is not listed in the payload of list items
+      // (when user not includes the item in the payload list, it means user intends to remove it)
       const dtoProductIds = data.map(it => it.product);
-
       const toDelete = existingItems.filter(
         i => !dtoProductIds.includes(i.product)
       );
@@ -251,8 +259,9 @@ export class PurchasingService {
         _id: { $in: toDelete.map(i => i._id) },
       }).session(session);
 
+      // The rest: if any item in the payload list is already available in DB, it means user intends to change it's value
       await Promise.all(data.map(async item => {
-        const existing = existingItems.find(i => i.product.toString() === item.product.toString());
+        const existing = itemMap.get(item.product.toString());
         const newData = { ...item, purchase_order: purchasing_id };
         if (existing) {
           await this.purchaseItemSvc.editPurchasingItem(existing._id, newData, session);
@@ -261,8 +270,8 @@ export class PurchasingService {
         }
       }));
 
-      const list = await this.purchasingItemModel.find({ purchase_order: purchasing_id }).session(session).lean();
-      return list;
+      const list = await this.listPurchasingItems({ purchasing_id });
+      return list.data;
     }, sessionIn);
   }
 
