@@ -4,9 +4,9 @@ import { InjectModel } from '@nestjs/mongoose';
 import { ClientSession, Model, Types } from 'mongoose';
 import { PaginationDto } from 'src/global/global.dto';
 import { GlobalService } from 'src/global/global.service';
-import { IPaginationRes } from 'src/types/interfaces';
+import { IListRes } from 'src/types/interfaces';
 import { BaseResponse } from 'src/utils/base-response';
-import { InventoryDto, ListInventoryItemsDTO } from './inventory.dto';
+import { InventoryDto } from './inventory.dto';
 import { InventoryItem } from '../inventory-item/inventory-item.schema';
 @Injectable()
 export class InventoryService {
@@ -36,7 +36,7 @@ export class InventoryService {
     sortBy,
     sortDir,
     search,
-  }: PaginationDto): Promise<{ data: Inventory[]; meta: IPaginationRes }> {
+  }: PaginationDto): Promise<IListRes<Inventory>> {
     const searchFields: string[] = ['product_name'];
 
     return this.global.getList<Inventory>(
@@ -81,34 +81,11 @@ export class InventoryService {
     return this.global.withTransaction(async (session) => {
       const inventory = await this.inventoryModel.findById(id).session(session);
       if (!inventory) throw BaseResponse.notFound()
-      await this.global.deleteData(inventory, session);
+      const existingItems = await this.inventoryItemModel.exists({ inventory: id });
+      if (existingItems) throw BaseResponse.forbidden({ err: 'deleteInventory existingItems', option: { message: 'Cannot delete: this inventory is not empty' } })
+      await inventory.deleteOne({ session });
       return inventory || undefined;
     }, sessionIn);
   }
-
-    async listInventoryItems({
-      inventory_id,
-      page,
-      size,
-      sortBy,
-      sortDir,
-      search,
-    }: ListInventoryItemsDTO): Promise<{ data: InventoryItem[]; meta: IPaginationRes }> {
-      const searchFields: string[] = ['product_name'];
-      const filter: { column: string, value: any } = { column: 'inventory', value: inventory_id }
-  
-      return this.global.getList<InventoryItem>(
-        this.inventoryItemModel,
-        {
-          page,
-          size,
-          sortBy,
-          sortDir,
-          search,
-          searchFields,
-          filter
-        }
-      )
-    }
   
 }

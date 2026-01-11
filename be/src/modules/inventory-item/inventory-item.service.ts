@@ -5,8 +5,9 @@ import { GlobalService } from 'src/global/global.service';
 import { BaseResponse } from 'src/utils/base-response';
 import { Inventory } from '../inventory/inventory.schema';
 import { Product } from '../product/product.schema';
-import { InventoryItemDto } from './inventory-item.dto';
+import { InventoryItemDto, ListInventoryItemsDTO } from './inventory-item.dto';
 import { InventoryItem } from './inventory-item.schema';
+import { IListRes } from 'src/types/interfaces';
 
 @Injectable()
 export class InventoryItemService {
@@ -19,13 +20,38 @@ export class InventoryItemService {
     @InjectModel(Product.name) private productModel: Model<Product>,
   ) { }
 
+  async listInventoryItems({
+    inventory_id,
+    page,
+    size,
+    sortBy,
+    sortDir,
+    search,
+  }: ListInventoryItemsDTO): Promise<IListRes<InventoryItem>> {
+    const searchFields: string[] = ['product_name'];
+    const filter: { column: string, value: any } = { column: 'inventory', value: inventory_id }
+
+    return this.global.getList<InventoryItem>(
+      this.inventoryItemModel,
+      {
+        page,
+        size,
+        sortBy,
+        sortDir,
+        search,
+        searchFields,
+        filter
+      }
+    )
+  }
+
   async createInventoryItem(dto: InventoryItemDto, sessionIn?: ClientSession): Promise<InventoryItem | undefined> {
     return this.global.withTransaction(async (session) => {
       const product = await this.productModel.findById(dto.product).session(session);
       if (!product) {
         throw BaseResponse.notFound({ err: `createInventoryItem Product not found` });
       }
-      const inventory = await this.inventoryModel.findById(dto.inventory).session(session);
+      const inventory = await this.inventoryModel.exists(dto.inventory).session(session);
       if (!inventory) {
         throw BaseResponse.notFound({ err: `createInventoryItem Inventory not found` });
       }
@@ -46,7 +72,7 @@ export class InventoryItemService {
     sessionIn?: ClientSession
   ): Promise<InventoryItem | undefined> {
     return this.global.withTransaction(async (session) => {
-      const inventory = await this.inventoryModel.findById(dto.inventory).session(session);
+      const inventory = await this.inventoryModel.exists(dto.inventory).session(session);
       if (!inventory) {
         throw BaseResponse.notFound({ err: `editInventoryItem Inventory not found` });
       }
@@ -70,21 +96,24 @@ export class InventoryItemService {
     }, sessionIn);
   }
 
-  async detailInventoryItem(id: Types.ObjectId): Promise<InventoryItem | undefined> {
-    const detailInventory = await this.inventoryItemModel
-      .findById(id)
-      .populate(['inventory', 'product'])
-      .lean()
-      .exec();
-    return detailInventory || undefined
+  async detailInventoryItem(id: Types.ObjectId, sessionIn?: ClientSession): Promise<InventoryItem | undefined> {
+    return this.global.withTransaction(async (session) => {
+      const detailInventory = await this.inventoryItemModel
+        .findById(id)
+        .session(session)
+        .populate(['inventory', 'product'])
+        .lean()
+        .exec();
+      return detailInventory || undefined
+    }, sessionIn);
   }
 
-  async deleteInventoryItem(id: Types.ObjectId, sessionIn?: ClientSession): Promise<InventoryItem | undefined> {
+  async deleteInventoryItem(inventory_id: Types.ObjectId, sessionIn?: ClientSession): Promise<InventoryItem | undefined> {
     return this.global.withTransaction(async (session) => {
-      const inventoryItem = await this.inventoryItemModel.findById(id).session(session);
+      const inventoryItem = await this.inventoryItemModel.findById(inventory_id).session(session);
       if (!inventoryItem) throw BaseResponse.notFound({ err: 'deleteInventoryItem not found' });
-      await this.updateInventoryTotalQuantity(inventoryItem?.inventory, session);
-      await this.global.deleteData(inventoryItem, session);
+      await this.updateInventoryTotalQuantity(inventory_id, session);
+      await inventoryItem.deleteOne({ session });
       return inventoryItem || undefined;
     }, sessionIn);
   }
