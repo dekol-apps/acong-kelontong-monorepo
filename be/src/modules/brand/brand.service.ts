@@ -4,7 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { BaseResponse } from 'src/utils/base-response';
 import { GlobalService } from 'src/global/global.service';
-import { IPaginationRes } from 'src/types/interfaces';
+import { IListRes } from 'src/types/interfaces';
 import { PaginationDto } from 'src/global/global.dto';
 
 @Injectable()
@@ -21,7 +21,7 @@ export class BrandService {
         sortBy,
         sortDir,
         search,
-    }: PaginationDto): Promise<{ data: Brand[]; meta: IPaginationRes }> {
+    }: PaginationDto): Promise<IListRes<Brand>> {
         const searchFields: string[] = ['brand_name', 'brand_description'];
 
         return this.global.getList<Brand>(

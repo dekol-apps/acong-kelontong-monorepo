@@ -45,6 +45,10 @@ export type TModules =  //This is a list of API Endpoint permission
 
 export type TLogoutOption = 'all' | 'other' | 'current';
 
+export interface IListRes<T> {
+  data: T[];
+  meta?: IPaginationRes
+}
 export interface IPaginationRes {
   total: number;
   totalPages: number;

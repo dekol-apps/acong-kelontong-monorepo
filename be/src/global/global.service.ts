@@ -2,10 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { Model, FilterQuery, ClientSession, Connection } from 'mongoose';
 import { modules } from 'src/types/constants';
-import { IPaginationRes, TOneOrMany } from 'src/types/interfaces';
+import { IListRes, TOneOrMany } from 'src/types/interfaces';
 import { Trash } from './global.schema';
 import { Document } from 'mongoose';
 import { FilterDto } from './global.dto';
+import { BaseResponse } from 'src/utils/base-response';
 
 export type PopulateParam = { column: string; select?: any; match?: any; options?: any };
 export class IGetListParam {
@@ -29,24 +30,25 @@ export class GlobalService {
   ) { }
 
 
-  async getList<M>(model: Model<M>, params: IGetListParam): Promise<{ data: M[]; meta: IPaginationRes }> {
-    const pageNum = Math.max(1, Number(params.page) || 1);
-    const pageSize = Math.max(1, Number(params.size) || 1000);
-    const skip = (pageNum - 1) * pageSize;
+  async getList<M>(model: Model<M>, params: IGetListParam): Promise<IListRes<M>> {
+    const pageNum = params.page ? Math.max(1, params.page) : undefined;
+    const pageSize = params.size ? Math.max(1, params.size) : undefined;
+    const isPaginated = pageNum !== undefined && pageSize !== undefined;
+    const skip = isPaginated ? (pageNum - 1) * pageSize : 0;
 
     // ✅ Start with empty filter object
     const conditions: FilterQuery<M> = {};
 
     // 🔎 Search
     if (params.search && params.searchFields.length > 0) {
-      const conditionList = params.searchFields.map((field: any) => ({
+      const conditionList = params.searchFields.map((field: string) => ({
         [field]: { $regex: params.search, $options: 'i' },
-      }));
+      } as FilterQuery<M>));
       conditions['$or'] = conditionList;
     }
 
     // Flexible filter
-    const addFilter = (filter) => {
+    const addFilter = (filter: FilterDto) => {
       if (!filter?.column || filter.value === undefined) return;
 
       const incomingValues = Array.isArray(filter.value)
@@ -88,7 +90,11 @@ export class GlobalService {
       sort[params.sortBy] = params.sortDir === 'desc' ? -1 : 1;
     }
 
-    const query = model.find(conditions).sort(sort).skip(skip).limit(pageSize);
+    let query = model.find(conditions).sort(sort);
+
+    if (isPaginated) {
+      query = query.skip(skip).limit(pageSize);
+    }
 
     // ✅ Handle populate (single or array)
     if (params.populate) {
@@ -101,19 +107,22 @@ export class GlobalService {
       }
     }
 
-    const [data, total] = await Promise.all([
-      query.exec(),
-      model.countDocuments(conditions).exec(),
-    ]);
+    const total = await model.countDocuments(conditions).exec();
+
+    if (!isPaginated && total > 500) {
+      throw BaseResponse.unexpected({ option: { message: 'Pagination is required for large datasets' } });
+    }
+
+    const data = await query.exec();
 
     return {
       data,
-      meta: {
+      meta: isPaginated ? {
         total,
         page: pageNum,
         size: pageSize,
         totalPages: Math.ceil(total / pageSize),
-      },
+      } : undefined,
     };
   }
 

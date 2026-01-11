@@ -3,7 +3,7 @@ import { Role } from './role.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { GlobalService } from 'src/global/global.service';
-import { IPaginationRes } from 'src/types/interfaces';
+import { IListRes } from 'src/types/interfaces';
 import { BaseResponse } from 'src/utils/base-response';
 
 @Injectable()
@@ -21,7 +21,7 @@ export class RoleService {
     sortDir: 'asc' | 'desc' = 'asc',
     search?: string,
     active?: boolean
-  ): Promise<{ data: Role[]; meta: IPaginationRes }> {
+  ): Promise<IListRes<Role>> {
     const searchFields: string[] = ['role_name'];
     let filter;
     if (active) {

@@ -4,7 +4,7 @@ import { Model, Types } from 'mongoose';
 import { User } from './user.schema';
 import * as bcrypt from 'bcrypt';
 import { salts, sessionDays } from 'src/types/constants';
-import { IEditUser, IPaginationRes, TmpUser } from 'src/types/interfaces';
+import { IEditUser, IListRes, TmpUser } from 'src/types/interfaces';
 import { BaseResponse } from 'src/utils/base-response';
 import { GlobalService } from 'src/global/global.service';
 import { generateRandomToken, addDays, decodeBase64 } from 'src/utils/helper';
@@ -84,7 +84,7 @@ export class UserService {
     sortDir: 'asc' | 'desc' = 'asc',
     search?: string,
     verified?: boolean
-  ): Promise<{ data: User[]; meta: IPaginationRes }> {
+  ): Promise<IListRes<User>> {
     const searchFields: string[] = ['first_name', 'last_name']; // ✅ Add searchable fields
     const filter = { column: 'verified', value: verified };
     const populate = { column: 'role' };
