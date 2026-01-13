@@ -4,11 +4,12 @@ import { ClientSession, Model, Types } from 'mongoose';
 import { GlobalService } from 'src/global/global.service';
 import { InventoryItem } from '../inventory-item/inventory-item.schema';
 import { Inventory } from '../inventory/inventory.schema';
-import { InventoryMovementDto, InventoryMovementType } from './inventory-movement.dto';
+import { InventoryMovementDto } from './inventory-movement.dto';
 import { BaseResponse } from 'src/utils/base-response';
 import { InventoryItemService } from '../inventory-item/inventory-item.service';
 import { InventoryMovement } from './inventory-movement.schema';
 import { Product } from '../product/product.schema';
+import { FlowType } from 'src/types/interfaces';
 
 @Injectable()
 export class InventoryMovementService {
@@ -62,7 +63,7 @@ export class InventoryMovementService {
       const itemMap = new Map(
         existingItems.map(i => [i.product.toString(), i]),
       );
-      if (dto.movement_type === InventoryMovementType.IN) {
+      if (dto.movement_type === FlowType.IN) {
         // If any item in the payload list is already available in DB, it means user intends to increment it's quantity
         await Promise.all(dto.items.map(async item => {
           const existing = itemMap.get(item.product.toString());

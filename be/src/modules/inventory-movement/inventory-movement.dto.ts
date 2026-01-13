@@ -1,11 +1,7 @@
 import { ArrayMinSize, IsArray, IsEnum, IsInt, IsMongoId, IsNotEmpty, IsOptional, IsString, Min, ValidateNested } from 'class-validator';
 import { Types } from 'mongoose';
 import { Type } from 'class-transformer';
-
-export enum InventoryMovementType {
-  IN = 'IN',
-  OUT = 'OUT',
-}
+import { FlowType } from 'src/types/interfaces';
 
 export class InventoryMovementItemDto {
   @IsMongoId()
@@ -22,10 +18,10 @@ export class InventoryMovementDto {
   @IsNotEmpty()
   inventory: Types.ObjectId;
 
-  @IsEnum(InventoryMovementType, {
+  @IsEnum(FlowType, {
     message: 'movement_type must be either IN or OUT',
   })
-  movement_type: InventoryMovementType;
+  movement_type: FlowType;
 
   @IsArray()
   @ArrayMinSize(1)

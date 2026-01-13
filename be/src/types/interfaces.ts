@@ -70,3 +70,8 @@ export interface IBaseResponse {
 }
 
 export type TOneOrMany<T> = T | T[];
+
+export enum FlowType {
+  IN = 'IN',
+  OUT = 'OUT',
+}

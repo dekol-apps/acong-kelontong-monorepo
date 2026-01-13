@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { InventoryMovementType } from './inventory-movement.dto';
 import { Inventory, InventoryDocument } from '../inventory/inventory.schema';
+import { FlowType } from 'src/types/interfaces';
 
 export class InventoryMovementItem {
     @Prop({ type: Types.ObjectId, ref: 'Product', required: true })
@@ -18,10 +18,10 @@ export class InventoryMovement {
     @Prop({ type: Types.ObjectId, ref: Inventory.name, required: true }) inventory: Types.ObjectId;
     @Prop({
         type: String,
-        enum: InventoryMovementType,
+        enum: FlowType,
         required: true,
     })
-    movement_type: InventoryMovementType;
+    movement_type: FlowType;
     @Prop({ type: Array<InventoryMovementItem> }) items: Array<InventoryMovementItem>;
     @Prop() description?: string;
     @Prop({ required: true }) regist_date: Date;
