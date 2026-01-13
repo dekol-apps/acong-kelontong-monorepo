@@ -2,6 +2,7 @@ import { ArrayMinSize, IsArray, IsEnum, IsInt, IsMongoId, IsNotEmpty, IsOptional
 import { Types } from 'mongoose';
 import { Type } from 'class-transformer';
 import { FlowType } from 'src/types/interfaces';
+import { PaginationDto } from 'src/global/global.dto';
 
 export class InventoryMovementItemDto {
   @IsMongoId()
@@ -32,4 +33,8 @@ export class InventoryMovementDto {
   @IsString()
   @IsOptional()
   description?: string;
+}
+
+export class ListInventoryMovementDTO extends PaginationDto {
+  movement_type?: FlowType;
 }

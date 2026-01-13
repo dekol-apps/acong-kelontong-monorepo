@@ -1,8 +1,8 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Res, Query } from '@nestjs/common';
 import { Types } from 'mongoose';
 import type { Response } from 'express';
 import { BaseResponse } from 'src/utils/base-response';
-import { InventoryItemDto } from './inventory-item.dto';
+import { InventoryItemDto, ListInventoryItemsDTO } from './inventory-item.dto';
 import { InventoryItemService } from './inventory-item.service';
 
 @Controller('inventory-item')
@@ -20,6 +20,19 @@ export class InventoryItemController {
     try {
       const inventoryItem = await this.service.createInventoryItem(body);
       return BaseResponse.success({ res, option: { message: "Success create inventoryItem", detail: inventoryItem } });
+    } catch (err) {
+      return BaseResponse.error({ res, err });
+    }
+  }
+
+  @Get('')
+  async listInventoryItems(
+    @Query() query: ListInventoryItemsDTO,
+    @Res() res: Response,
+  ) {
+    try {
+      const { data, meta } = await this.service.listInventoryItems(query);
+      return BaseResponse.success({ res, option: { message: 'Success get list inventory item', list: data, meta } });
     } catch (err) {
       return BaseResponse.error({ res, err });
     }

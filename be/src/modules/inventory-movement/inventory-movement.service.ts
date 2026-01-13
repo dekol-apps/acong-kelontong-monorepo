@@ -4,12 +4,12 @@ import { ClientSession, Model, Types } from 'mongoose';
 import { GlobalService } from 'src/global/global.service';
 import { InventoryItem } from '../inventory-item/inventory-item.schema';
 import { Inventory } from '../inventory/inventory.schema';
-import { InventoryMovementDto } from './inventory-movement.dto';
+import { InventoryMovementDto, ListInventoryMovementDTO } from './inventory-movement.dto';
 import { BaseResponse } from 'src/utils/base-response';
 import { InventoryItemService } from '../inventory-item/inventory-item.service';
 import { InventoryMovement } from './inventory-movement.schema';
 import { Product } from '../product/product.schema';
-import { FlowType } from 'src/types/interfaces';
+import { FlowType, IListRes } from 'src/types/interfaces';
 
 @Injectable()
 export class InventoryMovementService {
@@ -100,6 +100,30 @@ export class InventoryMovementService {
     }, sessionIn)
   }
 
+  async listInventoryMovement({
+    movement_type,
+    page,
+    size,
+    sortBy,
+    sortDir,
+    search,
+  }: ListInventoryMovementDTO): Promise<IListRes<InventoryMovement>> {
+    const searchFields: string[] = ['product_name', 'description', 'item_qty'];
+    const filter = { column: 'movement_type', value: movement_type };
+
+    return this.global.getList<InventoryMovement>(
+      this.inventoryMovementModel,
+      {
+        page,
+        size,
+        sortBy,
+        sortDir,
+        search,
+        searchFields,
+        filter,
+      }
+    )
+  }
 
   async detailInventoryMovement(id: Types.ObjectId, sessionIn?: ClientSession): Promise<InventoryMovement | undefined> {
     return this.global.withTransaction(async (session) => {
