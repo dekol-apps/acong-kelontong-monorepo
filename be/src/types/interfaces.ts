@@ -75,3 +75,12 @@ export enum FlowType {
   IN = 'IN',
   OUT = 'OUT',
 }
+
+export enum OrderType {
+  PURCHASING = 'PURCHASING',
+  DEPOSIT = 'DEPOSIT',
+  WITHDRAWAL = 'WITHDRAWAL',
+  SALE = 'SALE',
+  EXPENSE = 'EXPENSE',
+
+}
