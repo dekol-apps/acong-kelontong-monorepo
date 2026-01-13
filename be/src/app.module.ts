@@ -46,6 +46,9 @@ import { InventoryItem, InventoryItemSchema } from './modules/inventory-item/inv
 import { InventoryMovementController } from './modules/inventory-movement/inventory-movement.controller';
 import { InventoryMovementService } from './modules/inventory-movement/inventory-movement.service';
 import { InventoryMovement, InventoryMovementSchema } from './modules/inventory-movement/inventory-movement.schema';
+import { InvestmentService } from './modules/investment/investment.service';
+import { InvestmentController } from './modules/investment/investment.controller';
+import { Investment, InvestmentSchema } from './modules/investment/investment.schema';
 
 @Module({
   imports: [
@@ -102,6 +105,7 @@ import { InventoryMovement, InventoryMovementSchema } from './modules/inventory-
       { name: Inventory.name, schema: InventorySchema },
       { name: InventoryItem.name, schema: InventoryItemSchema },
       { name: InventoryMovement.name, schema: InventoryMovementSchema },
+      { name: Investment.name, schema: InvestmentSchema },
     ]),
     SeederModule,
   ],
@@ -119,7 +123,8 @@ import { InventoryMovement, InventoryMovementSchema } from './modules/inventory-
     InventoryController,
     ApprovalController,
     InventoryItemController,
-    InventoryMovementController
+    InventoryMovementController,
+    InvestmentController
   ],
   providers: [
     AppService,
@@ -138,6 +143,7 @@ import { InventoryMovement, InventoryMovementSchema } from './modules/inventory-
     PurchasingItemService,
     InventoryItemService,
     InventoryMovementService,
+    InvestmentService,
   ]
 })
 export class AppModule implements OnModuleInit {
