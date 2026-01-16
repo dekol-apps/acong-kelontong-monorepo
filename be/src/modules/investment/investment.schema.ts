@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
-import { FlowType, OrderType } from 'src/types/interfaces';
+import { Document } from 'mongoose';
+import { FlowType } from 'src/types/interfaces';
 
 @Schema({ timestamps: true })
 export class Investment {
@@ -10,7 +10,7 @@ export class Investment {
     enum: FlowType,
     required: true,
   })
-  movement_type: FlowType;
+  flow_type: FlowType;
 
   @Prop({ required: true, min: 1 })
   transaction_amount: number;

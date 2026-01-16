@@ -143,7 +143,6 @@ export class GlobalService {
       return result;
     } catch (err) {
       if (isNew) await session.abortTransaction();
-      await session.endSession();
       throw err;
     } finally {
       if (isNew) await session.endSession();

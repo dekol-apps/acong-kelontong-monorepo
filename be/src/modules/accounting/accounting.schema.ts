@@ -9,7 +9,7 @@ export class Accounting {
     enum: FlowType,
     required: true,
   })
-  movement_type: FlowType;
+  flow_type: FlowType;
 
   @Prop({ type: Types.ObjectId, required: true })
   order_id: Types.ObjectId;

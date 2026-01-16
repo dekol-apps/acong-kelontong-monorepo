@@ -3,9 +3,11 @@ import { InjectModel } from '@nestjs/mongoose';
 import { ClientSession, Model, Types } from 'mongoose';
 import { GlobalService } from 'src/global/global.service';
 import { Investment } from './investment.schema';
-import { IListRes } from 'src/types/interfaces';
+import { FlowType, IListRes, OrderType } from 'src/types/interfaces';
 import { BaseResponse } from 'src/utils/base-response';
 import { InvestmentDto, ListInvestmentDTO } from './investment.dto';
+import { AccountingService } from '../accounting/accounting.service';
+import { Accounting } from '../accounting/accounting.schema';
 
 @Injectable()
 export class InvestmentService {
@@ -13,11 +15,13 @@ export class InvestmentService {
   constructor(
     @Inject(forwardRef(() => GlobalService))
     private global: GlobalService,
+    @Inject(forwardRef(() => AccountingService))
+    private accounting: AccountingService,
     @InjectModel(Investment.name) private investmentModel: Model<Investment>,
   ) { }
 
   async listInvestment({
-    movement_type,
+    flow_type,
     page,
     size,
     sortBy,
@@ -25,7 +29,7 @@ export class InvestmentService {
     search,
   }: ListInvestmentDTO): Promise<IListRes<Investment>> {
     const searchFields: string[] = ['transaction_amount', 'description'];
-    const filter = { column: 'movement_type', value: movement_type };
+    const filter = { column: 'flow_type', value: flow_type };
 
     return this.global.getList<Investment>(
       this.investmentModel,
@@ -41,13 +45,19 @@ export class InvestmentService {
     )
   }
 
-  async createInvestment(data: InvestmentDto): Promise<Investment> {
-    try {
+  async createInvestment(data: InvestmentDto, sessionIn?: ClientSession): Promise<Investment> {
+    return this.global.withTransaction(async (session) => {
       const newInvestment = await this.investmentModel.create(data);
+      const accountingPayload: Accounting = {
+        flow_type: data.flow_type,
+        order_id: newInvestment._id,
+        order_data: newInvestment,
+        order_type: data.flow_type === FlowType.OUT ? OrderType.WITHDRAWAL : OrderType.DEPOSIT,
+        transaction_amount: data.transaction_amount
+      }
+      await this.accounting.createAccountingItem(accountingPayload, session)
       return newInvestment;
-    } catch (err) {
-      throw BaseResponse.unexpected({ err: { text: 'createInvestment catch', err } })
-    }
+    }, sessionIn);
   }
 
   async detailInvestment(id: Types.ObjectId, sessionIn?: ClientSession): Promise<Investment | undefined> {
@@ -88,6 +98,15 @@ export class InvestmentService {
       if (!updated) {
         throw BaseResponse.notFound({ err: 'Updated investment not found' });
       }
+
+      const accountingPayload: Accounting = {
+        flow_type: data.flow_type,
+        order_id: updated._id,
+        order_data: updated,
+        order_type: data.flow_type === FlowType.OUT ? OrderType.WITHDRAWAL : OrderType.DEPOSIT,
+        transaction_amount: data.transaction_amount
+      }
+      await this.accounting.editAccountingItem(accountingPayload, session)
 
       return {
         investment: updated,
