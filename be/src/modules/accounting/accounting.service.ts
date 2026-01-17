@@ -2,10 +2,11 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, ClientSession } from 'mongoose';
 import { GlobalService } from 'src/global/global.service';
-import { FlowType, OrderType } from 'src/types/interfaces';
+import { CurrencyEn, FlowType, OrderType } from 'src/types/interfaces';
 import { BaseResponse } from 'src/utils/base-response';
 import { Accounting } from './accounting.schema';
 import { Purchasing } from '../purchasing/purchasing.schema';
+import { AccountingBalance } from './accounting-balance.schema';
 
 @Injectable()
 export class AccountingService {
@@ -14,17 +15,38 @@ export class AccountingService {
     @Inject(forwardRef(() => GlobalService))
     private global: GlobalService,
     @InjectModel(Accounting.name) private accountingModel: Model<Accounting>,
+    @InjectModel(AccountingBalance.name) private balanceModel: Model<AccountingBalance>,
   ) { }
 
   async createAccountingItem(data: Accounting, sessionIn?: ClientSession): Promise<Accounting | undefined> {
     return this.global.withTransaction(async (session) => {
-      if (data.flow_type === FlowType.OUT) { // Withdrawal transaction
-        const balance = await this.countBalance(session);
-        const tryCount = balance - data.transaction_amount;
-        if (tryCount <= 0) {
-          throw BaseResponse.forbidden({ err: 'createInvestment insufficient', option: { message: 'Insufficient amount of balance' } })
-        }
+      const { flow_type } = data;
+      const filter =
+        flow_type === FlowType.OUT
+          ? { currency: CurrencyEn.IDR, amount: { $gte: data.transaction_amount } }
+          : { currency: CurrencyEn.IDR };
+
+      const update =
+        flow_type === FlowType.OUT
+          ? { $inc: { amount: -data.transaction_amount } }
+          : { $inc: { amount: data.transaction_amount } };
+
+      const balance = await this.balanceModel.findOneAndUpdate(
+        filter,
+        update,
+        {
+          session,
+          new: true,
+        },
+      );
+
+      if (!balance) {
+        throw BaseResponse.invalid({
+          err: 'createAccountingItem Insufficient balance', option: { message: 'Insufficient balance' }
+        });
       }
+
+      if (!data.record_date) data.record_date = new Date();
 
       const [created] = await this.accountingModel.create(
         [data],
@@ -42,30 +64,34 @@ export class AccountingService {
 
   async editAccountingItem(data: Accounting, sessionIn?: ClientSession): Promise<Accounting | undefined> {
     return this.global.withTransaction(async (session) => {
-      const { order_type, order_id, flow_type } = data;
-      if (flow_type === FlowType.OUT) { // Withdrawal transaction
-        const balance = await this.countBalance(session);
-        const tryCount = balance - data.transaction_amount;
-        if (tryCount <= 0) {
-          throw BaseResponse.forbidden({ err: 'createInvestment insufficient', option: { message: 'Insufficient amount of balance' } })
-        }
+      const { order_type, order_id } = data;
+      const old = await this.accountingModel.findOne({ order_id, order_type }).session(session);
+      if (!old) {
+        throw BaseResponse.notFound({ err: 'editAccountingItem !old' });
       }
-
-      const result = await this.accountingModel.findOneAndUpdate(
+      const record_date = new Date()
+      // Reverse old
+      await this.createAccountingItem(
         {
-          order_id,
-          order_type,
-          transaction_amount: { $gte: data.transaction_amount },
+          flow_type: old.flow_type === FlowType.IN ? FlowType.OUT : FlowType.IN,
+          transaction_amount: old.transaction_amount,
+          order_type: OrderType.ADJUSTMENT,
+          order_id: order_id,
+          order_data: old,
+          record_date
         },
-        data,
-        {
-          new: true,
-          session,
-        }
+        session,
       );
+      // Insert corrected
+      const result = await this.createAccountingItem(
+        { ...data, record_date }
+        ,
+        session,
+      );
+
       if (!result) {
         throw BaseResponse.unexpected({
-          err: 'Failed to update accounting item',
+          err: 'editAccountingItem !result',
         });
       }
       return result;
@@ -97,10 +123,12 @@ export class AccountingService {
   }
 
   async countBalance(sessionIn?: ClientSession): Promise<number> {
-    const moneyIn = await this.countTotalMoney(FlowType.IN, undefined, sessionIn);
-    const moneyOut = await this.countTotalMoney(FlowType.OUT, undefined, sessionIn);
-    return moneyIn - moneyOut;
+    return this.global.withTransaction(async (session) => {
+      const balance = await this.balanceModel.findOne({ currency: CurrencyEn.IDR }).session(session);
+      return balance?.amount ?? 0;
+    }, sessionIn);
   }
+
 
   async countProfit(sessionIn?: ClientSession): Promise<number> {
     const earnings = await this.countTotalMoney(FlowType.IN, OrderType.SALE, sessionIn);

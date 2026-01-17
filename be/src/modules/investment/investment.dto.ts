@@ -1,12 +1,12 @@
 import { IsArray, IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, Min, MinLength } from 'class-validator';
 import { PaginationDto } from 'src/global/global.dto';
-import { FlowType } from 'src/types/interfaces';
+import { InvestmentType } from 'src/types/interfaces';
 
 export class InvestmentDto {
-  @IsEnum(FlowType, {
-    message: 'movement_type must be either IN or OUT',
+  @IsEnum(InvestmentType, {
+    message: 'investment_type must be either DEPOSIT or WITHDRAWAL',
   })
-  flow_type: FlowType;
+  investment_type: InvestmentType;
 
   @IsNotEmpty()
   @IsInt()
@@ -24,5 +24,5 @@ export class InvestmentDto {
 }
 
 export class ListInvestmentDTO extends PaginationDto {
-  flow_type?: FlowType;
+  investment_type?: InvestmentType;
 }

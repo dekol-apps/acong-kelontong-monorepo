@@ -76,11 +76,22 @@ export enum FlowType {
   OUT = 'OUT',
 }
 
-export enum OrderType {
-  PURCHASING = 'PURCHASING',
+export enum InvestmentType {
   DEPOSIT = 'DEPOSIT',
   WITHDRAWAL = 'WITHDRAWAL',
+}
+
+
+export enum OrderType {
+  PURCHASING = 'PURCHASING',
   SALE = 'SALE',
   EXPENSE = 'EXPENSE',
+  ADJUSTMENT = 'ADJUSTMENT',
+  DEPOSIT = 'DEPOSIT',
+  WITHDRAWAL = 'WITHDRAWAL',
+}
 
+export enum CurrencyEn {
+  IDR = 'IDR',
+  USD = 'USD',
 }

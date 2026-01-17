@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { ClientSession, Model, Types } from 'mongoose';
 import { GlobalService } from 'src/global/global.service';
 import { Investment } from './investment.schema';
-import { FlowType, IListRes, OrderType } from 'src/types/interfaces';
+import { FlowType, IListRes, InvestmentType, OrderType } from 'src/types/interfaces';
 import { BaseResponse } from 'src/utils/base-response';
 import { InvestmentDto, ListInvestmentDTO } from './investment.dto';
 import { AccountingService } from '../accounting/accounting.service';
@@ -21,7 +21,7 @@ export class InvestmentService {
   ) { }
 
   async listInvestment({
-    flow_type,
+    investment_type,
     page,
     size,
     sortBy,
@@ -29,7 +29,7 @@ export class InvestmentService {
     search,
   }: ListInvestmentDTO): Promise<IListRes<Investment>> {
     const searchFields: string[] = ['transaction_amount', 'description'];
-    const filter = { column: 'flow_type', value: flow_type };
+    const filter = { column: 'investment_type', value: investment_type };
 
     return this.global.getList<Investment>(
       this.investmentModel,
@@ -47,12 +47,16 @@ export class InvestmentService {
 
   async createInvestment(data: InvestmentDto, sessionIn?: ClientSession): Promise<Investment> {
     return this.global.withTransaction(async (session) => {
-      const newInvestment = await this.investmentModel.create(data);
+      const [newInvestment] = await this.investmentModel.create(
+        [data],
+        { session }
+      );
+
       const accountingPayload: Accounting = {
-        flow_type: data.flow_type,
+        flow_type: data.investment_type === InvestmentType.DEPOSIT ? FlowType.IN : FlowType.OUT,
         order_id: newInvestment._id,
         order_data: newInvestment,
-        order_type: data.flow_type === FlowType.OUT ? OrderType.WITHDRAWAL : OrderType.DEPOSIT,
+        order_type: data.investment_type === InvestmentType.DEPOSIT ? OrderType.DEPOSIT : OrderType.WITHDRAWAL,
         transaction_amount: data.transaction_amount
       }
       await this.accounting.createAccountingItem(accountingPayload, session)
@@ -100,10 +104,10 @@ export class InvestmentService {
       }
 
       const accountingPayload: Accounting = {
-        flow_type: data.flow_type,
-        order_id: updated._id,
+        flow_type: data.investment_type === InvestmentType.DEPOSIT ? FlowType.IN : FlowType.OUT,
+        order_id: id,
         order_data: updated,
-        order_type: data.flow_type === FlowType.OUT ? OrderType.WITHDRAWAL : OrderType.DEPOSIT,
+        order_type: data.investment_type === InvestmentType.DEPOSIT ? OrderType.DEPOSIT : OrderType.WITHDRAWAL,
         transaction_amount: data.transaction_amount
       }
       await this.accounting.editAccountingItem(accountingPayload, session)
