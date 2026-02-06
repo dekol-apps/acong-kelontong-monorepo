@@ -27,6 +27,16 @@ export class User {
 
   @Prop({ type: Date, default: addDays(new Date(), sessionDays) })
   verify_due_time?: Date;
+
+  @Prop()
+  user_photo?: string;
+
+  @Prop({ required: false, unique: true, validate: [isEmail, 'Invalid email'] })
+  req_change_email?: string;
+
+  @Prop({ type: Date })
+  req_change_email_due_time?: Date;
+
 }
 
 export type UserDocument = User & Document & { role: RoleDocument };

@@ -1,4 +1,3 @@
-import { UserDocument } from "src/modules/user/user.schema";
 import type { Response } from 'express';
 import { RoleDocument } from 'src/modules/role/role.schema';
 import { Types } from 'mongoose';
@@ -15,16 +14,6 @@ export interface ITokenPayload extends IRefreshTokenPayload {
 export interface GlobalVar extends ITokenPayload {
   userAgent: string;
   accesToken: string;
-}
-export interface TmpUser extends UserDocument {
-  tmpPassword: string;
-}
-export interface IEditUser {
-  first_name?: string;
-  last_name?: string;
-  email?: string;
-  password?: string;
-  role?: Types.ObjectId;
 }
 
 export type TModules =  //This is a list of API Endpoint permission
