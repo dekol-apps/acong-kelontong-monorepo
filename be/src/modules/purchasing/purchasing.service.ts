@@ -134,7 +134,7 @@ export class PurchasingService {
         try {
           const oldPath = new URL(purchase.invoice_photo).pathname; // e.g. /uploads/invoices/<uuid>/<file>
           const folderPath = oldPath.split('/').slice(0, -1).join('/'); // remove file name
-          fs.rmSync(`.${folderPath}`, { recursive: true, force: true }); // delete the folder
+          fs.rmSync(`.${folderPath}`, { recursive: true, force: true }); // delete the UUID folder
         } catch (err) {
           console.warn('Failed to delete old invoice folder:', err.message);
         }
@@ -226,7 +226,7 @@ export class PurchasingService {
         try {
           const oldPath = new URL(purchasing.invoice_photo).pathname; // e.g. /uploads/invoices/<uuid>/<file>
           const folderPath = oldPath.split('/').slice(0, -1).join('/'); // remove file name
-          fs.rmSync(`.${folderPath}`, { recursive: true, force: true }); // delete the folder
+          fs.rmSync(`.${folderPath}`, { recursive: true, force: true }); // delete the UUID folder
         } catch (err) {
           console.warn('deletePurchasing Failed to delete old invoice folder:', err.message);
         }
