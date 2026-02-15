@@ -1,11 +1,11 @@
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs';
 import * as path from 'path';
 import { applyDecorators, UseInterceptors } from '@nestjs/common';
 
-export function InvestmentAttachmentsInterceptor(
+export function AttachmentsInterceptor( 
   fieldName = 'attachments',
   maxCount = 10,
 ) {
@@ -20,17 +20,17 @@ export function InvestmentAttachmentsInterceptor(
         },
         storage: diskStorage({
           destination: (req, file, cb) => {
+            const baseUrl = req.baseUrl;
             const uuidFolder = uuidv4();
-            const uploadPath = path.join('./uploads/investment', uuidFolder);
+            const uploadPath = path.join(`./uploads/${baseUrl}/${fieldName}`, uuidFolder);
 
             fs.mkdirSync(uploadPath, { recursive: true });
 
-            (req as any).uuidFolder = uuidFolder;
+            (req as any).uploadPath = uploadPath;
             cb(null, uploadPath);
           },
           filename: (req, file, cb) => {
-            const ext = path.extname(file.originalname);
-            cb(null, `${file.originalname}${ext}`); // keep original filename
+            cb(null, file.originalname); // keep original filename
           },
         }),
       }),

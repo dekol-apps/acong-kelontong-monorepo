@@ -5,7 +5,7 @@ import { BaseResponse } from 'src/utils/base-response';
 import { InvestmentDto, ListInvestmentDTO } from './investment.dto';
 import { InvestmentService } from './investment.service';
 import * as fs from 'fs';
-import { InvestmentAttachmentsInterceptor } from './investment-attachments.interceptor';
+import { AttachmentsInterceptor } from 'src/global/attachments-interceptor';
 
 interface headerArgs {
   files?: Express.Multer.File[];
@@ -28,10 +28,10 @@ export class InvestmentController {
   ): Promise<T> {
     try {
       if (args.files?.length && args.dto) {
-        const folder = (args.req as any).uuidFolder;
+        const uploadPath = (args.req as any).uploadPath;
         const existingAttachments = args.dto.attachments?.filter(item => typeof item === 'string') ?? [];
         const newAttachements = args.files.map((file) => {
-          const filePath = `/uploads/investment/${folder}/${file.originalname}`;
+          const filePath = `/uploads/${uploadPath}/${file.originalname}`;
           return `${args.req.protocol}://${args.req.get('host')}${filePath}`;
         });
         args.dto.attachments = [...existingAttachments, ...newAttachements]
@@ -40,8 +40,8 @@ export class InvestmentController {
       return await cb();
     } catch (err) {
       if (args.files?.length) {
-        const folder = (args.req as any).uuidFolder;
-        const dirPath = `./uploads/investment/${folder}`;
+        const uploadPath = (args.req as any).uploadPath;
+        const dirPath = `./uploads/${uploadPath}`;
 
         fs.rmSync(dirPath, { recursive: true, force: true });
       }
@@ -51,7 +51,7 @@ export class InvestmentController {
   }
 
   @Post('')
-  @InvestmentAttachmentsInterceptor()
+  @AttachmentsInterceptor('attachments', 5)
   async createInvestment(
     @UploadedFiles() files: Express.Multer.File[],
     @Body() dto: InvestmentDto,
@@ -65,7 +65,7 @@ export class InvestmentController {
   }
 
   @Put(':investment_id')
-  @InvestmentAttachmentsInterceptor()
+  @AttachmentsInterceptor('attachments', 5)
   async editInvestment(
     @Param('investment_id') id: Types.ObjectId,
     @UploadedFiles() files: Express.Multer.File[],
