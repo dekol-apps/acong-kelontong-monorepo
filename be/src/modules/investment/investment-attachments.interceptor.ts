@@ -5,7 +5,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { applyDecorators, UseInterceptors } from '@nestjs/common';
 
-export function UploadinvestmentInterceptor(
+export function InvestmentAttachmentsInterceptor(
   fieldName = 'attachments',
   maxCount = 10,
 ) {

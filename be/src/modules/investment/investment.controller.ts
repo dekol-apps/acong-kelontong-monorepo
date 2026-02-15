@@ -5,7 +5,7 @@ import { BaseResponse } from 'src/utils/base-response';
 import { InvestmentDto, ListInvestmentDTO } from './investment.dto';
 import { InvestmentService } from './investment.service';
 import * as fs from 'fs';
-import { UploadinvestmentInterceptor } from './investment-attachments.interceptor';
+import { InvestmentAttachmentsInterceptor } from './investment-attachments.interceptor';
 
 interface headerArgs {
   files?: Express.Multer.File[];
@@ -29,11 +29,12 @@ export class InvestmentController {
     try {
       if (args.files?.length && args.dto) {
         const folder = (args.req as any).uuidFolder;
-
-        args.dto.attachments = args.files.map((file) => {
+        const existingAttachments = args.dto.attachments?.filter(item => typeof item === 'string') ?? [];
+        const newAttachements = args.files.map((file) => {
           const filePath = `/uploads/investment/${folder}/${file.originalname}`;
           return `${args.req.protocol}://${args.req.get('host')}${filePath}`;
         });
+        args.dto.attachments = [...existingAttachments, ...newAttachements]
       }
 
       return await cb();
@@ -50,7 +51,7 @@ export class InvestmentController {
   }
 
   @Post('')
-  @UploadinvestmentInterceptor()
+  @InvestmentAttachmentsInterceptor()
   async createInvestment(
     @UploadedFiles() files: Express.Multer.File[],
     @Body() dto: InvestmentDto,
@@ -64,7 +65,7 @@ export class InvestmentController {
   }
 
   @Put(':investment_id')
-  @UploadinvestmentInterceptor()
+  @InvestmentAttachmentsInterceptor()
   async editInvestment(
     @Param('investment_id') id: Types.ObjectId,
     @UploadedFiles() files: Express.Multer.File[],
