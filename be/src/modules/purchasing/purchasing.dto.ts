@@ -1,13 +1,17 @@
-import { IsNotEmpty, IsString, IsDate, IsOptional, IsMongoId, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsString, IsDate, IsOptional, IsMongoId, IsNumber, IsArray, MinLength } from 'class-validator';
 import { Types } from 'mongoose';
 import { PaginationDto } from 'src/global/global.dto';
 export class PurchaseOrderDto {
   @IsOptional()
   @IsString()
   invoice_number?: string;
-  @IsOptional()
-  @IsString()
-  invoice_photo?: string;
+
+  @IsNotEmpty()
+  @MinLength(1)
+  @IsArray()
+  @IsString({ each: true })
+  invoice_attachments?: string[];
+  
   @IsOptional()
   @IsNumber()
   additional_cost?: number;

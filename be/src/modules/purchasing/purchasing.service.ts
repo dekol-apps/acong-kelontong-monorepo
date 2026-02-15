@@ -95,10 +95,10 @@ export class PurchasingService {
     await createdPurchase.save({ session });
     await session.commitTransaction();
     await session.endSession();
-    return this.detailPurchasing(createdPurchase._id);
+    return await this.detailPurchasing(createdPurchase._id);
   }
 
-  async editPurchasing(id: Types.ObjectId, data: PurchasingDto & { status?: PurchasingEn }, sessionIn?: ClientSession): Promise<Purchasing | undefined> {
+  async editPurchasing(id: Types.ObjectId, data: PurchasingDto & { status?: PurchasingEn }, sessionIn?: ClientSession): Promise<{ detail: Purchasing; removedAttachments: string[] }> {
     return this.global.withTransaction(async (session) => {
       const purchase = await this.purchasingModel.findById(id).session(session);
       if (!purchase) throw BaseResponse.notFound({ err: 'Purchasing not found' });
@@ -110,11 +110,11 @@ export class PurchasingService {
         [PurchasingEn.EXPIRED]: [''],
         [PurchasingEn.DROP]: [''],
         [PurchasingEn.RECEIVE]: ['status'],
-        [PurchasingEn.PROCESS]: ['status', 'invoice_number', 'invoice_photo', 'due_date', 'additional_cost'],
+        [PurchasingEn.PROCESS]: ['status', 'invoice_number', 'invoice_attachments', 'due_date', 'additional_cost'],
         [PurchasingEn.REJECT]: [''],
-        [PurchasingEn.APPROVE]: ['status', 'invoice_number', 'invoice_photo', 'due_date', 'additional_cost'],
+        [PurchasingEn.APPROVE]: ['status', 'invoice_number', 'invoice_attachments', 'due_date', 'additional_cost'],
         [PurchasingEn.REQUEST]: ['status', 'reject_notes'],
-        [PurchasingEn.CREATE]: ['status', 'invoice_number', 'invoice_photo', 'due_date', 'total_purchase_price', 'supplier_name', 'supplier', 'additional_cost'],
+        [PurchasingEn.CREATE]: ['status', 'invoice_number', 'invoice_attachments', 'due_date', 'total_purchase_price', 'supplier_name', 'supplier', 'additional_cost'],
       };
       // get allowed fields for this status
       const fields: string[] = purchase.status ? allowedFieldsByStatus[purchase.status] : [];
@@ -130,29 +130,30 @@ export class PurchasingService {
         });
       }
 
-      if (purchase.invoice_photo && purchase.invoice_photo !== data.invoice_photo) {
-        try {
-          const oldPath = new URL(purchase.invoice_photo).pathname; // e.g. /uploads/invoices/<uuid>/<file>
-          const folderPath = oldPath.split('/').slice(0, -1).join('/'); // remove file name
-          fs.rmSync(`.${folderPath}`, { recursive: true, force: true }); // delete the UUID folder
-        } catch (err) {
-          console.warn('Failed to delete old invoice folder:', err.message);
-        }
-      }
+      const oldAttachments = purchase.invoice_attachments ?? [];
+      const newAttachments = data.invoice_attachments ?? oldAttachments;
+
+      const removedAttachments = oldAttachments.filter(
+        (url) => !newAttachments.includes(url),
+      );
 
       fields.forEach((field: string) => {
         if (field === 'supplier') purchase.supplier = supplier._id;
         if (field === 'supplier_name') purchase.supplier_name = supplier.supplier_name;
         if (field === 'due_date') purchase.due_date = data.due_date;
         if (field === 'invoice_number') purchase.invoice_number = data.invoice_number;
-        if (field === 'invoice_photo') purchase.invoice_photo = data.invoice_photo;
+        if (field === 'invoice_attachments') purchase.invoice_attachments = data.invoice_attachments;
         if (field === 'additional_cost') purchase.additional_cost = data.additional_cost;
         if (field === 'reject_notes') purchase.reject_notes = data.reject_notes;
         if (field === 'status') purchase.status = data.status ?? purchase.status;
       });
 
       await purchase.save({ session });
-      return this.detailPurchasing(purchase._id);
+
+      return {
+        detail: purchase,
+        removedAttachments,
+      };
     }, sessionIn);
   }
 
@@ -214,7 +215,7 @@ export class PurchasingService {
     )
   }
 
-  async deletePurchasing(id: Types.ObjectId, sessionIn?: ClientSession): Promise<Purchasing | undefined> {
+  async deletePurchasing(id: Types.ObjectId, sessionIn?: ClientSession): Promise<{ detail: Purchasing; removedAttachments: string[] }> {
     return this.global.withTransaction(async (session) => {
       const purchasing = await this.purchasingModel.findById(id).session(session);
       if (!purchasing) throw BaseResponse.notFound({ err: 'deletePurchasing !purchasing', option: { message: 'Purchasing not found' } });
@@ -222,21 +223,17 @@ export class PurchasingService {
       if (!allowedStatus.includes(purchasing.status)) {
         BaseResponse.forbidden({ err: 'deletePurchasing !allowedStatus', option: { message: `Cannot delete item with status ${purchasing.status}` } });
       }
-      if (purchasing.invoice_photo) {
-        try {
-          const oldPath = new URL(purchasing.invoice_photo).pathname; // e.g. /uploads/invoices/<uuid>/<file>
-          const folderPath = oldPath.split('/').slice(0, -1).join('/'); // remove file name
-          fs.rmSync(`.${folderPath}`, { recursive: true, force: true }); // delete the UUID folder
-        } catch (err) {
-          console.warn('deletePurchasing Failed to delete old invoice folder:', err.message);
-        }
-      }
-      const deleted = await this.global.deleteData(purchasing, session);
+      const removedAttachments = purchasing.invoice_attachments ?? [];
+
+      await this.global.deleteData(purchasing, session);
       const items = await this.purchasingItemModel.find({ purchase_order: id }).session(session);
       await Promise.all(items.map(async item => {
         await this.global.deleteData(item, session);
       }))
-      return deleted || undefined;
+      return {
+        detail: purchasing,
+        removedAttachments,
+      };
     }, sessionIn);
   }
 
@@ -317,7 +314,7 @@ export class PurchasingService {
     }, sessionIn)
   }
 
-  async receiveOrder(id: Types.ObjectId, dto: ReceiveOrderDto, updateItems: PurchasingItemDto[]): Promise<Purchasing | undefined> {
+  async receiveOrder(id: Types.ObjectId, dto: ReceiveOrderDto, updateItems: PurchasingItemDto[]): Promise<{ detail: Purchasing; removedAttachments: string[] }> {
     return this.global.withTransaction(async (session) => {
       const purchase = await this.purchasingModel.findById(id).session(session);
       if (!purchase)

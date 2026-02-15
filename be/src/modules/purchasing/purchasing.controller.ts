@@ -8,11 +8,11 @@ import { Types } from 'mongoose';
 import { PurchasingEn } from './purchasing.schema';
 import { PurchasingItemDto } from '../purchasing-item/purchasing-item.dto';
 import * as fs from 'fs';
-import { UploadInvoiceInterceptor } from './purchasing-invoice.interceptor';
+import { AttachmentsInterceptor } from 'src/global/attachments-interceptor';
 
 interface headerArgs {
   purchasingId?: Types.ObjectId,
-  file?: Express.Multer.File,
+  files?: Express.Multer.File[]
   req: Request,
   dto?: PurchasingDto,
   res: Response,
@@ -24,35 +24,42 @@ export class PurchasingController {
     private readonly service: PurchasingService,
   ) { }
 
-  async purchasingMutation<T>(args: headerArgs, cb: () => Promise<T>): Promise<T> {
+  async purchasingMutation<T>(
+    args: headerArgs,
+    cb: () => Promise<T>,
+  ): Promise<T> {
     try {
-      if (args.file && args.dto) {
-        const folder = (args.req as any).uuidFolder;
-        const filePath = `/uploads/invoices/${folder}/${args.file.filename}`;
-        const fullUrl = `${args.req.protocol}://${args.req.get('host')}${filePath}`;
-        args.dto.invoice_photo = fullUrl;
+      if (args.files?.length && args.dto) {
+        const uploadPath = (args.req as any).uploadPath;
+        const existingAttachments = args.dto.invoice_attachments?.filter(item => typeof item === 'string') ?? [];
+        const newAttachements = args.files.map((file) => {
+          const filePath = `/uploads/${uploadPath}/${file.originalname}`;
+          return `${args.req.protocol}://${args.req.get('host')}${filePath}`;
+        });
+        args.dto.invoice_attachments = [...existingAttachments, ...newAttachements]
       }
-      const result = await cb();
-      return result;
+
+      return await cb();
     } catch (err) {
-      if (args.file) {
-        const folder = (args.req as any).uuidFolder;
-        const filePath = `/uploads/invoices/${folder}/`;
-        fs.rmSync(`.${filePath}`, { recursive: true, force: true });
+      if (args.files?.length) {
+        const uploadPath = (args.req as any).uploadPath;
+        const dirPath = `./uploads/${uploadPath}`;
+
+        fs.rmSync(dirPath, { recursive: true, force: true });
       }
       return BaseResponse.error({ res: args.res, err });
     }
   }
 
   @Post('')
-  @UploadInvoiceInterceptor()
+  @AttachmentsInterceptor('invoice_attachments', 5)
   async createPurchasing(
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() files: Express.Multer.File[],
     @Body() dto: PurchasingDto,
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    return this.purchasingMutation({ file, dto, req, res }, async () => {
+    return this.purchasingMutation({ files, dto, req, res }, async () => {
       const data: PurchasingDto & { status: PurchasingEn } = {
         ...dto,
         status: PurchasingEn.CREATE
@@ -76,19 +83,28 @@ export class PurchasingController {
   }
 
   @Put(':purchasing_id')
-  @UploadInvoiceInterceptor()
+  @AttachmentsInterceptor('invoice_attachments', 5)
   async editPurchasing(
     @Param('purchasing_id') purchasingId: Types.ObjectId,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() files: Express.Multer.File[],
     @Req() req: Request,
     @Body() dto: PurchasingDto,
     @Res() res: Response,
   ) {
-    return this.purchasingMutation({ file, dto, req, res }, async () => {
-      const purchasing = await this.service.editPurchasing(purchasingId, dto);
+    return this.purchasingMutation({ files, dto, req, res }, async () => {
+      const { detail, removedAttachments } = await this.service.editPurchasing(purchasingId, dto);
+      // delete old files AFTER DB success
+      removedAttachments.forEach((url) => {
+        try {
+          const pathname = new URL(url).pathname;
+          fs.rmSync(`.${pathname}`, { force: true });
+        } catch (e) {
+          console.warn('Failed to remove attachment:', url);
+        }
+      });
       return BaseResponse.success({
         res,
-        option: { message: 'Success edit purchasing', detail: purchasing },
+        option: { message: 'Success edit purchasing', detail },
       });
     })
   }
@@ -112,8 +128,17 @@ export class PurchasingController {
     @Res() res: Response,
   ) {
     try {
-      const purchasing = await this.service.deletePurchasing(purchasingId);
-      return BaseResponse.success({ res, option: { message: "Success get detail purchasing", detail: purchasing } });
+      const { detail, removedAttachments } = await this.service.deletePurchasing(purchasingId);
+      // delete old files AFTER DB success
+      removedAttachments.forEach((url) => {
+        try {
+          const pathname = new URL(url).pathname;
+          fs.rmSync(`.${pathname}`, { force: true });
+        } catch (e) {
+          console.warn('Failed to remove attachment:', url);
+        }
+      });
+      return BaseResponse.success({ res, option: { message: "Success get detail purchasing", detail } });
     } catch (err) {
       return BaseResponse.error({ res, err });
     }
@@ -165,23 +190,32 @@ export class PurchasingController {
   }
 
   @Put(':purchasing_id/receive')
-  @UploadInvoiceInterceptor()
+  @AttachmentsInterceptor('invoice_attachments', 5)
   async recieveOrder(
     @Param('purchasing_id') purchasingId: Types.ObjectId,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() files: Express.Multer.File[],
     @Req() req: Request,
     @Body() dto: { purchase: ReceiveOrderDto, purhcaseItems: PurchasingItemDto[] },
     @Res() res: Response,
   ) {
-    return this.purchasingMutation({ file, dto: dto.purchase, req, res }, async () => {
+    return this.purchasingMutation({ files, dto: dto.purchase, req, res }, async () => {
       const data: ReceiveOrderDto & { status: PurchasingEn } = {
         ...dto.purchase,
         status: PurchasingEn.RECEIVE
       }
-      const purchasing = await this.service.receiveOrder(purchasingId, data, dto.purhcaseItems);
+      const { detail, removedAttachments } = await this.service.receiveOrder(purchasingId, data, dto.purhcaseItems);
+      // delete old files AFTER DB success
+      removedAttachments.forEach((url) => {
+        try {
+          const pathname = new URL(url).pathname;
+          fs.rmSync(`.${pathname}`, { force: true });
+        } catch (e) {
+          console.warn('Failed to remove attachment:', url);
+        }
+      });
       return BaseResponse.success({
         res,
-        option: { message: `Purchase order on receive`, detail: purchasing },
+        option: { message: `Purchase order on receive`, detail },
       });
     });
   }

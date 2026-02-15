@@ -35,7 +35,7 @@ export class Purchasing {
   invoice_number?: string;
 
   @Prop()
-  invoice_photo?: string;
+  invoice_attachments?: string[];
 
   @Prop({ type: Number, default: 0 })
   total_purchase_price: number;
