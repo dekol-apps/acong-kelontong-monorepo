@@ -1,6 +1,20 @@
-import { IsNotEmpty, IsString, IsDate, IsOptional, IsMongoId, IsNumber, IsArray, MinLength } from 'class-validator';
-import { Types } from 'mongoose';
+import { IsNotEmpty, IsString, IsDate, IsOptional, IsMongoId, IsNumber, IsArray, MinLength, IsEnum } from 'class-validator';
+import mongoose, { Types } from 'mongoose';
 import { PaginationDto } from 'src/global/global.dto';
+import { ApprovalType } from 'src/types/interfaces';
+import { Purchasing } from './purchasing.schema';
+
+export class PurchaseOrderApprovalDto {
+  @IsNotEmpty()
+  @IsEnum(ApprovalType, {
+    message: 'approval must be either APPROVE or REJECT',
+  })
+  approval: ApprovalType;
+
+  @IsOptional()
+  reject_notes?: string;
+}
+
 export class PurchaseOrderDto {
   @IsOptional()
   @IsString()
@@ -10,14 +24,17 @@ export class PurchaseOrderDto {
   @MinLength(1)
   @IsArray()
   @IsString({ each: true })
-  invoice_attachments?: string[];
-  
+  purchasing_attachments?: string[];
+
   @IsOptional()
   @IsNumber()
-  additional_cost?: number;
+  additional_cost?: mongoose.Schema.Types.Decimal128;
+
   @IsOptional()
-  reject_notes?: string;
+  @IsString()
+  notes?: string;
 }
+
 export class PurchasingDto extends PurchaseOrderDto {
   @IsMongoId() // ✅ checks it's a valid ObjectId string
   @IsNotEmpty()
@@ -26,14 +43,16 @@ export class PurchasingDto extends PurchaseOrderDto {
   @IsDate()
   @IsNotEmpty()
   due_date?: Date;
-}
-
-export class ReceiveOrderDto extends PurchaseOrderDto {
   @IsOptional()
-  @IsString()
-  receive_notes?: string;
+  reject_notes?: string;
 }
 
 export class ListPurchasingItemsDTO extends PaginationDto {
   purchasing_id: Types.ObjectId
 }
+
+export type PurchasingDetail =
+  Purchasing & {
+    _id: Types.ObjectId;
+    total_purchase_price: number;
+  };

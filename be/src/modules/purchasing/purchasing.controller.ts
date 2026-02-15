@@ -3,7 +3,7 @@ import { PaginationDto } from 'src/global/global.dto';
 import { BaseResponse } from 'src/utils/base-response';
 import { PurchasingService } from './purchasing.service';
 import type { Request, Response } from 'express';
-import { PurchasingDto, ListPurchasingItemsDTO, ReceiveOrderDto } from './purchasing.dto';
+import { PurchasingDto, ListPurchasingItemsDTO, PurchaseOrderApprovalDto, PurchaseOrderDto } from './purchasing.dto';
 import { Types } from 'mongoose';
 import { PurchasingEn } from './purchasing.schema';
 import { PurchasingItemDto } from '../purchasing-item/purchasing-item.dto';
@@ -31,12 +31,12 @@ export class PurchasingController {
     try {
       if (args.files?.length && args.dto) {
         const uploadPath = (args.req as any).uploadPath;
-        const existingAttachments = args.dto.invoice_attachments?.filter(item => typeof item === 'string') ?? [];
+        const existingAttachments = args.dto.purchasing_attachments?.filter(item => typeof item === 'string') ?? [];
         const newAttachements = args.files.map((file) => {
           const filePath = `/uploads/${uploadPath}/${file.originalname}`;
           return `${args.req.protocol}://${args.req.get('host')}${filePath}`;
         });
-        args.dto.invoice_attachments = [...existingAttachments, ...newAttachements]
+        args.dto.purchasing_attachments = [...existingAttachments, ...newAttachements]
       }
 
       return await cb();
@@ -52,7 +52,7 @@ export class PurchasingController {
   }
 
   @Post('')
-  @AttachmentsInterceptor('invoice_attachments', 5)
+  @AttachmentsInterceptor('purchasing_attachments', 5)
   async createPurchasing(
     @UploadedFile() files: Express.Multer.File[],
     @Body() dto: PurchasingDto,
@@ -83,7 +83,7 @@ export class PurchasingController {
   }
 
   @Put(':purchasing_id')
-  @AttachmentsInterceptor('invoice_attachments', 5)
+  @AttachmentsInterceptor('purchasing_attachments', 5)
   async editPurchasing(
     @Param('purchasing_id') purchasingId: Types.ObjectId,
     @UploadedFile() files: Express.Multer.File[],
@@ -159,6 +159,22 @@ export class PurchasingController {
     });
   }
 
+  @Put(':purchasing_id/approval')
+  async purchaseOrderApproval(
+    @Param('purchasing_id') purchasingId: Types.ObjectId,
+    @Req() req: Request,
+    @Body() dto: PurchaseOrderApprovalDto,
+    @Res() res: Response,
+  ) {
+    return this.purchasingMutation({ req, res }, async () => {
+      const purchasing = await this.service.purchasingApproval(purchasingId, dto);
+      return BaseResponse.success({
+        res,
+        option: { message: `Purchase order success ${dto.approval}`, detail: purchasing },
+      });
+    });
+  }
+
   @Put(':purchasing_id/process')
   async purchaseOrderProcess(
     @Param('purchasing_id') purchasingId: Types.ObjectId,
@@ -189,17 +205,45 @@ export class PurchasingController {
     });
   }
 
+  @Put(':purchasing_id/payment')
+  @AttachmentsInterceptor('purchasing_attachments', 5)
+  async purchasingPayment(
+    @Param('purchasing_id') purchasingId: Types.ObjectId,
+    @UploadedFile() files: Express.Multer.File[],
+    @Req() req: Request,
+    @Body() dto: PurchaseOrderDto,
+    @Res() res: Response,
+  ) {
+    return this.purchasingMutation({ files, dto, req, res }, async () => {
+      const { detail, removedAttachments } = await this.service.editPurchasing(purchasingId, dto);
+      // delete old files AFTER DB success
+      removedAttachments.forEach((url) => {
+        try {
+          const pathname = new URL(url).pathname;
+          fs.rmSync(`.${pathname}`, { force: true });
+        } catch (e) {
+          console.warn('Failed to remove attachment:', url);
+        }
+      });
+      return BaseResponse.success({
+        res,
+        option: { message: 'Success update purchasing data', detail },
+      });
+    })
+  }
+
+
   @Put(':purchasing_id/receive')
-  @AttachmentsInterceptor('invoice_attachments', 5)
+  @AttachmentsInterceptor('purchasing_attachments', 5)
   async recieveOrder(
     @Param('purchasing_id') purchasingId: Types.ObjectId,
     @UploadedFile() files: Express.Multer.File[],
     @Req() req: Request,
-    @Body() dto: { purchase: ReceiveOrderDto, purhcaseItems: PurchasingItemDto[] },
+    @Body() dto: { purchase: PurchaseOrderDto, purhcaseItems: PurchasingItemDto[] },
     @Res() res: Response,
   ) {
     return this.purchasingMutation({ files, dto: dto.purchase, req, res }, async () => {
-      const data: ReceiveOrderDto & { status: PurchasingEn } = {
+      const data: PurchaseOrderDto & { status: PurchasingEn } = {
         ...dto.purchase,
         status: PurchasingEn.RECEIVE
       }

@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import mongoose, { Document, Types } from 'mongoose';
 import { Supplier, SupplierDocument } from '../supplier/supplier.schema';
 
 export enum PurchasingEn {
@@ -28,26 +28,23 @@ export class Purchasing {
   @Prop({ enum: PurchasingEn, required: true })
   status: PurchasingEn;
 
-  @Prop({ type: Date })
-  received_at?: Date;
-
   @Prop()
   invoice_number?: string;
 
   @Prop()
-  invoice_attachments?: string[];
+  purchasing_attachments?: string[];
 
-  @Prop({ type: Number, default: 0 })
-  total_purchase_price: number;
-
-  @Prop({ type: Number, default: 0 })
-  additional_cost?: number;
+  @Prop({ type: mongoose.Schema.Types.Decimal128, default: 0 })
+  additional_cost?: mongoose.Schema.Types.Decimal128;
 
   @Prop()
-  reject_notes?: string;
+  notes?: string; // for example: notes for additional cost
 
   @Prop()
-  receive_notes?: string;
+  reject_notes?: string; // APPROVAL step
+
+  @Prop({ type: Date })
+  finish_date?: Date; // Receive order step
 }
 
 

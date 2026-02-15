@@ -35,7 +35,6 @@ export class PurchasingItemService {
       }
       const created = (await this.purchasingItemModel.create([data], { session }))[0];
       if (!created) throw BaseResponse.notFound({ err: 'createPurchasingItem created not found' });
-      await this.updatePurchasingTotalPrice(created?.purchase_order, session);
       return created;
     }, sessionIn)
   }
@@ -66,7 +65,6 @@ export class PurchasingItemService {
         },
       ).session(session);
       if (!updatedItem) throw BaseResponse.notFound({ err: 'editPurchasingItem updatedItem not found' });
-      await this.updatePurchasingTotalPrice(updatedItem?.purchase_order, session);
       return updatedItem || undefined;
     }, sessionIn);
   }
@@ -84,24 +82,8 @@ export class PurchasingItemService {
     return this.global.withTransaction(async (session) => {
       const purchasingItem = await this.purchasingItemModel.findById(id).session(session);
       if (!purchasingItem) throw BaseResponse.notFound({ err: 'deletePurchasingItem not found' });
-      await this.updatePurchasingTotalPrice(purchasingItem?.purchase_order, session);
       await this.global.deleteData(purchasingItem, session);
       return purchasingItem || undefined;
     }, sessionIn);
-  }
-
-  async updatePurchasingTotalPrice(purchase_order: Types.ObjectId, sessionIn?: ClientSession): Promise<Purchasing | undefined> {
-    return this.global.withTransaction(async (session) => {
-      const purchase = await this.purchasingModel.findById(purchase_order).session(session);
-      if (!purchase) throw BaseResponse.notFound({ err: 'Purchasing not found' });
-      const items = await this.purchasingItemModel.find({ purchase_order: purchase_order }).session(session).lean();
-      if (!items || items.length < 1) {
-        return purchase;
-      }
-      const total_price = items.reduce((sum, item) => sum + item.purchase_qty * item.purchase_price, 0);
-      purchase.total_purchase_price = total_price;
-      const result = await purchase.save({ session });
-      return result
-    }, sessionIn)
   }
 }

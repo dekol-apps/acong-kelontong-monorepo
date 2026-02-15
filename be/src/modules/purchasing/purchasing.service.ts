@@ -3,10 +3,10 @@ import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { ClientSession, Connection, Model, Types } from 'mongoose';
 import { PaginationDto } from 'src/global/global.dto';
 import { GlobalService } from 'src/global/global.service';
-import { IListRes } from 'src/types/interfaces';
+import { ApprovalType, FlowType, IListRes, OrderType } from 'src/types/interfaces';
 import { BaseResponse } from 'src/utils/base-response';
 import { Purchasing, PurchasingEn } from './purchasing.schema';
-import { ListPurchasingItemsDTO, PurchasingDto, ReceiveOrderDto } from './purchasing.dto';
+import { ListPurchasingItemsDTO, PurchaseOrderApprovalDto, PurchaseOrderDto, PurchasingDetail, PurchasingDto } from './purchasing.dto';
 import { Supplier } from '../supplier/supplier.schema';
 import { InventoryService } from '../inventory/inventory.service';
 import { PurchasingItem } from '../purchasing-item/purchasing-item.schema';
@@ -15,7 +15,9 @@ import { PurchasingItemDto } from '../purchasing-item/purchasing-item.dto';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { decreaseDays } from 'src/utils/helper';
 import { cleanupDays } from 'src/types/constants';
-import * as fs from 'fs';
+import { Document } from 'mongoose';
+import { Accounting } from '../accounting/accounting.schema';
+import { AccountingService } from '../accounting/accounting.service';
 
 @Injectable()
 export class PurchasingService {
@@ -23,6 +25,9 @@ export class PurchasingService {
   constructor(
     @Inject(forwardRef(() => GlobalService))
     private global: GlobalService,
+    @Inject(forwardRef(() => AccountingService))
+    private accounting: AccountingService,
+    @Inject(forwardRef(() => InventoryService))
     private inventory: InventoryService,
     private purchaseItemSvc: PurchasingItemService,
     @InjectModel(Purchasing.name) private purchasingModel: Model<Purchasing>,
@@ -87,7 +92,6 @@ export class PurchasingService {
       supplier_name: supplier.supplier_name,
       due_date: data.due_date,
       status: data.status,
-      total_purchase_price: 0,
     }], { session });
 
     const createdPurchase = purchase[0];
@@ -98,7 +102,7 @@ export class PurchasingService {
     return await this.detailPurchasing(createdPurchase._id);
   }
 
-  async editPurchasing(id: Types.ObjectId, data: PurchasingDto & { status?: PurchasingEn }, sessionIn?: ClientSession): Promise<{ detail: Purchasing; removedAttachments: string[] }> {
+  async editPurchasing(id: Types.ObjectId, data: PurchasingDto & { status?: PurchasingEn }, sessionIn?: ClientSession): Promise<{ detail: PurchasingDetail; removedAttachments: string[] }> {
     return this.global.withTransaction(async (session) => {
       const purchase = await this.purchasingModel.findById(id).session(session);
       if (!purchase) throw BaseResponse.notFound({ err: 'Purchasing not found' });
@@ -109,12 +113,12 @@ export class PurchasingService {
       const allowedFieldsByStatus = {
         [PurchasingEn.EXPIRED]: [''],
         [PurchasingEn.DROP]: [''],
-        [PurchasingEn.RECEIVE]: ['status'],
-        [PurchasingEn.PROCESS]: ['status', 'invoice_number', 'invoice_attachments', 'due_date', 'additional_cost'],
-        [PurchasingEn.REJECT]: [''],
-        [PurchasingEn.APPROVE]: ['status', 'invoice_number', 'invoice_attachments', 'due_date', 'additional_cost'],
+        [PurchasingEn.RECEIVE]: ['status', 'notes', 'finish_date'],
+        [PurchasingEn.PROCESS]: ['status', 'invoice_number', 'purchasing_attachments', 'due_date', 'additional_cost', 'notes', 'finish_date'],
+        [PurchasingEn.REJECT]: ['status', 'invoice_number', 'purchasing_attachments', 'due_date', 'supplier_name', 'supplier', 'additional_cost', 'notes'],
+        [PurchasingEn.APPROVE]: ['status', 'invoice_number', 'purchasing_attachments', 'due_date', 'additional_cost', 'notes'],
         [PurchasingEn.REQUEST]: ['status', 'reject_notes'],
-        [PurchasingEn.CREATE]: ['status', 'invoice_number', 'invoice_attachments', 'due_date', 'total_purchase_price', 'supplier_name', 'supplier', 'additional_cost'],
+        [PurchasingEn.CREATE]: ['status', 'purchasing_attachments', 'due_date', 'supplier_name', 'supplier', 'additional_cost', 'notes'],
       };
       // get allowed fields for this status
       const fields: string[] = purchase.status ? allowedFieldsByStatus[purchase.status] : [];
@@ -130,8 +134,8 @@ export class PurchasingService {
         });
       }
 
-      const oldAttachments = purchase.invoice_attachments ?? [];
-      const newAttachments = data.invoice_attachments ?? oldAttachments;
+      const oldAttachments = purchase.purchasing_attachments ?? [];
+      const newAttachments = data.purchasing_attachments ?? oldAttachments;
 
       const removedAttachments = oldAttachments.filter(
         (url) => !newAttachments.includes(url),
@@ -142,16 +146,17 @@ export class PurchasingService {
         if (field === 'supplier_name') purchase.supplier_name = supplier.supplier_name;
         if (field === 'due_date') purchase.due_date = data.due_date;
         if (field === 'invoice_number') purchase.invoice_number = data.invoice_number;
-        if (field === 'invoice_attachments') purchase.invoice_attachments = data.invoice_attachments;
+        if (field === 'purchasing_attachments') purchase.purchasing_attachments = data.purchasing_attachments;
         if (field === 'additional_cost') purchase.additional_cost = data.additional_cost;
         if (field === 'reject_notes') purchase.reject_notes = data.reject_notes;
         if (field === 'status') purchase.status = data.status ?? purchase.status;
       });
 
       await purchase.save({ session });
+      const detail = await this.detailPurchasing(purchase._id);
 
       return {
-        detail: purchase,
+        detail,
         removedAttachments,
       };
     }, sessionIn);
@@ -181,13 +186,39 @@ export class PurchasingService {
     )
   }
 
-  async detailPurchasing(purchasing_id: Types.ObjectId): Promise<Purchasing | undefined> {
+  async detailPurchasing(purchasing_id: Types.ObjectId): Promise<PurchasingDetail> {
     const detailPurchasing = await this.purchasingModel
       .findById(purchasing_id)
       .populate('supplier')
-      .lean()
-      .exec();
-    return detailPurchasing || undefined;
+      .lean(); // <-- important
+
+    if (!detailPurchasing) throw BaseResponse.notFound();
+    const total_purchase_price = await this.countTotalPurchasePrice(purchasing_id);
+
+    return {
+      ...detailPurchasing,
+      total_purchase_price,
+    };
+  }
+
+  async countTotalPurchasePrice(purchasing_id: Types.ObjectId): Promise<number> {
+    const result = await this.purchasingItemModel.aggregate([
+      {
+        $match: { purchasing_id },
+      },
+      {
+        $group: {
+          _id: null,
+          total: {
+            $sum: {
+              $multiply: ["$purchase_price", "$purchase_qty"],
+            },
+          },
+        },
+      },
+    ]);
+
+    return result[0]?.total ?? 0;
   }
 
   async listPurchasingItems({
@@ -215,7 +246,7 @@ export class PurchasingService {
     )
   }
 
-  async deletePurchasing(id: Types.ObjectId, sessionIn?: ClientSession): Promise<{ detail: Purchasing; removedAttachments: string[] }> {
+  async deletePurchasing(id: Types.ObjectId, sessionIn?: ClientSession): Promise<{ detail: Purchasing | undefined; removedAttachments: string[] }> {
     return this.global.withTransaction(async (session) => {
       const purchasing = await this.purchasingModel.findById(id).session(session);
       if (!purchasing) throw BaseResponse.notFound({ err: 'deletePurchasing !purchasing', option: { message: 'Purchasing not found' } });
@@ -223,15 +254,17 @@ export class PurchasingService {
       if (!allowedStatus.includes(purchasing.status)) {
         BaseResponse.forbidden({ err: 'deletePurchasing !allowedStatus', option: { message: `Cannot delete item with status ${purchasing.status}` } });
       }
-      const removedAttachments = purchasing.invoice_attachments ?? [];
+      const removedAttachments = purchasing.purchasing_attachments ?? [];
 
       await this.global.deleteData(purchasing, session);
       const items = await this.purchasingItemModel.find({ purchase_order: id }).session(session);
       await Promise.all(items.map(async item => {
         await this.global.deleteData(item, session);
       }))
+
+      const detail = await this.detailPurchasing(purchasing._id);
       return {
-        detail: purchasing,
+        detail,
         removedAttachments,
       };
     }, sessionIn);
@@ -282,7 +315,7 @@ export class PurchasingService {
       if (status === PurchasingEn.REJECT) purchase.reject_notes = notes;
       if (status === PurchasingEn.APPROVE) purchase.reject_notes = undefined;
       await purchase.save({ session });
-      return purchase;
+      return await this.detailPurchasing(purchase._id);
     }, sessionIn);
   }
 
@@ -292,12 +325,12 @@ export class PurchasingService {
     });
   }
 
-  async purchasingApproval(id: Types.ObjectId, status: PurchasingEn, notes?: string, sessionIn?: ClientSession): Promise<Purchasing | undefined> {
+  async purchasingApproval(id: Types.ObjectId, dto: PurchaseOrderApprovalDto, sessionIn?: ClientSession): Promise<Purchasing | undefined> {
     return this.global.withTransaction(async (session) => {
-      if (status === PurchasingEn.APPROVE) {
-        return await this.purchasingUpdateStat(id, status, undefined, session)
+      if (dto.approval === ApprovalType.APPROVE) {
+        return await this.purchasingUpdateStat(id, PurchasingEn.APPROVE, undefined, session)
       } else {
-        return await this.purchasingUpdateStat(id, status, notes, session)
+        return await this.purchasingUpdateStat(id, PurchasingEn.REJECT, dto.reject_notes, session)
       }
     }, sessionIn)
   }
@@ -314,7 +347,23 @@ export class PurchasingService {
     }, sessionIn)
   }
 
-  async receiveOrder(id: Types.ObjectId, dto: ReceiveOrderDto, updateItems: PurchasingItemDto[]): Promise<{ detail: Purchasing; removedAttachments: string[] }> {
+  async purchasingPayment(id: Types.ObjectId, dto: PurchaseOrderDto, sessionIn?: ClientSession): Promise<{ detail: Purchasing | undefined; removedAttachments: string[] }> {
+    return this.global.withTransaction(async (session) => {
+      const edit = await this.editPurchasing(id, dto, session);
+      if (!edit || !edit.detail) throw BaseResponse.unexpected();
+      const accountingPayload: Accounting = {
+        flow_type: FlowType.OUT,
+        order_id: edit.detail?._id,
+        order_data: edit.detail,
+        order_type: OrderType.PURCHASING,
+        transaction_amount: edit.detail?.total_purchase_price
+      }
+      await this.accounting.createAccountingItem(accountingPayload, session)
+      return edit;
+    }, sessionIn)
+  }
+
+  async receiveOrder(id: Types.ObjectId, dto: PurchaseOrderDto, updateItems: PurchasingItemDto[]): Promise<{ detail: Purchasing | undefined; removedAttachments: string[] }> {
     return this.global.withTransaction(async (session) => {
       const purchase = await this.purchasingModel.findById(id).session(session);
       if (!purchase)

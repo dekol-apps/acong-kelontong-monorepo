@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import mongoose, { Document, Types } from 'mongoose';
 import { Product, ProductDocument } from '../product/product.schema';
 import { Purchasing, PurchasingDocument } from '../purchasing/purchasing.schema';
 
@@ -24,8 +24,8 @@ export class PurchasingItem {
   @Prop({ type: Number, default: 0 })
   recieved_qty: number;
 
-  @Prop({ type: Number, required: true })
-  purchase_price: number;
+  @Prop({ type: mongoose.Schema.Types.Decimal128, required: true })
+  purchase_price: mongoose.Schema.Types.Decimal128;
 }
 
 export type PurchasingItemDocument = PurchasingItem & Document & { product: ProductDocument } & { purchase_order: PurchasingDocument };

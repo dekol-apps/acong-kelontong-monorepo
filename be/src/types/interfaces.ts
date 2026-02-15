@@ -70,6 +70,10 @@ export enum InvestmentType {
   WITHDRAWAL = 'WITHDRAWAL',
 }
 
+export enum ApprovalType {
+  APPROVE = 'APPROVE',
+  REJECT = 'REJECT',
+}
 
 export enum OrderType {
   PURCHASING = 'PURCHASING',
