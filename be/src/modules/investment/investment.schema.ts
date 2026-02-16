@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import mongoose, { Document } from 'mongoose';
 import { FlowType } from 'src/types/interfaces';
 
 @Schema({ timestamps: true })
@@ -12,8 +12,8 @@ export class Investment {
   })
   flow_type: FlowType;
 
-  @Prop({ required: true, min: 1 })
-  transaction_amount: number;
+  @Prop({ type: mongoose.Schema.Types.Decimal128, required: true, min: 1 })
+  transaction_amount: mongoose.Schema.Types.Decimal128;
 
   @Prop()
   attachments?: string[];

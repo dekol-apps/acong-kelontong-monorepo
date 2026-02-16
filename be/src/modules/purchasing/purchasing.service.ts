@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
-import { ClientSession, Connection, Model, Types } from 'mongoose';
+import mongoose, { ClientSession, Connection, Model, Types } from 'mongoose';
 import { PaginationDto } from 'src/global/global.dto';
 import { GlobalService } from 'src/global/global.service';
 import { ApprovalType, FlowType, IListRes, OrderType } from 'src/types/interfaces';
@@ -202,7 +202,7 @@ export class PurchasingService {
     };
   }
 
-  async countTotalPurchasePrice(purchasing_id: Types.ObjectId): Promise<number> {
+  async countTotalPurchasePrice(purchasing_id: Types.ObjectId): Promise<mongoose.Schema.Types.Decimal128> {
     const result = await this.purchasingItemModel.aggregate([
       {
         $match: { purchasing_id },

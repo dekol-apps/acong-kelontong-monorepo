@@ -1,4 +1,5 @@
 import { IsArray, IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, Min, MinLength } from 'class-validator';
+import mongoose from 'mongoose';
 import { PaginationDto } from 'src/global/global.dto';
 import { InvestmentType } from 'src/types/interfaces';
 
@@ -11,7 +12,7 @@ export class InvestmentDto {
   @IsNotEmpty()
   @IsInt()
   @Min(1)
-  transaction_amount: number;
+  transaction_amount: mongoose.Schema.Types.Decimal128;
 
   @IsNotEmpty()
   @MinLength(1)
