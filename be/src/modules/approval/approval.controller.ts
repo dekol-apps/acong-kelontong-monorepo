@@ -6,6 +6,7 @@ import { Types } from 'mongoose';
 import { PurchasingEn } from '../purchasing/purchasing.schema';
 import { PurchasingService } from '../purchasing/purchasing.service';
 import { UAuthGuard } from '../auth/auth.guard';
+import { ApprovalType } from 'src/types/interfaces';
 
 @UseGuards(UAuthGuard)
 @Controller('approval')
@@ -39,7 +40,7 @@ export class ApprovalController {
         @Res() res: Response,
     ) {
         try {
-            const purchasing = await this.service.purchasingApproval(purchasingId, PurchasingEn.APPROVE);
+            const purchasing = await this.service.purchasingApproval(purchasingId, { approval: ApprovalType.APPROVE });
             return BaseResponse.success({
                 res,
                 option: { message: `Purchase order approved`, detail: purchasing },
@@ -56,7 +57,7 @@ export class ApprovalController {
         @Res() res: Response,
     ) {
         try {
-            const purchasing = await this.service.purchasingApproval(purchasingId, PurchasingEn.REJECT, dto.reject_notes);
+            const purchasing = await this.service.purchasingApproval(purchasingId, { approval: ApprovalType.REJECT, reject_notes: dto.reject_notes });
             return BaseResponse.success({
                 res,
                 option: { message: `Purchase order rejected`, detail: purchasing },
