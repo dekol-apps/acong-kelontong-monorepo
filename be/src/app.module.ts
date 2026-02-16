@@ -51,6 +51,9 @@ import { InvestmentService } from './modules/investment/investment.service';
 import { InvestmentController } from './modules/investment/investment.controller';
 import { Investment, InvestmentSchema } from './modules/investment/investment.schema';
 import { Accounting, AccountingSchema } from './modules/accounting/accounting.schema';
+import { ExpenseService } from './modules/expense/expense.service';
+import { ExpenseController } from './modules/expense/expense.controller';
+import { Expense, ExpenseSchema } from './modules/expense/expense.schema';
 
 @Module({
   imports: [
@@ -109,6 +112,7 @@ import { Accounting, AccountingSchema } from './modules/accounting/accounting.sc
       { name: InventoryMovement.name, schema: InventoryMovementSchema },
       { name: Investment.name, schema: InvestmentSchema },
       { name: Accounting.name, schema: AccountingSchema },
+      { name: Expense.name, schema: ExpenseSchema },
     ]),
     SeederModule,
   ],
@@ -127,7 +131,8 @@ import { Accounting, AccountingSchema } from './modules/accounting/accounting.sc
     ApprovalController,
     InventoryItemController,
     InventoryMovementController,
-    InvestmentController
+    InvestmentController,
+    ExpenseController
   ],
   providers: [
     AppService,
@@ -148,6 +153,7 @@ import { Accounting, AccountingSchema } from './modules/accounting/accounting.sc
     InventoryMovementService,
     AccountingService,
     InvestmentService,
+    ExpenseService,
   ]
 })
 export class AppModule implements OnModuleInit {
