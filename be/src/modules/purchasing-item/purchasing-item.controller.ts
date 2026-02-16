@@ -52,7 +52,6 @@ export class PurchasingItemController {
     }
   }
 
-
   @Delete(':purchase_item_id')
   async deletePurchaseItem(
     @Param('purchase_item_id') purchaseItemId: Types.ObjectId,
@@ -60,7 +59,7 @@ export class PurchasingItemController {
   ) {
     try {
       const purchaseItem = await this.service.deletePurchasingItem(purchaseItemId);
-      return BaseResponse.success({ res, option: { message: "Success get detail purchaseItem", detail: purchaseItem } });
+      return BaseResponse.success({ res, option: { message: "Success delete purchaseItem", detail: purchaseItem } });
     } catch (err) {
       return BaseResponse.error({ res, err });
     }

@@ -350,6 +350,10 @@ export class PurchasingService {
 
   async purchasingPayment(id: Types.ObjectId, dto: PurchaseOrderDto, sessionIn?: ClientSession): Promise<{ detail: Purchasing | undefined; removedAttachments: string[] }> {
     return this.global.withTransaction(async (session) => {
+      const purchasing = await this.purchasingModel.findById(id);
+      if (!purchasing) throw BaseResponse.notFound({ err: 'purchasingPayment !purchasing' });
+      if (!dto.invoice_number) throw BaseResponse.invalid({ option: { message: 'invoice_number is required' } });
+      if (!dto.purchasing_attachments?.length && purchasing.purchasing_attachments?.length) throw BaseResponse.invalid({ option: { message: 'purchasing_attachments is required' } });
       const edit = await this.editPurchasing(id, dto, session);
       if (!edit || !edit.detail) throw BaseResponse.unexpected({ err: 'purchasingPayment' });
       const accountingPayload: Accounting = {
