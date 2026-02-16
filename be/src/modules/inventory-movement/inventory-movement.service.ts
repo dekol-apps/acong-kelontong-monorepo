@@ -35,14 +35,16 @@ export class InventoryMovementService {
         inventory: dto.inventory,
         movement_type: dto.movement_type,
         items: [],
-        regist_date: new Date()
+        regist_date: new Date(),
+        description: dto.description
       }
       await Promise.all(dto.items.map(async item => {
         const product = await this.productModel.findById(item.product).session(session).lean();
         if (!product) {
           throw BaseResponse.invalid({ option: { message: 'Product not found' }, err: 'createInventoryMovement !product' });
         }
-        const movementItem = {
+        const movementItem: InventoryItem = {
+          inventory: dto.inventory,
           product: item.product,
           product_name: product?.product_name,
           item_qty: item.item_qty
