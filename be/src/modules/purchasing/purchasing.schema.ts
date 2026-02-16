@@ -9,6 +9,7 @@ export enum PurchasingEn {
   APPROVE = 'APPROVE',
   PROCESS = 'PROCESS',
   RECEIVE = 'RECEIVE',
+  COMPLETE = 'COMPLETE',
   DROP = 'DROP',
   EXPIRED = 'EXPIRED',
 }
@@ -44,7 +45,7 @@ export class Purchasing {
   reject_notes?: string; // APPROVAL step
 
   @Prop({ type: Date })
-  finish_date?: Date; // Receive order step
+  completed_date?: Date; // Receive order step
 }
 
 

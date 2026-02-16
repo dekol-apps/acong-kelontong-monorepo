@@ -22,7 +22,7 @@ export class PurchasingItem {
   purchase_qty: number;
 
   @Prop({ type: Number, default: 0 })
-  recieved_qty: number;
+  received_qty: number;
 
   @Prop({ type: mongoose.Schema.Types.Decimal128, required: true })
   purchase_price: mongoose.Schema.Types.Decimal128;

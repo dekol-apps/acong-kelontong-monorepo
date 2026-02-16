@@ -6,7 +6,7 @@ import type { Request, Response } from 'express';
 import { PurchasingDto, ListPurchasingItemsDTO, PurchaseOrderApprovalDto, PurchaseOrderDto } from './purchasing.dto';
 import { Types } from 'mongoose';
 import { PurchasingEn } from './purchasing.schema';
-import { PurchasingItemDto } from '../purchasing-item/purchasing-item.dto';
+import { PurchasingItemDto, ReceiveOrderItemDto } from '../purchasing-item/purchasing-item.dto';
 import * as fs from 'fs';
 import { AttachmentsInterceptor } from 'src/global/attachments-interceptor';
 
@@ -239,7 +239,7 @@ export class PurchasingController {
     @Param('purchasing_id') purchasingId: Types.ObjectId,
     @UploadedFile() files: Express.Multer.File[],
     @Req() req: Request,
-    @Body() dto: { purchase: PurchaseOrderDto, purhcaseItems: PurchasingItemDto[] },
+    @Body() dto: { purchase: PurchaseOrderDto, purhcaseItems: ReceiveOrderItemDto[] },
     @Res() res: Response,
   ) {
     return this.purchasingMutation({ files, dto: dto.purchase, req, res }, async () => {

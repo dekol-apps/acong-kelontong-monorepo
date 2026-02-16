@@ -11,7 +11,7 @@ import { Supplier } from '../supplier/supplier.schema';
 import { InventoryService } from '../inventory/inventory.service';
 import { PurchasingItem } from '../purchasing-item/purchasing-item.schema';
 import { PurchasingItemService } from '../purchasing-item/purchasing-item.service';
-import { PurchasingItemDto } from '../purchasing-item/purchasing-item.dto';
+import { PurchasingItemDto, ReceiveOrderItemDto } from '../purchasing-item/purchasing-item.dto';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { decreaseDays } from 'src/utils/helper';
 import { cleanupDays } from 'src/types/constants';
@@ -113,10 +113,11 @@ export class PurchasingService {
       const allowedFieldsByStatus = {
         [PurchasingEn.EXPIRED]: [''],
         [PurchasingEn.DROP]: [''],
-        [PurchasingEn.RECEIVE]: ['status', 'notes', 'finish_date'],
-        [PurchasingEn.PROCESS]: ['status', 'invoice_number', 'purchasing_attachments', 'due_date', 'additional_cost', 'notes', 'finish_date'],
-        [PurchasingEn.REJECT]: ['status', 'invoice_number', 'purchasing_attachments', 'due_date', 'supplier_name', 'supplier', 'additional_cost', 'notes'],
-        [PurchasingEn.APPROVE]: ['status', 'invoice_number', 'purchasing_attachments', 'due_date', 'additional_cost', 'notes'],
+        [PurchasingEn.COMPLETE]: [''],
+        [PurchasingEn.RECEIVE]: ['status', 'notes', 'completed_date'],
+        [PurchasingEn.PROCESS]: ['status', 'invoice_number', 'purchasing_attachments', 'additional_cost', 'notes'],
+        [PurchasingEn.REJECT]: ['status', 'purchasing_attachments', 'due_date', 'supplier_name', 'supplier', 'additional_cost', 'notes'],
+        [PurchasingEn.APPROVE]: ['status', 'purchasing_attachments', 'due_date', 'additional_cost', 'notes'],
         [PurchasingEn.REQUEST]: ['status', 'reject_notes'],
         [PurchasingEn.CREATE]: ['status', 'purchasing_attachments', 'due_date', 'supplier_name', 'supplier', 'additional_cost', 'notes'],
       };
@@ -350,7 +351,7 @@ export class PurchasingService {
   async purchasingPayment(id: Types.ObjectId, dto: PurchaseOrderDto, sessionIn?: ClientSession): Promise<{ detail: Purchasing | undefined; removedAttachments: string[] }> {
     return this.global.withTransaction(async (session) => {
       const edit = await this.editPurchasing(id, dto, session);
-      if (!edit || !edit.detail) throw BaseResponse.unexpected();
+      if (!edit || !edit.detail) throw BaseResponse.unexpected({ err: 'purchasingPayment' });
       const accountingPayload: Accounting = {
         flow_type: FlowType.OUT,
         order_id: edit.detail?._id,
@@ -363,21 +364,41 @@ export class PurchasingService {
     }, sessionIn)
   }
 
-  async receiveOrder(id: Types.ObjectId, dto: PurchaseOrderDto, updateItems: PurchasingItemDto[]): Promise<{ detail: Purchasing | undefined; removedAttachments: string[] }> {
+  async receiveOrder(id: Types.ObjectId, dto: PurchaseOrderDto, updateItems: ReceiveOrderItemDto[]): Promise<{ detail: Purchasing | undefined; removedAttachments: string[] }> {
     return this.global.withTransaction(async (session) => {
       const purchase = await this.purchasingModel.findById(id).session(session);
       if (!purchase)
         throw BaseResponse.notFound({ err: { text: 'receiveOrder purchase not found' } });
       if (purchase.status !== PurchasingEn.PROCESS)
         throw BaseResponse.forbidden({ err: { text: 'receiveOrder invalid status' } });
-      // ✅ Step 1: Update purchasing and its items
-      const updatedPurchase = await this.editPurchasing(id, {
+
+      let completed = 0;
+      // Update value received_qty for each item
+      await Promise.all(
+        updateItems.map(async item => {
+          const existing = await this.purchasingItemModel
+            .findById(item._id)
+            .session(session);
+          if (!existing) throw BaseResponse.notFound({ err: 'receiveOrder !existing' });
+          const newReceived = existing.received_qty + (item.received_qty ?? 0);
+          if (newReceived > existing.purchase_qty) {
+            throw BaseResponse.invalid({
+              err: 'Received qty exceeds purchase qty'
+            });
+          }
+          existing.received_qty = newReceived;
+          if (existing.purchase_qty === existing.received_qty) completed += 1;
+          await existing.save({ session });
+        })
+      );
+      const totalItems = await this.purchasingItemModel.countDocuments({ purchase_order: id });
+      const body = {
         ...dto,
-      }, session);
-      if (!updatedPurchase)
-        throw BaseResponse.unexpected({ err: { text: 'receiveOrder failed to editPurchasing' } });
-      // ✅ Step 2: Update items with new values (optional)
-      await this.bulkUpdatePurchasingItems(id, updateItems, session);
+        status: totalItems === completed ? PurchasingEn.COMPLETE : PurchasingEn.RECEIVE,
+        completed_date: completed ? new Date() : undefined
+      }
+      const updatedPurchase = await this.editPurchasing(id, body, session);
+      if (!updatedPurchase) throw BaseResponse.unexpected({ err: { text: 'receiveOrder failed to editPurchasing' } });
       return updatedPurchase;
     });
   }
