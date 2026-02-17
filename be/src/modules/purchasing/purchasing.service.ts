@@ -13,11 +13,13 @@ import { PurchasingItem } from '../purchasing-item/purchasing-item.schema';
 import { PurchasingItemService } from '../purchasing-item/purchasing-item.service';
 import { PurchasingItemDto, ReceiveOrderItemDto } from '../purchasing-item/purchasing-item.dto';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { decreaseDays } from 'src/utils/helper';
+import { decreaseDays, digitShortDate } from 'src/utils/helper';
 import { cleanupDays } from 'src/types/constants';
 import { Document } from 'mongoose';
 import { Accounting } from '../accounting/accounting.schema';
 import { AccountingService } from '../accounting/accounting.service';
+import { InventoryMovementService } from '../inventory-movement/inventory-movement.service';
+import { InventoryMovementDto, InventoryMovementItemDto } from '../inventory-movement/inventory-movement.dto';
 
 @Injectable()
 export class PurchasingService {
@@ -27,8 +29,8 @@ export class PurchasingService {
     private global: GlobalService,
     @Inject(forwardRef(() => AccountingService))
     private accounting: AccountingService,
-    @Inject(forwardRef(() => InventoryService))
-    private inventory: InventoryService,
+    @Inject(forwardRef(() => InventoryMovementService))
+    private inventoryMovementSvc: InventoryMovementService,
     private purchaseItemSvc: PurchasingItemService,
     @InjectModel(Purchasing.name) private purchasingModel: Model<Purchasing>,
     @InjectModel(PurchasingItem.name) private purchasingItemModel: Model<PurchasingItem>,
@@ -370,36 +372,88 @@ export class PurchasingService {
 
   async receiveOrder(id: Types.ObjectId, dto: PurchaseOrderDto, updateItems: ReceiveOrderItemDto[]): Promise<{ detail: Purchasing | undefined; removedAttachments: string[] }> {
     return this.global.withTransaction(async (session) => {
+      if (!updateItems.length) {
+        throw BaseResponse.invalid({ err: 'No items to receive' });
+      }
+
       const purchase = await this.purchasingModel.findById(id).session(session);
       if (!purchase)
         throw BaseResponse.notFound({ err: { text: 'receiveOrder purchase not found' } });
       if (purchase.status !== PurchasingEn.PROCESS)
         throw BaseResponse.forbidden({ err: { text: 'receiveOrder invalid status' } });
 
-      let completed = 0;
-      // Update value received_qty for each item
-      await Promise.all(
-        updateItems.map(async item => {
-          const existing = await this.purchasingItemModel
-            .findById(item._id)
-            .session(session);
-          if (!existing) throw BaseResponse.notFound({ err: 'receiveOrder !existing' });
-          const newReceived = existing.received_qty + (item.received_qty ?? 0);
-          if (newReceived > existing.purchase_qty) {
-            throw BaseResponse.invalid({
-              err: 'Received qty exceeds purchase qty'
-            });
-          }
-          existing.received_qty = newReceived;
-          if (existing.purchase_qty === existing.received_qty) completed += 1;
-          await existing.save({ session });
-        })
+      // Update value received_qty for each item and manage inventory movement
+      const existingItems = await this.purchasingItemModel.find({
+        purchase_order: id,
+      }).session(session);
+      const itemMap = new Map( //make list of item with id as key
+        existingItems.map(i => [i._id.toString(), i]),
       );
-      const totalItems = await this.purchasingItemModel.countDocuments({ purchase_order: id });
+
+      const movementMap = new Map<
+        string,
+        { inventory: Types.ObjectId; items: Map<string, number> }
+      >();
+
+      for (const item of updateItems) {
+        const existing = itemMap.get(item._id.toString());
+        if (!existing) throw BaseResponse.notFound({ err: 'receiveOrder !existing' });
+
+        const delta = item.received_qty ?? 0;
+        const newReceived = existing.received_qty + delta;
+
+        if (newReceived > existing.purchase_qty) {
+          throw BaseResponse.invalid({
+            err: 'Received qty exceeds purchase qty'
+          });
+        }
+
+        if (delta > 0) {
+          existing.received_qty = newReceived;
+          await existing.save({ session });
+        }
+
+        if (delta <= 0) continue;
+
+        const invKey = item.inventory.toString();
+        const prodKey = existing.product.toString();
+
+        if (!movementMap.has(invKey)) {
+          movementMap.set(invKey, {
+            inventory: item.inventory,
+            items: new Map(),
+          });
+        }
+
+        const inventoryEntry = movementMap.get(invKey)!;
+        const currentQty = inventoryEntry.items.get(prodKey) ?? 0;
+        inventoryEntry.items.set(prodKey, currentQty + delta);
+      }
+      const inventoryMovement: InventoryMovementDto[] = [];
+      for (const [, value] of movementMap) {
+        inventoryMovement.push({
+          inventory: value.inventory,
+          movement_type: FlowType.IN,
+          items: Array.from(value.items.entries()).map(
+            ([product, qty]) => ({
+              product: new Types.ObjectId(product),
+              item_qty: qty,
+            })
+          ),
+          description: `Purchasing receive order - date: ${digitShortDate(new Date())} - id: ${id.toString()}`
+        });
+      }
+      for (const movement of inventoryMovement) {
+        await this.inventoryMovementSvc.move(movement, session);
+      }
+
+      const isComplete = existingItems.every(
+        i => i.purchase_qty === i.received_qty
+      );
       const body = {
         ...dto,
-        status: totalItems === completed ? PurchasingEn.COMPLETE : PurchasingEn.RECEIVE,
-        completed_date: completed ? new Date() : undefined
+        status: isComplete ? PurchasingEn.COMPLETE : PurchasingEn.RECEIVE,
+        completed_date: isComplete ? new Date() : undefined
       }
       const updatedPurchase = await this.editPurchasing(id, body, session);
       if (!updatedPurchase) throw BaseResponse.unexpected({ err: { text: 'receiveOrder failed to editPurchasing' } });
