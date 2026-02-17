@@ -8,18 +8,16 @@ import { BaseResponse } from 'src/utils/base-response';
 import { Purchasing, PurchasingEn } from './purchasing.schema';
 import { ListPurchasingItemsDTO, PurchaseOrderApprovalDto, PurchaseOrderDto, PurchasingDetail, PurchasingDto } from './purchasing.dto';
 import { Supplier } from '../supplier/supplier.schema';
-import { InventoryService } from '../inventory/inventory.service';
 import { PurchasingItem } from '../purchasing-item/purchasing-item.schema';
 import { PurchasingItemService } from '../purchasing-item/purchasing-item.service';
 import { PurchasingItemDto, ReceiveOrderItemDto } from '../purchasing-item/purchasing-item.dto';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { decreaseDays, digitShortDate } from 'src/utils/helper';
 import { cleanupDays } from 'src/types/constants';
-import { Document } from 'mongoose';
 import { Accounting } from '../accounting/accounting.schema';
 import { AccountingService } from '../accounting/accounting.service';
 import { InventoryMovementService } from '../inventory-movement/inventory-movement.service';
-import { InventoryMovementDto, InventoryMovementItemDto } from '../inventory-movement/inventory-movement.dto';
+import { InventoryMovementDto } from '../inventory-movement/inventory-movement.dto';
 
 @Injectable()
 export class PurchasingService {
@@ -447,9 +445,14 @@ export class PurchasingService {
         await this.inventoryMovementSvc.move(movement, session);
       }
 
-      const isComplete = existingItems.every(
+      const refreshedItems = await this.purchasingItemModel.find({
+        purchase_order: id,
+      }).session(session);
+
+      const isComplete = refreshedItems.every(
         i => i.purchase_qty === i.received_qty
       );
+
       const body = {
         ...dto,
         status: isComplete ? PurchasingEn.COMPLETE : PurchasingEn.RECEIVE,

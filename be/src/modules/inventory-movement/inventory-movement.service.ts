@@ -59,9 +59,12 @@ export class InventoryMovementService {
 
   async move(dto: InventoryMovementDto, sessionIn?: ClientSession): Promise<InventoryMovement | undefined> {
     return this.global.withTransaction(async (session) => {
+      const productIds = dto.items.map(i => i.product);
       const existingItems = await this.inventoryItemModel.find({
         inventory: dto.inventory,
+        product: { $in: productIds },
       }).session(session);
+
       const itemMap = new Map(
         existingItems.map(i => [i.product.toString(), i]),
       );
@@ -69,12 +72,19 @@ export class InventoryMovementService {
         // If any item in the payload list is already available in DB, it means user intends to increment it's quantity
         await Promise.all(dto.items.map(async item => {
           const existing = itemMap.get(item.product.toString());
-          if (existing) {
-            const updateQty = { ...existing, item_qty: existing.item_qty + item.item_qty };
-            await this.inventoryItem.editInventoryItem(existing._id, updateQty, session);
-          } else {
-            const newData = { ...item, inventory: dto.inventory };
+          const newData = { ...item, inventory: dto.inventory };
+          if (!existing) {
             await this.inventoryItem.createInventoryItem(newData, session);
+          } else {
+            await this.inventoryItem.editInventoryItem(
+              existing._id,
+              {
+                inventory: existing.inventory,
+                product: existing.product,
+                item_qty: existing.item_qty + item.item_qty,
+              },
+              session
+            );
           }
         }));
       } else { // Move OUT
@@ -90,10 +100,17 @@ export class InventoryMovementService {
           }
 
           if (decQtyResult === 0) {
-            await this.inventoryItem.deleteInventoryItem(existing._id);
+            await this.inventoryItem.deleteInventoryItem(existing._id, session);
           } else {
-            const updateQty = { ...existing, item_qty: decQtyResult };
-            await this.inventoryItem.editInventoryItem(existing._id, updateQty, session);
+            await this.inventoryItem.editInventoryItem(
+              existing._id,
+              {
+                inventory: existing.inventory,
+                product: existing.product,
+                item_qty: decQtyResult,
+              },
+              session
+            );
           }
         }));
       }
