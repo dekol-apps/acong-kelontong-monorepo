@@ -1,7 +1,7 @@
 import { ArrayMinSize, IsArray, IsEnum, IsInt, IsMongoId, IsNotEmpty, IsOptional, IsString, Min, ValidateNested } from 'class-validator';
 import { Types } from 'mongoose';
 import { Type } from 'class-transformer';
-import { FlowType } from 'src/types/interfaces';
+import { FlowType, OrderType } from 'src/types/interfaces';
 import { PaginationDto } from 'src/global/global.dto';
 
 export class InventoryMovementItemDto {
@@ -23,6 +23,11 @@ export class InventoryMovementDto {
     message: 'movement_type must be either IN or OUT',
   })
   movement_type: FlowType;
+
+  @IsEnum(FlowType, {
+    message: 'order_type invalid enum',
+  })
+  order_type: OrderType;
 
   @IsArray()
   @ArrayMinSize(1)

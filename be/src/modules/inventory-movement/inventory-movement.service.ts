@@ -36,7 +36,8 @@ export class InventoryMovementService {
         movement_type: dto.movement_type,
         items: [],
         regist_date: new Date(),
-        description: dto.description
+        description: dto.description,
+        order_type: dto.order_type
       }
       await Promise.all(dto.items.map(async item => {
         const product = await this.productModel.findById(item.product).session(session).lean();

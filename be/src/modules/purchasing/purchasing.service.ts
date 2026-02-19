@@ -438,7 +438,8 @@ export class PurchasingService {
               item_qty: qty,
             })
           ),
-          description: `Purchasing receive order - date: ${digitShortDate(new Date())} - id: ${id.toString()}`
+          order_type: OrderType.PURCHASING,
+          description: `Purchasing receive order - date: ${digitShortDate(new Date())} - PO ID: ${id.toString()}`
         });
       }
       for (const movement of inventoryMovement) {
