@@ -10,12 +10,18 @@ export class Product {
   product_name: string; // e.g. "PT Indofood Sukses Tbk"
   @Prop()
   product_description?: string;
-  @Prop({ default: UnitOfMeasure.PCS, enum: UnitOfMeasure})
+  @Prop({ default: UnitOfMeasure.PCS, enum: UnitOfMeasure })
   unit_of_measure?: UnitOfMeasure;
   @Prop()
   barcode?: string;
   @Prop({ type: Types.ObjectId, ref: Brand.name, required: true })
   brand: Types.ObjectId;
+  @Prop({ type: Types.Decimal128, default: 0 })
+  sale_price?: Types.Decimal128;
+  @Prop({ type: Number, default: 0 })
+  discount_percent?: number
+  @Prop({ type: Number, default: 0 })
+  discount_items?: number
 }
 
 export type ProductDocument = Product & Document & { brand: BrandDocument };
