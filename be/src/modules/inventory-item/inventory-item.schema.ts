@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { ProductDocument } from '../product/product.schema';
 import { Inventory, InventoryDocument } from '../inventory/inventory.schema';
-import { InventoryMovementItem } from '../inventory-movement/inventory-movement.schema';
+import { InventoryMovementItem } from '../inventory-movement/inventory-movement-item.schema';
 
 @Schema({ timestamps: true })
 export class InventoryItem extends InventoryMovementItem{

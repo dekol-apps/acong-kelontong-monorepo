@@ -10,6 +10,7 @@ import { InventoryItemService } from '../inventory-item/inventory-item.service';
 import { InventoryMovement } from './inventory-movement.schema';
 import { Product } from '../product/product.schema';
 import { FlowType, IListRes } from 'src/types/interfaces';
+import { InventoryMovementItem } from './inventory-movement-item.schema';
 
 @Injectable()
 export class InventoryMovementService {
@@ -35,7 +36,6 @@ export class InventoryMovementService {
         inventory: dto.inventory,
         movement_type: dto.movement_type,
         items: [],
-        regist_date: new Date(),
         description: dto.description,
         order_type: dto.order_type
       }
@@ -44,8 +44,7 @@ export class InventoryMovementService {
         if (!product) {
           throw BaseResponse.invalid({ option: { message: 'Product not found' }, err: 'createInventoryMovement !product' });
         }
-        const movementItem: InventoryItem = {
-          inventory: dto.inventory,
+        const movementItem: InventoryMovementItem = {
           product: item.product,
           product_name: product?.product_name,
           item_qty: item.item_qty

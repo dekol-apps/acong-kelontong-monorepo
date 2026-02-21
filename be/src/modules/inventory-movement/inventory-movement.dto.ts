@@ -1,8 +1,8 @@
 import { ArrayMinSize, IsArray, IsEnum, IsInt, IsMongoId, IsNotEmpty, IsOptional, IsString, Min, ValidateNested } from 'class-validator';
 import { Types } from 'mongoose';
-import { Type } from 'class-transformer';
 import { FlowType, OrderType } from 'src/types/interfaces';
 import { PaginationDto } from 'src/global/global.dto';
+import { Type } from 'class-transformer';
 
 export class InventoryMovementItemDto {
   @IsMongoId()

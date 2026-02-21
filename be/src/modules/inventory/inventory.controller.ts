@@ -5,7 +5,7 @@ import type { Response } from 'express';
 import { BaseResponse } from 'src/utils/base-response';
 import { PaginationDto } from 'src/global/global.dto';
 import { Types } from 'mongoose';
-import { InventoryDto } from './inventory.dto';
+import { InventoryDto, InventoryReconcileDto } from './inventory.dto';
 
 @UseGuards(UAuthGuard)
 @Controller('inventory')
@@ -76,6 +76,19 @@ export class InventoryController {
     try {
       const inventory = await this.service.deleteInventory(inventoryId);
       return BaseResponse.success({ res, option: { message: "Success get detail inventory", detail: inventory } });
+    } catch (err) {
+      return BaseResponse.error({ res, err });
+    }
+  }
+
+  @Put(':inventory_id/reconcile')
+  async inventoryReconcile(
+    @Body() body: InventoryReconcileDto,
+    @Res() res: Response,
+  ) {
+    try {
+      const detail = await this.service.reconcile(body);
+      return BaseResponse.success({ res, option: { message: "Success create inventory reconciliation", detail } });
     } catch (err) {
       return BaseResponse.error({ res, err });
     }

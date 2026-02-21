@@ -54,6 +54,8 @@ import { Accounting, AccountingSchema } from './modules/accounting/accounting.sc
 import { ExpenseService } from './modules/expense/expense.service';
 import { ExpenseController } from './modules/expense/expense.controller';
 import { Expense, ExpenseSchema } from './modules/expense/expense.schema';
+import { InventoryMovementItem, InventoryMovementItemSchema } from './modules/inventory-movement/inventory-movement-item.schema';
+import { InventoryReconcile, InventoryReconcileSchema } from './modules/inventory/inventory-reconcile.schema';
 
 @Module({
   imports: [
@@ -110,6 +112,8 @@ import { Expense, ExpenseSchema } from './modules/expense/expense.schema';
       { name: Inventory.name, schema: InventorySchema },
       { name: InventoryItem.name, schema: InventoryItemSchema },
       { name: InventoryMovement.name, schema: InventoryMovementSchema },
+      { name: InventoryMovementItem.name, schema: InventoryMovementItemSchema },
+      { name: InventoryReconcile.name, schema: InventoryReconcileSchema },
       { name: Investment.name, schema: InvestmentSchema },
       { name: Accounting.name, schema: AccountingSchema },
       { name: Expense.name, schema: ExpenseSchema },
