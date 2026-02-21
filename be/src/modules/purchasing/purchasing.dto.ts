@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsDate, IsOptional, IsMongoId, IsNumber, IsArray, MinLength, IsEnum, IsInt } from 'class-validator';
+import { IsNotEmpty, IsString, IsDate, IsOptional, IsMongoId, IsArray, MinLength, IsEnum, IsInt } from 'class-validator';
 import mongoose, { Types } from 'mongoose';
 import { PaginationDto } from 'src/global/global.dto';
 import { ApprovalType } from 'src/types/interfaces';
@@ -54,5 +54,5 @@ export class ListPurchasingItemsDTO extends PaginationDto {
 export type PurchasingDetail =
   Purchasing & {
     _id: Types.ObjectId;
-    total_purchase_price: mongoose.Schema.Types.Decimal128;
+    total_purchase_price: Types.Decimal128;
   };

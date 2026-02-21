@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { IsDate } from 'class-validator';
-import mongoose, { Document, Types } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import { FlowType, OrderType } from 'src/types/interfaces';
 
 @Schema({ timestamps: true })
@@ -25,8 +25,8 @@ export class Accounting {
   })
   order_type: OrderType;
 
-  @Prop({ type: mongoose.Schema.Types.Decimal128, required: true, min: 1 })
-  transaction_amount: mongoose.Schema.Types.Decimal128;
+  @Prop({ type: Types.Decimal128, required: true, min: 1 })
+  transaction_amount: Types.Decimal128;
 
   @Prop({ required: true })
   @IsDate()

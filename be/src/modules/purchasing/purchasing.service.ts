@@ -202,7 +202,7 @@ export class PurchasingService {
     };
   }
 
-  async countTotalPurchasePrice(purchasing_id: Types.ObjectId): Promise<mongoose.Schema.Types.Decimal128> {
+  async countTotalPurchasePrice(purchasing_id: Types.ObjectId): Promise<Types.Decimal128> {
     const result = await this.purchasingItemModel.aggregate([
       {
         $match: { purchasing_id },

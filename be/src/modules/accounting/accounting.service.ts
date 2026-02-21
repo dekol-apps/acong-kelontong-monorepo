@@ -1,12 +1,12 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, ClientSession } from 'mongoose';
+import { Model, ClientSession, Types } from 'mongoose';
 import { GlobalService } from 'src/global/global.service';
 import { CurrencyEn, FlowType, OrderType } from 'src/types/interfaces';
 import { BaseResponse } from 'src/utils/base-response';
 import { Accounting } from './accounting.schema';
-import { Purchasing } from '../purchasing/purchasing.schema';
 import { AccountingBalance } from './accounting-balance.schema';
+import { InventoryItem } from '../inventory-item/inventory-item.schema';
 
 @Injectable()
 export class AccountingService {
@@ -14,6 +14,7 @@ export class AccountingService {
   constructor(
     @Inject(forwardRef(() => GlobalService))
     private global: GlobalService,
+    @InjectModel(InventoryItem.name) private inventoryItem: Model<InventoryItem>,
     @InjectModel(Accounting.name) private accountingModel: Model<Accounting>,
     @InjectModel(AccountingBalance.name) private balanceModel: Model<AccountingBalance>,
   ) { }
@@ -23,14 +24,17 @@ export class AccountingService {
       const { flow_type } = data;
       const filter =
         flow_type === FlowType.OUT
-          ? { currency: CurrencyEn.IDR, amount: { $gte: data.transaction_amount } }
+          ? { currency: CurrencyEn.IDR, transaction_amount: { $gte: data.transaction_amount } }
           : { currency: CurrencyEn.IDR };
 
-      const update =
+      const amount =
         flow_type === FlowType.OUT
-          ? { $inc: { amount: -data.transaction_amount } }
-          : { $inc: { amount: data.transaction_amount } };
+          ? Types.Decimal128.fromString(`-${data.transaction_amount.toString()}`)
+          : data.transaction_amount;
 
+      const update = {
+        $inc: { transaction_amount: amount }
+      };
       const balance = await this.balanceModel.findOneAndUpdate(
         filter,
         update,
@@ -128,7 +132,6 @@ export class AccountingService {
       return balance?.amount ?? 0;
     }, sessionIn);
   }
-
 
   async countProfit(sessionIn?: ClientSession): Promise<number> {
     const earnings = await this.countTotalMoney(FlowType.IN, OrderType.SALE, sessionIn);
