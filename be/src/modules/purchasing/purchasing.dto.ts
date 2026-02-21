@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsString, IsDate, IsOptional, IsMongoId, IsArray, MinLength, IsEnum, IsInt } from 'class-validator';
-import mongoose, { Types } from 'mongoose';
+import { Types } from 'mongoose';
 import { PaginationDto } from 'src/global/global.dto';
 import { ApprovalType } from 'src/types/interfaces';
 import { Purchasing } from './purchasing.schema';
@@ -28,7 +28,7 @@ export class PurchaseOrderDto {
 
   @IsOptional()
   @IsInt()
-  additional_cost?: mongoose.Schema.Types.Decimal128;
+  payment_realization?: Types.Decimal128;
 
   @IsOptional()
   @IsString()
@@ -55,4 +55,5 @@ export type PurchasingDetail =
   Purchasing & {
     _id: Types.ObjectId;
     total_purchase_price: Types.Decimal128;
+    cost_difference: Types.Decimal128;
   };

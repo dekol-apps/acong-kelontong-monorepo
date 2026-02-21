@@ -35,8 +35,8 @@ export class Purchasing {
   @Prop()
   purchasing_attachments?: string[];
 
-  @Prop({ type: mongoose.Schema.Types.Decimal128, default: 0 })
-  additional_cost?: mongoose.Schema.Types.Decimal128;
+  @Prop({ type: Types.Decimal128, default: 0 })
+  payment_realization?: Types.Decimal128;
 
   @Prop()
   notes?: string; // for example: notes for additional cost

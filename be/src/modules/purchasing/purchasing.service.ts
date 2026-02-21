@@ -12,7 +12,7 @@ import { PurchasingItem } from '../purchasing-item/purchasing-item.schema';
 import { PurchasingItemService } from '../purchasing-item/purchasing-item.service';
 import { PurchasingItemDto, ReceiveOrderItemDto } from '../purchasing-item/purchasing-item.dto';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { decreaseDays, digitShortDate } from 'src/utils/helper';
+import { decreaseDays, digitShortDate, subtractDecimal } from 'src/utils/helper';
 import { cleanupDays } from 'src/types/constants';
 import { Accounting } from '../accounting/accounting.schema';
 import { AccountingService } from '../accounting/accounting.service';
@@ -115,11 +115,11 @@ export class PurchasingService {
         [PurchasingEn.DROP]: [''],
         [PurchasingEn.COMPLETE]: [''],
         [PurchasingEn.RECEIVE]: ['status', 'notes', 'completed_date'],
-        [PurchasingEn.PROCESS]: ['status', 'invoice_number', 'purchasing_attachments', 'additional_cost', 'notes'],
-        [PurchasingEn.REJECT]: ['status', 'purchasing_attachments', 'due_date', 'supplier_name', 'supplier', 'additional_cost', 'notes'],
-        [PurchasingEn.APPROVE]: ['status', 'purchasing_attachments', 'due_date', 'additional_cost', 'notes'],
+        [PurchasingEn.PROCESS]: ['status', 'invoice_number', 'purchasing_attachments', 'payment_realization', 'notes'],
+        [PurchasingEn.REJECT]: ['status', 'purchasing_attachments', 'due_date', 'supplier_name', 'supplier', 'payment_realization', 'notes'],
+        [PurchasingEn.APPROVE]: ['status', 'purchasing_attachments', 'due_date', 'payment_realization', 'notes'],
         [PurchasingEn.REQUEST]: ['status', 'reject_notes'],
-        [PurchasingEn.CREATE]: ['status', 'purchasing_attachments', 'due_date', 'supplier_name', 'supplier', 'additional_cost', 'notes'],
+        [PurchasingEn.CREATE]: ['status', 'purchasing_attachments', 'due_date', 'supplier_name', 'supplier', 'payment_realization', 'notes'],
       };
       // get allowed fields for this status
       const fields: string[] = purchase.status ? allowedFieldsByStatus[purchase.status] : [];
@@ -148,7 +148,7 @@ export class PurchasingService {
         if (field === 'due_date') purchase.due_date = data.due_date;
         if (field === 'invoice_number') purchase.invoice_number = data.invoice_number;
         if (field === 'purchasing_attachments') purchase.purchasing_attachments = data.purchasing_attachments;
-        if (field === 'additional_cost') purchase.additional_cost = data.additional_cost;
+        if (field === 'payment_realization') purchase.payment_realization = data.payment_realization;
         if (field === 'reject_notes') purchase.reject_notes = data.reject_notes;
         if (field === 'status') purchase.status = data.status ?? purchase.status;
       });
@@ -195,10 +195,12 @@ export class PurchasingService {
 
     if (!detailPurchasing) throw BaseResponse.notFound();
     const total_purchase_price = await this.countTotalPurchasePrice(purchasing_id);
+    const cost_difference = subtractDecimal(detailPurchasing.payment_realization, total_purchase_price) ?? Types.Decimal128.fromString('0');
 
     return {
       ...detailPurchasing,
       total_purchase_price,
+      cost_difference
     };
   }
 
@@ -219,7 +221,7 @@ export class PurchasingService {
       },
     ]);
 
-    return result[0]?.total ?? 0;
+    return result[0]?.total ?? Types.Decimal128.fromString('0');
   }
 
   async listPurchasingItems({
@@ -350,6 +352,7 @@ export class PurchasingService {
 
   async purchasingPayment(id: Types.ObjectId, dto: PurchaseOrderDto, sessionIn?: ClientSession): Promise<{ detail: Purchasing | undefined; removedAttachments: string[] }> {
     return this.global.withTransaction(async (session) => {
+      if (!dto.payment_realization) throw BaseResponse.invalid({ option: { message: "payment_realization is required" } });
       const purchasing = await this.purchasingModel.findById(id);
       if (!purchasing) throw BaseResponse.notFound({ err: 'purchasingPayment !purchasing' });
       if (!dto.invoice_number) throw BaseResponse.invalid({ option: { message: 'invoice_number is required' } });
@@ -361,7 +364,7 @@ export class PurchasingService {
         order_id: edit.detail?._id,
         order_data: edit.detail,
         order_type: OrderType.PURCHASING,
-        transaction_amount: edit.detail?.total_purchase_price
+        transaction_amount: dto.payment_realization
       }
       await this.accounting.createAccountingItem(accountingPayload, session)
       return edit;
@@ -427,7 +430,7 @@ export class PurchasingService {
         const currentQty = inventoryEntry.items.get(prodKey) ?? 0;
         inventoryEntry.items.set(prodKey, currentQty + delta);
       }
-      const inventoryMovement: InventoryMovementDto[] = [];
+      const inventoryMovement: (InventoryMovementDto & { source_id: Types.ObjectId })[] = [];
       for (const [, value] of movementMap) {
         inventoryMovement.push({
           inventory: value.inventory,
@@ -439,6 +442,7 @@ export class PurchasingService {
             })
           ),
           order_type: OrderType.PURCHASING,
+          source_id: id,
           description: `Purchasing receive order - date: ${digitShortDate(new Date())} - PO ID: ${id.toString()}`
         });
       }

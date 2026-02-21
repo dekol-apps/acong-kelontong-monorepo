@@ -19,6 +19,7 @@ export class InventoryMovement {
         required: true,
     })
     order_type: OrderType;
+    @Prop({ type: Types.ObjectId }) source_id?: Types.ObjectId;
     @Prop({ type: [InventoryMovementItemSchema], required: true }) items: InventoryMovementItem[];
     @Prop() description?: string;
 }

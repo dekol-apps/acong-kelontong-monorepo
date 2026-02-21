@@ -26,7 +26,7 @@ export class InventoryMovementService {
     @InjectModel(Product.name) private productModel: Model<Product>,
   ) { }
 
-  async createInventoryMovement(dto: InventoryMovementDto, sessionIn?: ClientSession): Promise<InventoryMovement | undefined> {
+  async createInventoryMovement(dto: InventoryMovementDto & { source_id?: Types.ObjectId }, sessionIn?: ClientSession): Promise<InventoryMovement | undefined> {
     return this.global.withTransaction(async (session) => {
       const inventory = await this.inventoryModel.exists(dto.inventory).session(session);
       if (!inventory) {
@@ -37,7 +37,8 @@ export class InventoryMovementService {
         movement_type: dto.movement_type,
         items: [],
         description: dto.description,
-        order_type: dto.order_type
+        order_type: dto.order_type,
+        source_id: dto.source_id
       }
       await Promise.all(dto.items.map(async item => {
         const product = await this.productModel.findById(item.product).session(session).lean();
@@ -57,7 +58,7 @@ export class InventoryMovementService {
     }, sessionIn)
   }
 
-  async move(dto: InventoryMovementDto, sessionIn?: ClientSession): Promise<InventoryMovement | undefined> {
+  async move(dto: InventoryMovementDto & { source_id?: Types.ObjectId }, sessionIn?: ClientSession): Promise<InventoryMovement | undefined> {
     return this.global.withTransaction(async (session) => {
       const productIds = dto.items.map(i => i.product);
       const existingItems = await this.inventoryItemModel.find({

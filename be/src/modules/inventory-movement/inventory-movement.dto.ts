@@ -13,7 +13,6 @@ export class InventoryMovementItemDto {
   @Min(1)
   item_qty: number;
 }
-
 export class InventoryMovementDto {
   @IsMongoId()
   @IsNotEmpty()

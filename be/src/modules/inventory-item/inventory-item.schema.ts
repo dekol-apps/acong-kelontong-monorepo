@@ -5,7 +5,7 @@ import { Inventory, InventoryDocument } from '../inventory/inventory.schema';
 import { InventoryMovementItem } from '../inventory-movement/inventory-movement-item.schema';
 
 @Schema({ timestamps: true })
-export class InventoryItem extends InventoryMovementItem{
+export class InventoryItem extends InventoryMovementItem {
   @Prop({ type: Types.ObjectId, ref: Inventory.name, required: true }) inventory: Types.ObjectId;
 }
 
