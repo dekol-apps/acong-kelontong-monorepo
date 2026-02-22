@@ -1,7 +1,7 @@
-import { IsNotEmpty, IsString, IsDate, IsOptional, IsMongoId, IsArray, MinLength, IsEnum, IsInt } from 'class-validator';
+import { IsNotEmpty, IsString, IsDate, IsOptional, IsMongoId, IsArray, MinLength, IsEnum, IsNumber } from 'class-validator';
 import { Types } from 'mongoose';
 import { PaginationDto } from 'src/global/global.dto';
-import { ApprovalType } from 'src/types/interfaces';
+import { ApprovalType, PPhType, PPnType } from 'src/types/interfaces';
 import { Purchasing } from './purchasing.schema';
 
 export class PurchaseOrderApprovalDto {
@@ -27,12 +27,44 @@ export class PurchaseOrderDto {
   purchasing_attachments?: string[];
 
   @IsOptional()
-  @IsInt()
+  @IsNumber()
   payment_realization?: Types.Decimal128;
 
   @IsOptional()
   @IsString()
   notes?: string;
+
+  @IsOptional()
+  @IsEnum(PPhType, {
+    message: 'pph_type must be either PPh23, PPh22 or PPh4_2',
+  })
+  pph_type?: PPhType;
+
+  @IsOptional()
+  @IsEnum(PPnType, {
+    message: 'ppn_type must be either EXCLUSIVE, INCLUSIVE or NONE',
+  })
+  ppn_type?: PPnType;
+
+  @IsOptional()
+  @IsNumber()
+  pph_rate?: number; // example 2 for 2%
+
+  @IsOptional()
+  @IsNumber()
+  ppn_rate?: number; // example 11 for 11%
+
+  @IsOptional()
+  @IsNumber()
+  pph_amount?: Types.Decimal128;
+
+  @IsOptional()
+  @IsNumber()
+  ppn_amount?: Types.Decimal128;
+
+  @IsOptional()
+  @IsNumber()
+  shipping_cost?: Types.Decimal128;
 }
 
 export class PurchasingDto extends PurchaseOrderDto {

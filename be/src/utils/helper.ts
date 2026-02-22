@@ -1,5 +1,7 @@
 import { randomBytes, createHash } from "crypto";
 import CryptoJS from 'crypto-js';
+import { Types } from 'mongoose';
+import Decimal from 'decimal.js';
 
 export function encrypt(value: unknown): string {
   // put the value inside object, just in case the value is string
@@ -65,4 +67,22 @@ export function digitShortDate(date: Date): string {
     month: '2-digit',
     year: 'numeric',
   }).replace(',', '');
+}
+
+export const toDecimal = (val: Types.Decimal128) =>
+  new Decimal(val.toString());
+
+export const toDecimal128 = (val: Decimal) =>
+  Types.Decimal128.fromString(val.toFixed(0)); // Rupiah rounding
+
+export function addDecimal(a?: Types.Decimal128, b?: Types.Decimal128) {
+  if (!a || !b) return undefined;
+  const result = new Decimal(a.toString()).plus(new Decimal(b.toString()));
+  return Types.Decimal128.fromString(result.toFixed());
+}
+
+export function subtractDecimal(a?: Types.Decimal128, b?: Types.Decimal128) {
+  if (!a || !b) return undefined;
+  const result = new Decimal(a.toString()).minus(new Decimal(b.toString()));
+  return Types.Decimal128.fromString(result.toFixed());
 }

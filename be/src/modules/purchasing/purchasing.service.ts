@@ -1,23 +1,24 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
-import mongoose, { ClientSession, Connection, Model, Types } from 'mongoose';
+import { ClientSession, Connection, Model, Types } from 'mongoose';
 import { PaginationDto } from 'src/global/global.dto';
 import { GlobalService } from 'src/global/global.service';
-import { ApprovalType, FlowType, IListRes, OrderType } from 'src/types/interfaces';
+import { ApprovalType, FlowType, IListRes, OrderType, PPhType, PPnType } from 'src/types/interfaces';
 import { BaseResponse } from 'src/utils/base-response';
-import { Purchasing, PurchasingEn } from './purchasing.schema';
+import { Purchasing, PurchasingEn, ValidatePaymentInput, ValidatePaymentResult } from './purchasing.schema';
 import { ListPurchasingItemsDTO, PurchaseOrderApprovalDto, PurchaseOrderDto, PurchasingDetail, PurchasingDto } from './purchasing.dto';
 import { Supplier } from '../supplier/supplier.schema';
 import { PurchasingItem } from '../purchasing-item/purchasing-item.schema';
 import { PurchasingItemService } from '../purchasing-item/purchasing-item.service';
 import { PurchasingItemDto, ReceiveOrderItemDto } from '../purchasing-item/purchasing-item.dto';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { decreaseDays, digitShortDate, subtractDecimal } from 'src/utils/helper';
+import { decreaseDays, digitShortDate, subtractDecimal, toDecimal, toDecimal128 } from 'src/utils/helper';
 import { cleanupDays } from 'src/types/constants';
 import { Accounting } from '../accounting/accounting.schema';
 import { AccountingService } from '../accounting/accounting.service';
 import { InventoryMovementService } from '../inventory-movement/inventory-movement.service';
 import { InventoryMovementDto } from '../inventory-movement/inventory-movement.dto';
+import Decimal from 'decimal.js';
 
 @Injectable()
 export class PurchasingService {
@@ -102,7 +103,7 @@ export class PurchasingService {
     return await this.detailPurchasing(createdPurchase._id);
   }
 
-  async editPurchasing(id: Types.ObjectId, data: PurchasingDto & { status?: PurchasingEn }, sessionIn?: ClientSession): Promise<{ detail: PurchasingDetail; removedAttachments: string[] }> {
+  async editPurchasing(id: Types.ObjectId, data: PurchasingDto & { ppn_rate?: number, status?: PurchasingEn }, sessionIn?: ClientSession): Promise<{ detail: PurchasingDetail; removedAttachments: string[] }> {
     return this.global.withTransaction(async (session) => {
       const purchase = await this.purchasingModel.findById(id).session(session);
       if (!purchase) throw BaseResponse.notFound({ err: 'Purchasing not found' });
@@ -350,8 +351,74 @@ export class PurchasingService {
     }, sessionIn)
   }
 
+  validatePayment(
+    input: ValidatePaymentInput,
+  ): ValidatePaymentResult {
+    const total = toDecimal(input.tax_base);
+    const shipping = toDecimal(input.shipping_cost);
+    const ppnRate = new Decimal(input.ppn_rate).div(100);
+    const pphRate = new Decimal(input.pph_rate).div(100);
+    // =====================
+    // 1️⃣ Expected PPN
+    // =====================
+    let expectedPpn = new Decimal(0);
+    if (input.ppn_type === PPnType.EXCLUSIVE) {
+      expectedPpn = total.mul(ppnRate);
+    }
+    if (input.ppn_type === PPnType.INCLUSIVE) {
+      const base = total.div(new Decimal(1).plus(ppnRate));
+      expectedPpn = total.minus(base);
+    }
+    // =====================
+    // 2️⃣ Expected PPh
+    // =====================
+    let expectedPph = new Decimal(0);
+    if (input.pph_type !== PPhType.NONE) {
+      expectedPph = total.mul(pphRate);
+    }
+    // =====================
+    // 3️⃣ Expected Payable
+    // =====================
+    const expectedPayable = total
+      .plus(shipping)
+      .plus(expectedPpn)
+      .minus(expectedPph);
+    // =====================
+    // 4️⃣ Predicted Additional Cost
+    // =====================
+    const payment = toDecimal(input.payment_realization);
+    const predictedAdditionalCost =
+      payment.minus(expectedPayable);
+    // =====================
+    // 5️⃣ Validation Flags
+    // =====================
+    const providedPpn = toDecimal(input.ppn_amount);
+    const providedPph = toDecimal(input.pph_amount);
+
+    const isPpnValid = expectedPpn.equals(providedPpn);
+    const isPphValid = expectedPph.equals(providedPph);
+
+    const isPaymentMatch = payment.equals(expectedPayable);
+
+    return {
+      expected_ppn_amount: toDecimal128(expectedPpn),
+      expected_pph_amount: toDecimal128(expectedPph),
+      expected_payable: toDecimal128(expectedPayable),
+      predicted_additional_cost: toDecimal128(predictedAdditionalCost),
+      is_ppn_valid: isPpnValid,
+      is_pph_valid: isPphValid,
+      is_payment_match: isPaymentMatch,
+    };
+  }
   async purchasingPayment(id: Types.ObjectId, dto: PurchaseOrderDto, sessionIn?: ClientSession): Promise<{ detail: Purchasing | undefined; removedAttachments: string[] }> {
     return this.global.withTransaction(async (session) => {
+      if (!dto.shipping_cost) throw BaseResponse.invalid({ option: { message: "shipping_cost is required" } });
+      if (!dto.pph_type) throw BaseResponse.invalid({ option: { message: "pph_type is required" } });
+      if (!dto.pph_rate) throw BaseResponse.invalid({ option: { message: "pph_rate is required" } });
+      if (!dto.pph_amount) throw BaseResponse.invalid({ option: { message: "pph_amount is required" } });
+      if (!dto.ppn_type) throw BaseResponse.invalid({ option: { message: "ppn_type is required" } });
+      if (!dto.ppn_rate) throw BaseResponse.invalid({ option: { message: "ppn_rate is required" } });
+      if (!dto.ppn_amount) throw BaseResponse.invalid({ option: { message: "ppn_amount is required" } });
       if (!dto.payment_realization) throw BaseResponse.invalid({ option: { message: "payment_realization is required" } });
       const purchasing = await this.purchasingModel.findById(id);
       if (!purchasing) throw BaseResponse.notFound({ err: 'purchasingPayment !purchasing' });
@@ -359,12 +426,41 @@ export class PurchasingService {
       if (!dto.purchasing_attachments?.length && purchasing.purchasing_attachments?.length) throw BaseResponse.invalid({ option: { message: 'purchasing_attachments is required' } });
       const edit = await this.editPurchasing(id, dto, session);
       if (!edit || !edit.detail) throw BaseResponse.unexpected({ err: 'purchasingPayment' });
+      const {
+        expected_ppn_amount,
+        expected_pph_amount,
+        expected_payable,
+        predicted_additional_cost,
+        is_ppn_valid,
+        is_pph_valid,
+        is_payment_match,
+      } = this.validatePayment({
+        tax_base: edit.detail.total_purchase_price,
+        pph_rate: dto.pph_rate,
+        ppn_rate: dto.ppn_rate,
+        pph_type: dto.pph_type,
+        ppn_type: dto.ppn_type,
+        pph_amount: dto.pph_amount,
+        ppn_amount: dto.ppn_amount,
+        payment_realization: dto.payment_realization,
+        shipping_cost: dto.shipping_cost,
+      });
+      const message = `
+        Payment calculation result invalid:\n
+        PPn: ${is_ppn_valid ? 'Correct' : 'Incorrect'}\n
+        PPh: ${is_pph_valid ? 'Correct' : 'Incorrect'}\n
+        details:\n
+        expected_ppn_amount: ${expected_ppn_amount.toString()}\n,
+        expected_pph_amount: ${expected_pph_amount.toString()}\n,
+        expected_payable: ${expected_payable.toString()}\n,
+      `
+      if (!is_ppn_valid || !is_pph_valid) throw BaseResponse.invalid({ option: { message } })
       const accountingPayload: Accounting = {
         flow_type: FlowType.OUT,
         order_id: edit.detail?._id,
         order_data: edit.detail,
         order_type: OrderType.PURCHASING,
-        transaction_amount: dto.payment_realization
+        transaction_amount: dto.payment_realization,
       }
       await this.accounting.createAccountingItem(accountingPayload, session)
       return edit;
