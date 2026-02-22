@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose from 'mongoose';
+import { Types } from 'mongoose';
 
 export enum ExpenseStatus {
   CREATE = 'CREATE',
@@ -17,8 +17,8 @@ export class Expense {
   @Prop({ required: true })
   subject: string; // Electricity Feb 2026
 
-  @Prop({ type: mongoose.Schema.Types.Decimal128, required: true, min: 1 })
-  transaction_amount: mongoose.Schema.Types.Decimal128;
+  @Prop({ type: Types.Decimal128, required: true, min: 1 })
+  transaction_amount: Types.Decimal128;
 
   @Prop({ required: true })
   expense_date: Date;
