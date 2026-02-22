@@ -69,20 +69,27 @@ export function digitShortDate(date: Date): string {
   }).replace(',', '');
 }
 
-export const toDecimal = (val: Types.Decimal128) =>
-  new Decimal(val.toString());
+Decimal.set({
+  rounding: Decimal.ROUND_HALF_UP,
+  precision: 20
+}); // middle rounding: 10.4 = 10, 10.5 = 11
 
-export const toDecimal128 = (val: Decimal) =>
-  Types.Decimal128.fromString(val.toFixed(0)); // Rupiah rounding
+export const toDecimal = (val: Types.Decimal128 | number | undefined) =>
+  new Decimal(val?.toString() ?? 0);
+
+export const toDecimal128 = (val: Decimal, scale = 0) => // scale IDR = 0, USD = 2
+  Types.Decimal128.fromString(val.toFixed(scale));
 
 export function addDecimal(a?: Types.Decimal128, b?: Types.Decimal128) {
-  if (!a || !b) return undefined;
-  const result = new Decimal(a.toString()).plus(new Decimal(b.toString()));
+  const decA = new Decimal(a?.toString() ?? 0);
+  const decB = new Decimal(b?.toString() ?? 0);
+  const result = new Decimal(decA.toString()).plus(new Decimal(decB.toString()));
   return Types.Decimal128.fromString(result.toFixed());
 }
 
 export function subtractDecimal(a?: Types.Decimal128, b?: Types.Decimal128) {
-  if (!a || !b) return undefined;
-  const result = new Decimal(a.toString()).minus(new Decimal(b.toString()));
+  const decA = new Decimal(a?.toString() ?? 0);
+  const decB = new Decimal(b?.toString() ?? 0);
+  const result = new Decimal(decA.toString()).minus(new Decimal(decB.toString()));
   return Types.Decimal128.fromString(result.toFixed());
 }

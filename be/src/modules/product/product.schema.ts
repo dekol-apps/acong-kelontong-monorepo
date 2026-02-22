@@ -16,12 +16,6 @@ export class Product {
   barcode?: string;
   @Prop({ type: Types.ObjectId, ref: Brand.name, required: true })
   brand: Types.ObjectId;
-  @Prop({ type: Types.Decimal128, default: 0 })
-  sale_price?: Types.Decimal128;
-  @Prop({ type: Number, default: 0 })
-  discount_percent?: number
-  @Prop({ type: Number, default: 0 })
-  discount_items?: number
 }
 
 export type ProductDocument = Product & Document & { brand: BrandDocument };

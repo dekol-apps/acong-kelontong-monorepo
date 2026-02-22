@@ -56,6 +56,10 @@ import { ExpenseController } from './modules/expense/expense.controller';
 import { Expense, ExpenseSchema } from './modules/expense/expense.schema';
 import { InventoryMovementItem, InventoryMovementItemSchema } from './modules/inventory-movement/inventory-movement-item.schema';
 import { InventoryReconcile, InventoryReconcileSchema } from './modules/inventory/inventory-reconcile.schema';
+import { SaleController } from './modules/sale/sale.controller';
+import { SaleService } from './modules/sale/sale.service';
+import { Sale, SaleSchema } from './modules/sale/sale.schema';
+import { SaleItem, SaleItemSchema } from './modules/sale/sale-item.schema';
 
 @Module({
   imports: [
@@ -117,6 +121,8 @@ import { InventoryReconcile, InventoryReconcileSchema } from './modules/inventor
       { name: Investment.name, schema: InvestmentSchema },
       { name: Accounting.name, schema: AccountingSchema },
       { name: Expense.name, schema: ExpenseSchema },
+      { name: Sale.name, schema: SaleSchema },
+      { name: SaleItem.name, schema: SaleItemSchema },
     ]),
     SeederModule,
   ],
@@ -136,7 +142,8 @@ import { InventoryReconcile, InventoryReconcileSchema } from './modules/inventor
     InventoryItemController,
     InventoryMovementController,
     InvestmentController,
-    ExpenseController
+    ExpenseController,
+    SaleController
   ],
   providers: [
     AppService,
@@ -158,6 +165,7 @@ import { InventoryReconcile, InventoryReconcileSchema } from './modules/inventor
     AccountingService,
     InvestmentService,
     ExpenseService,
+    SaleService,
   ]
 })
 export class AppModule implements OnModuleInit {

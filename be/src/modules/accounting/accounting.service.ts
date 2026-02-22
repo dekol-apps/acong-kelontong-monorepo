@@ -134,15 +134,41 @@ export class AccountingService {
   }
 
   async countProfit(sessionIn?: ClientSession): Promise<number> {
-    const earnings = await this.countTotalMoney(FlowType.IN, OrderType.SALE, sessionIn);
+    const earnings = await this.countMonetization(sessionIn);
     const purchasings = await this.countTotalMoney(FlowType.OUT, OrderType.PURCHASING, sessionIn);
     const operational = await this.countTotalMoney(FlowType.OUT, OrderType.EXPENSE, sessionIn);
     return earnings - purchasings - operational;
   }
 
-  async countRevenue(sessionIn?: ClientSession): Promise<number> {
+  async countMonetization(sessionIn?: ClientSession): Promise<number> {
     const earnings = await this.countTotalMoney(FlowType.IN, OrderType.SALE, sessionIn);
     return earnings;
+  }
+
+  async countTotalAssetValue(sessionIn?: ClientSession): Promise<number> {
+    return this.global.withTransaction(async (session) => {
+      const inventoryItems = await this.inventoryItem.aggregate([
+        {
+          $group: {
+            _id: null,
+            total: {
+              $sum: {
+                $multiply: ["$purchase_price", "$purchase_qty"],
+              },
+            },
+          },
+        },
+      ]).session(session);
+      return inventoryItems[0]?.total ?? 0;
+    }, sessionIn);
+  }
+
+  async countCapitalValue(sessionIn?: ClientSession): Promise<number> {
+    return this.global.withTransaction(async (session) => {
+      const inventoryItemsValuationTotal = await this.countTotalAssetValue(session);
+      const balance = await this.countBalance(sessionIn);
+      return balance + inventoryItemsValuationTotal;
+    }, sessionIn);
   }
 
   async countInvestment(sessionIn?: ClientSession): Promise<number> {
