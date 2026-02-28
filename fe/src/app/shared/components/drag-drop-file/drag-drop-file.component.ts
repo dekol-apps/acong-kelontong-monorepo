@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, ElementRef, EventEmitter, inject, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { TenMegaByte } from '../../../types/constants/common.constants';
-export interface IFielImg { file?: File | null, str?: string };
+import { AlertService } from '../alert/alert-service';
+export interface IFielImg { file?: File | null, src?: string };
 
 @Component({
   selector: 'app-drag-drop-file',
@@ -20,7 +21,7 @@ export class DragDropFileComponent implements OnChanges {
   @Input() error?: boolean;
   @Input() fileTypes: string[] = ['jpg', 'jpeg', 'png'];
   @Input() maxSize: number = TenMegaByte; // Default 10 MB
-  @Input() patchFileVal?: string = '';
+  @Input() patchFileVal?: IFielImg;
   @Input() componentName: string = '';
   @Input() haveAction?: boolean = true;
   @Input() loading?: boolean;
@@ -28,13 +29,14 @@ export class DragDropFileComponent implements OnChanges {
 
   isDragging: boolean = false;
   dragEnter: boolean = false;
-  file: IFielImg['file'] = null;
+  // file: IFielImg['file'] = null;
   fileVal?: string = '';
-  constructor() { }
+
+  constructor(private alert: AlertService) { }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes.patchFileVal) {
-      this.fileVal = this.patchFileVal;
+      this.fileVal = this.patchFileVal?.src;
     }
   }
 
@@ -47,7 +49,7 @@ export class DragDropFileComponent implements OnChanges {
   }
 
   reset() {
-    this.file = null;
+    // this.file = null;
     this.fileVal = '';
     this.cdRef.detectChanges();
   }
@@ -65,21 +67,20 @@ export class DragDropFileComponent implements OnChanges {
         // this.toast.error('File size max 10MB!');
       } else {
         this.loading = true;
-        this.file = file;
+        // this.file = file;
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onloadend = () => {
           const base64 = reader.result;
           const source = base64!.toString();
-          // this.fileVal = source;
-          this.fileChanged.emit({ file: this.file, str: source });
+          // this.fileVal = source;validateFile
+          this.fileChanged.emit({ file, src: source });
         };
       }
       this.loading = false;
     }
     catch (err) {
-      window.alert('UPLOAD_FILE.SYSTEM_ERROR');
-      // this.toast.error('UPLOAD_FILE.SYSTEM_ERROR');
+      this.alert.error('UPLOAD_FILE.SYSTEM_ERROR');
     } finally {
       this.isDragging = false;
     }
