@@ -9,8 +9,11 @@
   <div appTableColumn customColumnId="action">
     <ng-template let-item>
       <div class="d-flex flex-row gap-1 justify-content-end">
-        <a (click)="showForm('view')" class="text-white pointer btn btn-secondary">
+        <a (click)="showForm('view', item._id)" class="text-white pointer btn btn-secondary">
           <i class="fa-solid fa-eye"></i>
+        </a>
+        <a (click)="showForm('edit', item._id)" class="text-white pointer btn btn-warning">
+          <i class="fa-solid fa-pencil"></i>
         </a>
       </div>
     </ng-template>

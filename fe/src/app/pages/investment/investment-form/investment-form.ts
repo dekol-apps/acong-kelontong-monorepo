@@ -4,15 +4,16 @@ import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angula
 import { AlertService } from '../../../shared/components/alert/alert-service';
 import { IRole } from '../../../types/interfaces/user.interface';
 import { FormValidation } from '../../../shared/directives/form-validation/form-validation';
-import { DragDropFileComponent, IFielImg } from '../../../shared/components/drag-drop-file/drag-drop-file.component';
+import { IFielImg } from '../../../shared/components/drag-drop-file/drag-drop-file.component';
 import { InvestmentType } from '../../../types/interfaces/common.interface';
-import { decimalToNumber } from '../../../utils/helper';
+import { decimalToNumber, objToFormData } from '../../../utils/helper';
+import { DragDropFileMulti } from '../../../shared/components/drag-drop-file-multi/drag-drop-file-multi';
 
 export type investmentFormType = 'deposit' | 'withdrawal';
 export type investmentFormPageType = 'new' | 'edit' | 'view';
 @Component({
   selector: 'app-investment-form',
-  imports: [ReactiveFormsModule, FormValidation, DragDropFileComponent],
+  imports: [ReactiveFormsModule, FormValidation, DragDropFileMulti],
   standalone: true,
   templateUrl: './investment-form.html',
   styleUrl: './investment-form.scss'
@@ -24,7 +25,6 @@ export class InvestmentForm implements AfterViewInit {
   @Output() close: EventEmitter<boolean> = new EventEmitter<boolean>()
 
   isLoading: boolean = false;
-  patchFileVal?: string = '';
   roles: IRole[] = [];
 
   form: FormGroup = new FormGroup({
@@ -48,31 +48,38 @@ export class InvestmentForm implements AfterViewInit {
     if (this.id) {
       this.service.getDetailInvestment(this.id).subscribe((res) => {
         this.form.patchValue(res);
+        this.form.patchValue({
+          attachments: res.attachments?.map(it => {
+            return { src: it, file: null }
+          })
+        })
         this.form.controls.transaction_amount.patchValue(decimalToNumber(res.transaction_amount?.$numberDecimal));
         console.log('this.form.value', this.form.value)
       })
     }
   }
 
-  addFile(evt: IFielImg) {
+  addFile(evt: IFielImg[]) {
     this.deleteFile();
-    this.patchFileVal = evt.str;
-    this.form.controls.evidence.patchValue(evt.file);
+    this.form.controls.attachments.patchValue(evt);
   }
 
   deleteFile() {
-    this.form.controls.evidence.reset();
-    this.patchFileVal = undefined;
+    this.form.controls.attachments.reset();
   }
 
   submit() {
     if (this.type === 'deposit') this.form.controls.investment_type.patchValue(InvestmentType.DEPOSIT)
     else this.form.controls.investment_type.patchValue(InvestmentType.WITHDRAWAL);
     if (this.form.invalid) return this.alert.error('Please check your inputs');
-    const body = this.form.value;
-    let serviceArgs = this.service.createInvestment(body);
+    const body = {
+      ...this.form.value,
+      attachments: this.form.value.attachments?.map(it => it.file ?? it.src)
+    };
+    const formData = objToFormData(body, { fileFields: ['attachments'] });
+    let serviceArgs = this.service.createInvestment(formData);
     if (this.page === 'edit') {
-      serviceArgs = this.service.editInvestment(this.id, body);
+      serviceArgs = this.service.editInvestment(this.id, formData);
     }
     serviceArgs.subscribe((res) => {
       this.alert.success(`Success!`);

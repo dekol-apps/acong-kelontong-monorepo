@@ -6,10 +6,11 @@ import { InvestmentType, IPaginationInput } from '../../../types/interfaces/comm
 import { IInvestment } from '../../../types/interfaces/investment.interface';
 import { investmentFormPageType, InvestmentForm } from '../investment-form/investment-form';
 import { InvestmentService } from '../investment.service';
+import { TableColumn } from '../../../shared/directives/table-column/table-column';
 
 @Component({
   selector: 'app-withdrawal',
-  imports: [GenericTable],
+  imports: [GenericTable, TableColumn],
   standalone: true,
   templateUrl: './withdrawal.html',
   styleUrl: './withdrawal.scss'
@@ -28,13 +29,13 @@ export class Withdrawal {
   columns: Array<ColumnProps> = [
     {
       label: 'Amount',
-      id: 'amount.$numberDecimal',
+      id: 'transaction_amount.$numberDecimal',
       extraHeaderClass: 'uppercase-text',
       sort: true
     },
     {
       label: 'Transaction Date',
-      id: 'transaction_date',
+      id: 'createdAt',
       extraHeaderClass: 'uppercase-text',
       dataType: 'DATE',
       sort: true
