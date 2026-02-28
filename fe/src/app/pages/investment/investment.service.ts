@@ -26,13 +26,8 @@ export class InvestmentService extends BaseService {
           list: res?.list
         };
         return val;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot get list investment');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
   editDeposit(
@@ -41,13 +36,8 @@ export class InvestmentService extends BaseService {
     return this.putRequest({ url: Endpoint.PURCHASING, body }).pipe(
       map((res: IResDetail<IInvestment>) => {
         return res.detail;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot edit deposit');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
   createDeposit(
@@ -56,26 +46,16 @@ export class InvestmentService extends BaseService {
     return this.postRequest({ url: Endpoint.PURCHASING, body }).pipe(
       map((res: IResDetail<IInvestment>) => {
         return res.detail;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot create deposit');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
   getDetailDeposit(itemId: string): Observable<IInvestment> {
     return this.getRequest({ url: Endpoint.PURCHASING_ID(itemId) }).pipe(
       map((res: IResDetail<IInvestment>) => {
         return res.detail;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot get deposit detail');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
   getListWithdrawal(
@@ -88,13 +68,8 @@ export class InvestmentService extends BaseService {
           list: res?.list
         };
         return val;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot get list withdrawal');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
   createWithdrawal(
@@ -103,13 +78,8 @@ export class InvestmentService extends BaseService {
     return this.postRequest({ url: Endpoint.PURCHASING, body }).pipe(
       map((res: IResDetail<IInvestment>) => {
         return res.detail;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot create withdrawal');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
   editWithdrawal(
@@ -118,25 +88,15 @@ export class InvestmentService extends BaseService {
     return this.putRequest({ url: Endpoint.PURCHASING, body }).pipe(
       map((res: IResDetail<IInvestment>) => {
         return res.detail;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot edit withdrawal');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
   getDetailWithdrawal(itemId: string): Observable<IInvestment> {
     return this.getRequest({ url: Endpoint.PURCHASING_ID(itemId) }).pipe(
       map((res: IResDetail<IInvestment>) => {
         return res.detail;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot get withdrawal detail');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 }

@@ -20,10 +20,10 @@ export interface IResponse<T> {
 }
 
 export interface IResList<T> extends IResponse<T> {
-  list?: T[];
+  list: T[];
   meta?: IPaginationInput;
 }
 
 export interface IResDetail<T> extends IResponse<T> {
-  detail?: T;
+  detail: T;
 }

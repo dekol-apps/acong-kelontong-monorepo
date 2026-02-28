@@ -26,13 +26,8 @@ export class ProductService extends BaseService {
           list: res?.list
         };
         return val;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot get list product');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
   createProduct(
@@ -41,13 +36,8 @@ export class ProductService extends BaseService {
     return this.postRequest({ url: Endpoint.PRODUCT, body }).pipe(
       map((res: IResDetail<IProduct>) => {
         return res.detail;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot invite product');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
   editProduct(
@@ -57,39 +47,24 @@ export class ProductService extends BaseService {
     return this.putRequest({ url: Endpoint.PRODUCT_ID(product_id), body }).pipe(
       map((res: IResDetail<IProduct>) => {
         return res.detail;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot edit product');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
   getProductDetail(product_id: string): Observable<IProduct> {
     return this.getRequest({ url: Endpoint.PRODUCT_ID(product_id) }).pipe(
       map((res: IResDetail<IProduct>) => {
         return res.detail;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot get product detail');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
   deleteProduct(product_id: string): Observable<IProduct> {
     return this.deleteRequest({ url: Endpoint.PRODUCT_ID(product_id) }).pipe(
       map((res: IResDetail<IProduct>) => {
         return res.detail;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot delete product');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
 }
