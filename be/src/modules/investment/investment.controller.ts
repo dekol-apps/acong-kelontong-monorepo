@@ -29,13 +29,12 @@ export class InvestmentController {
   ): Promise<T> {
     try {
       if (args.files?.length && args.body) {
-        const uploadPath = (args.req as any).uploadPath;
         const existingAttachments = args.body.attachments?.filter(item => typeof item === 'string') ?? [];
-        const newAttachements = args.files.map((file) => {
-          const filePath = `/uploads/${uploadPath}/${file.originalname}`;
-          return `${args.req.protocol}://${args.req.get('host')}${filePath}`;
+        const newAttachments = args.files.map((file) => {
+          const normalizedDestination = file.destination.replace(/\\/g, '/'); //JUST IN CASE server run on windows.
+          return `${args.req.protocol}://${args.req.get('host')}/${normalizedDestination}/${file.filename}`;
         });
-        args.body.attachments = [...existingAttachments, ...newAttachements]
+        args.body.attachments = [...existingAttachments, ...newAttachments]
       }
 
       return await cb();
@@ -59,11 +58,12 @@ export class InvestmentController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    const data = {
-      ...body,
-      transaction_amount: toDecimal128(toDecimal(body.transaction_amount))
-    }
+    console.log('FILES:', files);
     return this.investmentMutation({ files, body, req, res }, async () => {
+      const data = {
+        ...body,
+        transaction_amount: toDecimal128(toDecimal(body.transaction_amount))
+      }
       const investment = await this.service.createInvestment(data);
       return BaseResponse.success({ res, option: { message: "Success create investment", detail: investment } });
     })
@@ -78,11 +78,11 @@ export class InvestmentController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    const data = {
-      ...body,
-      transaction_amount: toDecimal128(toDecimal(body.transaction_amount))
-    }
     return this.investmentMutation({ files, body, req, res }, async () => {
+      const data = {
+        ...body,
+        transaction_amount: toDecimal128(toDecimal(body.transaction_amount))
+      }
       const id = new Types.ObjectId(investment_id);
       const { investment, removedAttachments } = await this.service.editInvestment(id, data);
 
