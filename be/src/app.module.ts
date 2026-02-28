@@ -60,6 +60,7 @@ import { SaleController } from './modules/sale/sale.controller';
 import { SaleService } from './modules/sale/sale.service';
 import { Sale, SaleSchema } from './modules/sale/sale.schema';
 import { SaleItem, SaleItemSchema } from './modules/sale/sale-item.schema';
+import { AccountingController } from './modules/accounting/accounting.controller';
 
 @Module({
   imports: [
@@ -143,7 +144,8 @@ import { SaleItem, SaleItemSchema } from './modules/sale/sale-item.schema';
     InventoryMovementController,
     InvestmentController,
     ExpenseController,
-    SaleController
+    SaleController,
+    AccountingController
   ],
   providers: [
     AppService,

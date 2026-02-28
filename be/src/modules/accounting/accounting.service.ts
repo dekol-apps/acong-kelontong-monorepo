@@ -134,13 +134,13 @@ export class AccountingService {
   }
 
   async countProfit(sessionIn?: ClientSession): Promise<number> {
-    const earnings = await this.countMonetization(sessionIn);
+    const earnings = await this.countRevenue(sessionIn);
     const purchasings = await this.countTotalMoney(FlowType.OUT, OrderType.PURCHASING, sessionIn);
     const operational = await this.countTotalMoney(FlowType.OUT, OrderType.EXPENSE, sessionIn);
     return earnings - purchasings - operational;
   }
 
-  async countMonetization(sessionIn?: ClientSession): Promise<number> {
+  async countRevenue(sessionIn?: ClientSession): Promise<number> {
     const earnings = await this.countTotalMoney(FlowType.IN, OrderType.SALE, sessionIn);
     return earnings;
   }
@@ -175,5 +175,25 @@ export class AccountingService {
     const depo = await this.countTotalMoney(FlowType.IN, OrderType.DEPOSIT, sessionIn);
     const wd = await this.countTotalMoney(FlowType.OUT, OrderType.WITHDRAWAL, sessionIn);
     return depo - wd;
+  }
+
+  async getPortofolio(sessionIn?: ClientSession): Promise<any> {
+    return this.global.withTransaction(async (session) => {
+      const balance = await this.countBalance(session);
+      const investment = await this.countInvestment(session);
+      const capValue = await this.countCapitalValue(session);
+      const totalAsset = await this.countTotalAssetValue(session);
+      const revenue = await this.countRevenue(session);
+      const profit = await this.countProfit(session);
+
+      return {
+        balance,
+        investment,
+        capValue,
+        totalAsset,
+        revenue,
+        profit,
+      }
+    }, sessionIn);
   }
 }

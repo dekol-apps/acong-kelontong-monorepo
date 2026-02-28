@@ -3,6 +3,8 @@ import { environment } from '../../../environments/environment';
 const api = `${environment.apiUrl}/`;
 
 export const Endpoint = {
+  ACCOUNTING: `${api}accounting`,
+
   /* Auth endpoints */
   LOGIN: `${api}auth/login`,
   LOGOUT: `${api}auth/logout`,
