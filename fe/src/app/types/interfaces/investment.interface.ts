@@ -1,6 +1,8 @@
+import { InvestmentType } from './common.interface';
 export interface IInvestment {
   _id?: string,
-  amount?: number,
-  transaction_date?: Date,
-  evidence?: string
+  investment_type?: InvestmentType,
+  transaction_amount?: { $numberDecimal: string },
+  attachments?: string[],
+  description?: string,
 }

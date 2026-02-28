@@ -6,15 +6,16 @@ import { InvestmentDto, ListInvestmentDTO } from './investment.dto';
 import { InvestmentService } from './investment.service';
 import * as fs from 'fs';
 import { AttachmentsInterceptor } from 'src/global/attachments-interceptor';
+import { toDecimal, toDecimal128 } from 'src/utils/helper';
 
 interface headerArgs {
   files?: Express.Multer.File[];
   req: Request;
-  dto?: InvestmentDto;
+  body?: InvestmentDto;
   res: Response;
 }
 
-@Controller('inventory-movement')
+@Controller('investment')
 export class InvestmentController {
 
   constructor(
@@ -27,14 +28,14 @@ export class InvestmentController {
     cb: () => Promise<T>,
   ): Promise<T> {
     try {
-      if (args.files?.length && args.dto) {
+      if (args.files?.length && args.body) {
         const uploadPath = (args.req as any).uploadPath;
-        const existingAttachments = args.dto.attachments?.filter(item => typeof item === 'string') ?? [];
+        const existingAttachments = args.body.attachments?.filter(item => typeof item === 'string') ?? [];
         const newAttachements = args.files.map((file) => {
           const filePath = `/uploads/${uploadPath}/${file.originalname}`;
           return `${args.req.protocol}://${args.req.get('host')}${filePath}`;
         });
-        args.dto.attachments = [...existingAttachments, ...newAttachements]
+        args.body.attachments = [...existingAttachments, ...newAttachements]
       }
 
       return await cb();
@@ -54,12 +55,16 @@ export class InvestmentController {
   @AttachmentsInterceptor('attachments', 5)
   async createInvestment(
     @UploadedFiles() files: Express.Multer.File[],
-    @Body() dto: InvestmentDto,
+    @Body() body: InvestmentDto,
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    return this.investmentMutation({ files, dto, req, res }, async () => {
-      const investment = await this.service.createInvestment(dto);
+    const data = {
+      ...body,
+      transaction_amount: toDecimal128(toDecimal(body.transaction_amount))
+    }
+    return this.investmentMutation({ files, body, req, res }, async () => {
+      const investment = await this.service.createInvestment(data);
       return BaseResponse.success({ res, option: { message: "Success create investment", detail: investment } });
     })
   }
@@ -67,14 +72,19 @@ export class InvestmentController {
   @Put(':investment_id')
   @AttachmentsInterceptor('attachments', 5)
   async editInvestment(
-    @Param('investment_id') id: Types.ObjectId,
+    @Param('investment_id') investment_id: string,
     @UploadedFiles() files: Express.Multer.File[],
-    @Body() dto: InvestmentDto,
+    @Body() body: any,
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    return this.investmentMutation({ files, dto, req, res }, async () => {
-      const { investment, removedAttachments } = await this.service.editInvestment(id, dto);
+    const data = {
+      ...body,
+      transaction_amount: toDecimal128(toDecimal(body.transaction_amount))
+    }
+    return this.investmentMutation({ files, body, req, res }, async () => {
+      const id = new Types.ObjectId(investment_id);
+      const { investment, removedAttachments } = await this.service.editInvestment(id, data);
 
       // delete old files AFTER DB success
       removedAttachments.forEach((url) => {

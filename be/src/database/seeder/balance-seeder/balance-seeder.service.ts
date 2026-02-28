@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { AccountingBalance } from 'src/modules/accounting/accounting-balance.schema';
 import { CurrencyEn } from 'src/types/interfaces';
+import { toDecimal, toDecimal128 } from 'src/utils/helper';
 
 @Injectable()
 export class BalanceSeederService {
@@ -13,7 +14,7 @@ export class BalanceSeederService {
   async run() {
     await this.balanceModel.updateOne(
       { currency: CurrencyEn.IDR },
-      { $setOnInsert: { amount: 0 } },
+      { $setOnInsert: { amount: toDecimal128(toDecimal(0)) } },
       { upsert: true },
     );
     console.info(`🚀 Seeded account balance: ${CurrencyEn.IDR}`);

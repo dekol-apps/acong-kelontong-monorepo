@@ -5,10 +5,11 @@ import { AlertService } from '../../../shared/components/alert/alert-service';
 import { IRole } from '../../../types/interfaces/user.interface';
 import { FormValidation } from '../../../shared/directives/form-validation/form-validation';
 import { DragDropFileComponent, IFielImg } from '../../../shared/components/drag-drop-file/drag-drop-file.component';
+import { InvestmentType } from '../../../types/interfaces/common.interface';
+import { decimalToNumber } from '../../../utils/helper';
 
 export type investmentFormType = 'deposit' | 'withdrawal';
 export type investmentFormPageType = 'new' | 'edit' | 'view';
-
 @Component({
   selector: 'app-investment-form',
   imports: [ReactiveFormsModule, FormValidation, DragDropFileComponent],
@@ -27,8 +28,10 @@ export class InvestmentForm implements AfterViewInit {
   roles: IRole[] = [];
 
   form: FormGroup = new FormGroup({
-    amount: new FormControl(null, [Validators.required]),
-    evidence: new FormControl(null, [Validators.required]),
+    transaction_amount: new FormControl(null, [Validators.required]),
+    investment_type: new FormControl(null, [Validators.required]),
+    attachments: new FormControl(null),
+    description: new FormControl(null),
   });
 
   constructor(private service: InvestmentService, private alert: AlertService) { }
@@ -43,17 +46,11 @@ export class InvestmentForm implements AfterViewInit {
 
   getDetail() {
     if (this.id) {
-      if (this.type === 'deposit') {
-        this.service.getDetailDeposit(this.id).subscribe((res) => {
-          this.form.patchValue(res);
-          console.log('this.form.value', this.form.value)
-        })
-      } else {
-        this.service.getDetailWithdrawal(this.id).subscribe((res) => {
-          this.form.patchValue(res);
-          console.log('this.form.value', this.form.value)
-        })
-      }
+      this.service.getDetailInvestment(this.id).subscribe((res) => {
+        this.form.patchValue(res);
+        this.form.controls.transaction_amount.patchValue(decimalToNumber(res.transaction_amount?.$numberDecimal));
+        console.log('this.form.value', this.form.value)
+      })
     }
   }
 
@@ -69,13 +66,14 @@ export class InvestmentForm implements AfterViewInit {
   }
 
   submit() {
+    if (this.type === 'deposit') this.form.controls.investment_type.patchValue(InvestmentType.DEPOSIT)
+    else this.form.controls.investment_type.patchValue(InvestmentType.WITHDRAWAL);
     if (this.form.invalid) return this.alert.error('Please check your inputs');
     const body = this.form.value;
-    let serviceArgs = this.service.createWithdrawal(body);
+    let serviceArgs = this.service.createInvestment(body);
     if (this.page === 'edit') {
-      let serviceArgs = this.service.editWithdrawal(body);
-      if (this.type === 'deposit') serviceArgs = this.service.editDeposit(body);
-    } else if (this.type === 'deposit') serviceArgs = this.service.createDeposit(body);
+      serviceArgs = this.service.editInvestment(this.id, body);
+    }
     serviceArgs.subscribe((res) => {
       this.alert.success(`Success!`);
       this.close.emit(true);

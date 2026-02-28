@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Types } from 'mongoose';
 import { CurrencyEn } from 'src/types/interfaces';
 
 @Schema()
@@ -11,8 +12,8 @@ export class AccountingBalance {
   })
   currency: CurrencyEn;
 
-  @Prop({ required: true, default: 0 })
-  amount: number;
+  @Prop({ type: Types.Decimal128, required: true, min: 0 })
+  amount: Types.Decimal128;
 }
 
 export type AccountingBalanceDocument = AccountingBalance & Document;

@@ -1,14 +1,15 @@
 import { Component } from '@angular/core';
 import { ColumnProps, GenericTable, ITableQueryData } from '../../../shared/components/generic-table/generic-table';
-import { IPaginationInput } from '../../../types/interfaces/common.interface';
+import { InvestmentType, IPaginationInput } from '../../../types/interfaces/common.interface';
 import { IInvestment } from '../../../types/interfaces/investment.interface';
 import { InvestmentService } from '../investment.service';
 import { NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { InvestmentForm, investmentFormPageType } from '../investment-form/investment-form';
+import { TableColumn } from '../../../shared/directives/table-column/table-column';
 
 @Component({
   selector: 'app-deposit',
-  imports: [GenericTable],
+  imports: [GenericTable, TableColumn],
   standalone: true,
   templateUrl: './deposit.html',
   styleUrl: './deposit.scss'
@@ -26,15 +27,22 @@ export class Deposit {
   columns: Array<ColumnProps> = [
     {
       label: 'Amount',
-      id: 'amount',
+      id: 'transaction_amount.$numberDecimal',
       extraHeaderClass: 'uppercase-text',
-      sort: true
+      sort: true,
+      dataType: 'CURRENCY'
     },
     {
       label: 'Transaction Date',
-      id: 'transaction_date',
+      id: 'createdAt',
       extraHeaderClass: 'uppercase-text',
       dataType: 'DATE',
+      sort: true
+    },
+    {
+      label: 'Description',
+      id: 'description',
+      extraHeaderClass: 'uppercase-text',
       sort: true
     },
     {
@@ -58,7 +66,8 @@ export class Deposit {
 
   getList(evt: ITableQueryData) {
     this.isLoading = true;
-    this.service.getListDeposit({
+    this.service.getListInvestment({
+      investment_type: InvestmentType.DEPOSIT,
       page: evt.page,
       size: evt.size,
       sortBy: evt.sortBy,

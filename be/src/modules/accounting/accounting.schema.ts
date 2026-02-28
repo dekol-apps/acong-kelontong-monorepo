@@ -31,6 +31,13 @@ export class Accounting {
   @Prop({ required: true })
   @IsDate()
   record_date?: Date
+
+  // This is reference of older incorrect accounting row that being corrected
+  @Prop({ type: Types.ObjectId })
+  correction_id?: Types.ObjectId;
+
+  @Prop({ type: Object })
+  correction_data?: object;
 }
 
 export type AccountingDocument = Accounting & Document;

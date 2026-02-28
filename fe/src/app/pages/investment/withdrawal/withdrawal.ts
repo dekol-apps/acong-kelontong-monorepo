@@ -2,7 +2,7 @@ import { Component, ViewChild } from '@angular/core';
 import { NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { ColumnProps, GenericTable, ITableQueryData } from '../../../shared/components/generic-table/generic-table';
 import { ConfirmModal } from '../../../shared/components/modals/confirm-modal/confirm-modal';
-import { IPaginationInput } from '../../../types/interfaces/common.interface';
+import { InvestmentType, IPaginationInput } from '../../../types/interfaces/common.interface';
 import { IInvestment } from '../../../types/interfaces/investment.interface';
 import { investmentFormPageType, InvestmentForm } from '../investment-form/investment-form';
 import { InvestmentService } from '../investment.service';
@@ -28,7 +28,7 @@ export class Withdrawal {
   columns: Array<ColumnProps> = [
     {
       label: 'Amount',
-      id: 'amount',
+      id: 'amount.$numberDecimal',
       extraHeaderClass: 'uppercase-text',
       sort: true
     },
@@ -60,7 +60,8 @@ export class Withdrawal {
 
   getList(evt: ITableQueryData) {
     this.isLoading = true;
-    this.service.getListWithdrawal({
+    this.service.getListInvestment({
+      investment_type: InvestmentType.WITHDRAWAL,
       page: evt.page,
       size: evt.size,
       sortBy: evt.sortBy,

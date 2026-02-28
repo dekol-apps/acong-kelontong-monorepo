@@ -1,18 +1,19 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { FlowType } from 'src/types/interfaces';
+import { InvestmentType } from 'src/types/interfaces';
+import { decimalToNumber } from 'src/utils/helper';
 
 @Schema({ timestamps: true })
 export class Investment {
 
   @Prop({
     type: String,
-    enum: FlowType,
+    enum: InvestmentType,
     required: true,
   })
-  flow_type: FlowType;
+  investment_type: InvestmentType;
 
-  @Prop({ type: Types.Decimal128, required: true, min: 1 })
+  @Prop({ type: Types.Decimal128, required: true, min: 1, get: (v) => decimalToNumber(v) })
   transaction_amount: Types.Decimal128;
 
   @Prop()

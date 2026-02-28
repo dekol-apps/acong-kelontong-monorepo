@@ -12,7 +12,7 @@ export class InvestmentDto {
   @IsNotEmpty()
   @IsInt()
   @Min(1)
-  transaction_amount: Types.Decimal128;
+  transaction_amount: number;
 
   @IsNotEmpty()
   @MinLength(1)

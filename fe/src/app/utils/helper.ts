@@ -16,3 +16,7 @@ export const getNestedProperty = (obj: any, path?: string): any => {
 export const trackByFn = (index: number, item: any): any => {
   return item.someUniqueIdentifier; // Replace with a unique identifier from your item
 }
+
+export function decimalToNumber(val?: any) {
+  return parseFloat(val?.toString() ?? '0');
+}

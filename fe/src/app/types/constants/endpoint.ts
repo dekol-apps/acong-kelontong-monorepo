@@ -5,6 +5,11 @@ const api = `${environment.apiUrl}/`;
 export const Endpoint = {
   ACCOUNTING: `${api}accounting`,
 
+  INVESTMENT: `${api}investment`,
+  INVESTMENT_ID: (id: string) => {
+    return `${api}investment/${id}`
+  },
+
   /* Auth endpoints */
   LOGIN: `${api}auth/login`,
   LOGOUT: `${api}auth/logout`,

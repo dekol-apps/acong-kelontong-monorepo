@@ -7,6 +7,7 @@ import { BaseResponse } from 'src/utils/base-response';
 import { Accounting } from './accounting.schema';
 import { AccountingBalance } from './accounting-balance.schema';
 import { InventoryItem } from '../inventory-item/inventory-item.schema';
+import { decimalToNumber } from 'src/utils/helper';
 
 @Injectable()
 export class AccountingService {
@@ -22,9 +23,15 @@ export class AccountingService {
   async createAccountingItem(data: Accounting, sessionIn?: ClientSession): Promise<Accounting | undefined> {
     return this.global.withTransaction(async (session) => {
       const { flow_type } = data;
+      const before = await this.balanceModel
+        .findOne({ currency: CurrencyEn.IDR })
+        .session(session);
+
+      console.log({ data });
+      console.log('BEFORE:', before?.amount?.toString());
       const filter =
         flow_type === FlowType.OUT
-          ? { currency: CurrencyEn.IDR, transaction_amount: { $gte: data.transaction_amount } }
+          ? { currency: CurrencyEn.IDR, amount: { $gte: data.transaction_amount } }
           : { currency: CurrencyEn.IDR };
 
       const amount =
@@ -32,12 +39,11 @@ export class AccountingService {
           ? Types.Decimal128.fromString(`-${data.transaction_amount.toString()}`)
           : data.transaction_amount;
 
-      const update = {
-        $inc: { transaction_amount: amount }
-      };
       const balance = await this.balanceModel.findOneAndUpdate(
         filter,
-        update,
+        {
+          $inc: { amount }
+        },
         {
           session,
           new: true,
@@ -69,19 +75,23 @@ export class AccountingService {
   async editAccountingItem(data: Accounting, sessionIn?: ClientSession): Promise<Accounting | undefined> {
     return this.global.withTransaction(async (session) => {
       const { order_type, order_id } = data;
-      const old = await this.accountingModel.findOne({ order_id, order_type }).session(session);
+      const sortByNewest = await this.accountingModel.find({ order_type, order_id }).sort({ createdAt: -1 }).limit(1).session(session);
+      const old = sortByNewest[0];
       if (!old) {
         throw BaseResponse.notFound({ err: 'editAccountingItem !old' });
       }
+      console.log({ old })
       const record_date = new Date()
       // Reverse old
       await this.createAccountingItem(
         {
           flow_type: old.flow_type === FlowType.IN ? FlowType.OUT : FlowType.IN,
           transaction_amount: old.transaction_amount,
-          order_type: OrderType.ADJUSTMENT,
+          order_type: old.order_type,
           order_id: order_id,
-          order_data: old,
+          order_data: old.order_data,
+          correction_id: old._id,
+          correction_data: old,
           record_date
         },
         session,
@@ -129,7 +139,7 @@ export class AccountingService {
   async countBalance(sessionIn?: ClientSession): Promise<number> {
     return this.global.withTransaction(async (session) => {
       const balance = await this.balanceModel.findOne({ currency: CurrencyEn.IDR }).session(session);
-      return balance?.amount ?? 0;
+      return decimalToNumber(balance?.amount) ?? 0;
     }, sessionIn);
   }
 

@@ -93,3 +93,7 @@ export function subtractDecimal(a?: Types.Decimal128, b?: Types.Decimal128) {
   const result = new Decimal(decA.toString()).minus(new Decimal(decB.toString()));
   return Types.Decimal128.fromString(result.toFixed());
 }
+
+export function decimalToNumber(val?: Types.Decimal128 | Decimal) {
+  return parseFloat(val?.toString() ?? '0');
+}

@@ -45,7 +45,7 @@ export class InvestmentService {
     )
   }
 
-  async createInvestment(data: InvestmentDto, sessionIn?: ClientSession): Promise<Investment> {
+  async createInvestment(data: Investment, sessionIn?: ClientSession): Promise<Investment> {
     return this.global.withTransaction(async (session) => {
       const [newInvestment] = await this.investmentModel.create(
         [data],
@@ -77,7 +77,7 @@ export class InvestmentService {
 
   async editInvestment(
     id: Types.ObjectId,
-    data: InvestmentDto,
+    data: Investment,
     sessionIn?: ClientSession,
   ): Promise<{ investment: Investment; removedAttachments: string[] }> {
     return this.global.withTransaction(async (session) => {
@@ -93,14 +93,14 @@ export class InvestmentService {
         (url) => !newAttachments.includes(url),
       );
 
-      const updated = await this.investmentModel.findByIdAndUpdate(
-        id,
+      const updated = await this.investmentModel.findOneAndUpdate(
+        { _id: id, investment_type: data.investment_type },
         { $set: data },
         { new: true, runValidators: true, session },
       );
 
       if (!updated) {
-        throw BaseResponse.notFound({ err: 'Updated investment not found' });
+        throw BaseResponse.notFound({ err: 'Updated investment not found, maksure do not confuse DEPOSIT and WITHDRAWAL' });
       }
 
       const accountingPayload: Accounting = {
