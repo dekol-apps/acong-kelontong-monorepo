@@ -1,7 +1,7 @@
 <div class="card-header mb-4">
   <div class="d-flex flex-row justify-content-between gap-4">
     <h3 class="card-title">Deposit History</h3>
-    <a class="btn btn-primary" (click)="showForm('input')">New Deposit</a>
+    <a class="btn btn-primary" (click)="showForm('new')">New Deposit</a>
   </div>
 </div>
 <app-generic-table ngSkipHydration [columns]="columns" [data]="listDeposit" [usePagination]="true" [useSearch]="true"

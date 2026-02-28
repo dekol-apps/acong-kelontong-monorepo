@@ -7,7 +7,7 @@ import { FormValidation } from '../../../shared/directives/form-validation/form-
 import { DragDropFileComponent, IFielImg } from '../../../shared/components/drag-drop-file/drag-drop-file.component';
 
 export type investmentFormType = 'deposit' | 'withdrawal';
-export type investmentFormPageType = 'input' | 'view';
+export type investmentFormPageType = 'new' | 'edit' | 'view';
 
 @Component({
   selector: 'app-investment-form',
@@ -32,6 +32,10 @@ export class InvestmentForm implements AfterViewInit {
   });
 
   constructor(private service: InvestmentService, private alert: AlertService) { }
+
+  clickEdit() {
+    this.page = 'edit'; window.scroll(0, 0);
+  }
 
   ngAfterViewInit(): void {
     this.getDetail()
@@ -68,7 +72,10 @@ export class InvestmentForm implements AfterViewInit {
     if (this.form.invalid) return this.alert.error('Please check your inputs');
     const body = this.form.value;
     let serviceArgs = this.service.createWithdrawal(body);
-    if (this.type === 'deposit') serviceArgs = this.service.createDeposit(body);
+    if (this.page === 'edit') {
+      let serviceArgs = this.service.editWithdrawal(body);
+      if (this.type === 'deposit') serviceArgs = this.service.editDeposit(body);
+    } else if (this.type === 'deposit') serviceArgs = this.service.createDeposit(body);
     serviceArgs.subscribe((res) => {
       this.alert.success(`Success!`);
       this.close.emit(true);

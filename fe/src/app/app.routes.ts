@@ -31,7 +31,7 @@ export const routes: Routes = [
         path: SALES_HISTORY.url,
         data: { ...SALES_HISTORY },
         canActivate: [PageGuardService],
-        loadComponent: () => import('./pages/dashboard-v2/dashboard-v2').then(c => c.DashboardV2)
+        loadComponent: () => import('./pages/dashboard-v3/dashboard-v3').then(c => c.DashboardV3)
       },
        {
         path: INVESTMENT.url,

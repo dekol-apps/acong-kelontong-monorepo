@@ -35,6 +35,21 @@ export class InvestmentService extends BaseService {
     ) as any;
   }
 
+  editDeposit(
+    body: FormData //refers to IInvestmentDto
+  ): Observable<IInvestment> {
+    return this.putRequest({ url: Endpoint.PURCHASING, body }).pipe(
+      map((res: IResDetail<IInvestment>) => {
+        return res.detail;
+      }),
+      catchError((err) => {
+        console.error(err);
+        this.alert.error('Cannot edit deposit');
+        throw new Error(err);
+      })
+    ) as any;
+  }
+
   createDeposit(
     body: FormData //refers to IInvestmentDto
   ): Observable<IInvestment> {
@@ -44,7 +59,7 @@ export class InvestmentService extends BaseService {
       }),
       catchError((err) => {
         console.error(err);
-        this.alert.error('Cannot create investment');
+        this.alert.error('Cannot create deposit');
         throw new Error(err);
       })
     ) as any;
@@ -57,7 +72,7 @@ export class InvestmentService extends BaseService {
       }),
       catchError((err) => {
         console.error(err);
-        this.alert.error('Cannot get investment detail');
+        this.alert.error('Cannot get deposit detail');
         throw new Error(err);
       })
     ) as any;
@@ -76,7 +91,7 @@ export class InvestmentService extends BaseService {
       }),
       catchError((err) => {
         console.error(err);
-        this.alert.error('Cannot get list investment');
+        this.alert.error('Cannot get list withdrawal');
         throw new Error(err);
       })
     ) as any;
@@ -91,7 +106,22 @@ export class InvestmentService extends BaseService {
       }),
       catchError((err) => {
         console.error(err);
-        this.alert.error('Cannot create investment');
+        this.alert.error('Cannot create withdrawal');
+        throw new Error(err);
+      })
+    ) as any;
+  }
+
+  editWithdrawal(
+    body: FormData
+  ): Observable<IInvestment> {
+    return this.putRequest({ url: Endpoint.PURCHASING, body }).pipe(
+      map((res: IResDetail<IInvestment>) => {
+        return res.detail;
+      }),
+      catchError((err) => {
+        console.error(err);
+        this.alert.error('Cannot edit withdrawal');
         throw new Error(err);
       })
     ) as any;
@@ -104,7 +134,7 @@ export class InvestmentService extends BaseService {
       }),
       catchError((err) => {
         console.error(err);
-        this.alert.error('Cannot get investment detail');
+        this.alert.error('Cannot get withdrawal detail');
         throw new Error(err);
       })
     ) as any;
