@@ -1,23 +1,22 @@
 import { IsNotEmpty, IsNumber, IsOptional, IsMongoId, IsInt, Min } from 'class-validator';
-import { Types } from 'mongoose';
 export class ReceiveOrderItemDto {
   @IsMongoId() // checks it's a valid ObjectId string
   @IsNotEmpty()
-  _id: Types.ObjectId;
+  _id: string;
   @IsOptional()
   @IsNumber()
   received_qty?: number;
   @IsMongoId()
   @IsNotEmpty()
-  inventory: Types.ObjectId; // Select inventory to be used to store the received items
+  inventory: string; // Select inventory to be used to store the received items
 }
 export class PurchasingItemDto {
   @IsMongoId() // checks it's a valid ObjectId string
   @IsNotEmpty()
-  purchase_order: Types.ObjectId;
+  purchase_order: string;
   @IsMongoId() // checks it's a valid ObjectId string
   @IsNotEmpty()
-  product: Types.ObjectId;
+  product: string;
   @IsInt()
   @Min(1)
   purchase_qty: number;

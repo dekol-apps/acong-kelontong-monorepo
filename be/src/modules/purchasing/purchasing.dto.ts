@@ -15,7 +15,7 @@ export class PurchaseOrderApprovalDto {
   reject_notes?: string;
 }
 
-export class PurchaseOrderDto {
+export class PurchaseOrderDto extends PurchaseOrderApprovalDto {
   @IsOptional()
   @IsString()
   invoice_number?: string;
@@ -68,19 +68,17 @@ export class PurchaseOrderDto {
 }
 
 export class PurchasingDto extends PurchaseOrderDto {
-  @IsMongoId() // ✅ checks it's a valid ObjectId string
+  @IsMongoId()
   @IsNotEmpty()
-  supplier?: Types.ObjectId;
+  supplier?: string;
   @IsString()
   @IsDate()
   @IsNotEmpty()
   due_date?: Date;
-  @IsOptional()
-  reject_notes?: string;
 }
 
 export class ListPurchasingItemsDTO extends PaginationDto {
-  purchasing_id: Types.ObjectId
+  purchasing_id: string
 }
 
 export type PurchasingDetail =

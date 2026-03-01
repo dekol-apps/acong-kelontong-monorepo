@@ -287,7 +287,7 @@ export class PurchasingService {
       // (when user not includes the item in the payload list, it means user intends to remove it)
       const dtoProductIds = data.map(it => it.product);
       const toDelete = existingItems.filter(
-        i => !dtoProductIds.includes(i.product)
+        i => !dtoProductIds.includes(i.product.toString())
       );
       await this.purchasingItemModel.deleteMany({
         _id: { $in: toDelete.map(i => i._id) },
@@ -296,7 +296,7 @@ export class PurchasingService {
       // The rest: if any item in the payload list is already available in DB, it means user intends to change it's value
       await Promise.all(data.map(async item => {
         const existing = itemMap.get(item.product.toString());
-        const newData = { ...item, purchase_order: purchasing_id };
+        const newData = { ...item, purchase_order: purchasing_id.toString() };
         if (existing) {
           await this.purchaseItemSvc.editPurchasingItem(existing._id, newData, session);
         } else {
@@ -304,7 +304,7 @@ export class PurchasingService {
         }
       }));
 
-      const list = await this.listPurchasingItems({ purchasing_id });
+      const list = await this.listPurchasingItems({ purchasing_id: purchasing_id.toString() });
       return list.data;
     }, sessionIn);
   }
@@ -517,7 +517,7 @@ export class PurchasingService {
 
         if (!movementMap.has(invKey)) {
           movementMap.set(invKey, {
-            inventory: item.inventory,
+            inventory: new Types.ObjectId(item.inventory),
             items: new Map(),
           });
         }

@@ -11,7 +11,7 @@ import * as fs from 'fs';
 import { AttachmentsInterceptor } from 'src/global/attachments-interceptor';
 
 interface headerArgs {
-  purchasingId?: Types.ObjectId,
+  purchasingId?: string,
   files?: Express.Multer.File[]
   req: Request,
   dto?: PurchasingDto,
@@ -85,13 +85,14 @@ export class PurchasingController {
   @Put(':purchasing_id')
   @AttachmentsInterceptor('purchasing_attachments', 5)
   async editPurchasing(
-    @Param('purchasing_id') purchasingId: Types.ObjectId,
+    @Param('purchasing_id') id: string,
     @UploadedFile() files: Express.Multer.File[],
     @Req() req: Request,
     @Body() dto: PurchasingDto,
     @Res() res: Response,
   ) {
     return this.purchasingMutation({ files, dto, req, res }, async () => {
+      const purchasingId = new Types.ObjectId(id);
       const { detail, removedAttachments } = await this.service.editPurchasing(purchasingId, dto);
       // delete old files AFTER DB success
       removedAttachments.forEach((url) => {
@@ -111,10 +112,11 @@ export class PurchasingController {
 
   @Get(':purchasing_id')
   async detailPurchasing(
-    @Param('purchasing_id') purchasingId: Types.ObjectId,
+    @Param('purchasing_id') id: string,
     @Res() res: Response,
   ) {
     try {
+      const purchasingId = new Types.ObjectId(id);
       const purchasing = await this.service.detailPurchasing(purchasingId);
       return BaseResponse.success({ res, option: { message: "Success get detail purchasing", detail: purchasing } });
     } catch (err) {
@@ -124,10 +126,11 @@ export class PurchasingController {
 
   @Delete(':purchasing_id')
   async deletePurchasing(
-    @Param('purchasing_id') purchasingId: Types.ObjectId,
+    @Param('purchasing_id') id: string,
     @Res() res: Response,
   ) {
     try {
+      const purchasingId = new Types.ObjectId(id);
       const { detail, removedAttachments } = await this.service.deletePurchasing(purchasingId);
       // delete old files AFTER DB success
       removedAttachments.forEach((url) => {
@@ -146,11 +149,12 @@ export class PurchasingController {
 
   @Put(':purchasing_id/request')
   async purchaseOrder(
-    @Param('purchasing_id') purchasingId: Types.ObjectId,
+    @Param('purchasing_id') id: string,
     @Req() req: Request,
     @Res() res: Response,
   ) {
     return this.purchasingMutation({ req, res }, async () => {
+      const purchasingId = new Types.ObjectId(id);
       const purchasing = await this.service.purchaseOrder(purchasingId);
       return BaseResponse.success({
         res,
@@ -161,12 +165,13 @@ export class PurchasingController {
 
   @Put(':purchasing_id/approval')
   async purchaseOrderApproval(
-    @Param('purchasing_id') purchasingId: Types.ObjectId,
+    @Param('purchasing_id') id: string,
     @Req() req: Request,
     @Body() dto: PurchaseOrderApprovalDto,
     @Res() res: Response,
   ) {
     return this.purchasingMutation({ req, res }, async () => {
+      const purchasingId = new Types.ObjectId(id);
       const purchasing = await this.service.purchasingApproval(purchasingId, dto);
       return BaseResponse.success({
         res,
@@ -177,11 +182,12 @@ export class PurchasingController {
 
   @Put(':purchasing_id/process')
   async purchaseOrderProcess(
-    @Param('purchasing_id') purchasingId: Types.ObjectId,
+    @Param('purchasing_id') id: string,
     @Req() req: Request,
     @Res() res: Response,
   ) {
     return this.purchasingMutation({ req, res }, async () => {
+      const purchasingId = new Types.ObjectId(id);
       const purchasing = await this.service.purchasingExecute(purchasingId);
       return BaseResponse.success({
         res,
@@ -192,11 +198,12 @@ export class PurchasingController {
 
   @Put(':purchasing_id/drop')
   async purchaseOrderDrop(
-    @Param('purchasing_id') purchasingId: Types.ObjectId,
+    @Param('purchasing_id') id: string,
     @Req() req: Request,
     @Res() res: Response,
   ) {
     return this.purchasingMutation({ req, res }, async () => {
+      const purchasingId = new Types.ObjectId(id);
       const purchasing = await this.service.purchasingDrop(purchasingId, PurchasingEn.DROP);
       return BaseResponse.success({
         res,
@@ -208,13 +215,14 @@ export class PurchasingController {
   @Put(':purchasing_id/payment')
   @AttachmentsInterceptor('purchasing_attachments', 5)
   async purchasingPayment(
-    @Param('purchasing_id') purchasingId: Types.ObjectId,
+    @Param('purchasing_id') id: string,
     @UploadedFile() files: Express.Multer.File[],
     @Req() req: Request,
     @Body() dto: PurchaseOrderDto,
     @Res() res: Response,
   ) {
     return this.purchasingMutation({ files, dto, req, res }, async () => {
+      const purchasingId = new Types.ObjectId(id);
       const { detail, removedAttachments } = await this.service.editPurchasing(purchasingId, dto);
       // delete old files AFTER DB success
       removedAttachments.forEach((url) => {
@@ -236,13 +244,14 @@ export class PurchasingController {
   @Put(':purchasing_id/receive')
   @AttachmentsInterceptor('purchasing_attachments', 5)
   async recieveOrder(
-    @Param('purchasing_id') purchasingId: Types.ObjectId,
+    @Param('purchasing_id') id: string,
     @UploadedFile() files: Express.Multer.File[],
     @Req() req: Request,
     @Body() dto: { purchase: PurchaseOrderDto, purhcaseItems: ReceiveOrderItemDto[] },
     @Res() res: Response,
   ) {
     return this.purchasingMutation({ files, dto: dto.purchase, req, res }, async () => {
+      const purchasingId = new Types.ObjectId(id);
       const data: PurchaseOrderDto & { status: PurchasingEn } = {
         ...dto.purchase,
         status: PurchasingEn.RECEIVE
@@ -267,7 +276,7 @@ export class PurchasingController {
   @Get(':purchasing_id/items')
   async listPurchasingItem(
     @Query() query: ListPurchasingItemsDTO,
-    @Param('purchasing_id') purchasingId: Types.ObjectId,
+    @Param('purchasing_id') purchasingId: string,
     @Res() res: Response,
   ) {
     try {
@@ -282,10 +291,11 @@ export class PurchasingController {
   @Post(':purchasing_id/items')
   async purchasingItemBulkUpdate(
     @Body() body: PurchasingItemDto[],
-    @Param('purchasing_id') purchasingId: Types.ObjectId,
+    @Param('purchasing_id') id: string,
     @Res() res: Response,
   ) {
     try {
+      const purchasingId = new Types.ObjectId(id);
       const data = await this.service.bulkUpdatePurchasingItems(purchasingId, body);
       return BaseResponse.success({ res, option: { message: 'Success bulk update purchasing item', list: data } });
     } catch (err) {
