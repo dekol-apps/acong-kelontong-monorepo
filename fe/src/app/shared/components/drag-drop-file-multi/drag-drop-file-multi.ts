@@ -41,7 +41,8 @@ export class DragDropFileMulti {
   }
 
   deleteFile(idx: number) {
-    this.patchFileVal.slice(idx, 1);
+    this.patchFileVal.splice(idx, 1);
     this.fileChanged.emit(this.patchFileVal);
+    console.log('deleteFile',idx, this.patchFileVal);
   }
 }
