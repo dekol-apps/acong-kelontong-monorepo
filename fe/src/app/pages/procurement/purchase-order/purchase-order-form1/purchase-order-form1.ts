@@ -73,7 +73,7 @@ export class PurchaseOrderForm1 implements OnInit {
   next() {
     if (this.form.invalid) return this.alert.error('Please check your inputs');
     const body = {
-      ...this.form.value,
+      supplier: this.form.value.supplier,
       due_date: ngbToNativeDate(this.form.value.due_date)
     };
     console.log({ body })

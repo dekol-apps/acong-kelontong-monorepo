@@ -23,7 +23,7 @@
       <button ngbNavLink>Payment</button>
       <ng-template ngbNavContent>
         <div class="nav-tabs m-2">
-          <app-purchase-order-form-payment [form]="form" [type]="type" (back)="done()" (submitPO)="nextStep()"></app-purchase-order-form-payment>
+          <app-purchase-order-form-payment [form]="form" [type]="type" (back)="prevStep()" (submitPO)="nextStep()"></app-purchase-order-form-payment>
         </div>
       </ng-template>
     </li>

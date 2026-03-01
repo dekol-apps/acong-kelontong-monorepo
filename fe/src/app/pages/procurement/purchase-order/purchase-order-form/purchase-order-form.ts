@@ -68,7 +68,7 @@ export class PurchaseOrderForm {
         this.alert.success(`Success ${this.purchase_id ? 'edit' : 'create'} purchasing!`);
         if (!this.purchase_id) {
           this.purchase_id = res._id;
-          this.router.navigate([`../2/${this.purchase_id}`], { relativeTo: this.route, queryParams: { type: 'edit' } });
+          this.nextStep()
         } else {
           this.nextStep()
         }
@@ -77,14 +77,19 @@ export class PurchaseOrderForm {
   }
 
   nextStep() {
-    console.log('nextStep')
-    if (this.activeStep < 3)
+    if (this.activeStep < 4)
       this.activeStep += 1;
+    if (this.purchase_id) {
+      this.router.navigate([`../../${this.activeStep}/${this.purchase_id}`], { relativeTo: this.route, queryParams: { type: 'edit' } });
+    }
   }
 
   prevStep() {
     if (this.activeStep > 1)
       this.activeStep -= 1;
+    if (this.purchase_id) {
+      this.router.navigate([`../../${this.activeStep}/${this.purchase_id}`], { relativeTo: this.route, queryParams: { type: 'edit' } });
+    }
   }
 
   done() {
