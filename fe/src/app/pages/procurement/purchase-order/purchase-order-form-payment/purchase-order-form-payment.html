@@ -1,0 +1,38 @@
+<form [formGroup]="form" appFormValidation (ngSubmit)="next()">
+  <fieldset [disabled]="type==='view'">
+    <div class="card-body">
+      <div class="d-flex flex-row flex-wrap justify-content-between gap-2">
+        <div class="w-100">
+          <label for="supplier" class="form-label required">Supplier</label>
+          <select class="form-select" id="supplier" formControlName="supplier">
+            <option selected disabled value="">Choose...</option>
+            @for (supplier of suppliers; track $index) {
+            <option [value]="supplier._id">{{supplier.supplier_name}}</option>
+            }
+          </select>
+        </div>
+        <div class="w-100">
+          <label for="due_date" class="form-label required">Due Date</label>
+          <div class="input-group">
+            <input class="form-control" placeholder="yyyy-mm-dd" name="dp" formControlName="due_date" ngbDatepicker
+              #d="ngbDatepicker" />
+            <button class="btn btn-outline-secondary bi bi-calendar3" (click)="d.toggle()" type="button"></button>
+          </div>
+        </div>
+        <div class="w-100">
+          <label for="invoice_number" class="form-label">Invoice Number</label>
+          <input type="text" class="form-control" id="invoice_number" formControlName="invoice_number" />
+        </div>
+        <div class="w-100">
+          <label for="invoice_photo" class="form-label">Invoice Photo</label>
+          <app-drag-drop-file-multi [patchFileVal]="form.value.attachments" [loading]="isLoading" (deleteHandler)="deleteFile()"
+            (fileChanged)="addFile($event)" message="Tambahkan Foto Sampul Kos"></app-drag-drop-file-multi>
+        </div>
+      </div>
+    </div>
+  </fieldset>
+  <div class="card-footer d-flex gap-2">
+    <button class="btn btn-secondary" type="button" (click)="back.emit()">Exit</button>
+    <button class="btn btn-primary" type="submit">Next</button>
+  </div>
+</form>
