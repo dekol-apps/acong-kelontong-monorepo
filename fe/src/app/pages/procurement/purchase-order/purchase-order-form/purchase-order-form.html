@@ -3,15 +3,15 @@
     <div class="card-title text-capitalize">Purchase Order</div>
   </div>
   <ul ngbNav #nav="ngbNav" [(activeId)]="activeStep" [destroyOnHide]="false" class="nav-tabs mt-4">
-    <li [ngbNavItem]="1" [destroyOnHide]="true" [disabled]="true">
+    <li [ngbNavItem]="1" [destroyOnHide]="true">
       <button ngbNavLink>Supplier</button>
       <ng-template ngbNavContent>
         <div class="nav-tabs m-2">
-          <app-purchase-order-form1 [type]="type" (back)="done()" (submitPO)="nextStep()"></app-purchase-order-form1>
+          <app-purchase-order-form1 [form]="form" [type]="type" (back)="done()" (submitPO)="submitForm1($event)"></app-purchase-order-form1>
         </div>
       </ng-template>
     </li>
-    <li [ngbNavItem]="2" [destroyOnHide]="true" [disabled]="true">
+    <li [ngbNavItem]="2" [destroyOnHide]="true">
       <button ngbNavLink>Items</button>
       <ng-template ngbNavContent>
         <div class="nav-tabs m-2">
@@ -19,7 +19,15 @@
         </div>
       </ng-template>
     </li>
-    <li [ngbNavItem]="3" [destroyOnHide]="true" [disabled]="true">
+       <li [ngbNavItem]="3" [destroyOnHide]="true">
+      <button ngbNavLink>Payment</button>
+      <ng-template ngbNavContent>
+        <div class="nav-tabs m-2">
+          <app-purchase-order-form-payment [form]="form" [type]="type" (back)="done()" (submitPO)="nextStep()"></app-purchase-order-form-payment>
+        </div>
+      </ng-template>
+    </li>
+    <li [ngbNavItem]="4" [destroyOnHide]="true">
       <button ngbNavLink>Summary</button>
       <ng-template ngbNavContent>
         <div class="nav-tabs m-2">

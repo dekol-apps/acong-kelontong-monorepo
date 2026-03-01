@@ -82,14 +82,14 @@ export const PURCHASE_ORDER: IMenu = {
 }
 export const PURCHASE_ORDER_NEW: IMenu = {
     code: 'form',
-    url: 'form',
+    url: 'form/:step',
     icon: '',
     labelKey: 'New Purchase Order',
     permissions: ['purchasing.create', 'purchasing.edit'],
 }
 export const PURCHASE_ORDER_EDIT: IMenu = {
     code: 'form',
-    url: 'form/:po_id',
+    url: 'form/:step/:po_id',
     icon: '',
     labelKey: 'Edit Purchase Order',
     permissions: ['purchasing.create', 'purchasing.edit'],

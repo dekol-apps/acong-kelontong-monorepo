@@ -26,9 +26,13 @@
         <td class="align-top">{{purchase?.invoice_number || '-'}}</td>
       </tr>
       <tr>
-        <td class="fw-bold p-1 col-3 align-top">Invoice Photo</td>
+        <td class="fw-bold p-1 col-3 align-top">Purchasing Attachments</td>
         <td class="align-top">
-          <img class="col-5" [src]="purchase?.invoice_photo" alt="Invoice">
+          <div class="d-flex gap-2 flex-wrap">
+            @for (item of purchase?.purchasing_attachments; track $index) {
+            <img class="col-5" [src]="item" alt="Attachment">
+            }
+          </div>
         </td>
       </tr>
     </tbody>
@@ -49,6 +53,6 @@
 </app-generic-table>
 
 <ng-template #POItemForm>
-  <app-purchase-order-item-form [type]="'view'" [purchase_id]="purchase_id"
-    [purchase_item_id]="purchase_item_id" (onClose)="modalRef.dismiss()"></app-purchase-order-item-form>
+  <app-purchase-order-item-form [type]="'view'" [purchase_id]="purchase_id" [purchase_item_id]="purchase_item_id"
+    (onClose)="modalRef.dismiss()"></app-purchase-order-item-form>
 </ng-template>

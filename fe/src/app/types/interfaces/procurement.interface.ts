@@ -1,5 +1,6 @@
 import { ITableQueryData } from '../../shared/components/generic-table/generic-table';
 import { IProduct } from './catalogue.interface';
+import { PPhType, PPnType } from './common.interface';
 import { InventoryEn } from './supplies.interface';
 
 export interface ISupplier {
@@ -10,10 +11,15 @@ export interface ISupplier {
 }
 
 export enum PurchasingEn {
+  CREATE = 'CREATE',
   REQUEST = 'REQUEST',
+  REJECT = 'REJECT',
+  APPROVE = 'APPROVE',
   PROCESS = 'PROCESS',
   RECEIVE = 'RECEIVE',
+  COMPLETE = 'COMPLETE',
   DROP = 'DROP',
+  EXPIRED = 'EXPIRED',
 }
 export interface IPurchasingDto {
   supplier?: string;
@@ -41,29 +47,40 @@ export interface ReceiveOrderItemDto {
 }
 export interface IPurchasing {
   _id?: string;
-  supplier: ISupplier;
-  supplier_name: string;
-  due_date: Date;
+  items?: IPurchasingItem[];
+  supplier?: ISupplier;
+  supplier_name?: string;
+  due_date?: Date;
   status?: PurchasingEn;
   received_at?: Date;
   invoice_number?: string;
-  invoice_photo?: string;
-  total_purchase_price: number;
-  items?: IPurchasingItem[];
+  purchasing_attachments?: string[];
+  notes?: string; // for example: notes for additional cost
+  reject_notes?: string; // APPROVAL step
+  completed_date?: Date; // Receive order step
   createdAt?: Date;
+  shipping_cost?: string;
+  payment_realization?: string;
+  total_purchase_price?: number;
+  pph_type?: PPhType;
+  pph_rate?: number;
+  pph_amount?: string;
+  ppn_type?: PPnType;
+  ppn_rate?: number;
+  ppn_amount?: string;
 }
 export interface IPurchasingItem {
   _id?: string;
-  product: IProduct;
-  purchase_order: IPurchasing;
-  product_name: string;
-  supplier_name: string;
-  purchase_qty: number;
-  recieved_qty: number;
-  purchase_price: number;
-  sell_price: number;
+  product?: IProduct;
+  purchase_order?: IPurchasing;
+  product_name?: string;
+  supplier_name?: string;
+  purchase_qty?: number;
+  received_qty?: number;
+  purchase_price?: number;
+  sell_price?: number;
   exp_date?: Date;
-} 
+}
 export interface IListPurchasingItemsDTO extends ITableQueryData {
   purchasing_id: string;
 }

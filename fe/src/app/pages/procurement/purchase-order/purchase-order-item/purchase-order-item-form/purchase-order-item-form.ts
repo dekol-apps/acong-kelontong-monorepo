@@ -27,10 +27,8 @@ export class PurchaseOrderItemForm implements OnInit, AfterViewInit, OnChanges {
   form: FormGroup = new FormGroup({
     purchase_order: new FormControl(this.purchase_id, [Validators.required]),
     product: new FormControl(null, [Validators.required]),
-    exp_date: new FormControl(null),
     purchase_qty: new FormControl(null, [Validators.required]),
     purchase_price: new FormControl(null, [Validators.required]),
-    sell_price: new FormControl(null),
   });
 
   constructor(private service: PurchaseOrderService, private alert: AlertService, private productSvc: ProductService, private route: ActivatedRoute) {
@@ -42,8 +40,8 @@ export class PurchaseOrderItemForm implements OnInit, AfterViewInit, OnChanges {
       this.service.getPurchaseItemDetail(this.purchase_item_id).subscribe((res) => {
         this.form.patchValue({
           ...res,
-          purchase_order: res.purchase_order._id,
-          product: res.product._id,
+          purchase_order: res.purchase_order?._id,
+          product: res.product?._id,
           exp_date: nativeToNgbDate(res.exp_date)
         });
       })

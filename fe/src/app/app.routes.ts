@@ -33,7 +33,7 @@ export const routes: Routes = [
         canActivate: [PageGuardService],
         loadComponent: () => import('./pages/dashboard-v3/dashboard-v3').then(c => c.DashboardV3)
       },
-       {
+      {
         path: INVESTMENT.url,
         data: { ...INVESTMENT },
         loadComponent: () => import('./pages/investment/investment').then(c => c.Investment)
@@ -81,6 +81,11 @@ export const routes: Routes = [
             path: '',
             canActivate: [PageGuardService],
             loadComponent: () => import('./pages/procurement/purchase-order/purchase-order').then(c => c.PurchaseOrder)
+          },
+          {
+            path: 'form',
+            redirectTo: 'form/1',
+            pathMatch: 'full'
           },
           {
             path: PURCHASE_ORDER_NEW.url,
@@ -160,5 +165,5 @@ export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./layout/auth-layout/login/login').then(c => c.Login) },
   { path: 'user-verification/:ticket', loadComponent: () => import('./pages/admin/user/user-verification/user-verification').then(c => c.UserVerification) },
   { path: 'error/404', loadComponent: () => import('./layout/error-layout/page-not-found/page-not-found').then(c => c.PageNotFound) },
-  { path: '**', redirectTo: 'error/404' },
+  // { path: '**', redirectTo: 'error/404' },
 ];

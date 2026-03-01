@@ -48,13 +48,6 @@ export class PurchaseOrderItem implements OnInit {
       sort: true,
     },
     {
-      label: 'Supplier',
-      id: 'supplier_name',
-      extraHeaderClass: 'uppercase-text',
-      backendPropName: 'supplier_name',
-      sort: true,
-    },
-    {
       label: 'Purchase QTY',
       id: 'purchase_qty',
       extraHeaderClass: 'uppercase-text',
@@ -66,20 +59,6 @@ export class PurchaseOrderItem implements OnInit {
       extraHeaderClass: 'uppercase-text',
       backendPropName: 'purchase_price',
       dataType: 'CURRENCY'
-    },
-    {
-      label: 'Sale Price',
-      id: 'sell_price',
-      extraHeaderClass: 'uppercase-text',
-      backendPropName: 'sell_price',
-      dataType: 'CURRENCY'
-    },
-    {
-      label: 'Expired Date',
-      id: 'exp_date',
-      extraHeaderClass: 'uppercase-text',
-      backendPropName: 'exp_date',
-      dataType: 'DATE'
     },
     {
       label: 'Action',

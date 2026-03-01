@@ -19,15 +19,6 @@
             <button class="btn btn-outline-secondary bi bi-calendar3" (click)="d.toggle()" type="button"></button>
           </div>
         </div>
-        <div class="w-100">
-          <label for="invoice_number" class="form-label">Invoice Number</label>
-          <input type="text" class="form-control" id="invoice_number" formControlName="invoice_number" />
-        </div>
-        <div class="w-100">
-          <label for="invoice_photo" class="form-label">Invoice Photo</label>
-          <app-drag-drop-file [patchFileVal]="patchFileVal" [loading]="loading" (deleteHandler)="deleteFile()"
-            (fileChanged)="addFile($event)" message="Tambahkan Foto Sampul Kos"></app-drag-drop-file>
-        </div>
       </div>
     </div>
   </fieldset>

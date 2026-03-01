@@ -10,7 +10,7 @@ import { PurchaseOrderService } from '../../procurement/purchase-order/purchase-
 
 @Component({
   selector: 'app-approval-purchasing',
-  imports: [GenericTable, TableColumn, RouterLink, ConfirmModal],
+  imports: [GenericTable, TableColumn, RouterLink],
   templateUrl: './approval-purchasing.html',
   styleUrl: './approval-purchasing.scss'
 })
