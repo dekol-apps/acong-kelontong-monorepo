@@ -1,5 +1,4 @@
 import { IsArray, IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, Min, MinLength } from 'class-validator';
-import { Types } from 'mongoose';
 import { PaginationDto } from 'src/global/global.dto';
 import { InvestmentType } from 'src/types/interfaces';
 

@@ -88,11 +88,21 @@ export class PurchasingService {
       throw BaseResponse.notFound({ err: 'Supplier not found' });
     }
     const purchase = await this.purchasingModel.create([{  // use array + session
-      ...data,
       supplier: supplier._id,
       supplier_name: supplier.supplier_name,
       due_date: data.due_date,
       status: data.status,
+      invoice_number: data.invoice_number,
+      purchasing_attachments: data.purchasing_attachments,
+      payment_realization: data.payment_realization,
+      notes: data.notes,
+      pph_type: data.pph_type,
+      ppn_type: data.ppn_type,
+      pph_rate: data.pph_rate,
+      ppn_rate: data.ppn_rate,
+      pph_amount: data.pph_amount,
+      ppn_amount: data.ppn_amount,
+      shipping_cost: data.shipping_cost,
     }], { session });
 
     const createdPurchase = purchase[0];
@@ -149,7 +159,7 @@ export class PurchasingService {
         if (field === 'due_date') purchase.due_date = data.due_date;
         if (field === 'invoice_number') purchase.invoice_number = data.invoice_number;
         if (field === 'purchasing_attachments') purchase.purchasing_attachments = data.purchasing_attachments;
-        if (field === 'payment_realization') purchase.payment_realization = data.payment_realization;
+        if (field === 'payment_realization') purchase.payment_realization = toDecimal128(toDecimal(data.payment_realization));
         if (field === 'reject_notes') purchase.reject_notes = data.reject_notes;
         if (field === 'status') purchase.status = data.status ?? purchase.status;
       });
@@ -457,10 +467,10 @@ export class PurchasingService {
         ppn_rate: dto.ppn_rate,
         pph_type: dto.pph_type,
         ppn_type: dto.ppn_type,
-        pph_amount: dto.pph_amount,
-        ppn_amount: dto.ppn_amount,
-        payment_realization: dto.payment_realization,
-        shipping_cost: dto.shipping_cost,
+        pph_amount: toDecimal128(toDecimal(dto.pph_amount)),
+        ppn_amount: toDecimal128(toDecimal(dto.ppn_amount)),
+        payment_realization: toDecimal128(toDecimal(dto.payment_realization)),
+        shipping_cost: toDecimal128(toDecimal(dto.shipping_cost)),
       });
       const message = `
         Payment calculation result invalid:\n
@@ -477,7 +487,7 @@ export class PurchasingService {
         order_id: edit.detail?._id,
         order_data: edit.detail,
         order_type: OrderType.PURCHASING,
-        transaction_amount: dto.payment_realization,
+        transaction_amount: toDecimal128(toDecimal(dto.payment_realization)),
       }
       await this.accounting.createAccountingItem(accountingPayload, session)
       return edit;

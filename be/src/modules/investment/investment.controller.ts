@@ -60,11 +60,7 @@ export class InvestmentController {
   ) {
     console.log('FILES:', files);
     return this.investmentMutation({ files, body, req, res }, async () => {
-      const data = {
-        ...body,
-        transaction_amount: toDecimal128(toDecimal(body.transaction_amount))
-      }
-      const investment = await this.service.createInvestment(data);
+      const investment = await this.service.createInvestment(body);
       return BaseResponse.success({ res, option: { message: "Success create investment", detail: investment } });
     })
   }

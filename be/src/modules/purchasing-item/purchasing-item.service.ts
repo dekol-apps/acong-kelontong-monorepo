@@ -7,6 +7,7 @@ import { Product } from '../product/product.schema';
 import { Purchasing } from '../purchasing/purchasing.schema';
 import { PurchasingItem } from './purchasing-item.schema';
 import { PurchasingItemDto } from './purchasing-item.dto';
+import { toDecimal, toDecimal128 } from 'src/utils/helper';
 @Injectable()
 export class PurchasingItemService {
 
@@ -29,9 +30,12 @@ export class PurchasingItemService {
         throw BaseResponse.notFound({ err: `createPurchasingItem Purchasing not found` });
       }
       const data = {
-        ...dto,
         supplier_name: purchasing.supplier_name,
         product_name: product.product_name,
+        purchase_order: new Types.ObjectId(dto.purchase_order),
+        product: new Types.ObjectId(dto.product),
+        purchase_qty: dto.purchase_qty,
+        purchase_price: toDecimal128(toDecimal(dto.purchase_price)),
       }
       const created = (await this.purchasingItemModel.create([data], { session }))[0];
       if (!created) throw BaseResponse.notFound({ err: 'createPurchasingItem created not found' });
@@ -52,9 +56,12 @@ export class PurchasingItemService {
       const product = await this.productModel.findById(dto.product).session(session);
       if (!product) throw BaseResponse.notFound({ err: `editPurchasingItem Product not found` });
       const data = {
-        ...dto,
         supplier_name: purchasing.supplier_name,
         product_name: product.product_name,
+        purchase_order: new Types.ObjectId(dto.purchase_order),
+        product: new Types.ObjectId(dto.product),
+        purchase_qty: dto.purchase_qty,
+        purchase_price: toDecimal128(toDecimal(dto.purchase_price)),
       }
       const updatedItem = await this.purchasingItemModel.findByIdAndUpdate(
         id,

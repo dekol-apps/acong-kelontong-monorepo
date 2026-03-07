@@ -1,5 +1,4 @@
 import { IsNotEmpty, IsNumber, IsOptional, IsMongoId, IsInt, Min } from 'class-validator';
-import { Types } from 'mongoose';
 export class ReceiveOrderItemDto {
   @IsMongoId() // checks it's a valid ObjectId string
   @IsNotEmpty()
@@ -23,5 +22,5 @@ export class PurchasingItemDto {
   purchase_qty: number;
   @IsInt()
   @Min(1)
-  purchase_price: Types.Decimal128;
+  purchase_price: number;
 }

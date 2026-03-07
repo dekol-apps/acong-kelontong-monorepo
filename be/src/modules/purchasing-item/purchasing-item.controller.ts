@@ -19,11 +19,7 @@ export class PurchasingItemController {
     @Res() res: Response,
   ) {
     try {
-      const data: PurchasingItemDto = {
-        ...body,
-        purchase_price: toDecimal128(toDecimal(body.purchase_price))
-      }
-      const purchaseItem = await this.service.createPurchasingItem(data);
+      const purchaseItem = await this.service.createPurchasingItem(body);
       return BaseResponse.success({ res, option: { message: "Success create purchaseItem", detail: purchaseItem } });
     } catch (err) {
       return BaseResponse.error({ res, err });

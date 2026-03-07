@@ -28,7 +28,7 @@ export class PurchaseOrderDto extends PurchaseOrderApprovalDto {
 
   @IsOptional()
   @IsNumber()
-  payment_realization?: Types.Decimal128;
+  payment_realization?: number;
 
   @IsOptional()
   @IsString()
@@ -56,15 +56,15 @@ export class PurchaseOrderDto extends PurchaseOrderApprovalDto {
 
   @IsOptional()
   @IsNumber()
-  pph_amount?: Types.Decimal128;
+  pph_amount?: number;
 
   @IsOptional()
   @IsNumber()
-  ppn_amount?: Types.Decimal128;
+  ppn_amount?: number;
 
   @IsOptional()
   @IsNumber()
-  shipping_cost?: Types.Decimal128;
+  shipping_cost?: number;
 }
 
 export class PurchasingDto extends PurchaseOrderDto {

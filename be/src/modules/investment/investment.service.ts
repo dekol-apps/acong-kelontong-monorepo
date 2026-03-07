@@ -8,6 +8,7 @@ import { BaseResponse } from 'src/utils/base-response';
 import { InvestmentDto, ListInvestmentDTO } from './investment.dto';
 import { AccountingService } from '../accounting/accounting.service';
 import { Accounting } from '../accounting/accounting.schema';
+import { toDecimal, toDecimal128 } from 'src/utils/helper';
 
 @Injectable()
 export class InvestmentService {
@@ -45,8 +46,14 @@ export class InvestmentService {
     )
   }
 
-  async createInvestment(data: Investment, sessionIn?: ClientSession): Promise<Investment> {
+  async createInvestment(dto: InvestmentDto, sessionIn?: ClientSession): Promise<Investment> {
     return this.global.withTransaction(async (session) => {
+      const data = {
+        investment_type: dto.investment_type,
+        attachments: dto.attachments,
+        description: dto.description,
+        transaction_amount: toDecimal128(toDecimal(dto.transaction_amount))
+      }
       const [newInvestment] = await this.investmentModel.create(
         [data],
         { session }
@@ -57,7 +64,7 @@ export class InvestmentService {
         order_id: newInvestment._id,
         order_data: newInvestment,
         order_type: data.investment_type === InvestmentType.DEPOSIT ? OrderType.DEPOSIT : OrderType.WITHDRAWAL,
-        transaction_amount: data.transaction_amount
+        transaction_amount: toDecimal128(toDecimal(data.transaction_amount))
       }
       await this.accounting.createAccountingItem(accountingPayload, session)
       return newInvestment;
@@ -77,7 +84,7 @@ export class InvestmentService {
 
   async editInvestment(
     id: Types.ObjectId,
-    data: Investment,
+    data: InvestmentDto,
     sessionIn?: ClientSession,
   ): Promise<{ investment: Investment; removedAttachments: string[] }> {
     return this.global.withTransaction(async (session) => {
@@ -108,7 +115,7 @@ export class InvestmentService {
         order_id: id,
         order_data: updated,
         order_type: data.investment_type === InvestmentType.DEPOSIT ? OrderType.DEPOSIT : OrderType.WITHDRAWAL,
-        transaction_amount: data.transaction_amount
+        transaction_amount: toDecimal128(toDecimal(data.transaction_amount))
       }
       await this.accounting.editAccountingItem(accountingPayload, session)
 
