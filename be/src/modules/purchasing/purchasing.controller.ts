@@ -280,7 +280,7 @@ export class PurchasingController {
     @Res() res: Response,
   ) {
     try {
-      if (!query.purchasing_id) query.purchasing_id = new Types.ObjectId(purchasingId);
+      query.purchasing_id = new Types.ObjectId(purchasingId);
       const { data, meta } = await this.service.listPurchasingItems(query);
       return BaseResponse.success({ res, option: { message: 'Success get list purchasing item', list: data, meta } });
     } catch (err) {

@@ -31,7 +31,7 @@
       </tr>
       <tr>
         <td class="fw-bold p-1 col-3 align-top">PPh Amount</td>
-        <td class="align-top">{{(purchase?.pph_amount | currency: CURRENCY_FORMAT) || '-'}}</td>
+        <td class="align-top">{{(purchase?.pph_amount?.$numberDecimal| currency: CURRENCY_FORMAT) || '-'}}</td>
       </tr>
       <tr>
         <td class="fw-bold p-1 col-3 align-top">PPn Type</td>
@@ -43,23 +43,23 @@
       </tr>
       <tr>
         <td class="fw-bold p-1 col-3 align-top">PPn Amount</td>
-        <td class="align-top">{{(purchase?.ppn_amount | currency: CURRENCY_FORMAT) || '-'}}</td>
+        <td class="align-top">{{(purchase?.ppn_amount?.$numberDecimal | currency: CURRENCY_FORMAT) || '-'}}</td>
       </tr>
       <tr>
         <td class="fw-bold p-1 col-3 align-top">Shipping Cost</td>
-        <td class="align-top">{{(purchase?.shipping_cost | currency: CURRENCY_FORMAT) || '-'}}</td>
+        <td class="align-top">{{(purchase?.shipping_cost?.$numberDecimal | currency: CURRENCY_FORMAT) || '-'}}</td>
       </tr>
       <tr>
         <td class="fw-bold p-1 col-3 align-top">Total Price</td>
-        <td class="align-top">{{(purchase?.total_purchase_price | currency: CURRENCY_FORMAT) || '-'}}</td>
+        <td class="align-top">{{(purchase?.total_purchase_price?.$numberDecimal | currency: CURRENCY_FORMAT) || '-'}}</td>
       </tr>
       <tr>
         <td class="fw-bold p-1 col-3 align-top">Additional Cost</td>
-        <td class="align-top">{{(purchase?.additional_cost | currency: CURRENCY_FORMAT) || '-'}}</td>
+        <td class="align-top">{{(purchase?.additional_cost?.$numberDecimal | currency: CURRENCY_FORMAT) || '-'}}</td>
       </tr>
       <tr>
         <td class="fw-bold p-1 col-3 align-top">Payment Realization</td>
-        <td class="align-top">{{(purchase?.payment_realization | currency: CURRENCY_FORMAT) || '-'}}</td>
+        <td class="align-top">{{(purchase?.payment_realization?.$numberDecimal | currency: CURRENCY_FORMAT) || '-'}}</td>
       </tr>
       <tr>
         <td class="fw-bold p-1 col-3 align-top">Notes</td>

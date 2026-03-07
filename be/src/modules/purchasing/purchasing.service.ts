@@ -238,7 +238,7 @@ export class PurchasingService {
 
     const filter = {
       column: 'purchase_order',
-      value: purchasing_id
+      value: purchasing_id.toString()
     };
 
     const list = await this.global.getList<PurchasingItem>(
