@@ -3,7 +3,7 @@ import { PaginationDto } from 'src/global/global.dto';
 import { BaseResponse } from 'src/utils/base-response';
 import { PurchasingService } from './purchasing.service';
 import type { Request, Response } from 'express';
-import { PurchasingDto, ListPurchasingItemsDTO, PurchaseOrderApprovalDto, PurchaseOrderDto } from './purchasing.dto';
+import { PurchasingDto, PurchaseOrderApprovalDto, PurchaseOrderDto } from './purchasing.dto';
 import { Types } from 'mongoose';
 import { PurchasingEn } from './purchasing.schema';
 import { PurchasingItemDto, ReceiveOrderItemDto } from '../purchasing-item/purchasing-item.dto';
@@ -275,13 +275,13 @@ export class PurchasingController {
 
   @Get(':purchasing_id/items')
   async listPurchasingItem(
-    @Query() query: ListPurchasingItemsDTO,
+    @Query() query: PaginationDto,
     @Param('purchasing_id') purchasingId: string,
     @Res() res: Response,
   ) {
     try {
-      query.purchasing_id = new Types.ObjectId(purchasingId);
-      const { data, meta } = await this.service.listPurchasingItems(query);
+      const purchasing_id = new Types.ObjectId(purchasingId);
+      const { data, meta } = await this.service.listPurchasingItems(purchasing_id, query);
       return BaseResponse.success({ res, option: { message: 'Success get list purchasing item', list: data, meta } });
     } catch (err) {
       return BaseResponse.error({ res, err });

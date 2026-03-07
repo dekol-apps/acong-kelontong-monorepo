@@ -61,7 +61,7 @@ export class PurchaseOrderItem implements OnInit {
       backendPropName: 'purchase_price',
       dataType: 'CURRENCY'
     },
-     {
+    {
       label: 'Total',
       id: 'price_total.$numberDecimal',
       extraHeaderClass: 'uppercase-text',
@@ -97,7 +97,6 @@ export class PurchaseOrderItem implements OnInit {
   }
 
   canTouch() {
-    console.log('this.type', this.type, this.status)
     return this.type === 'new' || (this.type === 'edit' && this.status && this.ableToTouch.includes(this.status))
   }
 

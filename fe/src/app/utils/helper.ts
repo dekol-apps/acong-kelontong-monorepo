@@ -41,6 +41,12 @@ export const objToFormData = (
       return;
     }
 
+    // DATE
+    if (value instanceof Date) {
+      formData.append(formKey, value.toISOString());
+      return;
+    }
+
     // ARRAY
     if (Array.isArray(value)) {
       // 🔥 If this key is declared as fileField → Multer mode: key[val,val,val]

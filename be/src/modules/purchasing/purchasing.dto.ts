@@ -77,10 +77,6 @@ export class PurchasingDto extends PurchaseOrderDto {
   due_date?: Date;
 }
 
-export class ListPurchasingItemsDTO extends PaginationDto {
-  purchasing_id: Types.ObjectId
-}
-
 export type PurchasingDetail =
   Purchasing & {
     _id: Types.ObjectId;

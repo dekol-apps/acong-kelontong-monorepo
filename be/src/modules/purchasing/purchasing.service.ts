@@ -6,7 +6,7 @@ import { GlobalService } from 'src/global/global.service';
 import { ApprovalType, FlowType, IListRes, OrderType, PPhType, PPnType } from 'src/types/interfaces';
 import { BaseResponse } from 'src/utils/base-response';
 import { Purchasing, PurchasingEn, ValidatePaymentInput, ValidatePaymentResult } from './purchasing.schema';
-import { ListPurchasingItemsDTO, PurchaseOrderApprovalDto, PurchaseOrderDto, PurchasingDetail, PurchasingDto } from './purchasing.dto';
+import { PurchaseOrderApprovalDto, PurchaseOrderDto, PurchasingDetail, PurchasingDto } from './purchasing.dto';
 import { Supplier } from '../supplier/supplier.schema';
 import { PurchasingItem } from '../purchasing-item/purchasing-item.schema';
 import { PurchasingItemService } from '../purchasing-item/purchasing-item.service';
@@ -125,12 +125,57 @@ export class PurchasingService {
         [PurchasingEn.EXPIRED]: [''],
         [PurchasingEn.DROP]: [''],
         [PurchasingEn.COMPLETE]: [''],
-        [PurchasingEn.RECEIVE]: ['status', 'notes', 'completed_date'],
-        [PurchasingEn.PROCESS]: ['status', 'invoice_number', 'purchasing_attachments', 'payment_realization', 'notes'],
-        [PurchasingEn.REJECT]: ['status', 'purchasing_attachments', 'due_date', 'supplier_name', 'supplier', 'payment_realization', 'notes'],
-        [PurchasingEn.APPROVE]: ['status', 'purchasing_attachments', 'due_date', 'payment_realization', 'notes'],
-        [PurchasingEn.REQUEST]: ['status', 'reject_notes'],
-        [PurchasingEn.CREATE]: ['status', 'purchasing_attachments', 'due_date', 'supplier_name', 'supplier', 'payment_realization', 'notes'],
+        [PurchasingEn.RECEIVE]: [
+          'status',
+          'notes',
+          'completed_date',
+          'invoice_number',
+          'purchasing_attachments',
+        ],
+        [PurchasingEn.PROCESS]: [
+          'status',
+          'invoice_number',
+          'purchasing_attachments',
+          'payment_realization',
+          'notes',
+          'purchasing_attachments',
+          'payment_realization',
+          'notes',
+          'invoice_number',
+          'purchasing_attachments',
+          'payment_realization',
+          'notes',
+          'pph_type',
+          'ppn_type',
+          'pph_rate',
+          'ppn_rate',
+          'pph_amount',
+          'ppn_amount',
+          'shipping_cost'
+        ],
+        [PurchasingEn.REJECT]: [
+          'status',
+          'due_date',
+          'notes',
+          'supplier_name',
+          'supplier',
+        ],
+        [PurchasingEn.APPROVE]: [
+          'status',
+          'due_date',
+          'notes',
+        ],
+        [PurchasingEn.REQUEST]: [
+          'status',
+          'reject_notes'
+        ],
+        [PurchasingEn.CREATE]: [
+          'status',
+          'due_date',
+          'notes',
+          'supplier_name',
+          'supplier',
+        ],
       };
       // get allowed fields for this status
       const fields: string[] = purchase.status ? allowedFieldsByStatus[purchase.status] : [];
@@ -184,7 +229,7 @@ export class PurchasingService {
   }: PaginationDto): Promise<IListRes<Purchasing>> {
     const searchFields: string[] = ['supplier_name'];
 
-    return this.global.getList<Purchasing>(
+    const list = await this.global.getList<Purchasing>(
       this.purchasingModel,
       {
         page,
@@ -196,6 +241,16 @@ export class PurchasingService {
         filter
       }
     )
+    return {
+      meta: list.meta,
+      data: await Promise.all(list.data.map(async it => {
+        const obj = it.toObject();
+        return {
+          ...obj,
+          total_purchase_price: await this.countTotalPurchasePrice(obj._id)
+        };
+      }))
+    };
   }
 
   async detailPurchasing(purchasing_id: Types.ObjectId): Promise<PurchasingDetail> {
@@ -218,47 +273,43 @@ export class PurchasingService {
   async countTotalPurchasePrice(purchasing_id: Types.ObjectId): Promise<Types.Decimal128> {
     const result = await this.purchasingItemModel.aggregate([
       {
-        $match: { purchasing_id },
+        $match: { purchase_order: new Types.ObjectId(purchasing_id) }
       },
       {
         $group: {
           _id: null,
           total: {
             $sum: {
-              $multiply: ["$purchase_price", "$purchase_qty"],
+              $multiply: [
+                { $toDecimal: "$purchase_price" },
+                { $toDecimal: "$purchase_qty" }
+              ],
             },
           },
         },
       },
     ]);
 
-    return result[0]?.total ?? Types.Decimal128.fromString('0');
+    return result[0]?.total ?? Types.Decimal128.fromString("0");
   }
 
-  async listPurchasingItems({
-    purchasing_id,
-    page,
-    size,
-    sortBy,
-    sortDir,
-    search,
-  }: ListPurchasingItemsDTO): Promise<IListRes<PurchasingItem & { price_total: Types.Decimal128 }>> {
+  async listPurchasingItems(purchasing_id: Types.ObjectId, pagination?: PaginationDto): Promise<IListRes<PurchasingItem & { price_total: Types.Decimal128 }>> {
 
     const searchFields = ['product_name'];
 
     const filter = {
       column: 'purchase_order',
-      value: purchasing_id.toString()
+      value: purchasing_id
     };
 
     const list = await this.global.getList<PurchasingItem>(
       this.purchasingItemModel,
       {
-        page,
-        size,
-        sortBy,
-        sortDir,
-        search,
+        page: pagination?.page,
+        size: pagination?.size,
+        sortBy: pagination?.sortBy,
+        sortDir: pagination?.sortDir,
+        search: pagination?.search,
         searchFields,
         filter
       }
@@ -331,7 +382,7 @@ export class PurchasingService {
         }
       }));
 
-      const list = await this.listPurchasingItems({ purchasing_id: purchasing_id });
+      const list = await this.listPurchasingItems(purchasing_id);
       return list.data;
     }, sessionIn);
   }

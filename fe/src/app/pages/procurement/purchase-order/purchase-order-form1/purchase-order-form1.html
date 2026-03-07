@@ -1,9 +1,10 @@
+@if (form) {
 <form [formGroup]="form" appFormValidation (ngSubmit)="submit()">
   <fieldset [disabled]="type==='view'">
     <div class="card-body">
       <div class="d-flex flex-row flex-wrap justify-content-between gap-2">
         <div class="w-100">
-          <label for="supplier" class="form-label required">Supplier</label>
+          <label for="supplier" class="form-label" appAutoWildcard>Supplier</label>
           <select class="form-select" id="supplier" formControlName="supplier">
             <option selected disabled value="">Choose...</option>
             @for (supplier of suppliers; track $index) {
@@ -12,10 +13,10 @@
           </select>
         </div>
         <div class="w-100">
-          <label for="due_date" class="form-label required">Due Date</label>
+          <label for="due_date" class="form-label" appAutoWildcard>Due Date</label>
           <div class="input-group">
-            <input class="form-control" placeholder="yyyy-mm-dd" name="due_date" formControlName="due_date" ngbDatepicker
-              #d="ngbDatepicker" />
+            <input class="form-control" placeholder="yyyy-mm-dd" name="due_date" formControlName="due_date"
+              ngbDatepicker #d="ngbDatepicker" />
             <button class="btn btn-outline-secondary bi bi-calendar3" (click)="d.toggle()" type="button"></button>
           </div>
         </div>
@@ -27,3 +28,4 @@
     <button class="btn btn-primary" type="submit">Next</button>
   </div>
 </form>
+}

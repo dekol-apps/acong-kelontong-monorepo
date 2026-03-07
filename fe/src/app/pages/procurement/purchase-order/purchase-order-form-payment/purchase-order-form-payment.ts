@@ -11,10 +11,11 @@ import { DragDropFileMulti } from '../../../../shared/components/drag-drop-file-
 import { PPHTYPES, PPNTYPES } from '../../../../types/constants/common.constants';
 import { PurchasingStore } from '../../../../shared/stores/purchasing.store';
 import { objToFormData } from '../../../../utils/helper';
+import { AutoWildcard } from '../../../../shared/directives/auto-wildcard/auto-wildcard';
 
 @Component({
   selector: 'app-purchase-order-form-payment',
-  imports: [ReactiveFormsModule, FormValidation, DragDropFileMulti, NgbDatepickerModule],
+  imports: [ReactiveFormsModule, FormValidation, DragDropFileMulti, NgbDatepickerModule, AutoWildcard],
   templateUrl: './purchase-order-form-payment.html',
   styleUrl: './purchase-order-form-payment.scss'
 })
@@ -29,19 +30,7 @@ export class PurchaseOrderFormPayment implements OnInit {
   isLoading?: boolean;
   patchFileVal?: string;
 
-  @Input() form: FormGroup = new FormGroup({
-    invoice_number: new FormControl(null),
-    purchasing_attachments: new FormControl(null),
-    notes: new FormControl(null),
-    pph_type: new FormControl(null),
-    ppn_type: new FormControl(null),
-    pph_rate: new FormControl(null),
-    ppn_rate: new FormControl(null),
-    pph_amount: new FormControl(null),
-    ppn_amount: new FormControl(null),
-    shipping_cost: new FormControl(null),
-    payment_realization: new FormControl(null),
-  });
+  @Input() form?: FormGroup;
 
   constructor(private alert: AlertService, private store: PurchasingStore) { }
 
@@ -49,14 +38,15 @@ export class PurchaseOrderFormPayment implements OnInit {
   }
 
   submit() {
-    if (this.form.invalid) return this.alert.error('Please check your inputs');
-    const value = this.form.getRawValue();
+    const value = this.form?.value;
+    if (this.form?.invalid) return this.alert.error('Please check your inputs');
     const body = {
       ...value,
       supplier: value.supplier,
       due_date: ngbToNativeDate(value.due_date),
-      purchasing_attachments: value.purchasing_attachments.map(it => it.file ?? it.src)
+      purchasing_attachments: value.purchasing_attachments?.map(it => it.file ?? it.src)
     };
+    console.log({body});
     const formData = objToFormData(body, { fileFields: ['purchasing_attachments'] });
     this.store.update(formData).subscribe({
       next: (res) => {
@@ -67,7 +57,7 @@ export class PurchaseOrderFormPayment implements OnInit {
   }
 
   addFile(evt: IFielImg[]) {
-    if (!evt.length) this.form.controls.attachments.reset();
-    else this.form.controls.attachments.patchValue(evt);
+    if (!evt.length) this.form?.controls.attachments.reset();
+    else this.form?.controls.attachments.patchValue(evt);
   }
 }

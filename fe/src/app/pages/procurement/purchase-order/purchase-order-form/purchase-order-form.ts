@@ -70,6 +70,63 @@ export class PurchaseOrderForm {
     payment_realization: new FormControl(null),
   });
 
+  allowedFieldsByStatus = {
+    [PurchasingEn.EXPIRED]: [''],
+    [PurchasingEn.DROP]: [''],
+    [PurchasingEn.COMPLETE]: [''],
+    [PurchasingEn.RECEIVE]: [
+      'status',
+      'notes',
+      'completed_date',
+      'invoice_number',
+      'purchasing_attachments',
+    ],
+    [PurchasingEn.PROCESS]: [
+      'status',
+      'invoice_number',
+      'purchasing_attachments',
+      'payment_realization',
+      'notes',
+      'purchasing_attachments',
+      'payment_realization',
+      'notes',
+      'invoice_number',
+      'purchasing_attachments',
+      'payment_realization',
+      'notes',
+      'pph_type',
+      'ppn_type',
+      'pph_rate',
+      'ppn_rate',
+      'pph_amount',
+      'ppn_amount',
+      'shipping_cost'
+    ],
+    [PurchasingEn.REJECT]: [
+      'status',
+      'due_date',
+      'notes',
+      'supplier_name',
+      'supplier',
+    ],
+    [PurchasingEn.APPROVE]: [
+      'status',
+      'due_date',
+      'notes',
+    ],
+    [PurchasingEn.REQUEST]: [
+      'status',
+      'reject_notes'
+    ],
+    [PurchasingEn.CREATE]: [
+      'status',
+      'due_date',
+      'notes',
+      'supplier_name',
+      'supplier',
+    ],
+  };
+
   getDetail(purchase_id: string) {
     this.purchasingService.getPurchasingDetail(purchase_id).subscribe({
       next: (res) => {
@@ -94,6 +151,10 @@ export class PurchaseOrderForm {
           this.form.controls.supplier.disable();
           this.form.controls.due_date.disable();
         }
+        const allowed = this.allowedFieldsByStatus[res.status!];
+        Object.keys(this.form.controls).forEach(element => {
+          if (!allowed.includes(element)) this.form.controls[element].disable();
+        });
       }
     });
   }

@@ -8,10 +8,11 @@ import { NgbDate, NgbDatepickerModule } from '@ng-bootstrap/ng-bootstrap';
 import { ngbToNativeDate } from '../../../../shared/components/date-range-filter/date-range-filter';
 import { formType } from '../../../../types/interfaces/common.interface';
 import { PurchasingStore } from '../../../../shared/stores/purchasing.store';
+import { AutoWildcard } from '../../../../shared/directives/auto-wildcard/auto-wildcard';
 
 @Component({
   selector: 'app-purchase-order-form1',
-  imports: [ReactiveFormsModule, FormValidation, NgbDatepickerModule],
+  imports: [ReactiveFormsModule, FormValidation, NgbDatepickerModule, AutoWildcard],
   templateUrl: './purchase-order-form1.html',
   styleUrl: './purchase-order-form1.scss'
 })
@@ -23,10 +24,7 @@ export class PurchaseOrderForm1 implements OnInit {
   @Input() purchase_id?: string;
   patchFileVal?: string;
 
-  @Input() form: FormGroup = new FormGroup({
-    supplier: new FormControl(null, [Validators.required]),
-    due_date: new FormControl(null, [Validators.required]),
-  });
+  @Input() form?: FormGroup;
 
   constructor(private alert: AlertService, private supplierSvc: SupplierService, private store: PurchasingStore) { }
 
@@ -35,7 +33,7 @@ export class PurchaseOrderForm1 implements OnInit {
   }
 
   onDateSelection(date: NgbDate | null) {
-    this.form.controls.due_date.patchValue(date)
+    this.form?.controls.due_date.patchValue(date)
   }
 
   getSupplierDropdown() {
@@ -45,10 +43,10 @@ export class PurchaseOrderForm1 implements OnInit {
   }
 
   submit() {
-    if (this.form.invalid) return this.alert.error('Please check your inputs');
+    if (this.form?.invalid) return this.alert.error('Please check your inputs');
     const body = {
-      supplier: this.form.getRawValue().supplier,
-      due_date: ngbToNativeDate(this.form.getRawValue().due_date)
+      supplier: this.form?.getRawValue().supplier,
+      due_date: ngbToNativeDate(this.form?.getRawValue().due_date)
     };
     let serviceArg = this.store.create(body);
     if (this.purchase_id) serviceArg = this.store.update(body)

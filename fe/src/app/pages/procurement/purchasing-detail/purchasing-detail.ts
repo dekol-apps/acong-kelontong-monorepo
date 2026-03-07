@@ -49,9 +49,16 @@ export class PurchasingDetail implements OnChanges {
     },
     {
       label: 'Purchase Price',
-      id: 'purchase_price',
+      id: 'purchase_price.$numberDecimal',
       extraHeaderClass: 'uppercase-text',
       backendPropName: 'purchase_price',
+      dataType: 'CURRENCY'
+    },
+    {
+      label: 'Total',
+      id: 'price_total.$numberDecimal',
+      extraHeaderClass: 'uppercase-text',
+      backendPropName: 'price_total',
       dataType: 'CURRENCY'
     },
     {
