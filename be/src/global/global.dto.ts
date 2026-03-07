@@ -9,6 +9,7 @@ import {
     ValidateNested
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { Types } from 'mongoose';
 
 export class FilterDto {
   @IsString()
@@ -16,7 +17,7 @@ export class FilterDto {
   column: string;
 
   @IsOptional()
-  value?: string | number | boolean | Array<string | number | boolean>;
+  value?: string | number | boolean | Array<string | number | boolean> | Types.ObjectId;
 }
 export class PaginationDto {
   @IsOptional()

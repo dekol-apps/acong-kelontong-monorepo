@@ -1,4 +1,4 @@
-<form [formGroup]="form" appFormValidation (ngSubmit)="next()">
+<form [formGroup]="form" appFormValidation (ngSubmit)="submit()">
   <fieldset [disabled]="type==='view'">
     <div class="card-body">
       <div class="d-flex flex-row flex-wrap justify-content-between gap-2">
@@ -14,7 +14,7 @@
         <div class="w-100">
           <label for="due_date" class="form-label required">Due Date</label>
           <div class="input-group">
-            <input class="form-control" placeholder="yyyy-mm-dd" name="dp" formControlName="due_date" ngbDatepicker
+            <input class="form-control" placeholder="yyyy-mm-dd" name="due_date" formControlName="due_date" ngbDatepicker
               #d="ngbDatepicker" />
             <button class="btn btn-outline-secondary bi bi-calendar3" (click)="d.toggle()" type="button"></button>
           </div>

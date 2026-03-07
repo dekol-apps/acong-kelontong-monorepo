@@ -11,7 +11,6 @@ import { TenMegaByte } from '../../../types/constants/common.constants';
 export class DragDropFileMulti {
 
   @Output() fileChanged: EventEmitter<IFielImg[]> = new EventEmitter();
-  @Output() deleteHandler: EventEmitter<Event> = new EventEmitter<Event>();
   @Output() previewHandler: EventEmitter<Event> = new EventEmitter<Event>();
 
   @ViewChild('hiddenInput') hiddenInput?: ElementRef;

@@ -1,32 +1,69 @@
-<form [formGroup]="form" appFormValidation (ngSubmit)="next()">
+<form [formGroup]="form" appFormValidation (ngSubmit)="submit()">
   <fieldset [disabled]="type==='view'">
     <div class="card-body">
       <div class="d-flex flex-row flex-wrap justify-content-between gap-2">
         <div class="w-100">
-          <label for="supplier" class="form-label required">Supplier</label>
-          <select class="form-select" id="supplier" formControlName="supplier">
+          <label for="invoice_number" class="form-label">Invoice Number</label>
+          <input type="text" class="form-control" id="invoice_number" formControlName="invoice_number"
+            placeholder="Enter id number from purchasing invoice" />
+        </div>
+        <div class="w-100">
+          <label for="pph_type" class="form-label required">PPh Type</label>
+          <select class="form-select" id="pph_type" formControlName="pph_type">
             <option selected disabled value="">Choose...</option>
-            @for (supplier of suppliers; track $index) {
-            <option [value]="supplier._id">{{supplier.supplier_name}}</option>
+            @for (pph_type of pphTypes; track $index) {
+            <option [value]="pph_type.value">{{pph_type.label}}</option>
             }
           </select>
         </div>
         <div class="w-100">
-          <label for="due_date" class="form-label required">Due Date</label>
-          <div class="input-group">
-            <input class="form-control" placeholder="yyyy-mm-dd" name="dp" formControlName="due_date" ngbDatepicker
-              #d="ngbDatepicker" />
-            <button class="btn btn-outline-secondary bi bi-calendar3" (click)="d.toggle()" type="button"></button>
-          </div>
+          <label for="pph_rate" class="form-label">PPh Rate (%)</label>
+          <input type="number" class="form-control" id="pph_rate" formControlName="pph_rate"
+            placeholder="Rate number in percent" />
         </div>
         <div class="w-100">
-          <label for="invoice_number" class="form-label">Invoice Number</label>
-          <input type="text" class="form-control" id="invoice_number" formControlName="invoice_number" />
+          <label for="pph_amount" class="form-label">PPh Amount (Rp)</label>
+          <input type="number" class="form-control" id="pph_amount" formControlName="pph_amount"
+            placeholder="Total PPh amount in rupiah" />
         </div>
         <div class="w-100">
-          <label for="invoice_photo" class="form-label">Invoice Photo</label>
-          <app-drag-drop-file-multi [patchFileVal]="form.value.attachments" [loading]="isLoading" (deleteHandler)="deleteFile()"
-            (fileChanged)="addFile($event)" message="Tambahkan Foto Sampul Kos"></app-drag-drop-file-multi>
+          <label for="ppn_type" class="form-label required">PPn Type</label>
+          <select class="form-select" id="ppn_type" formControlName="ppn_type">
+            <option selected disabled value="">Choose...</option>
+            @for (ppn_type of ppnTypes; track $index) {
+            <option [value]="ppn_type.value">{{ppn_type.label}}</option>
+            }
+          </select>
+        </div>
+        <div class="w-100">
+          <label for="ppn_rate" class="form-label">PPn Rate (%)</label>
+          <input type="number" class="form-control" id="ppn_rate" formControlName="ppn_rate"
+            placeholder="Rate number in percent" />
+        </div>
+        <div class="w-100">
+          <label for="ppn_amount" class="form-label">PPn Amount (Rp)</label>
+          <input type="number" class="form-control" id="ppn_amount" formControlName="ppn_amount"
+            placeholder="Total PPn amount in rupiah" />
+        </div>
+        <div class="w-100">
+          <label for="shipping_cost" class="form-label">Shipping Cost (Rp)</label>
+          <input type="number" class="form-control" id="shipping_cost" formControlName="shipping_cost"
+            placeholder="Cost amount in rupiah" />
+        </div>
+        <div class="w-100">
+          <label for="payment_realization" class="form-label">Payment Realization (Rp)</label>
+          <input type="number" class="form-control" id="payment_realization" formControlName="payment_realization"
+            placeholder="Total amount of money spent in rupiah" />
+        </div>
+        <div class="w-100">
+          <label for="notes" class="form-label">Description</label>
+          <textarea class="form-control" id="notes" rows="3" formControlName="notes"></textarea>
+        </div>
+        <div class="w-100">
+          <label for="invoice_photo" class="form-label">Attachments</label>
+          <app-drag-drop-file-multi [patchFileVal]="form.value.attachments" [loading]="isLoading"
+            (fileChanged)="addFile($event)"
+            message="Tambahkan Foto Sampul Kos"></app-drag-drop-file-multi>
         </div>
       </div>
     </div>

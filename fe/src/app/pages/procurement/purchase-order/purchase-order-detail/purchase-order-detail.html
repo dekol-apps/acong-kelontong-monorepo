@@ -1,9 +1,14 @@
 <div class="card-body">
-  <app-purchasing-detail [purchase_id]="purchase_id"></app-purchasing-detail>
+  <app-purchasing-detail [purchase_id]="purchase_id" (onQueryDetail)="detail=$event"></app-purchasing-detail>
 </div>
 <div class="card-footer d-flex gap-2">
-  @if (type !== 'view') {
-  <button class="btn btn-secondary" type="button" (click)="back.emit()">Back</button>
+  @if (type === 'view') {
+  <button class="btn btn-primary" type="button" (click)="exit()">Exit</button>
+  } @else {
+  <button class="btn btn-secondary" type="button" (click)="clickBack()">Back</button>
+  <button class="btn btn-primary" type="button" (click)="exit()">Save & Exit</button>
   }
-  <button class="btn btn-primary" type="button" (click)="nextStep.emit()">Exit</button>
+  @if (detail?.status===PurchasingEn.CREATE) {
+  <button class="btn btn-primary" type="button" (click)="clickSubmit()">Submit</button>
+  }
 </div>

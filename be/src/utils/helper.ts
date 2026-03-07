@@ -94,6 +94,13 @@ export function subtractDecimal(a?: Types.Decimal128, b?: Types.Decimal128) {
   return Types.Decimal128.fromString(result.toFixed());
 }
 
+export function multiplyDecimal(a?: Types.Decimal128, b?: number) {
+  const decimal = new Decimal(a?.toString() ?? 0);
+  const multiplier = new Decimal(b ?? 0);
+  const result = decimal.times(multiplier);
+  return Types.Decimal128.fromString(result.toFixed());
+}
+
 export function decimalToNumber(val?: Types.Decimal128 | Decimal) {
   return parseFloat(val?.toString() ?? '0');
 }

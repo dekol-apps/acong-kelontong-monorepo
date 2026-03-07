@@ -12,7 +12,7 @@ import { PurchasingItem } from '../purchasing-item/purchasing-item.schema';
 import { PurchasingItemService } from '../purchasing-item/purchasing-item.service';
 import { PurchasingItemDto, ReceiveOrderItemDto } from '../purchasing-item/purchasing-item.dto';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { decreaseDays, digitShortDate, subtractDecimal, toDecimal, toDecimal128 } from 'src/utils/helper';
+import { decreaseDays, digitShortDate, multiplyDecimal, subtractDecimal, toDecimal, toDecimal128 } from 'src/utils/helper';
 import { cleanupDays } from 'src/types/constants';
 import { Accounting } from '../accounting/accounting.schema';
 import { AccountingService } from '../accounting/accounting.service';
@@ -232,11 +232,16 @@ export class PurchasingService {
     sortBy,
     sortDir,
     search,
-  }: ListPurchasingItemsDTO): Promise<IListRes<PurchasingItem>> {
-    const searchFields: string[] = ['product_name'];
-    const filter: { column: string, value: any } = { column: 'purchase_order', value: purchasing_id }
+  }: ListPurchasingItemsDTO): Promise<IListRes<PurchasingItem & { price_total: Types.Decimal128 }>> {
 
-    return this.global.getList<PurchasingItem>(
+    const searchFields = ['product_name'];
+
+    const filter = {
+      column: 'purchase_order',
+      value: purchasing_id
+    };
+
+    const list = await this.global.getList<PurchasingItem>(
       this.purchasingItemModel,
       {
         page,
@@ -247,7 +252,19 @@ export class PurchasingService {
         searchFields,
         filter
       }
-    )
+    );
+
+    return {
+      meta: list.meta,
+      data: list.data.map(it => {
+        const obj = it.toObject();
+
+        return {
+          ...obj,
+          price_total: multiplyDecimal(obj.purchase_price, obj.purchase_qty)
+        };
+      })
+    };
   }
 
   async deletePurchasing(id: Types.ObjectId, sessionIn?: ClientSession): Promise<{ detail: Purchasing | undefined; removedAttachments: string[] }> {
@@ -304,7 +321,7 @@ export class PurchasingService {
         }
       }));
 
-      const list = await this.listPurchasingItems({ purchasing_id: purchasing_id.toString() });
+      const list = await this.listPurchasingItems({ purchasing_id: purchasing_id });
       return list.data;
     }, sessionIn);
   }

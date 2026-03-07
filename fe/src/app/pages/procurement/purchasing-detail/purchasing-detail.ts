@@ -1,4 +1,4 @@
-import { Component, Inject, Input, OnChanges, OnInit, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Inject, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { ColumnProps, GenericTable, ITableQueryData } from '../../../shared/components/generic-table/generic-table';
 import { TableColumn } from '../../../shared/directives/table-column/table-column';
 import { formType, IPaginationInput } from '../../../types/interfaces/common.interface';
@@ -25,6 +25,7 @@ export class PurchasingDetail implements OnChanges {
   isLoading: boolean = false;
   listPurchasingItem: IPurchasingItem[] = [];
   purchase?: IPurchasing;
+  @Output() onQueryDetail: EventEmitter<IPurchasing> = new EventEmitter<IPurchasing>();
 
   pagination: IPaginationInput = {
     page: 1,
@@ -41,13 +42,6 @@ export class PurchasingDetail implements OnChanges {
       sort: true,
     },
     {
-      label: 'Supplier',
-      id: 'supplier_name',
-      extraHeaderClass: 'uppercase-text',
-      backendPropName: 'supplier_name',
-      sort: true,
-    },
-    {
       label: 'Purchase QTY',
       id: 'purchase_qty',
       extraHeaderClass: 'uppercase-text',
@@ -59,20 +53,6 @@ export class PurchasingDetail implements OnChanges {
       extraHeaderClass: 'uppercase-text',
       backendPropName: 'purchase_price',
       dataType: 'CURRENCY'
-    },
-    {
-      label: 'Sale Price',
-      id: 'sell_price',
-      extraHeaderClass: 'uppercase-text',
-      backendPropName: 'sell_price',
-      dataType: 'CURRENCY'
-    },
-    {
-      label: 'Expired Date',
-      id: 'exp_date',
-      extraHeaderClass: 'uppercase-text',
-      backendPropName: 'exp_date',
-      dataType: 'DATE'
     },
     {
       label: 'Action',
@@ -109,6 +89,7 @@ export class PurchasingDetail implements OnChanges {
     this.service.getPurchasingDetail(purchase_id).subscribe((res) => {
       console.log({ getDetail: res })
       this.purchase = res;
+      this.onQueryDetail.emit(res);
     });
   }
 

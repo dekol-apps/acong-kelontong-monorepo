@@ -1,6 +1,10 @@
 <div class="d-flex flex-row flex-wrap justify-content-between gap-2 mb-5">
-  <table>
+  <table class="table">
     <tbody>
+      <tr>
+        <td class="fw-bold p-1 col-3 align-top">Invoice Number</td>
+        <td class="align-top">{{purchase?.invoice_number || '-'}}</td>
+      </tr>
       <tr>
         <td class="fw-bold p-1 col-3 align-top">Supplier</td>
         <td class="align-top">{{purchase?.supplier_name || '-'}}</td>
@@ -18,12 +22,48 @@
         <td class="align-top">{{(purchase?.received_at | date: DATE_FORMAT) || '-'}}</td>
       </tr>
       <tr>
+        <td class="fw-bold p-1 col-3 align-top">PPh Type</td>
+        <td class="align-top">{{(purchase?.pph_type) || '-'}}</td>
+      </tr>
+      <tr>
+        <td class="fw-bold p-1 col-3 align-top">PPh Rate</td>
+        <td class="align-top">{{(purchase?.pph_rate) || '-'}}</td>
+      </tr>
+      <tr>
+        <td class="fw-bold p-1 col-3 align-top">PPh Amount</td>
+        <td class="align-top">{{(purchase?.pph_amount | currency: CURRENCY_FORMAT) || '-'}}</td>
+      </tr>
+      <tr>
+        <td class="fw-bold p-1 col-3 align-top">PPn Type</td>
+        <td class="align-top">{{(purchase?.ppn_type) || '-'}}</td>
+      </tr>
+      <tr>
+        <td class="fw-bold p-1 col-3 align-top">PPn Rate</td>
+        <td class="align-top">{{(purchase?.ppn_rate) || '-'}}</td>
+      </tr>
+      <tr>
+        <td class="fw-bold p-1 col-3 align-top">PPn Amount</td>
+        <td class="align-top">{{(purchase?.ppn_amount | currency: CURRENCY_FORMAT) || '-'}}</td>
+      </tr>
+      <tr>
+        <td class="fw-bold p-1 col-3 align-top">Shipping Cost</td>
+        <td class="align-top">{{(purchase?.shipping_cost | currency: CURRENCY_FORMAT) || '-'}}</td>
+      </tr>
+      <tr>
         <td class="fw-bold p-1 col-3 align-top">Total Price</td>
         <td class="align-top">{{(purchase?.total_purchase_price | currency: CURRENCY_FORMAT) || '-'}}</td>
       </tr>
       <tr>
-        <td class="fw-bold p-1 col-3 align-top">Invoice Number</td>
-        <td class="align-top">{{purchase?.invoice_number || '-'}}</td>
+        <td class="fw-bold p-1 col-3 align-top">Additional Cost</td>
+        <td class="align-top">{{(purchase?.additional_cost | currency: CURRENCY_FORMAT) || '-'}}</td>
+      </tr>
+      <tr>
+        <td class="fw-bold p-1 col-3 align-top">Payment Realization</td>
+        <td class="align-top">{{(purchase?.payment_realization | currency: CURRENCY_FORMAT) || '-'}}</td>
+      </tr>
+      <tr>
+        <td class="fw-bold p-1 col-3 align-top">Notes</td>
+        <td class="align-top" [innerHTML]="purchase?.invoice_number || '-'"></td>
       </tr>
       <tr>
         <td class="fw-bold p-1 col-3 align-top">Purchasing Attachments</td>
@@ -54,5 +94,5 @@
 
 <ng-template #POItemForm>
   <app-purchase-order-item-form [type]="'view'" [purchase_id]="purchase_id" [purchase_item_id]="purchase_item_id"
-    (onClose)="modalRef.dismiss()"></app-purchase-order-item-form>
+    (onClose)="modalRef.dismiss(); tableRefresh(defaultTableParam)"></app-purchase-order-item-form>
 </ng-template>

@@ -70,7 +70,7 @@ export class PurchaseOrderDto extends PurchaseOrderApprovalDto {
 export class PurchasingDto extends PurchaseOrderDto {
   @IsMongoId()
   @IsNotEmpty()
-  supplier?: string;
+  supplier?: Types.ObjectId;
   @IsString()
   @IsDate()
   @IsNotEmpty()
@@ -78,7 +78,7 @@ export class PurchasingDto extends PurchaseOrderDto {
 }
 
 export class ListPurchasingItemsDTO extends PaginationDto {
-  purchasing_id: string
+  purchasing_id: Types.ObjectId
 }
 
 export type PurchasingDetail =

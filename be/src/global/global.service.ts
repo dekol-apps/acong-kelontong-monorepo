@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
-import { Model, FilterQuery, ClientSession, Connection } from 'mongoose';
+import { Model, FilterQuery, ClientSession, Connection, HydratedDocument } from 'mongoose';
 import { modules } from 'src/types/constants';
 import { IListRes, TOneOrMany } from 'src/types/interfaces';
 import { Trash } from './global.schema';
@@ -30,7 +30,10 @@ export class GlobalService {
   ) { }
 
 
-  async getList<M>(model: Model<M>, params: IGetListParam): Promise<IListRes<M>> {
+  async getList<M>(
+    model: Model<M>,
+    params: IGetListParam
+  ): Promise<IListRes<HydratedDocument<M>>> {
     const pageNum = params.page ? Math.max(1, params.page) : undefined;
     const pageSize = params.size ? Math.max(1, params.size) : undefined;
     const isPaginated = pageNum !== undefined && pageSize !== undefined;

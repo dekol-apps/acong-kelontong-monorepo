@@ -5,17 +5,19 @@ import { PurchaseOrderForm1 } from '../purchase-order-form1/purchase-order-form1
 import { PurchaseOrderItem } from '../purchase-order-item/purchase-order-item';
 import { PurchaseOrderDetail } from '../purchase-order-detail/purchase-order-detail';
 import { ActivatedRoute, Router } from '@angular/router';
-import { IPurchasing, IPurchasingItem } from '../../../../types/interfaces/procurement.interface';
+import { IPurchasing, IPurchasingItem, PurchasingEn } from '../../../../types/interfaces/procurement.interface';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { PurchaseOrderFormPayment } from "../purchase-order-form-payment/purchase-order-form-payment";
 import { PurchaseOrderService } from '../purchase-order.service';
 import { AlertService } from '../../../../shared/components/alert/alert-service';
+import { PurchasingStore } from '../../../../shared/stores/purchasing.store';
+import { nativeToNgbDate } from '../../../../shared/components/date-range-filter/date-range-filter';
 
 @Component({
   selector: 'app-purchase-order-form',
   imports: [NgbNavModule, PurchaseOrderForm1, PurchaseOrderItem, PurchaseOrderDetail, PurchaseOrderFormPayment],
   templateUrl: './purchase-order-form.html',
-  styleUrl: './purchase-order-form.scss'
+  styleUrl: './purchase-order-form.scss',
 })
 export class PurchaseOrderForm {
   type: formType = 'new';
@@ -28,8 +30,12 @@ export class PurchaseOrderForm {
     private route: ActivatedRoute,
     private router: Router,
     private alert: AlertService,
+    public store: PurchasingStore,
     private purchasingService: PurchaseOrderService
   ) {
+    this.store.purchasing$.subscribe(val => {
+      this.purchasingDetail = val;
+    })
     const step = this.route.snapshot.paramMap.get('step') || undefined;
     this.purchase_id = this.route.snapshot.paramMap.get('po_id') || undefined;
     const type = this.route.snapshot.queryParamMap.get('type') || undefined;
@@ -42,6 +48,9 @@ export class PurchaseOrderForm {
       }
     } else if (step) {
       this.activeStep = Number(step);
+    }
+    if (this.purchase_id) {
+      this.getDetail(this.purchase_id);
     }
   }
 
@@ -58,20 +67,60 @@ export class PurchaseOrderForm {
     pph_amount: new FormControl(null),
     ppn_amount: new FormControl(null),
     shipping_cost: new FormControl(null),
+    payment_realization: new FormControl(null),
   });
 
-  submitForm1(val) {
-    let serviceArg = this.purchasingService.createPurchasing(val);
-    if (this.purchase_id) serviceArg = this.purchasingService.editPurchasing(this.purchase_id, val)
-    serviceArg.subscribe({
+  getDetail(purchase_id: string) {
+    this.purchasingService.getPurchasingDetail(purchase_id).subscribe({
       next: (res) => {
-        this.alert.success(`Success ${this.purchase_id ? 'edit' : 'create'} purchasing!`);
-        if (!this.purchase_id) {
-          this.purchase_id = res._id;
-          this.nextStep()
-        } else {
-          this.nextStep()
+        console.log({ getDetail: res })
+        const valToPatch = {
+          ...res,
+          supplier: res.supplier?._id,
+          due_date: nativeToNgbDate(res.due_date),
+          invoice_number: res.invoice_number,
+          purchasing_attachments: res.purchasing_attachments?.map(it => {
+            return { src: it, file: null }
+          }),
+          pph_amount: res.pph_amount?.$numberDecimal,
+          ppn_amount: res.ppn_amount?.$numberDecimal,
+          shipping_cost: res.shipping_cost?.$numberDecimal,
+          payment_realization: res.payment_realization?.$numberDecimal
         }
+        this.form.patchValue(valToPatch)
+        console.log({ valToPatch })
+        this.store.setPurchasing(res);
+        if (res.status !== PurchasingEn.CREATE && res.status !== PurchasingEn.REJECT) {
+          this.form.controls.supplier.disable();
+          this.form.controls.due_date.disable();
+        }
+      }
+    });
+  }
+
+  submitForm1(val) {
+    if (!this.purchase_id) {
+      this.purchase_id = val._id;
+      this.store.setPurchasing(val);
+      console.log('submitForm1', this.purchase_id, val)
+      this.nextStep()
+    } else {
+      this.nextStep()
+    }
+  }
+
+  submitFormPayment(val) {
+    this.nextStep()
+  }
+
+  submitPurchasing(subject: PurchasingEn) {
+    let subscriber = this.purchasingService.requestPO(this.purchase_id!);
+    if (subject === PurchasingEn.REQUEST) {
+      subscriber = this.purchasingService.requestPO(this.purchase_id!);
+    }
+    subscriber.subscribe({
+      next: (res) => {
+        this.alert.success(res.message ?? 'Success, PO waiting for approval')
       }
     })
   }

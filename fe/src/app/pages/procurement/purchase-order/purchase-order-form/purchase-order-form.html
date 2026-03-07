@@ -7,7 +7,7 @@
       <button ngbNavLink>Supplier</button>
       <ng-template ngbNavContent>
         <div class="nav-tabs m-2">
-          <app-purchase-order-form1 [form]="form" [type]="type" (back)="done()" (submitPO)="submitForm1($event)"></app-purchase-order-form1>
+          <app-purchase-order-form1 [form]="form" [type]="type" [purchase_id]="purchase_id" (back)="done()" (next)="submitForm1($event)"></app-purchase-order-form1>
         </div>
       </ng-template>
     </li>
@@ -15,7 +15,7 @@
       <button ngbNavLink>Items</button>
       <ng-template ngbNavContent>
         <div class="nav-tabs m-2">
-          <app-purchase-order-item [type]="type" (back)="prevStep()" (nextStep)="nextStep()"></app-purchase-order-item>
+          <app-purchase-order-item [type]="type" [purchase_id]="purchase_id" (back)="prevStep()" (next)="nextStep()"></app-purchase-order-item>
         </div>
       </ng-template>
     </li>
@@ -23,7 +23,7 @@
       <button ngbNavLink>Payment</button>
       <ng-template ngbNavContent>
         <div class="nav-tabs m-2">
-          <app-purchase-order-form-payment [form]="form" [type]="type" (back)="prevStep()" (submitPO)="nextStep()"></app-purchase-order-form-payment>
+          <app-purchase-order-form-payment [form]="form" [type]="type" [purchase_id]="purchase_id" (back)="prevStep()" (next)="submitFormPayment($event)"></app-purchase-order-form-payment>
         </div>
       </ng-template>
     </li>
@@ -31,7 +31,7 @@
       <button ngbNavLink>Summary</button>
       <ng-template ngbNavContent>
         <div class="nav-tabs m-2">
-          <app-purchase-order-detail [type]="type" (back)="prevStep()" (nextStep)="done()"></app-purchase-order-detail>
+          <app-purchase-order-detail [type]="type" (back)="prevStep()" (nextStep)="submitPurchasing($event)"></app-purchase-order-detail>
         </div>
       </ng-template>
     </li>

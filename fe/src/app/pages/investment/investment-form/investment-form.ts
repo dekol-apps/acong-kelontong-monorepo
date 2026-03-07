@@ -60,12 +60,8 @@ export class InvestmentForm implements AfterViewInit {
   }
 
   addFile(evt: IFielImg[]) {
-    this.deleteFile();
-    this.form.controls.attachments.patchValue(evt);
-  }
-
-  deleteFile() {
-    this.form.controls.attachments.reset();
+    if (!evt.length) this.form.controls.attachments.reset();
+    else this.form.controls.attachments.patchValue(evt);
   }
 
   submit() {

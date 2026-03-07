@@ -7,6 +7,7 @@ import { IPaginationInput } from '../../../types/interfaces/common.interface';
 import { IResDetail, IResList } from '../../../types/interfaces/http.interface';
 import { ITableQueryData } from '../../../shared/components/generic-table/generic-table';
 import { IPurchasing, IPurchasingItem, IPurchasingItemDto } from '../../../types/interfaces/procurement.interface';
+import { PurchaseOrder } from './purchase-order';
 
 @Injectable({
   providedIn: 'root'
@@ -31,7 +32,7 @@ export class PurchaseOrderService extends BaseService {
   }
 
   createPurchasing(
-    body: FormData //refers to IPurchasingDto
+    body: FormData|IPurchasing //refers to IPurchasingDto
   ): Observable<IPurchasing> {
     return this.postRequest({ url: Endpoint.PURCHASING, body }).pipe(
       map((res: IResDetail<IPurchasing>) => {
@@ -42,7 +43,7 @@ export class PurchaseOrderService extends BaseService {
 
   editPurchasing(
     purchasing_id: string,
-    body: FormData //refers to IPurchasingDto
+    body: FormData|IPurchasing //refers to IPurchasingDto
   ): Observable<IPurchasing> {
     return this.putRequest({ url: Endpoint.PURCHASING_ID(purchasing_id), body }).pipe(
       map((res: IResDetail<IPurchasing>) => {
@@ -117,6 +118,10 @@ export class PurchaseOrderService extends BaseService {
         return res.detail;
       })
     );
+  }
+
+  requestPO(purchasing_id: string): Observable<IResDetail<PurchaseOrder>> {
+    return this.putRequest({ url: Endpoint.PURCHASING_ID(purchasing_id) });
   }
 }
 

@@ -4,6 +4,7 @@ import { BaseResponse } from 'src/utils/base-response';
 import { PurchasingItemService } from './purchasing-item.service';
 import type { Response } from 'express';
 import { PurchasingItemDto } from './purchasing-item.dto';
+import { toDecimal, toDecimal128 } from 'src/utils/helper';
 
 @Controller('purchasing-item')
 export class PurchasingItemController {
@@ -18,7 +19,11 @@ export class PurchasingItemController {
     @Res() res: Response,
   ) {
     try {
-      const purchaseItem = await this.service.createPurchasingItem(body);
+      const data: PurchasingItemDto = {
+        ...body,
+        purchase_price: toDecimal128(toDecimal(body.purchase_price))
+      }
+      const purchaseItem = await this.service.createPurchasingItem(data);
       return BaseResponse.success({ res, option: { message: "Success create purchaseItem", detail: purchaseItem } });
     } catch (err) {
       return BaseResponse.error({ res, err });

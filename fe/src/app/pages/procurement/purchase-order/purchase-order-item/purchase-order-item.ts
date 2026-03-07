@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Inject, Input, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
-import { IPurchasingItem } from '../../../../types/interfaces/procurement.interface';
+import { IPurchasingItem, PurchasingEn } from '../../../../types/interfaces/procurement.interface';
 import { PurchaseOrderService } from '../purchase-order.service';
 import { AlertService } from '../../../../shared/components/alert/alert-service';
 import { NgbActiveModal, NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
@@ -10,6 +10,7 @@ import { SORT_DIR } from '../../../../types/constants/common.constants';
 import { IPaginationInput, formType } from '../../../../types/interfaces/common.interface';
 import { PurchaseOrderItemForm } from './purchase-order-item-form/purchase-order-item-form';
 import { ActivatedRoute } from '@angular/router';
+import { PurchasingStore } from '../../../../shared/stores/purchasing.store';
 
 @Component({
   selector: 'app-purchase-order-item',
@@ -19,17 +20,17 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class PurchaseOrderItem implements OnInit {
 
-  @Output() nextStep: EventEmitter<unknown> = new EventEmitter<unknown>()
+  @Output() next: EventEmitter<unknown> = new EventEmitter<unknown>()
   @Output() back: EventEmitter<unknown> = new EventEmitter<unknown>()
 
   @ViewChild('ConfirmModal') confrimModal?: ConfirmModal;
   @ViewChild('POItemForm', { static: false }) poItemForm?: TemplateRef<PurchaseOrderItemForm>;
 
   @Input() type: formType = 'view';
+  @Input() purchase_id?: string;
 
   isLoading: boolean = false;
   listPurchasingItem: IPurchasingItem[] = [];
-  purchase_id?: string;
   purchase_item_id?: string;
   form_type?: formType;
 
@@ -48,16 +49,23 @@ export class PurchaseOrderItem implements OnInit {
       sort: true,
     },
     {
-      label: 'Purchase QTY',
+      label: 'Quantity',
       id: 'purchase_qty',
       extraHeaderClass: 'uppercase-text',
       backendPropName: 'purchase_qty',
     },
     {
-      label: 'Purchase Price',
-      id: 'purchase_price',
+      label: 'Price',
+      id: 'purchase_price.$numberDecimal',
       extraHeaderClass: 'uppercase-text',
       backendPropName: 'purchase_price',
+      dataType: 'CURRENCY'
+    },
+     {
+      label: 'Total',
+      id: 'price_total.$numberDecimal',
+      extraHeaderClass: 'uppercase-text',
+      backendPropName: 'price_total',
       dataType: 'CURRENCY'
     },
     {
@@ -78,8 +86,19 @@ export class PurchaseOrderItem implements OnInit {
 
   activeModal = Inject(NgbActiveModal);
 
-  constructor(private service: PurchaseOrderService, private modalService: NgbModal, private alert: AlertService, private route: ActivatedRoute) {
-    this.purchase_id = this.route.snapshot.paramMap.get('po_id') || undefined;
+  status?: PurchasingEn;
+
+  ableToTouch: string[] = [PurchasingEn.CREATE, PurchasingEn.REJECT, PurchasingEn.REQUEST] as string[];
+
+  constructor(private service: PurchaseOrderService, private modalService: NgbModal, private alert: AlertService, private store: PurchasingStore) {
+    this.store.purchasing$.subscribe(val => {
+      this.status = val?.status
+    })
+  }
+
+  canTouch() {
+    console.log('this.type', this.type, this.status)
+    return this.type === 'new' || (this.type === 'edit' && this.status && this.ableToTouch.includes(this.status))
   }
 
   modalOptions: NgbModalOptions = {
