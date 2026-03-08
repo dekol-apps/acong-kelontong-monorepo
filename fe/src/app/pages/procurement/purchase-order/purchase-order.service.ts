@@ -121,7 +121,7 @@ export class PurchaseOrderService extends BaseService {
   }
 
   requestPO(purchasing_id: string): Observable<IResDetail<PurchaseOrder>> {
-    return this.putRequest({ url: Endpoint.PURCHASING_ID(purchasing_id) });
+    return this.putRequest({ url: `${Endpoint.PURCHASING_ID(purchasing_id)}/request` });
   }
 }
 

@@ -66,7 +66,7 @@ export class ApprovalPurchasing implements OnInit {
     },
     {
       label: 'Total Purchase Price',
-      id: 'total_purchase_price',
+      id: 'total_purchase_price.$numberDecimal',
       extraHeaderClass: 'uppercase-text',
       dataType: 'CURRENCY'
     },

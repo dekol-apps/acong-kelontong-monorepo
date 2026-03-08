@@ -181,7 +181,8 @@ export class PurchaseOrderForm {
     }
     subscriber.subscribe({
       next: (res) => {
-        this.alert.success(res.message ?? 'Success, PO waiting for approval')
+        this.alert.success('Success, PO waiting for approval');
+        this.done();
       }
     })
   }
