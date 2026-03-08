@@ -191,7 +191,7 @@ export class PurchaseOrderForm {
     if (this.activeStep < 4)
       this.activeStep += 1;
     if (this.purchase_id) {
-      this.router.navigate([`../../${this.activeStep}/${this.purchase_id}`], { relativeTo: this.route, queryParams: { type: 'edit' } });
+      this.router.navigate([`purchase-order/form/${this.activeStep}/${this.purchase_id}`], { queryParams: { type: 'edit' } });
     }
   }
 
@@ -199,7 +199,7 @@ export class PurchaseOrderForm {
     if (this.activeStep > 1)
       this.activeStep -= 1;
     if (this.purchase_id) {
-      this.router.navigate([`../../${this.activeStep}/${this.purchase_id}`], { relativeTo: this.route, queryParams: { type: 'edit' } });
+      this.router.navigate([`purchase-order/form/${this.activeStep}/${this.purchase_id}`], { queryParams: { type: 'edit' } });
     }
   }
 
