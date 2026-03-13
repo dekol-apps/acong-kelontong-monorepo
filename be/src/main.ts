@@ -6,6 +6,12 @@ import { SanitizePipe } from './global/sanitizer.pipe';
 import { ErrResFactory } from './global/err-res-factory';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
+import { Types } from 'mongoose';
+
+// Map Decimal128 to its string equivalent during JSON serialization
+Types.Decimal128.prototype.toJSON = function () {
+  return this.toString();
+};
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
