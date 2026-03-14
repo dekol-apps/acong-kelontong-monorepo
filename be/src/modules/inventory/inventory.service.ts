@@ -9,8 +9,7 @@ import { BaseResponse } from 'src/utils/base-response';
 import { InventoryDto, InventoryReconcileDto } from './inventory.dto';
 import { InventoryItem } from '../inventory-item/inventory-item.schema';
 import { InventoryItemService } from '../inventory-item/inventory-item.service';
-import { InventoryMovementItem } from '../inventory-movement/inventory-movement-item.schema';
-import { InventoryReconcile } from './inventory-reconcile.schema';
+import { InventoryReconcile, InventoryReconcileItem } from './inventory-reconcile.schema';
 @Injectable()
 export class InventoryService {
   constructor(
@@ -100,56 +99,49 @@ export class InventoryService {
       const productIds = dto.items.map(i => i.product);
       const existingItems = await this.inventoryItemModel.find({
         inventory: dto.inventory,
-        product: { $in: productIds },
-      }).session(session);
+        product: { $in: productIds },//sort by createdAt latest
+      }).sort({ createdAt: -1 }).session(session);
 
-      const itemMap = new Map(
-        existingItems.map(i => [i.product.toString(), i]),
-      );
-
-      const itemsAfterReconcile: InventoryMovementItem[] = []
+      const itemsAfterReconcile: InventoryReconcileItem[] = []
 
       await Promise.all(dto.items.map(async item => {
-        const existing = itemMap.get(item.product.toString());
-        let productName = existing?.product_name;
-
-        if (!existing) {
-          const newData = { ...item, inventory: dto.inventory };
-          const newInv = await this.inventoryItem.createInventoryItem(newData, session);
-          productName = newInv?.product_name;
-        } else {
-          const qtyCorrection = item.item_qty;
-          if (qtyCorrection < 0) {
-            throw BaseResponse.invalid({ option: { message: 'Quantity cannot be lesser than 0!' }, err: 'inventory reconcile invalid qty' })
-          }
-
-          if (qtyCorrection === 0) {
-            await this.inventoryItem.deleteInventoryItem(existing._id, session);
-          } else {
-            await this.inventoryItem.editInventoryItem(
-              existing._id,
-              {
-                inventory: existing.inventory,
-                product: existing.product,
-                item_qty: qtyCorrection,
-              },
-              session
-            );
+        for (const existingItem of existingItems) {
+          if (existingItem.product.toString() === item.product.toString()) {
+            const qtyCorrection = item.item_qty;
+            if (qtyCorrection < 0) {
+              throw BaseResponse.invalid({ option: { message: 'Quantity cannot be lesser than 0!' }, err: 'inventory reconcile invalid qty' })
+            }
+            const existingItemsByProduct = existingItems.filter(i => i.product.toString() === item.product.toString());
+            //delete existing item by qtyCorrection
+            if (qtyCorrection < existingItemsByProduct.length) {
+              for (let i = 0; i < existingItemsByProduct.length - qtyCorrection; i++) {
+                await this.inventoryItem.deleteInventoryItem(existingItemsByProduct[i]._id, session);
+              }
+            }
+            const productName = existingItem?.product_name;
+            const itemAfterRecon = {
+              ...item,
+              product: item.product,
+              product_name: productName ?? 'Missing Product Name'
+            }
+            itemsAfterReconcile.push(itemAfterRecon)
           }
         }
-
-        const itemAfterRecon = {
-          ...item,
-          product: item.product,
-          product_name: productName ?? 'Missing Product Name'
-        }
-        itemsAfterReconcile.push(itemAfterRecon)
       }));
+
+      const itemsBefore: InventoryReconcileItem[] = existingItems.map((item: InventoryItem) => {
+        return {
+          product: item.product,
+          product_name: item.product_name,
+          item_qty: existingItems.filter(i => i.product.toString() === item.product.toString()).length,
+        }
+      });
+      const itemsBeforeReconcile = itemsBefore.filter((item, index) => itemsBefore.findIndex(i => i.product.toString() === item.product.toString()) === index);
 
       const data: InventoryReconcile = {
         inventory: dto.inventory,
         description: dto.description,
-        itemsBefore: existingItems,
+        itemsBefore: itemsBeforeReconcile,
         itemsAfter: itemsAfterReconcile
       }
 

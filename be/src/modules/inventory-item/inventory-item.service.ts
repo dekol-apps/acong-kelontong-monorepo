@@ -56,7 +56,7 @@ export class InventoryItemService {
           product: { $first: "$product" },
           product_name: { $first: "$product_name" },
           inventory: { $first: "$inventory" },
-          item_qty: { $sum: 1 }, 
+          item_qty: { $sum: 1 },
           // Option to track average landed_cost across batch
           avg_landed_cost: { $avg: { $toDecimal: "$landed_cost" } }
         }
@@ -96,8 +96,10 @@ export class InventoryItemService {
         throw BaseResponse.notFound({ err: `createInventoryItem Inventory not found` });
       }
       const data = {
-        ...dto,
+        inventory: dto.inventory,
+        product: dto.product,
         product_name: product.product_name,
+        landed_cost: dto.landed_cost,
       }
       const created = (await this.inventoryItemModel.create([data], { session }))[0];
       if (!created) throw BaseResponse.notFound({ err: 'createInventoryItem created not found' });
@@ -119,8 +121,10 @@ export class InventoryItemService {
       const product = await this.productModel.findById(dto.product).session(session);
       if (!product) throw BaseResponse.notFound({ err: `editInventoryItem Product not found` });
       const data = {
-        ...dto,
+        inventory: dto.inventory,
+        product: dto.product,
         product_name: product.product_name,
+        landed_cost: dto.landed_cost,
       }
       const updatedItem = await this.inventoryItemModel.findByIdAndUpdate(
         id,
@@ -131,7 +135,6 @@ export class InventoryItemService {
         },
       ).session(session);
       if (!updatedItem) throw BaseResponse.notFound({ err: 'editInventoryItem updatedItem not found' });
-      await this.updateInventoryTotalQuantity(updatedItem?.inventory, session);
       return updatedItem || undefined;
     }, sessionIn);
   }
