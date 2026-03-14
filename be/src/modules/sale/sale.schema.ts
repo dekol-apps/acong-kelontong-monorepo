@@ -15,6 +15,9 @@ export class Sale {
   @Prop({ type: Types.Decimal128, required: true })
   total_discount: Types.Decimal128;
 
+  @Prop({ type: Types.Decimal128, required: true, default: 0 })
+  total_cogs: Types.Decimal128;
+
   @Prop({ type: Types.Decimal128, required: true })
   grand_total: Types.Decimal128;
 }

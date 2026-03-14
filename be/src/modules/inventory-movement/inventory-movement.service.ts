@@ -9,8 +9,16 @@ import { BaseResponse } from 'src/utils/base-response';
 import { InventoryItemService } from '../inventory-item/inventory-item.service';
 import { InventoryMovement } from './inventory-movement.schema';
 import { Product } from '../product/product.schema';
-import { FlowType, IListRes } from 'src/types/interfaces';
+import { FlowType, IListRes, OrderType } from 'src/types/interfaces';
 import { InventoryMovementItem } from './inventory-movement-item.schema';
+
+/** Snapshot of an InventoryItem captured just before it is deleted, returned by moveOutByItemIds */
+export interface MovedInventoryItemData {
+  _id: Types.ObjectId;
+  product: Types.ObjectId;
+  product_name: string;
+  landed_cost?: Types.Decimal128;
+}
 
 @Injectable()
 export class InventoryMovementService {
@@ -48,7 +56,6 @@ export class InventoryMovementService {
         const movementItem: InventoryMovementItem = {
           product: item.product,
           product_name: product?.product_name,
-          item_qty: item.item_qty
         }
         data.items.push(movementItem);
       }))
@@ -61,11 +68,11 @@ export class InventoryMovementService {
   async move(dto: InventoryMovementDto & { source_id?: Types.ObjectId }, sessionIn?: ClientSession): Promise<InventoryMovement | undefined> {
     return this.global.withTransaction(async (session) => {
       if (dto.movement_type === FlowType.IN) {
-        // BURST: Insert N individual records based on item_qty to track COGS per item
+        // BURST: Insert N individual records based on items.length to track landed_cost per item
         await Promise.all(dto.items.map(async item => {
-          const newData = { ...item, inventory: dto.inventory, item_qty: 1 };
+          const newData = { ...item, inventory: dto.inventory };
           // Loop and create N individual items
-          for(let i = 0; i < item.item_qty; i++) {
+          for (let i = 0; i < item.item_qty; i++) {
             await this.inventoryItem.createInventoryItem(newData, session);
           }
         }));
@@ -73,24 +80,101 @@ export class InventoryMovementService {
         // BURST: Find N individual records for this product and delete them
         await Promise.all(dto.items.map(async item => {
           const product = await this.productModel.findById(item.product).session(session).lean();
-          const matchingItems = await this.inventoryItemModel.find({ 
+          const matchingItems = await this.inventoryItemModel.find({
             inventory: dto.inventory,
             product: item.product
           }).limit(item.item_qty).session(session);
-          
+
           if (matchingItems.length < item.item_qty) {
             throw BaseResponse.invalid({ option: { message: `Insufficient stock for product ${product?.product_name ?? 'Unknown'}!` }, err: 'inventory move OUT no stock' })
           }
 
           // Delete the exact items we found (FIFO-ish based on natural insert order)
-          for(const matchingItem of matchingItems) {
-             await this.inventoryItem.deleteInventoryItem(matchingItem._id, session);
+          for (const matchingItem of matchingItems) {
+            await this.inventoryItem.deleteInventoryItem(matchingItem._id, session);
           }
         }));
       }
       const result = await this.createInventoryMovement(dto, session);
       return result;
     }, sessionIn)
+  }
+
+  /**
+   * Move OUT specific individual InventoryItem records by their exact document IDs.
+   *
+   * Unlike `move(OUT)` (which picks FIFO), this method lets the caller choose
+   * exactly which physical units leave inventory — enabling precise COGS tracking
+   * because each item's `landed_cost` is captured before deletion.
+   *
+   * Returns the movement record and the captured item data (including landed_cost).
+   */
+  async moveOutByItemIds(
+    dto: {
+      inventory: Types.ObjectId;
+      order_type: OrderType;
+      description?: string;
+      source_id?: Types.ObjectId;
+    },
+    inventoryItemIds: Types.ObjectId[],
+    sessionIn?: ClientSession,
+  ): Promise<{ movement: InventoryMovement; movedItems: MovedInventoryItemData[] } | undefined> {
+    return this.global.withTransaction(async (session) => {
+      const movedItems: MovedInventoryItemData[] = [];
+
+      // Validate and capture each item's data before deleting
+      for (const itemId of inventoryItemIds) {
+        const inventoryItem = await this.inventoryItemModel
+          .findOne({ _id: itemId, inventory: dto.inventory })
+          .session(session);
+
+        if (!inventoryItem) {
+          throw BaseResponse.invalid({
+            option: { message: `InventoryItem ${itemId.toString()} not found in the specified inventory` },
+            err: 'moveOutByItemIds item not found',
+          });
+        }
+
+        // Capture the data (including landed_cost for COGS) before removal
+        movedItems.push({
+          _id: inventoryItem._id,
+          product: inventoryItem.product,
+          product_name: inventoryItem.product_name,
+          landed_cost: inventoryItem.landed_cost,
+        });
+
+        await inventoryItem.deleteOne({ session });
+      }
+
+      // Recalculate inventory total_qty once after all deletions
+      await this.inventoryItem.updateInventoryTotalQuantity(dto.inventory, session);
+
+      // Build a grouped movement summary (one entry per unique product)
+      const productMap = new Map<string, InventoryMovementItem>();
+      for (const item of movedItems) {
+        const key = item.product.toString();
+        if (!productMap.has(key)) {
+          productMap.set(key, {
+            product: item.product,
+            product_name: item.product_name,
+          });
+        }
+      }
+
+      const movementData: InventoryMovement = {
+        inventory: dto.inventory,
+        movement_type: FlowType.OUT,
+        order_type: dto.order_type,
+        items: Array.from(productMap.values()),
+        description: dto.description,
+        source_id: dto.source_id,
+      };
+
+      const [movement] = await this.inventoryMovementModel.create([movementData], { session });
+      if (!movement) throw BaseResponse.notFound({ err: 'moveOutByItemIds movement not created' });
+
+      return { movement, movedItems };
+    }, sessionIn);
   }
 
   async listInventoryMovement({

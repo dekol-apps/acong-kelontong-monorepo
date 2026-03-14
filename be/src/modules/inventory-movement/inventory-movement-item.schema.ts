@@ -6,8 +6,7 @@ import { Product, ProductDocument } from '../product/product.schema';
 export class InventoryMovementItem {
   @Prop({ type: Types.ObjectId, ref: Product.name, required: true }) product: Types.ObjectId;
   @Prop({ required: true }) product_name: string;
-  @Prop({ type: Number, required: true }) item_qty: number;
-  
+
   // Track specific cost per item unit for Landed Cost logic
   @Prop({ type: Types.Decimal128 }) landed_cost?: Types.Decimal128;
 }
