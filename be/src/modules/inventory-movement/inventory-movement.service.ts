@@ -177,6 +177,91 @@ export class InventoryMovementService {
     }, sessionIn);
   }
 
+  /**
+   * Move OUT inventory items selected automatically via FIFO for each product.
+   *
+   * For each entry in `items`, the oldest N InventoryItem records (by natural
+   * insert order) for the given product inside the specified inventory are
+   * captured and deleted.  Their `landed_cost` values are returned so the
+   * caller can use them as COGS data.
+   *
+   * Throws if there is insufficient stock for any product.
+   */
+  async moveOutByProductAndQty(
+    dto: {
+      inventory: Types.ObjectId;
+      order_type: OrderType;
+      description?: string;
+      source_id?: Types.ObjectId;
+    },
+    items: Array<{ product: Types.ObjectId; item_qty: number }>,
+    sessionIn?: ClientSession,
+  ): Promise<{ movement: InventoryMovement; movedItems: MovedInventoryItemData[] } | undefined> {
+    return this.global.withTransaction(async (session) => {
+      const movedItems: MovedInventoryItemData[] = [];
+
+      for (const item of items) {
+        // FIFO: pick the oldest N items for this product in this inventory
+        const candidates = await this.inventoryItemModel
+          .find({ inventory: dto.inventory, product: item.product })
+          .limit(item.item_qty)
+          .session(session);
+
+        if (candidates.length < item.item_qty) {
+          const productDoc = await this.productModel
+            .findById(item.product)
+            .session(session)
+            .lean();
+          throw BaseResponse.invalid({
+            option: {
+              message: `Insufficient stock for product "${productDoc?.product_name ?? item.product.toString()}"`,
+            },
+            err: 'moveOutByProductAndQty insufficient stock',
+          });
+        }
+
+        for (const candidate of candidates) {
+          movedItems.push({
+            _id: candidate._id,
+            product: candidate.product,
+            product_name: candidate.product_name,
+            landed_cost: candidate.landed_cost,
+          });
+          await candidate.deleteOne({ session });
+        }
+      }
+
+      // Recalculate inventory total_qty once after all deletions
+      await this.inventoryItem.updateInventoryTotalQuantity(dto.inventory, session);
+
+      // Build a grouped movement summary (one entry per unique product)
+      const productMap = new Map<string, InventoryMovementItem>();
+      for (const item of movedItems) {
+        const key = item.product.toString();
+        if (!productMap.has(key)) {
+          productMap.set(key, {
+            product: item.product,
+            product_name: item.product_name,
+          });
+        }
+      }
+
+      const movementData: InventoryMovement = {
+        inventory: dto.inventory,
+        movement_type: FlowType.OUT,
+        order_type: dto.order_type,
+        items: Array.from(productMap.values()),
+        description: dto.description,
+        source_id: dto.source_id,
+      };
+
+      const [movement] = await this.inventoryMovementModel.create([movementData], { session });
+      if (!movement) throw BaseResponse.notFound({ err: 'moveOutByProductAndQty movement not created' });
+
+      return { movement, movedItems };
+    }, sessionIn);
+  }
+
   async listInventoryMovement({
     movement_type,
     page,

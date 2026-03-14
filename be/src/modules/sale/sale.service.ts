@@ -4,7 +4,7 @@ import { Model, ClientSession, Types } from 'mongoose';
 import { GlobalService } from 'src/global/global.service';
 import { BaseResponse } from 'src/utils/base-response';
 import { AccountingService } from '../accounting/accounting.service';
-import { MovedInventoryItemData, InventoryMovementService } from '../inventory-movement/inventory-movement.service';
+import { InventoryMovementService } from '../inventory-movement/inventory-movement.service';
 import { CalculateSaleResult, SaleDto, SellingSaleDto } from './sale-dto';
 import { SaleItem } from './sale-item.schema';
 import { Sale } from './sale.schema';
@@ -32,48 +32,43 @@ export class SaleService {
   ) { }
 
   /**
-   * Add stock to the sale shelf by pulling specific physical units from inventory.
+   * Add stock to the sale shelf by pulling physical units from inventory via FIFO.
    *
    * Flow:
-   *  1. Call moveOutByItemIds — validates + deletes the exact InventoryItem records
-   *     the caller selected, captures their landed_cost before deletion, and records
-   *     the inventory movement (OUT).
+   *  1. Call moveOutByProductAndQty — for each item in the DTO, selects the
+   *     oldest N InventoryItem records for that product (FIFO), captures their
+   *     landed_cost, deletes them, and records the inventory movement (OUT).
    *  2. For each moved unit, create one SaleItem document with:
    *     - sale pricing from the DTO
    *     - cogs = landed_cost from the source InventoryItem
    */
   async addStock(data: SaleDto, sessionIn?: ClientSession): Promise<SaleItem[] | undefined> {
     return this.global.withTransaction(async (session) => {
-      // ─── Build a flat list of all requested inventory item IDs → pricing ──
-      // Maps inventoryItemId (string) → the pricing config from that DTO group
+      // ─── Build a pricing lookup keyed by product ID ───────────────────────
       const pricingMap = new Map<
         string,
         { sale_price: number; discount_percent?: number; ppn_rate?: number }
       >();
 
       for (const group of data.items) {
-        for (const id of group.inventory_item_ids) {
-          pricingMap.set(id.toString(), {
-            sale_price: group.sale_price,
-            discount_percent: group.discount_percent,
-            ppn_rate: group.ppn_rate,
-          });
-        }
+        pricingMap.set(group.product.toString(), {
+          sale_price: group.sale_price,
+          discount_percent: group.discount_percent,
+          ppn_rate: group.ppn_rate,
+        });
       }
 
-      const allInventoryItemIds = data.items.flatMap(g => g.inventory_item_ids);
-
-      // ─── Step 1: Move items OUT of inventory, get landed_cost per unit ────
-      const result = await this.inventoryMovementSvc.moveOutByItemIds(
+      // ─── Step 1: FIFO move-out by product + qty ───────────────────────────
+      const result = await this.inventoryMovementSvc.moveOutByProductAndQty(
         {
           inventory: data.inventory,
           order_type: OrderType.SALE,
           description: 'Stock moved to sale shelf',
         },
-        allInventoryItemIds,
+        data.items.map(g => ({ product: g.product, item_qty: g.item_qty })),
         session,
       );
-      if (!result) throw BaseResponse.invalid({ err: 'addStock moveOutByItemIds returned undefined' });
+      if (!result) throw BaseResponse.invalid({ err: 'addStock moveOutByProductAndQty returned undefined' });
 
       const { movedItems } = result;
 
@@ -95,9 +90,9 @@ export class SaleService {
       const createdItems: SaleItem[] = [];
 
       for (const movedItem of movedItems) {
-        const pricing = pricingMap.get(movedItem._id.toString());
+        const pricing = pricingMap.get(movedItem.product.toString());
         if (!pricing) {
-          throw BaseResponse.invalid({ err: `addStock: no pricing found for item ${movedItem._id.toString()}` });
+          throw BaseResponse.invalid({ err: `addStock: no pricing found for product ${movedItem.product.toString()}` });
         }
 
         const product = productMap.get(movedItem.product.toString());
@@ -108,15 +103,20 @@ export class SaleService {
           });
         }
         const brand = brandMap.get(product.brand?.toString() ?? '');
-
+        const sale_price = toDecimal128(new Decimal(pricing.sale_price))
+        const { net, discountAmount } = this.priceAfterDiscount(sale_price, pricing.discount_percent ?? 0);
+        const net_price = toDecimal128(net)
+        const discount_amount = toDecimal128(discountAmount)
         const saleItem: SaleItem = {
           product: movedItem.product,
           product_name: product.product_name,
           brand_name: brand?.brand_name ?? 'MISSING BRAND NAME',
           barcode: product.barcode,
-          sale_price: toDecimal128(new Decimal(pricing.sale_price)),
+          sale_price,
           discount_percent: pricing.discount_percent ?? 0,
+          discount_amount,
           ppn_rate: pricing.ppn_rate ?? 0,
+          net_price,
           // COGS = landed_cost of this exact physical unit from inventory
           cogs: movedItem.landed_cost,
         };
@@ -153,6 +153,14 @@ export class SaleService {
     )
   }
 
+  priceAfterDiscount(price: Types.Decimal128, discountPercent?: number) {
+    const priceDecimal = toDecimal(price);
+    const discountPercentDecimal = new Decimal(discountPercent || 0);
+    const discountAmount = priceDecimal.mul(discountPercentDecimal.div(100));
+    const net = priceDecimal.minus(discountAmount);
+    return { net, discountAmount };
+  }
+
   /**
    * Calculate PPN (VAT-inclusive) for a SINGLE physical unit.
    *
@@ -168,26 +176,16 @@ export class SaleService {
    */
   calculatePPn(
     item: {
-      price: Types.Decimal128,
-      discount_percent?: number,
+      net_price: Types.Decimal128,
       ppn_rate: number
     },
   ) {
-    const price = toDecimal(item.price);
-    const discountPercent = new Decimal(item.discount_percent || 0);
     const ppnRate = new Decimal(item.ppn_rate || 0).div(100);
-
-    // 1. Apply discount to get net price for one unit
-    const discountAmount = price.mul(discountPercent.div(100));
-    const net = price.minus(discountAmount);
-
-    // 2. Extract tax base and VAT from the inclusive net price
-    const base = net.div(new Decimal(1).plus(ppnRate));
-    const ppn = net.minus(base);
+    // Extract tax base and VAT from the inclusive net price
+    const base = toDecimal(item.net_price).div(new Decimal(1).plus(ppnRate));
+    const ppn = toDecimal(item.net_price).minus(base);
 
     return {
-      net,
-      discountAmount,
       ppn,
       base,
     };
@@ -204,14 +202,13 @@ export class SaleService {
     let totalCogs = new Decimal(0);
 
     for (const item of items) {
-      const { ppn, base, discountAmount } = this.calculatePPn({
-        price: item.sale_price,
-        discount_percent: item.discount_percent,
+      const { ppn, base } = this.calculatePPn({
+        net_price: item.net_price,
         ppn_rate: item.ppn_rate
       });
       totalPpn = totalPpn.plus(ppn);
       totalBeforeTax = totalBeforeTax.plus(base);
-      totalDiscount = totalDiscount.plus(discountAmount);
+      totalDiscount = totalDiscount.plus(toDecimal(item.discount_amount));
 
       // Accumulate COGS — may be undefined if landed_cost was never set on the inventory item
       if (item.cogs) {
@@ -256,6 +253,8 @@ export class SaleService {
             sale_price: existItem.sale_price,
             discount_percent: existItem.discount_percent,
             ppn_rate: existItem.ppn_rate,
+            net_price: existItem.net_price,
+            discount_amount: existItem.discount_amount,
             cogs: existItem.cogs, // carry COGS into the Sale record
           });
           // Remove this physical unit from the sale shelf

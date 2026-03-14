@@ -14,18 +14,21 @@ import { Types } from 'mongoose';
 
 export class SaleItemDto {
   /**
-   * Specific InventoryItem document IDs to pull from inventory.
-   * - Each ID represents one physical unit.
-   * - All IDs in one entry should belong to the same product.
-   * - The landed_cost of each InventoryItem becomes the COGS of the resulting SaleItem.
+   * The product to pull from inventory.
    */
-  @IsArray()
-  @ArrayMinSize(1)
-  @IsMongoId({ each: true })
-  inventory_item_ids: Types.ObjectId[];
+  @IsMongoId()
+  @IsNotEmpty()
+  product: Types.ObjectId;
 
   /**
-   * Sale price per unit applied to every unit in this group.
+   * Number of physical units to pull from inventory via FIFO.
+   */
+  @IsInt()
+  @Min(1)
+  item_qty: number;
+
+  /**
+   * Sale price per unit.
    * (JS number in DTO; converted to Decimal128 in service)
    */
   @IsNotEmpty()
@@ -44,7 +47,7 @@ export class SaleItemDto {
 export class SaleDto {
   /**
    * The inventory to pull stock from.
-   * The service validates that every inventory_item_id belongs to this inventory.
+   * Physical units are selected automatically by FIFO within this inventory.
    */
   @IsMongoId()
   @IsNotEmpty()
