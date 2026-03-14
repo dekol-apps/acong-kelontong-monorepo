@@ -1,14 +1,10 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Types } from 'mongoose';
-import { Product, ProductDocument } from '../product/product.schema';
+import { Schema, SchemaFactory } from '@nestjs/mongoose';
+import { ProductDocument } from '../product/product.schema';
+import { InventoryItem } from '../inventory-item/inventory-item.schema';
 
 @Schema({ timestamps: true })
-export class InventoryMovementItem {
-  @Prop({ type: Types.ObjectId, ref: Product.name, required: true }) product: Types.ObjectId;
-  @Prop({ required: true }) product_name: string;
+export class InventoryMovementItem extends InventoryItem {
 
-  // Track specific cost per item unit for Landed Cost logic
-  @Prop({ type: Types.Decimal128 }) landed_cost?: Types.Decimal128;
 }
 
 export type InventoryMovementItemDocument = InventoryMovementItem & Document & { product: ProductDocument };

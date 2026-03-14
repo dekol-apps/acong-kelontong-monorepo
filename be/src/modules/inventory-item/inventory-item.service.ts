@@ -3,11 +3,12 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, ClientSession, Types } from 'mongoose';
 import { GlobalService } from 'src/global/global.service';
 import { BaseResponse } from 'src/utils/base-response';
-import { Inventory } from '../inventory/inventory.schema';
 import { Product } from '../product/product.schema';
-import { InventoryItemDto, ListInventoryItemsDTO } from './inventory-item.dto';
+import { InventoryItemDto, InventoryReconcileDto } from './inventory-item.dto';
 import { InventoryItem } from './inventory-item.schema';
 import { IListRes } from 'src/types/interfaces';
+import { PaginationDto } from 'src/global/global.dto';
+import { InventoryReconcile, InventoryReconcileItem } from './inventory-reconcile.schema';
 
 @Injectable()
 export class InventoryItemService {
@@ -15,27 +16,24 @@ export class InventoryItemService {
   constructor(
     @Inject(forwardRef(() => GlobalService))
     private global: GlobalService,
-    @InjectModel(Inventory.name) private inventoryModel: Model<Inventory>,
+    @InjectModel(InventoryReconcile.name) private inventoryReconcileModel: Model<InventoryReconcile>,
     @InjectModel(InventoryItem.name) private inventoryItemModel: Model<InventoryItem>,
     @InjectModel(Product.name) private productModel: Model<Product>,
   ) { }
 
   async listInventoryItems({
-    inventory_id,
     page,
     size,
     sortBy,
     sortDir,
     search,
-  }: ListInventoryItemsDTO): Promise<IListRes<any>> {
+  }: PaginationDto): Promise<IListRes<any>> {
     const pageNum = page ? Math.max(1, page) : 1;
     const pageSize = size ? Math.max(1, size) : 10;
     const skip = (pageNum - 1) * pageSize;
 
     // Build matching stage
-    const matchStage: any = {
-      inventory: new Types.ObjectId(inventory_id)
-    };
+    const matchStage: any = {};
     if (search) {
       matchStage['product_name'] = { $regex: search, $options: 'i' };
     }
@@ -91,19 +89,13 @@ export class InventoryItemService {
       if (!product) {
         throw BaseResponse.notFound({ err: `createInventoryItem Product not found` });
       }
-      const inventory = await this.inventoryModel.exists(dto.inventory).session(session);
-      if (!inventory) {
-        throw BaseResponse.notFound({ err: `createInventoryItem Inventory not found` });
-      }
       const data = {
-        inventory: dto.inventory,
         product: dto.product,
         product_name: product.product_name,
         landed_cost: dto.landed_cost,
       }
       const created = (await this.inventoryItemModel.create([data], { session }))[0];
       if (!created) throw BaseResponse.notFound({ err: 'createInventoryItem created not found' });
-      await this.updateInventoryTotalQuantity(created?.inventory, session);
       return created;
     }, sessionIn)
   }
@@ -114,14 +106,9 @@ export class InventoryItemService {
     sessionIn?: ClientSession
   ): Promise<InventoryItem | undefined> {
     return this.global.withTransaction(async (session) => {
-      const inventory = await this.inventoryModel.exists(dto.inventory).session(session);
-      if (!inventory) {
-        throw BaseResponse.notFound({ err: `editInventoryItem Inventory not found` });
-      }
       const product = await this.productModel.findById(dto.product).session(session);
       if (!product) throw BaseResponse.notFound({ err: `editInventoryItem Product not found` });
       const data = {
-        inventory: dto.inventory,
         product: dto.product,
         product_name: product.product_name,
         landed_cost: dto.landed_cost,
@@ -155,23 +142,61 @@ export class InventoryItemService {
     return this.global.withTransaction(async (session) => {
       const inventoryItem = await this.inventoryItemModel.findById(inventory_id).session(session);
       if (!inventoryItem) throw BaseResponse.notFound({ err: 'deleteInventoryItem not found' });
-      await this.updateInventoryTotalQuantity(inventory_id, session);
       await inventoryItem.deleteOne({ session });
       return inventoryItem || undefined;
     }, sessionIn);
   }
 
-  async updateInventoryTotalQuantity(inventory_id: Types.ObjectId, sessionIn?: ClientSession): Promise<Inventory | undefined> {
+  async reconcile(dto: InventoryReconcileDto, sessionIn?: ClientSession): Promise<InventoryReconcile | undefined> {
     return this.global.withTransaction(async (session) => {
-      const inventory = await this.inventoryModel.findById(inventory_id).session(session);
-      if (!inventory) throw BaseResponse.notFound({ err: 'Inventory not found' });
-      const items = await this.inventoryItemModel.find({ inventory: inventory_id }).session(session).lean();
-      if (!items || items.length < 1) {
-        return inventory;
+      const productIds = dto.items.map(i => i.product);
+      const existingItems = await this.inventoryItemModel.find({
+        product: { $in: productIds },//sort by createdAt latest
+      }).sort({ createdAt: -1 }).session(session);
+
+      const itemsAfterReconcile: InventoryReconcileItem[] = []
+
+      await Promise.all(dto.items.map(async item => {
+        for (const existingItem of existingItems) {
+          if (existingItem.product.toString() === item.product.toString()) {
+            const qtyCorrection = item.item_qty;
+            if (qtyCorrection < 0) {
+              throw BaseResponse.invalid({ option: { message: 'Quantity cannot be lesser than 0!' }, err: 'inventory reconcile invalid qty' })
+            }
+            const existingItemsByProduct = existingItems.filter(i => i.product.toString() === item.product.toString());
+            //delete existing item by qtyCorrection
+            if (qtyCorrection < existingItemsByProduct.length) {
+              for (let i = 0; i < existingItemsByProduct.length - qtyCorrection; i++) {
+                await this.deleteInventoryItem(existingItemsByProduct[i]._id, session);
+              }
+            }
+            const productName = existingItem?.product_name;
+            const itemAfterRecon = {
+              product: item.product,
+              item_qty: item.item_qty,
+              product_name: productName ?? 'Missing Product Name'
+            }
+            itemsAfterReconcile.push(itemAfterRecon)
+          }
+        }
+      }));
+
+      const itemsBefore: InventoryReconcileItem[] = existingItems.map((item: InventoryItem) => {
+        return {
+          product: item.product,
+          product_name: item.product_name,
+          item_qty: existingItems.filter(i => i.product.toString() === item.product.toString()).length,
+        }
+      });
+      const itemsBeforeReconcile = itemsBefore.filter((item, index) => itemsBefore.findIndex(i => i.product.toString() === item.product.toString()) === index);
+
+      const data: InventoryReconcile = {
+        description: dto.description,
+        itemsBefore: itemsBeforeReconcile,
+        itemsAfter: itemsAfterReconcile
       }
-      inventory.total_qty = items.length;
-      const result = await inventory.save({ session });
-      return result
+
+      return await this.inventoryReconcileModel.create(data)
     }, sessionIn)
   }
 }

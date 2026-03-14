@@ -2,8 +2,9 @@ import { Body, Controller, Delete, Get, Param, Post, Put, Res, Query } from '@ne
 import { Types } from 'mongoose';
 import type { Response } from 'express';
 import { BaseResponse } from 'src/utils/base-response';
-import { InventoryItemDto, ListInventoryItemsDTO } from './inventory-item.dto';
+import { InventoryItemDto, InventoryReconcileDto } from './inventory-item.dto';
 import { InventoryItemService } from './inventory-item.service';
+import { PaginationDto } from 'src/global/global.dto';
 
 @Controller('inventory-item')
 export class InventoryItemController {
@@ -27,7 +28,7 @@ export class InventoryItemController {
 
   @Get('')
   async listInventoryItems(
-    @Query() query: ListInventoryItemsDTO,
+    @Query() query: PaginationDto,
     @Res() res: Response,
   ) {
     try {
@@ -38,7 +39,20 @@ export class InventoryItemController {
     }
   }
 
-  @Put(':inventory_item_id')
+  @Put('reconcile')
+  async inventoryReconcile(
+    @Body() body: InventoryReconcileDto,
+    @Res() res: Response,
+  ) {
+    try {
+      const detail = await this.service.reconcile(body);
+      return BaseResponse.success({ res, option: { message: "Success create inventory reconciliation", detail } });
+    } catch (err) {
+      return BaseResponse.error({ res, err });
+    }
+  }
+
+  @Put('item/:inventory_item_id')
   async editInventoryItem(
     @Param('inventory_item_id') inventoryItemId: Types.ObjectId,
     @Body() body: InventoryItemDto,
@@ -52,7 +66,7 @@ export class InventoryItemController {
     }
   }
 
-  @Get(':inventory_item_id')
+  @Get('item/:inventory_item_id')
   async detailInventoryItem(
     @Param('inventory_item_id') inventoryItemId: Types.ObjectId,
     @Res() res: Response,
@@ -66,7 +80,7 @@ export class InventoryItemController {
   }
 
 
-  @Delete(':inventory_item_id')
+  @Delete('item/:inventory_item_id')
   async deleteInventoryItem(
     @Param('inventory_item_id') inventoryItemId: Types.ObjectId,
     @Res() res: Response,

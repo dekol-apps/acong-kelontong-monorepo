@@ -45,14 +45,6 @@ export class SaleItemDto {
 }
 
 export class SaleDto {
-  /**
-   * The inventory to pull stock from.
-   * Physical units are selected automatically by FIFO within this inventory.
-   */
-  @IsMongoId()
-  @IsNotEmpty()
-  inventory: Types.ObjectId;
-
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })

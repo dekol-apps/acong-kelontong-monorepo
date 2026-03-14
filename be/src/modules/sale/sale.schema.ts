@@ -22,5 +22,5 @@ export class Sale {
   grand_total: Types.Decimal128;
 }
 
-export type SaleDocument = Sale & Document & { inventory: SaleDocument };
+export type SaleDocument = Sale & Document;
 export const SaleSchema = SchemaFactory.createForClass(Sale);

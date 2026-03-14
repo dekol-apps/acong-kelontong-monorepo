@@ -1,14 +1,28 @@
-import { IsMongoId, IsNotEmpty } from 'class-validator';
 import { Types } from 'mongoose';
-import { PaginationDto } from 'src/global/global.dto';
-import { InventoryMovementItemDto } from '../inventory-movement/inventory-movement.dto';
-
-export class InventoryItemDto extends InventoryMovementItemDto {
+import { Type } from 'class-transformer';
+import { IsInt, IsMongoId, Min, ArrayMinSize, IsArray, IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { InventoryReconcileItem } from './inventory-reconcile.schema';
+export class InventoryItemDto {
   @IsMongoId()
   @IsNotEmpty()
-  inventory: Types.ObjectId;
+  product: Types.ObjectId;
+
+  @IsInt()
+  @Min(1)
+  item_qty: number;
+
+  @IsOptional()
+  landed_cost?: Types.Decimal128;
 }
 
-export class ListInventoryItemsDTO extends PaginationDto {
-  inventory_id: Types.ObjectId
+export class InventoryReconcileDto {
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => InventoryReconcileItem)
+  items: InventoryReconcileItem[];
+
+  @IsString()
+  @IsOptional()
+  description?: string;
 }

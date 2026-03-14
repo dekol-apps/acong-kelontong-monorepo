@@ -1,15 +1,16 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { ProductDocument } from '../product/product.schema';
-import { Inventory, InventoryDocument } from '../inventory/inventory.schema';
-import { InventoryMovementItem } from '../inventory-movement/inventory-movement-item.schema';
+import { Product, ProductDocument } from '../product/product.schema';
 
 @Schema({ timestamps: true })
-export class InventoryItem extends InventoryMovementItem {
-  @Prop({ type: Types.ObjectId, ref: Inventory.name, required: true }) inventory: Types.ObjectId;
+export class InventoryItem {
+  @Prop({ type: Types.ObjectId, ref: Product.name, required: true }) product: Types.ObjectId;
+  @Prop({ required: true }) product_name: string;
+
+  // Track specific cost per item unit for Landed Cost logic
+  @Prop({ type: Types.Decimal128 }) landed_cost?: Types.Decimal128;
 }
 
-export type InventoryItemDocument = InventoryItem & Document & { inventory: InventoryDocument } & { product: ProductDocument };
+export type InventoryItemDocument = InventoryItem & Document & { product: ProductDocument };
 export const InventoryItemSchema = SchemaFactory.createForClass(InventoryItem);
-// Removed index { inventory: 1, product: 1 } to allow multiple individual product rows
 

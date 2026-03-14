@@ -3,13 +3,12 @@ import { InjectModel } from '@nestjs/mongoose';
 import { ClientSession, Model, Types } from 'mongoose';
 import { GlobalService } from 'src/global/global.service';
 import { InventoryItem } from '../inventory-item/inventory-item.schema';
-import { Inventory } from '../inventory/inventory.schema';
+import { FlowType, IListRes, OrderType } from 'src/types/interfaces';
 import { InventoryMovementDto, ListInventoryMovementDTO } from './inventory-movement.dto';
 import { BaseResponse } from 'src/utils/base-response';
 import { InventoryItemService } from '../inventory-item/inventory-item.service';
 import { InventoryMovement } from './inventory-movement.schema';
 import { Product } from '../product/product.schema';
-import { FlowType, IListRes, OrderType } from 'src/types/interfaces';
 import { InventoryMovementItem } from './inventory-movement-item.schema';
 
 /** Snapshot of an InventoryItem captured just before it is deleted, returned by moveOutByItemIds */
@@ -28,7 +27,6 @@ export class InventoryMovementService {
     private global: GlobalService,
     @Inject(forwardRef(() => InventoryItemService))
     private inventoryItem: InventoryItemService,
-    @InjectModel(Inventory.name) private inventoryModel: Model<Inventory>,
     @InjectModel(InventoryItem.name) private inventoryItemModel: Model<InventoryItem>,
     @InjectModel(InventoryMovement.name) private inventoryMovementModel: Model<InventoryMovement>,
     @InjectModel(Product.name) private productModel: Model<Product>,
@@ -36,12 +34,7 @@ export class InventoryMovementService {
 
   async createInventoryMovement(dto: InventoryMovementDto & { source_id?: Types.ObjectId }, sessionIn?: ClientSession): Promise<InventoryMovement | undefined> {
     return this.global.withTransaction(async (session) => {
-      const inventory = await this.inventoryModel.exists(dto.inventory).session(session);
-      if (!inventory) {
-        throw BaseResponse.notFound({ err: `createInventoryMovement Inventory not found` });
-      }
       const data: InventoryMovement = {
-        inventory: dto.inventory,
         movement_type: dto.movement_type,
         items: [],
         description: dto.description,
@@ -70,7 +63,7 @@ export class InventoryMovementService {
       if (dto.movement_type === FlowType.IN) {
         // BURST: Insert N individual records based on items.length to track landed_cost per item
         await Promise.all(dto.items.map(async item => {
-          const newData = { ...item, inventory: dto.inventory };
+          const newData = { ...item };
           // Loop and create N individual items
           for (let i = 0; i < item.item_qty; i++) {
             await this.inventoryItem.createInventoryItem(newData, session);
@@ -81,7 +74,6 @@ export class InventoryMovementService {
         await Promise.all(dto.items.map(async item => {
           const product = await this.productModel.findById(item.product).session(session).lean();
           const matchingItems = await this.inventoryItemModel.find({
-            inventory: dto.inventory,
             product: item.product
           }).limit(item.item_qty).session(session);
 
@@ -111,7 +103,6 @@ export class InventoryMovementService {
    */
   async moveOutByItemIds(
     dto: {
-      inventory: Types.ObjectId;
       order_type: OrderType;
       description?: string;
       source_id?: Types.ObjectId;
@@ -125,7 +116,7 @@ export class InventoryMovementService {
       // Validate and capture each item's data before deleting
       for (const itemId of inventoryItemIds) {
         const inventoryItem = await this.inventoryItemModel
-          .findOne({ _id: itemId, inventory: dto.inventory })
+          .findOne({ _id: itemId })
           .session(session);
 
         if (!inventoryItem) {
@@ -146,9 +137,6 @@ export class InventoryMovementService {
         await inventoryItem.deleteOne({ session });
       }
 
-      // Recalculate inventory total_qty once after all deletions
-      await this.inventoryItem.updateInventoryTotalQuantity(dto.inventory, session);
-
       // Build a grouped movement summary (one entry per unique product)
       const productMap = new Map<string, InventoryMovementItem>();
       for (const item of movedItems) {
@@ -162,7 +150,6 @@ export class InventoryMovementService {
       }
 
       const movementData: InventoryMovement = {
-        inventory: dto.inventory,
         movement_type: FlowType.OUT,
         order_type: dto.order_type,
         items: Array.from(productMap.values()),
@@ -189,7 +176,6 @@ export class InventoryMovementService {
    */
   async moveOutByProductAndQty(
     dto: {
-      inventory: Types.ObjectId;
       order_type: OrderType;
       description?: string;
       source_id?: Types.ObjectId;
@@ -201,9 +187,9 @@ export class InventoryMovementService {
       const movedItems: MovedInventoryItemData[] = [];
 
       for (const item of items) {
-        // FIFO: pick the oldest N items for this product in this inventory
+        // FIFO: pick the oldest N items for this product
         const candidates = await this.inventoryItemModel
-          .find({ inventory: dto.inventory, product: item.product })
+          .find({ product: item.product })
           .limit(item.item_qty)
           .session(session);
 
@@ -231,9 +217,6 @@ export class InventoryMovementService {
         }
       }
 
-      // Recalculate inventory total_qty once after all deletions
-      await this.inventoryItem.updateInventoryTotalQuantity(dto.inventory, session);
-
       // Build a grouped movement summary (one entry per unique product)
       const productMap = new Map<string, InventoryMovementItem>();
       for (const item of movedItems) {
@@ -247,7 +230,6 @@ export class InventoryMovementService {
       }
 
       const movementData: InventoryMovement = {
-        inventory: dto.inventory,
         movement_type: FlowType.OUT,
         order_type: dto.order_type,
         items: Array.from(productMap.values()),
@@ -292,7 +274,7 @@ export class InventoryMovementService {
       const detailInventory = await this.inventoryMovementModel
         .findById(id)
         .session(session)
-        .populate(['inventory', 'product'])
+        .populate(['product'])
         .lean()
         .exec();
       return detailInventory || undefined

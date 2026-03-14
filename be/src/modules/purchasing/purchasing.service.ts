@@ -567,7 +567,7 @@ export class PurchasingService {
 
       const movementMap = new Map<
         string,
-        { inventory: Types.ObjectId; items: Map<string, number> }
+        { items: Map<string, number> }
       >();
 
       // Create loops for updateItems, to update received_qty and create inventory movement
@@ -591,17 +591,15 @@ export class PurchasingService {
 
         if (delta <= 0) continue;
 
-        const invKey = item.inventory.toString();
         const prodKey = existing.product.toString();
 
-        if (!movementMap.has(invKey)) {
-          movementMap.set(invKey, {
-            inventory: new Types.ObjectId(item.inventory),
+        if (!movementMap.has('SINGLE_WAREHOUSE')) {
+          movementMap.set('SINGLE_WAREHOUSE', {
             items: new Map(),
           });
         }
 
-        const inventoryEntry = movementMap.get(invKey)!;
+        const inventoryEntry = movementMap.get('SINGLE_WAREHOUSE')!;
         const currentQty = inventoryEntry.items.get(prodKey) ?? 0;
         inventoryEntry.items.set(prodKey, currentQty + delta);
       }
@@ -618,7 +616,6 @@ export class PurchasingService {
       // Create loops for inventory movement
       for (const [, value] of movementMap) {
         inventoryMovement.push({
-          inventory: value.inventory,
           movement_type: FlowType.IN,
           items: Array.from(value.items.entries()).map(
             ([product, qty]) => {

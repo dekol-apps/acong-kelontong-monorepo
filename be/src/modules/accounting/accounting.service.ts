@@ -162,9 +162,7 @@ export class AccountingService {
           $group: {
             _id: null,
             total: {
-              $sum: {
-                $multiply: ["$purchase_price", "$purchase_qty"],
-              },
+              $sum: { $toDecimal: "$landed_cost" },
             },
           },
         },

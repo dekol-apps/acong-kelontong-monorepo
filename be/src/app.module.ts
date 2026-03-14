@@ -32,9 +32,6 @@ import { PurchasingService } from './modules/purchasing/purchasing.service';
 import { PurchasingController } from './modules/purchasing/purchasing.controller';
 import { Purchasing, PurchasingSchema } from './modules/purchasing/purchasing.schema';
 import { GlobalController } from './global/global.controller';
-import { InventoryController } from './modules/inventory/inventory.controller';
-import { InventoryService } from './modules/inventory/inventory.service';
-import { Inventory, InventorySchema } from './modules/inventory/inventory.schema';
 import { PurchasingItemController } from './modules/purchasing-item/purchasing-item.controller';
 import { PurchasingItemService } from './modules/purchasing-item/purchasing-item.service';
 import { PurchasingItem, PurchasingItemSchema } from './modules/purchasing-item/purchasing-item.schema';
@@ -55,7 +52,7 @@ import { ExpenseService } from './modules/expense/expense.service';
 import { ExpenseController } from './modules/expense/expense.controller';
 import { Expense, ExpenseSchema } from './modules/expense/expense.schema';
 import { InventoryMovementItem, InventoryMovementItemSchema } from './modules/inventory-movement/inventory-movement-item.schema';
-import { InventoryReconcile, InventoryReconcileSchema } from './modules/inventory/inventory-reconcile.schema';
+import { InventoryReconcile, InventoryReconcileSchema } from './modules/inventory-item/inventory-reconcile.schema';
 import { SaleController } from './modules/sale/sale.controller';
 import { SaleService } from './modules/sale/sale.service';
 import { Sale, SaleSchema } from './modules/sale/sale.schema';
@@ -114,7 +111,6 @@ import { AccountingController } from './modules/accounting/accounting.controller
       { name: Brand.name, schema: BrandSchema },
       { name: Purchasing.name, schema: PurchasingSchema },
       { name: PurchasingItem.name, schema: PurchasingItemSchema },
-      { name: Inventory.name, schema: InventorySchema },
       { name: InventoryItem.name, schema: InventoryItemSchema },
       { name: InventoryMovement.name, schema: InventoryMovementSchema },
       { name: InventoryMovementItem.name, schema: InventoryMovementItemSchema },
@@ -138,7 +134,6 @@ import { AccountingController } from './modules/accounting/accounting.controller
     PurchasingController,
     PurchasingItemController,
     GlobalController,
-    InventoryController,
     ApprovalController,
     InventoryItemController,
     InventoryMovementController,
@@ -160,7 +155,6 @@ import { AccountingController } from './modules/accounting/accounting.controller
     SupplierService,
     ProductService,
     PurchasingService,
-    InventoryService,
     PurchasingItemService,
     InventoryItemService,
     InventoryMovementService,

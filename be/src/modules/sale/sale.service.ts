@@ -61,7 +61,6 @@ export class SaleService {
       // ─── Step 1: FIFO move-out by product + qty ───────────────────────────
       const result = await this.inventoryMovementSvc.moveOutByProductAndQty(
         {
-          inventory: data.inventory,
           order_type: OrderType.SALE,
           description: 'Stock moved to sale shelf',
         },
