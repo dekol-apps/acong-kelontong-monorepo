@@ -610,10 +610,15 @@ export class PurchasingService {
           inventory: value.inventory,
           movement_type: FlowType.IN,
           items: Array.from(value.items.entries()).map(
-            ([product, qty]) => ({
-              product: new Types.ObjectId(product),
-              item_qty: qty,
-            })
+            ([product, qty]) => {
+              // Retrieve the original purchase price from the existing items list to use as COGS
+              const originalItem = existingItems.find(i => i.product.toString() === product);
+              return {
+                product: new Types.ObjectId(product),
+                item_qty: qty,
+                cogs: originalItem?.purchase_price
+              }
+            }
           ),
           order_type: OrderType.PURCHASING,
           source_id: id,

@@ -11,7 +11,5 @@ export class InventoryItem extends InventoryMovementItem {
 
 export type InventoryItemDocument = InventoryItem & Document & { inventory: InventoryDocument } & { product: ProductDocument };
 export const InventoryItemSchema = SchemaFactory.createForClass(InventoryItem);
-InventoryItemSchema.index(
-  { inventory: 1, product: 1 },
-  { unique: true }
-);
+// Removed index { inventory: 1, product: 1 } to allow multiple individual product rows
+

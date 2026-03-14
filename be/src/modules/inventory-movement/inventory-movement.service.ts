@@ -60,58 +60,31 @@ export class InventoryMovementService {
 
   async move(dto: InventoryMovementDto & { source_id?: Types.ObjectId }, sessionIn?: ClientSession): Promise<InventoryMovement | undefined> {
     return this.global.withTransaction(async (session) => {
-      const productIds = dto.items.map(i => i.product);
-      const existingItems = await this.inventoryItemModel.find({
-        inventory: dto.inventory,
-        product: { $in: productIds },
-      }).session(session);
-
-      const itemMap = new Map(
-        existingItems.map(i => [i.product.toString(), i]),
-      );
       if (dto.movement_type === FlowType.IN) {
-        // If any item in the payload list is already available in DB, it means user intends to increment it's quantity
+        // BURST: Insert N individual records based on item_qty to track COGS per item
         await Promise.all(dto.items.map(async item => {
-          const existing = itemMap.get(item.product.toString());
-          const newData = { ...item, inventory: dto.inventory };
-          if (!existing) {
+          const newData = { ...item, inventory: dto.inventory, item_qty: 1 };
+          // Loop and create N individual items
+          for(let i = 0; i < item.item_qty; i++) {
             await this.inventoryItem.createInventoryItem(newData, session);
-          } else {
-            await this.inventoryItem.editInventoryItem(
-              existing._id,
-              {
-                inventory: existing.inventory,
-                product: existing.product,
-                item_qty: existing.item_qty + item.item_qty,
-              },
-              session
-            );
           }
         }));
       } else { // Move OUT
-        // If any item in the payload list is already available in DB, it means user intends to decrement it's quantity
+        // BURST: Find N individual records for this product and delete them
         await Promise.all(dto.items.map(async item => {
-          const existing = itemMap.get(item.product.toString());
-          if (!existing) {
-            throw BaseResponse.invalid({ option: { message: 'Product not found in inventory' }, err: 'inventory move OUT !existing' });
-          }
-          const decQtyResult = existing.item_qty - item.item_qty;
-          if (decQtyResult < 0) {
-            throw BaseResponse.invalid({ option: { message: 'Insufficient stock!' }, err: 'inventory move OUT no stock' })
+          const product = await this.productModel.findById(item.product).session(session).lean();
+          const matchingItems = await this.inventoryItemModel.find({ 
+            inventory: dto.inventory,
+            product: item.product
+          }).limit(item.item_qty).session(session);
+          
+          if (matchingItems.length < item.item_qty) {
+            throw BaseResponse.invalid({ option: { message: `Insufficient stock for product ${product?.product_name ?? 'Unknown'}!` }, err: 'inventory move OUT no stock' })
           }
 
-          if (decQtyResult === 0) {
-            await this.inventoryItem.deleteInventoryItem(existing._id, session);
-          } else {
-            await this.inventoryItem.editInventoryItem(
-              existing._id,
-              {
-                inventory: existing.inventory,
-                product: existing.product,
-                item_qty: decQtyResult,
-              },
-              session
-            );
+          // Delete the exact items we found (FIFO-ish based on natural insert order)
+          for(const matchingItem of matchingItems) {
+             await this.inventoryItem.deleteInventoryItem(matchingItem._id, session);
           }
         }));
       }

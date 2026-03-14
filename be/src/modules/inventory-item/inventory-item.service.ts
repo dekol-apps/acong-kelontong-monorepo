@@ -27,22 +27,62 @@ export class InventoryItemService {
     sortBy,
     sortDir,
     search,
-  }: ListInventoryItemsDTO): Promise<IListRes<InventoryItem>> {
-    const searchFields: string[] = ['product_name'];
-    const filter: { column: string, value: any } = { column: 'inventory', value: inventory_id }
+  }: ListInventoryItemsDTO): Promise<IListRes<any>> {
+    const pageNum = page ? Math.max(1, page) : 1;
+    const pageSize = size ? Math.max(1, size) : 10;
+    const skip = (pageNum - 1) * pageSize;
 
-    return this.global.getList<InventoryItem>(
-      this.inventoryItemModel,
+    // Build matching stage
+    const matchStage: any = {
+      inventory: new Types.ObjectId(inventory_id)
+    };
+    if (search) {
+      matchStage['product_name'] = { $regex: search, $options: 'i' };
+    }
+
+    const sortStage: any = {};
+    if (sortBy) {
+      sortStage[sortBy] = sortDir === 'desc' ? -1 : 1;
+    } else {
+      sortStage['product_name'] = 1; // Default
+    }
+
+    // 1. Group records representing 1 physical item into a frontend aggregate summary
+    const pipeline: any[] = [
+      { $match: matchStage },
       {
-        page,
-        size,
-        sortBy,
-        sortDir,
-        search,
-        searchFields,
-        filter
+        $group: {
+          _id: "$product",
+          product: { $first: "$product" },
+          product_name: { $first: "$product_name" },
+          inventory: { $first: "$inventory" },
+          item_qty: { $sum: 1 }, 
+          // Option to track average COGS across batch
+          avg_cogs: { $avg: { $toDecimal: "$cogs" } }
+        }
+      },
+      { $sort: sortStage },
+      {
+        $facet: {
+          data: [{ $skip: skip }, { $limit: pageSize }],
+          totalCount: [{ $count: "count" }]
+        }
       }
-    )
+    ];
+
+    const result = await this.inventoryItemModel.aggregate(pipeline).exec();
+    const data = result[0].data;
+    const total = result[0].totalCount[0]?.count || 0;
+
+    return {
+      data,
+      meta: {
+        total,
+        page: pageNum,
+        size: pageSize,
+        totalPages: Math.ceil(total / pageSize),
+      }
+    };
   }
 
   async createInventoryItem(dto: InventoryItemDto, sessionIn?: ClientSession): Promise<InventoryItem | undefined> {

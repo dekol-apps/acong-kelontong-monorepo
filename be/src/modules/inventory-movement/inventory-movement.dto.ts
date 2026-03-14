@@ -12,6 +12,9 @@ export class InventoryMovementItemDto {
   @IsInt()
   @Min(1)
   item_qty: number;
+  
+  @IsOptional()
+  cogs?: Types.Decimal128;
 }
 export class InventoryMovementDto {
   @IsMongoId()
