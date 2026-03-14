@@ -8,8 +8,8 @@ export class InventoryMovementItem {
   @Prop({ required: true }) product_name: string;
   @Prop({ type: Number, required: true }) item_qty: number;
   
-  // Track specific cost per item unit for COGS logic
-  @Prop({ type: Types.Decimal128 }) cogs?: Types.Decimal128;
+  // Track specific cost per item unit for Landed Cost logic
+  @Prop({ type: Types.Decimal128 }) landed_cost?: Types.Decimal128;
 }
 
 export type InventoryMovementItemDocument = InventoryMovementItem & Document & { product: ProductDocument };

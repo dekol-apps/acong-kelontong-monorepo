@@ -57,8 +57,8 @@ export class InventoryItemService {
           product_name: { $first: "$product_name" },
           inventory: { $first: "$inventory" },
           item_qty: { $sum: 1 }, 
-          // Option to track average COGS across batch
-          avg_cogs: { $avg: { $toDecimal: "$cogs" } }
+          // Option to track average landed_cost across batch
+          avg_landed_cost: { $avg: { $toDecimal: "$landed_cost" } }
         }
       },
       { $sort: sortStage },

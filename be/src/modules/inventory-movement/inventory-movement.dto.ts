@@ -14,7 +14,7 @@ export class InventoryMovementItemDto {
   item_qty: number;
   
   @IsOptional()
-  cogs?: Types.Decimal128;
+  landed_cost?: Types.Decimal128;
 }
 export class InventoryMovementDto {
   @IsMongoId()

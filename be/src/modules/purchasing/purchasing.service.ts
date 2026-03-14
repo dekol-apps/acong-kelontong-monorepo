@@ -570,16 +570,17 @@ export class PurchasingService {
         { inventory: Types.ObjectId; items: Map<string, number> }
       >();
 
+      // Create loops for updateItems, to update received_qty and create inventory movement
       for (const item of updateItems) {
         const existing = itemMap.get(item._id.toString());
-        if (!existing) throw BaseResponse.notFound({ err: 'receiveOrder !existing' });
+        if (!existing) throw BaseResponse.notFound({ err: 'receiveOrder !existing', option: { message: "You cannot add more product in this step, please create new purchasing order" } });
 
         const delta = item.received_qty ?? 0;
         const newReceived = existing.received_qty + delta;
 
         if (newReceived > existing.purchase_qty) {
           throw BaseResponse.invalid({
-            err: 'Received qty exceeds purchase qty'
+            option: { message: 'Received qty exceeds purchase qty' }
           });
         }
 
@@ -604,19 +605,34 @@ export class PurchasingService {
         const currentQty = inventoryEntry.items.get(prodKey) ?? 0;
         inventoryEntry.items.set(prodKey, currentQty + delta);
       }
+      // Calculate Landed Cost components
+      const total_purchase_price = await this.countTotalPurchasePrice(id);
+      const total_items = existingItems.reduce((sum, item) => sum + item.purchase_qty, 0);
+      const payment_realization = toDecimal(purchase.payment_realization || 0);
+      const total_purchase_price_dec = toDecimal(total_purchase_price || 0);
+
+      const additional_cost = payment_realization.minus(total_purchase_price_dec);
+      const additional_cost_per_item = total_items > 0 ? additional_cost.div(total_items) : new Decimal(0);
+
       const inventoryMovement: (InventoryMovementDto & { source_id: Types.ObjectId })[] = [];
+      // Create loops for inventory movement
       for (const [, value] of movementMap) {
         inventoryMovement.push({
           inventory: value.inventory,
           movement_type: FlowType.IN,
           items: Array.from(value.items.entries()).map(
             ([product, qty]) => {
-              // Retrieve the original purchase price from the existing items list to use as COGS
+              // Retrieve the original purchase price from the existing items list
               const originalItem = existingItems.find(i => i.product.toString() === product);
+              const original_price = originalItem ? toDecimal(originalItem.purchase_price) : new Decimal(0);
+
+              // Landed cost = Purchase Price + (Additional Cost / Total Items)
+              const landed_cost = original_price.plus(additional_cost_per_item);
+
               return {
                 product: new Types.ObjectId(product),
                 item_qty: qty,
-                cogs: originalItem?.purchase_price
+                landed_cost: toDecimal128(landed_cost)
               }
             }
           ),
