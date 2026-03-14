@@ -1,9 +1,8 @@
-import { IsInt, IsNotEmpty, Min } from 'class-validator';
-import { Types } from 'mongoose';
+import { IsNumber, IsNotEmpty, Min } from 'class-validator';
 
 export class AccountingDto {
   @IsNotEmpty()
-  @IsInt()
+  @IsNumber()
   @Min(1)
-  transaction_amount: Types.Decimal128;
+  transaction_amount: number;
 }

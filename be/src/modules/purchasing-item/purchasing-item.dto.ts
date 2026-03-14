@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsMongoId, IsInt, Min } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsMongoId, Min, IsInt } from 'class-validator';
 export class ReceiveOrderItemDto {
   @IsMongoId() // checks it's a valid ObjectId string
   @IsNotEmpty()
@@ -20,7 +20,7 @@ export class PurchasingItemDto {
   @IsInt()
   @Min(1)
   purchase_qty: number;
-  @IsInt()
+  @IsNumber()
   @Min(1)
   purchase_price: number;
 }

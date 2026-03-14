@@ -1,5 +1,4 @@
-import { IsArray, IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, Min, MinLength } from 'class-validator';
-import { Types } from 'mongoose';
+import { IsArray, IsEnum, IsNumber, IsNotEmpty, IsOptional, IsString, Min, MinLength } from 'class-validator';
 import { ApprovalType } from 'src/types/interfaces';
 
 export class ExpenseApprovalDto {
@@ -20,9 +19,9 @@ export class ExpenseDto {
   subject: string;
 
   @IsNotEmpty()
-  @IsInt()
+  @IsNumber()
   @Min(1)
-  transaction_amount: Types.Decimal128;
+  transaction_amount: number;
 
   @IsNotEmpty()
   @MinLength(1)

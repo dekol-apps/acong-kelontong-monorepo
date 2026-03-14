@@ -1,4 +1,4 @@
-import { IsArray, IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, Min, MinLength } from 'class-validator';
+import { IsArray, IsEnum, IsNumber, IsNotEmpty, IsOptional, IsString, Min, MinLength } from 'class-validator';
 import { PaginationDto } from 'src/global/global.dto';
 import { InvestmentType } from 'src/types/interfaces';
 
@@ -9,7 +9,7 @@ export class InvestmentDto {
   investment_type: InvestmentType;
 
   @IsNotEmpty()
-  @IsInt()
+  @IsNumber()
   @Min(1)
   transaction_amount: number;
 
