@@ -9,6 +9,7 @@ import {
   ArrayMinSize,
   IsArray,
   ValidateNested,
+  IsDecimal,
 } from 'class-validator';
 import { Types } from 'mongoose';
 
@@ -34,6 +35,13 @@ export class SaleItemDto {
   @IsNotEmpty()
   @IsNumber()
   sale_price: number;
+
+  /**
+   * Original price of the item. comes from data collection from inventory item as Decimal128
+   */
+  @IsNotEmpty()
+  @IsDecimal()
+  original_price: Types.Decimal128;
 
   @IsOptional()
   @IsNumber()

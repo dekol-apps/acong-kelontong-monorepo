@@ -548,14 +548,14 @@ export class PurchasingService {
   async receiveOrder(id: Types.ObjectId, dto: PurchaseOrderDto, updateItems: ReceiveOrderItemDto[]): Promise<{ detail: Purchasing | undefined; removedAttachments: string[] }> {
     return this.global.withTransaction(async (session) => {
       if (!updateItems.length) {
-        throw BaseResponse.invalid({ err: 'No items to receive' });
+        throw BaseResponse.invalid({ option: { message: 'No items to receive' } });
       }
 
       const purchase = await this.purchasingModel.findById(id).session(session);
       if (!purchase)
-        throw BaseResponse.notFound({ err: { text: 'receiveOrder purchase not found' } });
+        throw BaseResponse.notFound({ err: 'receiveOrder purchase not found' });
       if (purchase.status !== PurchasingEn.PROCESS)
-        throw BaseResponse.forbidden({ err: { text: 'receiveOrder invalid status' } });
+        throw BaseResponse.forbidden({ err: 'receiveOrder invalid status' });
 
       // Update value received_qty for each item and manage inventory movement
       const existingItems = await this.purchasingItemModel.find({
@@ -565,10 +565,7 @@ export class PurchasingService {
         existingItems.map(i => [i._id.toString(), i]),
       );
 
-      const movementMap = new Map<
-        string,
-        { items: Map<string, number> }
-      >();
+      const inventoryEntry = new Map<string, number>();
 
       // Create loops for updateItems, to update received_qty and create inventory movement
       for (const item of updateItems) {
@@ -593,15 +590,8 @@ export class PurchasingService {
 
         const prodKey = existing.product.toString();
 
-        if (!movementMap.has('SINGLE_WAREHOUSE')) {
-          movementMap.set('SINGLE_WAREHOUSE', {
-            items: new Map(),
-          });
-        }
-
-        const inventoryEntry = movementMap.get('SINGLE_WAREHOUSE')!;
-        const currentQty = inventoryEntry.items.get(prodKey) ?? 0;
-        inventoryEntry.items.set(prodKey, currentQty + delta);
+        const currentQty = inventoryEntry.get(prodKey) ?? 0;
+        inventoryEntry.set(prodKey, currentQty + delta);
       }
       // Calculate Landed Cost components
       const total_purchase_price = await this.countTotalPurchasePrice(id);
@@ -614,30 +604,31 @@ export class PurchasingService {
 
       const inventoryMovement: (InventoryMovementDto & { source_id: Types.ObjectId })[] = [];
       // Create loops for inventory movement
-      for (const [, value] of movementMap) {
-        inventoryMovement.push({
-          movement_type: FlowType.IN,
-          items: Array.from(value.items.entries()).map(
-            ([product, qty]) => {
-              // Retrieve the original purchase price from the existing items list
-              const originalItem = existingItems.find(i => i.product.toString() === product);
-              const original_price = originalItem ? toDecimal(originalItem.purchase_price) : new Decimal(0);
+      inventoryMovement.push({
+        movement_type: FlowType.IN,
+        items: Array.from(inventoryEntry.entries()).map(
+          ([product, qty]) => {
+            // Retrieve the original purchase price from the existing items list
+            const originalItem = existingItems.find(i => i.product.toString() === product);
+            const original_price = originalItem ? toDecimal(originalItem.purchase_price) : new Decimal(0);
 
-              // Landed cost = Purchase Price + (Additional Cost / Total Items)
-              const landed_cost = original_price.plus(additional_cost_per_item);
+            // Landed cost = Purchase Price + (Additional Cost / Total Items)
+            const landed_cost = original_price.plus(additional_cost_per_item);
 
-              return {
-                product: new Types.ObjectId(product),
-                item_qty: qty,
-                landed_cost: toDecimal128(landed_cost)
-              }
+            return {
+              product: new Types.ObjectId(product),
+              item_qty: qty,
+              receive_date: new Date(),
+              original_price: toDecimal128(original_price),
+              landed_cost: toDecimal128(landed_cost)
             }
-          ),
-          order_type: OrderType.PURCHASING,
-          source_id: id,
-          description: `Purchasing receive order - date: ${digitShortDate(new Date())} - PO ID: ${id.toString()}`
-        });
-      }
+          }
+        ),
+        order_type: OrderType.PURCHASING,
+        source_id: id,
+        description: `Purchasing receive order - date: ${digitShortDate(new Date())} - PO ID: ${id.toString()}`
+      });
+
       for (const movement of inventoryMovement) {
         await this.inventoryMovementSvc.move(movement, session);
       }

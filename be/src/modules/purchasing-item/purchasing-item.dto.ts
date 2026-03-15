@@ -6,9 +6,6 @@ export class ReceiveOrderItemDto {
   @IsOptional()
   @IsNumber()
   received_qty?: number;
-  @IsMongoId()
-  @IsNotEmpty()
-  inventory: string; // Select inventory to be used to store the received items
 }
 export class PurchasingItemDto {
   @IsMongoId() // checks it's a valid ObjectId string

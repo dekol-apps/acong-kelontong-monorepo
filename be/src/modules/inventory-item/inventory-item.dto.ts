@@ -1,18 +1,29 @@
 import { Types } from 'mongoose';
 import { Type } from 'class-transformer';
-import { IsInt, IsMongoId, Min, ArrayMinSize, IsArray, IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { IsInt, IsMongoId, Min, ArrayMinSize, IsArray, IsNotEmpty, IsOptional, IsString, ValidateNested, IsDate, IsDecimal } from 'class-validator';
 import { InventoryReconcileItem } from './inventory-reconcile.schema';
 export class InventoryItemDto {
   @IsMongoId()
   @IsNotEmpty()
   product: Types.ObjectId;
 
+  @IsDate()
+  @IsNotEmpty()
+  receive_date: Date;
+
+  @IsDecimal()
+  @IsNotEmpty()
+  original_price: Types.Decimal128;
+
+  @IsDecimal()
+  @IsOptional()
+  landed_cost?: Types.Decimal128;
+}
+
+export class GInventoryItemDto extends InventoryItemDto {
   @IsInt()
   @Min(1)
   item_qty: number;
-
-  @IsOptional()
-  landed_cost?: Types.Decimal128;
 }
 
 export class InventoryReconcileDto {

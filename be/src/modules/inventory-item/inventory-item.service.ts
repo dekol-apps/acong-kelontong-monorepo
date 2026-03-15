@@ -83,16 +83,18 @@ export class InventoryItemService {
     };
   }
 
-  async createInventoryItem(dto: InventoryItemDto, sessionIn?: ClientSession): Promise<InventoryItem | undefined> {
+  async createInventoryItem(payload: InventoryItemDto, sessionIn?: ClientSession): Promise<InventoryItem | undefined> {
     return this.global.withTransaction(async (session) => {
-      const product = await this.productModel.findById(dto.product).session(session);
+      const product = await this.productModel.findById(payload.product).session(session);
       if (!product) {
         throw BaseResponse.notFound({ err: `createInventoryItem Product not found` });
       }
       const data = {
-        product: dto.product,
+        product: payload.product,
         product_name: product.product_name,
-        landed_cost: dto.landed_cost,
+        receive_date: payload.receive_date,
+        original_price: payload.original_price,
+        landed_cost: payload.landed_cost,
       }
       const created = (await this.inventoryItemModel.create([data], { session }))[0];
       if (!created) throw BaseResponse.notFound({ err: 'createInventoryItem created not found' });
@@ -111,6 +113,8 @@ export class InventoryItemService {
       const data = {
         product: dto.product,
         product_name: product.product_name,
+        receive_date: dto.receive_date,
+        original_price: dto.original_price,
         landed_cost: dto.landed_cost,
       }
       const updatedItem = await this.inventoryItemModel.findByIdAndUpdate(
@@ -151,8 +155,8 @@ export class InventoryItemService {
     return this.global.withTransaction(async (session) => {
       const productIds = dto.items.map(i => i.product);
       const existingItems = await this.inventoryItemModel.find({
-        product: { $in: productIds },//sort by createdAt latest
-      }).sort({ createdAt: -1 }).session(session);
+        product: { $in: productIds },//sort by receive_date oldest to newest
+      }).sort({ receive_date: 'ascending' }).session(session);
 
       const itemsAfterReconcile: InventoryReconcileItem[] = []
 

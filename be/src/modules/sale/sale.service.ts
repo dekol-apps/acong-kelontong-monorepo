@@ -64,7 +64,7 @@ export class SaleService {
           order_type: OrderType.SALE,
           description: 'Stock moved to sale shelf',
         },
-        data.items.map(g => ({ product: g.product, item_qty: g.item_qty })),
+        data.items.map(g => ({ product: g.product, item_qty: g.item_qty, original_price: g.original_price })),
         session,
       );
       if (!result) throw BaseResponse.invalid({ err: 'addStock moveOutByProductAndQty returned undefined' });
@@ -103,6 +103,11 @@ export class SaleService {
         }
         const brand = brandMap.get(product.brand?.toString() ?? '');
         const sale_price = toDecimal128(new Decimal(pricing.sale_price))
+        const { ppn } = this.calculatePPn({
+          net_price: sale_price,
+          ppn_rate: pricing.ppn_rate ?? 0
+        });
+        const ppn_amount = toDecimal128(ppn);
         const { net, discountAmount } = this.priceAfterDiscount(sale_price, pricing.discount_percent ?? 0);
         const net_price = toDecimal128(net)
         const discount_amount = toDecimal128(discountAmount)
@@ -111,10 +116,12 @@ export class SaleService {
           product_name: product.product_name,
           brand_name: brand?.brand_name ?? 'MISSING BRAND NAME',
           barcode: product.barcode,
+          original_price: movedItem.original_price,
           sale_price,
           discount_percent: pricing.discount_percent ?? 0,
           discount_amount,
           ppn_rate: pricing.ppn_rate ?? 0,
+          ppn_amount,
           net_price,
           // COGS = landed_cost of this exact physical unit from inventory
           cogs: movedItem.landed_cost,
@@ -173,21 +180,14 @@ export class SaleService {
    *   2. base = net / (1 + ppnRate/100)   [extract base from VAT-inclusive price]
    *   3. ppn  = net - base
    */
-  calculatePPn(
-    item: {
-      net_price: Types.Decimal128,
-      ppn_rate: number
-    },
-  ) {
+  calculatePPn(item: { net_price: Types.Decimal128; ppn_rate: number }) {
+    const price = toDecimal(item.net_price);
     const ppnRate = new Decimal(item.ppn_rate || 0).div(100);
-    // Extract tax base and VAT from the inclusive net price
-    const base = toDecimal(item.net_price).div(new Decimal(1).plus(ppnRate));
-    const ppn = toDecimal(item.net_price).minus(base);
 
-    return {
-      ppn,
-      base,
-    };
+    const base = price.div(new Decimal(1).plus(ppnRate));
+    const ppn = price.minus(base);
+
+    return { base, ppn };
   }
 
   /**
@@ -249,9 +249,11 @@ export class SaleService {
             brand_name: existItem.brand_name,
             product_name: existItem.product_name,
             barcode: existItem.barcode,
+            original_price: existItem.original_price,
             sale_price: existItem.sale_price,
             discount_percent: existItem.discount_percent,
             ppn_rate: existItem.ppn_rate,
+            ppn_amount: existItem.ppn_amount,
             net_price: existItem.net_price,
             discount_amount: existItem.discount_amount,
             cogs: existItem.cogs, // carry COGS into the Sale record

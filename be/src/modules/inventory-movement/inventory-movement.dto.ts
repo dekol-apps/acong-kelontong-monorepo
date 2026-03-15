@@ -2,7 +2,8 @@ import { ArrayMinSize, IsArray, IsEnum, IsOptional, IsString, ValidateNested } f
 import { FlowType, OrderType } from 'src/types/interfaces';
 import { PaginationDto } from 'src/global/global.dto';
 import { Type } from 'class-transformer';
-import { InventoryItemDto } from '../inventory-item/inventory-item.dto';
+import { GInventoryItemDto } from '../inventory-item/inventory-item.dto';
+import { Types } from 'mongoose';
 
 export class InventoryMovementDto {
 
@@ -19,8 +20,8 @@ export class InventoryMovementDto {
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
-  @Type(() => InventoryItemDto)
-  items: InventoryItemDto[];
+  @Type(() => GInventoryItemDto)
+  items: GInventoryItemDto[];
 
   @IsString()
   @IsOptional()
@@ -29,4 +30,13 @@ export class InventoryMovementDto {
 
 export class ListInventoryMovementDTO extends PaginationDto {
   movement_type?: FlowType;
+}
+
+export interface MovedInventoryItemData {
+  _id: Types.ObjectId;
+  product: Types.ObjectId;
+  receive_date: Date;
+  product_name: string;
+  original_price: Types.Decimal128;
+  landed_cost?: Types.Decimal128;
 }

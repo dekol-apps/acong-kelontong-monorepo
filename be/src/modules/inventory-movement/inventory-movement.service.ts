@@ -4,20 +4,16 @@ import { ClientSession, Model, Types } from 'mongoose';
 import { GlobalService } from 'src/global/global.service';
 import { InventoryItem } from '../inventory-item/inventory-item.schema';
 import { FlowType, IListRes, OrderType } from 'src/types/interfaces';
-import { InventoryMovementDto, ListInventoryMovementDTO } from './inventory-movement.dto';
+import { InventoryMovementDto, ListInventoryMovementDTO, MovedInventoryItemData } from './inventory-movement.dto';
 import { BaseResponse } from 'src/utils/base-response';
 import { InventoryItemService } from '../inventory-item/inventory-item.service';
 import { InventoryMovement } from './inventory-movement.schema';
 import { Product } from '../product/product.schema';
 import { InventoryMovementItem } from './inventory-movement-item.schema';
+import { InventoryItemDto } from '../inventory-item/inventory-item.dto';
+import { toDecimal, toDecimal128 } from 'src/utils/helper';
 
 /** Snapshot of an InventoryItem captured just before it is deleted, returned by moveOutByItemIds */
-export interface MovedInventoryItemData {
-  _id: Types.ObjectId;
-  product: Types.ObjectId;
-  product_name: string;
-  landed_cost?: Types.Decimal128;
-}
 
 @Injectable()
 export class InventoryMovementService {
@@ -48,7 +44,10 @@ export class InventoryMovementService {
         }
         const movementItem: InventoryMovementItem = {
           product: item.product,
+          receive_date: item.receive_date,
           product_name: product?.product_name,
+          original_price: item.original_price,
+          landed_cost: item.landed_cost,
         }
         data.items.push(movementItem);
       }))
@@ -63,7 +62,12 @@ export class InventoryMovementService {
       if (dto.movement_type === FlowType.IN) {
         // BURST: Insert N individual records based on items.length to track landed_cost per item
         await Promise.all(dto.items.map(async item => {
-          const newData = { ...item };
+          const newData: InventoryItemDto = {
+            product: item.product,
+            receive_date: item.receive_date,
+            original_price: item.original_price,
+            landed_cost: item.landed_cost,
+          };
           // Loop and create N individual items
           for (let i = 0; i < item.item_qty; i++) {
             await this.inventoryItem.createInventoryItem(newData, session);
@@ -74,8 +78,8 @@ export class InventoryMovementService {
         await Promise.all(dto.items.map(async item => {
           const product = await this.productModel.findById(item.product).session(session).lean();
           const matchingItems = await this.inventoryItemModel.find({
-            product: item.product
-          }).limit(item.item_qty).session(session);
+            product: item.product //sort by receive_date oldest to newest
+          }).sort({ receive_date: 'ascending' }).limit(item.item_qty).session(session);
 
           if (matchingItems.length < item.item_qty) {
             throw BaseResponse.invalid({ option: { message: `Insufficient stock for product ${product?.product_name ?? 'Unknown'}!` }, err: 'inventory move OUT no stock' })
@@ -130,7 +134,9 @@ export class InventoryMovementService {
         movedItems.push({
           _id: inventoryItem._id,
           product: inventoryItem.product,
+          receive_date: inventoryItem.receive_date,
           product_name: inventoryItem.product_name,
+          original_price: inventoryItem.original_price,
           landed_cost: inventoryItem.landed_cost,
         });
 
@@ -144,7 +150,10 @@ export class InventoryMovementService {
         if (!productMap.has(key)) {
           productMap.set(key, {
             product: item.product,
+            receive_date: item.receive_date,
             product_name: item.product_name,
+            original_price: item.original_price,
+            landed_cost: item.landed_cost,
           });
         }
       }
@@ -210,7 +219,9 @@ export class InventoryMovementService {
           movedItems.push({
             _id: candidate._id,
             product: candidate.product,
+            receive_date: candidate.receive_date,
             product_name: candidate.product_name,
+            original_price: candidate.original_price,
             landed_cost: candidate.landed_cost,
           });
           await candidate.deleteOne({ session });
@@ -224,7 +235,10 @@ export class InventoryMovementService {
         if (!productMap.has(key)) {
           productMap.set(key, {
             product: item.product,
+            receive_date: item.receive_date,
             product_name: item.product_name,
+            original_price: item.original_price,
+            landed_cost: item.landed_cost,
           });
         }
       }
