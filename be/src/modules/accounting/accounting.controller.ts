@@ -1,7 +1,6 @@
-import { Controller, Get, Query, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, Res, UseGuards } from '@nestjs/common';
 import { UAuthGuard } from '../auth/auth.guard';
 import { AccountingService } from './accounting.service';
-import { PaginationDto } from 'src/global/global.dto';
 import type { Response } from 'express';
 import { BaseResponse } from 'src/utils/base-response';
 

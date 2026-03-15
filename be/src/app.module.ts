@@ -48,6 +48,8 @@ import { InvestmentService } from './modules/investment/investment.service';
 import { InvestmentController } from './modules/investment/investment.controller';
 import { Investment, InvestmentSchema } from './modules/investment/investment.schema';
 import { Accounting, AccountingSchema } from './modules/accounting/accounting.schema';
+import { AccountingBalance, AccountingBalanceSchema } from './modules/accounting/accounting-balance.schema';
+import { AccountingSnapshot, AccountingSnapshotSchema } from './modules/accounting/accounting-snapshot.schema';
 import { ExpenseService } from './modules/expense/expense.service';
 import { ExpenseController } from './modules/expense/expense.controller';
 import { Expense, ExpenseSchema } from './modules/expense/expense.schema';
@@ -117,6 +119,8 @@ import { AccountingController } from './modules/accounting/accounting.controller
       { name: InventoryReconcile.name, schema: InventoryReconcileSchema },
       { name: Investment.name, schema: InvestmentSchema },
       { name: Accounting.name, schema: AccountingSchema },
+      { name: AccountingBalance.name, schema: AccountingBalanceSchema },
+      { name: AccountingSnapshot.name, schema: AccountingSnapshotSchema },
       { name: Expense.name, schema: ExpenseSchema },
       { name: Sale.name, schema: SaleSchema },
       { name: SaleItem.name, schema: SaleItemSchema },

@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, ClientSession, Types } from 'mongoose';
 import { GlobalService } from 'src/global/global.service';
@@ -6,8 +6,22 @@ import { CurrencyEn, FlowType, OrderType } from 'src/types/interfaces';
 import { BaseResponse } from 'src/utils/base-response';
 import { Accounting } from './accounting.schema';
 import { AccountingBalance } from './accounting-balance.schema';
+import { AccountingSnapshot } from './accounting-snapshot.schema';
 import { InventoryItem } from '../inventory-item/inventory-item.schema';
-import { decimalToNumber } from 'src/utils/helper';
+import { decimalToNumber, toDecimal128 } from 'src/utils/helper';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import Decimal from 'decimal.js';
+
+export interface IPortfolioData {
+  balance: number;
+  investment: number;
+  totalAssets: number;
+  inventoryValue: number;
+  revenue: number;
+  cogs: number;
+  profit: number;
+  equity: number;
+}
 
 @Injectable()
 export class AccountingService {
@@ -18,7 +32,10 @@ export class AccountingService {
     @InjectModel(InventoryItem.name) private inventoryItem: Model<InventoryItem>,
     @InjectModel(Accounting.name) private accountingModel: Model<Accounting>,
     @InjectModel(AccountingBalance.name) private balanceModel: Model<AccountingBalance>,
+    @InjectModel(AccountingSnapshot.name) private snapshotModel: Model<AccountingSnapshot>,
   ) { }
+
+  private readonly logger = new Logger(AccountingService.name);
 
   async createAccountingItem(data: Accounting, sessionIn?: ClientSession): Promise<Accounting | undefined> {
     return this.global.withTransaction(async (session) => {
@@ -143,11 +160,32 @@ export class AccountingService {
     }, sessionIn);
   }
 
+  async countTotalCogs(sessionIn?: ClientSession): Promise<number> {
+    return this.global.withTransaction(async (session) => {
+      const result = await this.accountingModel.aggregate([
+        {
+          $match: {
+            order_type: OrderType.SALE,
+            flow_type: FlowType.IN,
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            total_cogs: { $sum: { $toDecimal: "$order_data.total_cogs" } },
+          },
+        },
+      ]).session(session);
+      return result[0]?.total_cogs ?? 0;
+    }, sessionIn);
+  }
+
   async countProfit(sessionIn?: ClientSession): Promise<number> {
-    const earnings = await this.countRevenue(sessionIn);
-    const purchasings = await this.countTotalMoney(FlowType.OUT, OrderType.PURCHASING, sessionIn);
+    const revenue = await this.countRevenue(sessionIn);
+    const cogs = await this.countTotalCogs(sessionIn);
     const operational = await this.countTotalMoney(FlowType.OUT, OrderType.EXPENSE, sessionIn);
-    return earnings - purchasings - operational;
+    // Accrual Basis: Profit = Revenue - COGS - Expenses
+    return revenue - cogs - operational;
   }
 
   async countRevenue(sessionIn?: ClientSession): Promise<number> {
@@ -171,11 +209,27 @@ export class AccountingService {
     }, sessionIn);
   }
 
-  async countCapitalValue(sessionIn?: ClientSession): Promise<number> {
+  /**
+   * Total Assets = Cash Balance + Inventory Value
+   */
+  async countTotalAssets(sessionIn?: ClientSession): Promise<number> {
     return this.global.withTransaction(async (session) => {
       const inventoryItemsValuationTotal = await this.countTotalAssetValue(session);
       const balance = await this.countBalance(sessionIn);
       return balance + inventoryItemsValuationTotal;
+    }, sessionIn);
+  }
+
+  /**
+   * Equity = Total Assets - Total Liabilities
+   * (Currently tracking simple liabilities if any, or just assets)
+   */
+  async countEquity(sessionIn?: ClientSession): Promise<number> {
+    return this.global.withTransaction(async (session) => {
+      const totalAssets = await this.countTotalAssets(session);
+      // Future: subtract actual accounts payable
+      const liabilities = 0;
+      return totalAssets - liabilities;
     }, sessionIn);
   }
 
@@ -185,23 +239,48 @@ export class AccountingService {
     return depo - wd;
   }
 
-  async getPortofolio(sessionIn?: ClientSession): Promise<any> {
+  async getPortofolio(sessionIn?: ClientSession): Promise<IPortfolioData> {
     return this.global.withTransaction(async (session) => {
       const balance = await this.countBalance(session);
       const investment = await this.countInvestment(session);
-      const capValue = await this.countCapitalValue(session);
-      const totalAsset = await this.countTotalAssetValue(session);
+      const totalAssets = await this.countTotalAssets(session);
+      const inventoryValue = await this.countTotalAssetValue(session);
       const revenue = await this.countRevenue(session);
+      const cogs = await this.countTotalCogs(session);
       const profit = await this.countProfit(session);
+      const equity = await this.countEquity(session);
 
       return {
         balance,
         investment,
-        capValue,
-        totalAsset,
+        totalAssets,
+        inventoryValue,
         revenue,
+        cogs,
         profit,
+        equity,
       }
     }, sessionIn);
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async takeSnapshot() {
+    this.logger.log('Taking daily accounting snapshot...');
+    try {
+      const portfolio: IPortfolioData = await this.getPortofolio();
+      await this.snapshotModel.create({
+        balance: toDecimal128(new Decimal(portfolio.balance)),
+        investment: toDecimal128(new Decimal(portfolio.investment)),
+        total_assets: toDecimal128(new Decimal(portfolio.totalAssets)),
+        revenue: toDecimal128(new Decimal(portfolio.revenue)),
+        profit: toDecimal128(new Decimal(portfolio.profit)),
+        cogs: toDecimal128(new Decimal(portfolio.cogs)),
+        equity: toDecimal128(new Decimal(portfolio.equity)),
+        snapshot_date: new Date(),
+      });
+      this.logger.log('Daily accounting snapshot captured successfully.');
+    } catch (error) {
+      this.logger.error('Failed to capture daily accounting snapshot', error);
+    }
   }
 }
