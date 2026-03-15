@@ -24,7 +24,7 @@ export class ApprovalController {
         @Res() res: Response,
     ) {
         try {
-            const allowedStat = [PurchasingEn.REQUEST, PurchasingEn.APPROVE, PurchasingEn.REJECT];
+            const allowedStat = [PurchasingEn.REQUEST, PurchasingEn.APPROVE, PurchasingEn.PROCESS, PurchasingEn.RECEIVE, PurchasingEn.COMPLETE, PurchasingEn.REJECT];
             const filter = query.filter && Array.isArray(query.filter) ? query.filter.filter(it => it.value && allowedStat.includes(it.value as PurchasingEn)) : allowedStat.map(it => { return { column: 'status', value: it } })
             const query2 = {
                 ...query,
@@ -76,7 +76,7 @@ export class ApprovalController {
         @Res() res: Response,
     ) {
         try {
-            const allowedStat = [ExpenseStatus.REQUEST, ExpenseStatus.APPROVE, ExpenseStatus.REJECT];
+            const allowedStat = [ExpenseStatus.REQUEST, ExpenseStatus.APPROVE, ExpenseStatus.COMPLETE, ExpenseStatus.REJECT];
             const filter = query.filter && Array.isArray(query.filter) ? query.filter.filter(it => it.value && allowedStat.includes(it.value as ExpenseStatus)) : allowedStat.map(it => { return { column: 'status', value: it } })
             const query2 = {
                 ...query,
