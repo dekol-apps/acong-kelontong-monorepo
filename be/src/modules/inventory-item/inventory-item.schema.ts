@@ -8,6 +8,10 @@ export class InventoryItem {
   @Prop({ required: true }) product_name: string;
   @Prop({ type: Date, required: true }) receive_date: Date;
   @Prop({ type: Types.Decimal128, required: true }) original_price: Types.Decimal128;
+  @Prop({ type: Number, required: true, default: 0 })
+  original_ppn_rate: number;
+  @Prop({ type: Types.Decimal128, required: true, default: 0 })
+  original_ppn_amount: Types.Decimal128;
   // Track specific cost per item unit for Landed Cost logic
   @Prop({ type: Types.Decimal128 }) landed_cost?: Types.Decimal128;
 }

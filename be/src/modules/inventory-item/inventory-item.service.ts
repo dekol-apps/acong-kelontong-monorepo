@@ -94,6 +94,7 @@ export class InventoryItemService {
         product_name: product.product_name,
         receive_date: payload.receive_date,
         original_price: payload.original_price,
+        original_ppn_rate: payload.original_ppn_rate,
         landed_cost: payload.landed_cost,
       }
       const created = (await this.inventoryItemModel.create([data], { session }))[0];
@@ -115,6 +116,7 @@ export class InventoryItemService {
         product_name: product.product_name,
         receive_date: dto.receive_date,
         original_price: dto.original_price,
+        original_ppn_rate: dto.original_ppn_rate,
         landed_cost: dto.landed_cost,
       }
       const updatedItem = await this.inventoryItemModel.findByIdAndUpdate(

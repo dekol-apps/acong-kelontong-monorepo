@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
-import { Model, FilterQuery, ClientSession, Connection, HydratedDocument } from 'mongoose';
+import { Model, FilterQuery, ClientSession, Connection, HydratedDocument, Types } from 'mongoose';
 import { modules } from 'src/types/constants';
 import { IListRes, TOneOrMany } from 'src/types/interfaces';
 import { Trash } from './global.schema';
 import { Document } from 'mongoose';
 import { FilterDto } from './global.dto';
 import { BaseResponse } from 'src/utils/base-response';
+import Decimal from 'decimal.js';
+import { toDecimal } from 'src/utils/helper';
 
 export type PopulateParam = { column: string; select?: any; match?: any; options?: any };
 export class IGetListParam {
@@ -163,4 +165,32 @@ export class GlobalService {
     }, sessionIn);
   }
 
+  priceAfterDiscount(price: Types.Decimal128, discountPercent?: number) {
+    const priceDecimal = toDecimal(price);
+    const discountPercentDecimal = new Decimal(discountPercent || 0);
+    const discountAmount = priceDecimal.mul(discountPercentDecimal.div(100));
+    const net = priceDecimal.minus(discountAmount);
+    return { net, discountAmount };
+  }
+
+  /**
+   * Calculate PPN (VAT-inclusive) for a SINGLE physical unit.
+   *
+   * Given:
+   *   - net_price       = sale price of one unit
+   *   - ppn_rate        = VAT % (e.g. 11 for 11%)
+   *
+   * Steps:
+   *   1. base = net_price / (1 + ppn_rate/100)   [extract base from VAT-inclusive price]
+   *   2. ppn  = net_price - base
+   */
+  getPPnAmount(item: { net_price: Types.Decimal128; ppn_rate: number }) {
+    const price = toDecimal(item.net_price);
+    const ppnRate = new Decimal(item.ppn_rate || 0).div(100);
+
+    const base = price.div(new Decimal(1).plus(ppnRate));
+    const ppn = price.minus(base);
+
+    return { base, ppn };
+  }
 }

@@ -620,6 +620,7 @@ export class PurchasingService {
               item_qty: qty,
               receive_date: new Date(),
               original_price: toDecimal128(original_price),
+              original_ppn_rate: purchase.ppn_rate,
               landed_cost: toDecimal128(landed_cost)
             }
           }

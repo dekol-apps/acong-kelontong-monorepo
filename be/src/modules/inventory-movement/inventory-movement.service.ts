@@ -42,11 +42,17 @@ export class InventoryMovementService {
         if (!product) {
           throw BaseResponse.invalid({ option: { message: 'Product not found' }, err: 'createInventoryMovement !product' });
         }
+        const { ppn } = this.global.getPPnAmount({
+          net_price: item.original_price,
+          ppn_rate: item.original_ppn_rate
+        });
         const movementItem: InventoryMovementItem = {
           product: item.product,
           receive_date: item.receive_date,
           product_name: product?.product_name,
           original_price: item.original_price,
+          original_ppn_rate: item.original_ppn_rate,
+          original_ppn_amount: toDecimal128(ppn),
           landed_cost: item.landed_cost,
         }
         data.items.push(movementItem);
@@ -66,6 +72,7 @@ export class InventoryMovementService {
             product: item.product,
             receive_date: item.receive_date,
             original_price: item.original_price,
+            original_ppn_rate: item.original_ppn_rate,
             landed_cost: item.landed_cost,
           };
           // Loop and create N individual items
@@ -130,6 +137,11 @@ export class InventoryMovementService {
           });
         }
 
+        const { ppn } = this.global.getPPnAmount({
+          net_price: inventoryItem.original_price,
+          ppn_rate: inventoryItem.original_ppn_rate
+        });
+
         // Capture the data (including landed_cost for COGS) before removal
         movedItems.push({
           _id: inventoryItem._id,
@@ -137,6 +149,8 @@ export class InventoryMovementService {
           receive_date: inventoryItem.receive_date,
           product_name: inventoryItem.product_name,
           original_price: inventoryItem.original_price,
+          original_ppn_rate: inventoryItem.original_ppn_rate,
+          original_ppn_amount: toDecimal128(ppn),
           landed_cost: inventoryItem.landed_cost,
         });
 
@@ -146,6 +160,10 @@ export class InventoryMovementService {
       // Build a grouped movement summary (one entry per unique product)
       const productMap = new Map<string, InventoryMovementItem>();
       for (const item of movedItems) {
+        const { ppn } = this.global.getPPnAmount({
+          net_price: item.original_price,
+          ppn_rate: item.original_ppn_rate
+        });
         const key = item.product.toString();
         if (!productMap.has(key)) {
           productMap.set(key, {
@@ -153,6 +171,8 @@ export class InventoryMovementService {
             receive_date: item.receive_date,
             product_name: item.product_name,
             original_price: item.original_price,
+            original_ppn_rate: item.original_ppn_rate,
+            original_ppn_amount: toDecimal128(ppn),
             landed_cost: item.landed_cost,
           });
         }
@@ -216,12 +236,18 @@ export class InventoryMovementService {
         }
 
         for (const candidate of candidates) {
+          const { ppn } = this.global.getPPnAmount({
+            net_price: candidate.original_price,
+            ppn_rate: candidate.original_ppn_rate
+          });
           movedItems.push({
             _id: candidate._id,
             product: candidate.product,
             receive_date: candidate.receive_date,
             product_name: candidate.product_name,
             original_price: candidate.original_price,
+            original_ppn_rate: candidate.original_ppn_rate,
+            original_ppn_amount: toDecimal128(ppn),
             landed_cost: candidate.landed_cost,
           });
           await candidate.deleteOne({ session });
@@ -232,12 +258,18 @@ export class InventoryMovementService {
       const productMap = new Map<string, InventoryMovementItem>();
       for (const item of movedItems) {
         const key = item.product.toString();
+        const { ppn } = this.global.getPPnAmount({
+          net_price: item.original_price,
+          ppn_rate: item.original_ppn_rate
+        });
         if (!productMap.has(key)) {
           productMap.set(key, {
             product: item.product,
             receive_date: item.receive_date,
             product_name: item.product_name,
             original_price: item.original_price,
+            original_ppn_rate: item.original_ppn_rate,
+            original_ppn_amount: toDecimal128(ppn),
             landed_cost: item.landed_cost,
           });
         }

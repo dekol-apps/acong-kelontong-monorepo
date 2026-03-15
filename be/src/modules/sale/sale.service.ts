@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, ClientSession, Types } from 'mongoose';
+import { Model, ClientSession } from 'mongoose';
 import { GlobalService } from 'src/global/global.service';
 import { BaseResponse } from 'src/utils/base-response';
 import { AccountingService } from '../accounting/accounting.service';
@@ -103,12 +103,12 @@ export class SaleService {
         }
         const brand = brandMap.get(product.brand?.toString() ?? '');
         const sale_price = toDecimal128(new Decimal(pricing.sale_price))
-        const { ppn } = this.calculatePPn({
+        const { ppn } = this.global.getPPnAmount({
           net_price: sale_price,
           ppn_rate: pricing.ppn_rate ?? 0
         });
         const ppn_amount = toDecimal128(ppn);
-        const { net, discountAmount } = this.priceAfterDiscount(sale_price, pricing.discount_percent ?? 0);
+        const { net, discountAmount } = this.global.priceAfterDiscount(sale_price, pricing.discount_percent ?? 0);
         const net_price = toDecimal128(net)
         const discount_amount = toDecimal128(discountAmount)
         const saleItem: SaleItem = {
@@ -117,6 +117,8 @@ export class SaleService {
           brand_name: brand?.brand_name ?? 'MISSING BRAND NAME',
           barcode: product.barcode,
           original_price: movedItem.original_price,
+          original_ppn_rate: movedItem.original_ppn_rate,
+          original_ppn_amount: movedItem.original_ppn_amount,
           sale_price,
           discount_percent: pricing.discount_percent ?? 0,
           discount_amount,
@@ -159,14 +161,6 @@ export class SaleService {
     )
   }
 
-  priceAfterDiscount(price: Types.Decimal128, discountPercent?: number) {
-    const priceDecimal = toDecimal(price);
-    const discountPercentDecimal = new Decimal(discountPercent || 0);
-    const discountAmount = priceDecimal.mul(discountPercentDecimal.div(100));
-    const net = priceDecimal.minus(discountAmount);
-    return { net, discountAmount };
-  }
-
   /**
    * Calculate PPN (VAT-inclusive) for a SINGLE physical unit.
    *
@@ -179,18 +173,7 @@ export class SaleService {
    *   1. net  = price - (price * discountPercent / 100)
    *   2. base = net / (1 + ppnRate/100)   [extract base from VAT-inclusive price]
    *   3. ppn  = net - base
-   */
-  calculatePPn(item: { net_price: Types.Decimal128; ppn_rate: number }) {
-    const price = toDecimal(item.net_price);
-    const ppnRate = new Decimal(item.ppn_rate || 0).div(100);
-
-    const base = price.div(new Decimal(1).plus(ppnRate));
-    const ppn = price.minus(base);
-
-    return { base, ppn };
-  }
-
-  /**
+   *
    * Sum up totals across all SaleItem documents.
    * Because each SaleItem = 1 physical unit, no per-item qty multiplication needed.
    */
@@ -201,7 +184,7 @@ export class SaleService {
     let totalCogs = new Decimal(0);
 
     for (const item of items) {
-      const { ppn, base } = this.calculatePPn({
+      const { ppn, base } = this.global.getPPnAmount({
         net_price: item.net_price,
         ppn_rate: item.ppn_rate
       });
@@ -250,6 +233,8 @@ export class SaleService {
             product_name: existItem.product_name,
             barcode: existItem.barcode,
             original_price: existItem.original_price,
+            original_ppn_rate: existItem.original_ppn_rate,
+            original_ppn_amount: existItem.original_ppn_amount,
             sale_price: existItem.sale_price,
             discount_percent: existItem.discount_percent,
             ppn_rate: existItem.ppn_rate,

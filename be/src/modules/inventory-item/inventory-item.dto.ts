@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
 import { Type } from 'class-transformer';
-import { IsInt, IsMongoId, Min, ArrayMinSize, IsArray, IsNotEmpty, IsOptional, IsString, ValidateNested, IsDate, IsDecimal } from 'class-validator';
+import { IsInt, IsMongoId, Min, ArrayMinSize, IsArray, IsNotEmpty, IsOptional, IsString, ValidateNested, IsDate, IsDecimal, IsNumber } from 'class-validator';
 import { InventoryReconcileItem } from './inventory-reconcile.schema';
 export class InventoryItemDto {
   @IsMongoId()
@@ -10,6 +10,10 @@ export class InventoryItemDto {
   @IsDate()
   @IsNotEmpty()
   receive_date: Date;
+
+  @IsNumber()
+  @IsNotEmpty()
+  original_ppn_rate: number;
 
   @IsDecimal()
   @IsNotEmpty()
