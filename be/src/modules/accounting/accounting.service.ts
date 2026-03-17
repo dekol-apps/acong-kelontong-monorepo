@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, ClientSession, Types } from 'mongoose';
 import { GlobalService } from 'src/global/global.service';
 import { CurrencyEn, FlowType, OrderType } from 'src/types/interfaces';
+import { IListRes } from '../../types/interfaces';
 import { BaseResponse } from 'src/utils/base-response';
 import { Accounting } from './accounting.schema';
 import { AccountingBalance } from './accounting-balance.schema';
@@ -10,6 +11,7 @@ import { AccountingSnapshot } from './accounting-snapshot.schema';
 import { InventoryItem } from '../inventory-item/inventory-item.schema';
 import { decimalToNumber, toDecimal128 } from 'src/utils/helper';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { TaxTransactionFilterDto } from './accounting.dto';
 import Decimal from 'decimal.js';
 
 export interface IPortfolioData {
@@ -21,6 +23,18 @@ export interface IPortfolioData {
   cogs: number;
   profit: number;
   equity: number;
+}
+
+export interface ITaxTransaction {
+  id: Types.ObjectId;
+  type: FlowType;
+  source_type: OrderType;
+  source_id: Types.ObjectId;
+  source_data: any;
+  tax_base: number;
+  ppn: number;
+  faktur_pajak_no?: string;
+  transaction_date: Date;
 }
 
 @Injectable()
@@ -128,6 +142,8 @@ export class AccountingService {
       return result;
     }, sessionIn);
   }
+
+
 
   async countTotalMoney(flow_type?: FlowType, order_type?: OrderType, sessionIn?: ClientSession): Promise<number> {
     return this.global.withTransaction(async (session) => {
@@ -282,5 +298,73 @@ export class AccountingService {
     } catch (error) {
       this.logger.error('Failed to capture daily accounting snapshot', error);
     }
+  }
+
+  async listTaxTransactions(pagination: TaxTransactionFilterDto): Promise<IListRes<ITaxTransaction>> {
+    const { page, size, sortBy, sortDir, search, hasPpnOnly, startDate, endDate } = pagination;
+
+    const filter: any = {
+      order_type: { $in: [OrderType.PURCHASING, OrderType.SALE] }
+    };
+
+    if (startDate || endDate) {
+      filter.record_date = {};
+      if (startDate) filter.record_date.$gte = new Date(startDate);
+      if (endDate) filter.record_date.$lte = new Date(endDate);
+    }
+
+    const list = await this.global.getList<Accounting>(
+      this.accountingModel,
+      {
+        page,
+        size,
+        sortBy: sortBy || 'record_date',
+        sortDir: sortDir || 'desc',
+        search,
+        searchFields: ['order_type'],
+        filter
+      }
+    );
+
+    const data: ITaxTransaction[] = list.data.map(it => {
+      const orderData = it.order_data as Record<string, any>;
+      let tax_base = 0;
+      let ppn = 0;
+      let faktur_pajak_no: string | undefined = undefined;
+
+      if (it.order_type === OrderType.PURCHASING) {
+        tax_base = decimalToNumber(orderData.total_purchase_price) || 0;
+        ppn = decimalToNumber(orderData.ppn_amount) || 0;
+        faktur_pajak_no = orderData.ppn_facture_number as string;
+      } else if (it.order_type === OrderType.SALE) {
+        tax_base = decimalToNumber(orderData.total_before_tax) || 0;
+        ppn = decimalToNumber(orderData.total_ppn) || 0;
+      }
+
+      const tx: ITaxTransaction = {
+        id: it._id,
+        type: it.flow_type,
+        source_type: it.order_type,
+        source_id: it.order_id,
+        source_data: it.order_data,
+        tax_base,
+        ppn,
+        faktur_pajak_no,
+        transaction_date: it.record_date || new Date(),
+      };
+      return tx;
+    });
+
+    const isPpnOnly = (hasPpnOnly ?? '') === 'true';
+    const filteredData = isPpnOnly ? data.filter(it => it.ppn > 0) : data;
+
+    return {
+      meta: list.meta ? {
+        ...list.meta,
+        total: isPpnOnly ? filteredData.length : list.meta.total,
+        totalPages: isPpnOnly ? Math.ceil(filteredData.length / (size || 10)) : list.meta.totalPages
+      } : undefined,
+      data: filteredData
+    };
   }
 }
