@@ -8,7 +8,7 @@ import { Document } from 'mongoose';
 import { FilterDto } from './global.dto';
 import { BaseResponse } from 'src/utils/base-response';
 import Decimal from 'decimal.js';
-import { toDecimal } from 'src/utils/helper';
+import { toDecimal, toDecimal128 } from 'src/utils/helper';
 
 export type PopulateParam = { column: string; select?: any; match?: any; options?: any };
 export class IGetListParam {
@@ -192,5 +192,13 @@ export class GlobalService {
     const ppn = price.minus(base);
 
     return { base, ppn };
+  }
+
+  //get pph amount
+  getPphAmount(item: { transaction_amount: Types.Decimal128; pph_rate: number }) {
+    const price = toDecimal(item.transaction_amount);
+    const pphRate = new Decimal(item.pph_rate || 0).div(100);
+    const pph = price.times(pphRate);
+    return toDecimal128(pph);
   }
 }

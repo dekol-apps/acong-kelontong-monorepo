@@ -96,11 +96,8 @@ export class PurchasingService {
       purchasing_attachments: data.purchasing_attachments,
       payment_realization: data.payment_realization,
       notes: data.notes,
-      pph_type: data.pph_type,
       ppn_type: data.ppn_type,
-      pph_rate: data.pph_rate,
       ppn_rate: data.ppn_rate,
-      pph_amount: data.pph_amount,
       ppn_amount: data.ppn_amount,
       ppn_facture_number: data.ppn_facture_number,
       shipping_cost: data.shipping_cost,
@@ -438,7 +435,6 @@ export class PurchasingService {
     const total = toDecimal(input.tax_base);
     const shipping = toDecimal(input.shipping_cost);
     const ppnRate = new Decimal(input.ppn_rate).div(100);
-    const pphRate = new Decimal(input.pph_rate).div(100);
     // =====================
     // 1️⃣ Expected PPN
     // =====================
@@ -451,21 +447,13 @@ export class PurchasingService {
       expectedPpn = total.minus(base);
     }
     // =====================
-    // 2️⃣ Expected PPh
-    // =====================
-    let expectedPph = new Decimal(0);
-    if (input.pph_type !== PPhType.NONE) {
-      expectedPph = total.mul(pphRate);
-    }
-    // =====================
-    // 3️⃣ Expected Payable
+    // 2️⃣ Expected Payable
     // =====================
     const expectedPayable = total
       .plus(shipping)
-      .plus(expectedPpn)
-      .minus(expectedPph);
+      .plus(expectedPpn);
     // =====================
-    // 4️⃣ Predicted Additional Cost
+    // 3️⃣ Predicted Additional Cost
     // =====================
     const payment = toDecimal(input.payment_realization);
     const predictedAdditionalCost =
@@ -474,29 +462,22 @@ export class PurchasingService {
     // 5️⃣ Validation Flags
     // =====================
     const providedPpn = toDecimal(input.ppn_amount);
-    const providedPph = toDecimal(input.pph_amount);
 
     const isPpnValid = expectedPpn.equals(providedPpn);
-    const isPphValid = expectedPph.equals(providedPph);
 
     const isPaymentMatch = payment.equals(expectedPayable);
 
     return {
       expected_ppn_amount: toDecimal128(expectedPpn),
-      expected_pph_amount: toDecimal128(expectedPph),
       expected_payable: toDecimal128(expectedPayable),
       predicted_additional_cost: toDecimal128(predictedAdditionalCost),
       is_ppn_valid: isPpnValid,
-      is_pph_valid: isPphValid,
       is_payment_match: isPaymentMatch,
     };
   }
   async purchasingPayment(id: Types.ObjectId, dto: PurchaseOrderDto, sessionIn?: ClientSession): Promise<{ detail: Purchasing | undefined; removedAttachments: string[] }> {
     return this.global.withTransaction(async (session) => {
       if (!dto.shipping_cost) throw BaseResponse.invalid({ option: { message: "shipping_cost is required" } });
-      if (!dto.pph_type) throw BaseResponse.invalid({ option: { message: "pph_type is required" } });
-      if (!dto.pph_rate) throw BaseResponse.invalid({ option: { message: "pph_rate is required" } });
-      if (!dto.pph_amount) throw BaseResponse.invalid({ option: { message: "pph_amount is required" } });
       if (!dto.ppn_type) throw BaseResponse.invalid({ option: { message: "ppn_type is required" } });
       if (!dto.ppn_rate) throw BaseResponse.invalid({ option: { message: "ppn_rate is required" } });
       if (!dto.ppn_amount) throw BaseResponse.invalid({ option: { message: "ppn_amount is required" } });
@@ -509,19 +490,14 @@ export class PurchasingService {
       if (!edit || !edit.detail) throw BaseResponse.unexpected({ err: 'purchasingPayment' });
       const {
         expected_ppn_amount,
-        expected_pph_amount,
         expected_payable,
         predicted_additional_cost,
         is_ppn_valid,
-        is_pph_valid,
         is_payment_match,
       } = this.validatePayment({
         tax_base: edit.detail.total_purchase_price,
-        pph_rate: dto.pph_rate,
         ppn_rate: dto.ppn_rate,
-        pph_type: dto.pph_type,
         ppn_type: dto.ppn_type,
-        pph_amount: toDecimal128(toDecimal(dto.pph_amount)),
         ppn_amount: toDecimal128(toDecimal(dto.ppn_amount)),
         payment_realization: toDecimal128(toDecimal(dto.payment_realization)),
         shipping_cost: toDecimal128(toDecimal(dto.shipping_cost)),
@@ -529,13 +505,11 @@ export class PurchasingService {
       const message = `
         Payment calculation result invalid:\n
         PPn: ${is_ppn_valid ? 'Correct' : 'Incorrect'}\n
-        PPh: ${is_pph_valid ? 'Correct' : 'Incorrect'}\n
         details:\n
         expected_ppn_amount: ${expected_ppn_amount.toString()}\n,
-        expected_pph_amount: ${expected_pph_amount.toString()}\n,
         expected_payable: ${expected_payable.toString()}\n,
       `
-      if (!is_ppn_valid || !is_pph_valid) throw BaseResponse.invalid({ option: { message } })
+      if (!is_ppn_valid) throw BaseResponse.invalid({ option: { message } })
       const accountingPayload: Accounting = {
         flow_type: FlowType.OUT,
         order_id: edit.detail?._id,

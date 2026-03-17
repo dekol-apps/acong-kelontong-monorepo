@@ -1,5 +1,5 @@
 import { IsArray, IsEnum, IsNumber, IsNotEmpty, IsOptional, IsString, Min, MinLength } from 'class-validator';
-import { ApprovalType } from 'src/types/interfaces';
+import { ApprovalType, PPhType } from 'src/types/interfaces';
 
 export class ExpenseApprovalDto {
   @IsNotEmpty()
@@ -28,6 +28,16 @@ export class ExpenseDto {
   @IsArray()
   @IsString({ each: true })
   expense_attachments?: string[];
+
+  @IsOptional()
+  @IsEnum(PPhType, {
+    message: 'pph_type must be either PPh23, PPh22 or PPh4_2',
+  })
+  pph_type?: PPhType;
+
+  @IsOptional()
+  @IsNumber()
+  pph_rate?: number; // example 2 for 2%
 
   @IsOptional()
   @IsString()

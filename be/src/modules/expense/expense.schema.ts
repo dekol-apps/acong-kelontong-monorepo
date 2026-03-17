@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
+import { PPhType } from 'src/types/interfaces';
 
 export enum ExpenseStatus {
   CREATE = 'CREATE',
@@ -25,6 +26,15 @@ export class Expense {
 
   @Prop({ enum: ExpenseStatus, required: true })
   status: ExpenseStatus;
+
+  @Prop({ enum: PPhType, default: PPhType.NONE })
+  pph_type: PPhType;
+
+  @Prop({ type: Number, default: 0 })
+  pph_rate: number;
+
+  @Prop({ type: Types.Decimal128, default: 0 })
+  pph_amount?: Types.Decimal128;
 
   @Prop()
   notes?: string;

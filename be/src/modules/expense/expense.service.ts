@@ -8,6 +8,7 @@ import { ExpenseApprovalDto, ExpenseDto } from './expense.dto';
 import { ApprovalType, FlowType, IListRes, OrderType } from 'src/types/interfaces';
 import { BaseResponse } from 'src/utils/base-response';
 import { PaginationDto } from 'src/global/global.dto';
+import { toDecimal, toDecimal128 } from 'src/utils/helper';
 
 @Injectable()
 export class ExpenseService {
@@ -19,16 +20,25 @@ export class ExpenseService {
     private accounting: AccountingService,
     @InjectModel(Expense.name)
     private expenseModel: Model<Expense>,
-    @InjectConnection()
-    private readonly connection: Connection,
   ) { }
 
   async createExpense(data: ExpenseDto) {
+    const payload = {
+      status: ExpenseStatus.CREATE,
+      transaction_amount: data.transaction_amount,
+      expense_attachments: data.expense_attachments,
+      notes: data.notes,
+      subject: data.subject,
+      expense_date: new Date(),
+      pph_type: data.pph_type,
+      pph_rate: data.pph_rate,
+    }
+    if (data.pph_rate) {
+      const pph_amount = this.global.getPphAmount({ transaction_amount: toDecimal128(toDecimal(data.transaction_amount)), pph_rate: data.pph_rate });
+      payload['pph_amount'] = pph_amount;
+    }
     return this.global.withTransaction(async (session) => {
-      const expense = await this.expenseModel.create([{
-        ...data,
-        status: ExpenseStatus.CREATE,
-      }], { session });
+      const expense = await this.expenseModel.create([payload], { session });
 
       return expense[0];
     });

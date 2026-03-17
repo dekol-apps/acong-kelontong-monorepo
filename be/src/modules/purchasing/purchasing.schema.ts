@@ -51,15 +51,6 @@ export class Purchasing {
   @Prop({ type: Date })
   completed_date?: Date; // Receive order step
 
-  @Prop({ enum: PPhType, default: PPhType.NONE })
-  pph_type: PPhType;
-
-  @Prop({ type: Number, default: 0 })
-  pph_rate: number;
-
-  @Prop({ type: Types.Decimal128, default: 0 })
-  pph_amount?: Types.Decimal128;
-
   @Prop({ enum: PPnType, default: PPnType.NONE })
   ppn_type: PPnType;
 
@@ -78,11 +69,8 @@ export const PurchasingSchema = SchemaFactory.createForClass(Purchasing);
 
 export interface ValidatePaymentInput {
   tax_base: Types.Decimal128;
-  pph_rate: number; // example 2 for 2%
   ppn_rate: number; // example 11 for 11%
-  pph_type: PPhType;
   ppn_type: PPnType;
-  pph_amount: Types.Decimal128;
   ppn_amount: Types.Decimal128;
   payment_realization: Types.Decimal128;
   shipping_cost: Types.Decimal128;
@@ -90,10 +78,8 @@ export interface ValidatePaymentInput {
 
 export interface ValidatePaymentResult {
   expected_ppn_amount: Types.Decimal128;
-  expected_pph_amount: Types.Decimal128;
   expected_payable: Types.Decimal128;
   predicted_additional_cost: Types.Decimal128;
   is_ppn_valid: boolean;
-  is_pph_valid: boolean;
   is_payment_match: boolean;
 }

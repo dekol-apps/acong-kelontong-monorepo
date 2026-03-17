@@ -39,12 +39,6 @@ export class PurchaseOrderDto extends PurchaseOrderApprovalDto {
   notes?: string;
 
   @IsOptional()
-  @IsEnum(PPhType, {
-    message: 'pph_type must be either PPh23, PPh22 or PPh4_2',
-  })
-  pph_type?: PPhType;
-
-  @IsOptional()
   @IsEnum(PPnType, {
     message: 'ppn_type must be either EXCLUSIVE, INCLUSIVE or NONE',
   })
@@ -52,15 +46,7 @@ export class PurchaseOrderDto extends PurchaseOrderApprovalDto {
 
   @IsOptional()
   @IsNumber()
-  pph_rate?: number; // example 2 for 2%
-
-  @IsOptional()
-  @IsNumber()
   ppn_rate?: number; // example 11 for 11%
-
-  @IsOptional()
-  @IsNumber()
-  pph_amount?: number;
 
   @IsOptional()
   @IsNumber()
