@@ -15,6 +15,7 @@ import { Brand } from '../brand/brand.schema';
 import Decimal from 'decimal.js';
 import { toDecimal, toDecimal128 } from 'src/utils/helper';
 import { Accounting } from '../accounting/accounting.schema';
+import { defaultPpnRate } from 'src/types/constants';
 
 @Injectable()
 export class SaleService {
@@ -47,14 +48,13 @@ export class SaleService {
       // ─── Build a pricing lookup keyed by product ID ───────────────────────
       const pricingMap = new Map<
         string,
-        { sale_price: number; discount_percent?: number; ppn_rate?: number }
+        { sale_price: number; discount_percent?: number }
       >();
 
       for (const group of data.items) {
         pricingMap.set(group.product.toString(), {
           sale_price: group.sale_price,
           discount_percent: group.discount_percent,
-          ppn_rate: group.ppn_rate,
         });
       }
 
@@ -103,13 +103,7 @@ export class SaleService {
         }
         const brand = brandMap.get(product.brand?.toString() ?? '');
         const sale_price = toDecimal128(new Decimal(pricing.sale_price))
-        const { ppn } = this.global.getPPnAmount({
-          net_price: sale_price,
-          ppn_rate: pricing.ppn_rate ?? 0
-        });
-        const ppn_amount = toDecimal128(ppn);
-        const { net, discountAmount } = this.global.priceAfterDiscount(sale_price, pricing.discount_percent ?? 0);
-        const net_price = toDecimal128(net)
+        const { discountAmount } = this.global.priceAfterDiscount(sale_price, pricing.discount_percent ?? 0);
         const discount_amount = toDecimal128(discountAmount)
         const saleItem: SaleItem = {
           product: movedItem.product,
@@ -122,9 +116,6 @@ export class SaleService {
           sale_price,
           discount_percent: pricing.discount_percent ?? 0,
           discount_amount,
-          ppn_rate: pricing.ppn_rate ?? 0,
-          ppn_amount,
-          net_price,
           // COGS = landed_cost of this exact physical unit from inventory
           cogs: movedItem.landed_cost,
         };
@@ -133,21 +124,15 @@ export class SaleService {
         createdItems.push(created);
       }
 
-      return createdItems;
+      return createdItems.map(it => this.mapSaleItemData(it)) as any;
     }, sessionIn);
   }
 
-  async listStock({
-    page,
-    size,
-    sortBy,
-    sortDir,
-    search,
-    filter,
-  }: PaginationDto): Promise<IListRes<SaleItem>> {
+  async listStock(pagination: PaginationDto): Promise<IListRes<SaleItem>> {
+    const { page, size, sortBy, sortDir, search, filter } = pagination;
     const searchFields: string[] = ['product_name', 'barcode', 'brand_name'];
 
-    return this.global.getList<SaleItem>(
+    const result = await this.global.getList<SaleItem>(
       this.saleItemModel,
       {
         page,
@@ -158,7 +143,12 @@ export class SaleService {
         searchFields,
         filter,
       }
-    )
+    );
+
+    return {
+      ...result,
+      data: result.data.map(it => this.mapSaleItemData(it)) as any
+    };
   }
 
   /**
@@ -184,9 +174,15 @@ export class SaleService {
     let totalCogs = new Decimal(0);
 
     for (const item of items) {
+      // Net price is sale_price after discount
+      const salePrice = toDecimal(item.sale_price);
+      const discountPercent = item.discount_percent || 0;
+      const discountAmount = salePrice.mul(new Decimal(discountPercent).div(100));
+      const netPrice = salePrice.minus(discountAmount);
+
       const { ppn, base } = this.global.getPPnAmount({
-        net_price: item.net_price,
-        ppn_rate: item.ppn_rate
+        net_price: toDecimal128(netPrice),
+        ppn_rate: defaultPpnRate
       });
       totalPpn = totalPpn.plus(ppn);
       totalBeforeTax = totalBeforeTax.plus(base);
@@ -200,6 +196,7 @@ export class SaleService {
 
     const grandTotal = totalBeforeTax.plus(totalPpn);
     return {
+      ppn_rate: defaultPpnRate,
       total_before_tax: toDecimal128(totalBeforeTax),
       total_ppn: toDecimal128(totalPpn),
       grand_total: toDecimal128(grandTotal),
@@ -237,9 +234,6 @@ export class SaleService {
             original_ppn_amount: existItem.original_ppn_amount,
             sale_price: existItem.sale_price,
             discount_percent: existItem.discount_percent,
-            ppn_rate: existItem.ppn_rate,
-            ppn_amount: existItem.ppn_amount,
-            net_price: existItem.net_price,
             discount_amount: existItem.discount_amount,
             cogs: existItem.cogs, // carry COGS into the Sale record
           });
@@ -253,7 +247,12 @@ export class SaleService {
         await this.saleModel.create(
           [{
             items: itemSold,
-            ...totals
+            total_discount: totals.total_discount,
+            total_cogs: totals.total_cogs,
+            ppn_rate: totals.ppn_rate,
+            total_before_tax: totals.total_before_tax,
+            total_ppn: totals.total_ppn,
+            grand_total: totals.grand_total,
           }],
           { session }
         )
@@ -262,12 +261,43 @@ export class SaleService {
       const accountingPayload: Accounting = {
         flow_type: FlowType.IN,
         order_id: created._id,
-        order_data: created,
+        order_data: this.mapSaleData(created),
         order_type: OrderType.SALE,
         transaction_amount: totals.grand_total,
       };
       await this.accounting.createAccountingItem(accountingPayload, session);
-      return created;
+      return this.mapSaleData(created);
     }, sessionIn);
+  }
+
+  mapSaleItemData(item: any) {
+    const salePrice = toDecimal(item.sale_price);
+    const discountPercent = item.discount_percent || 0;
+    const discountAmount = salePrice.mul(new Decimal(discountPercent).div(100));
+    const netPrice = salePrice.minus(discountAmount);
+
+    const { ppn } = this.global.getPPnAmount({
+      net_price: toDecimal128(netPrice),
+      ppn_rate: defaultPpnRate
+    });
+
+    const base = typeof item.toObject === 'function' ? item.toObject() : item;
+    return {
+      ...base,
+      ppn_rate: defaultPpnRate,
+      ppn_amount: toDecimal128(ppn),
+      net_price: toDecimal128(netPrice),
+    };
+  }
+
+  mapSaleData(sale: any) {
+    const items = sale.items.map(it => this.mapSaleItemData(it));
+    const totals = this.calculateSale(sale.items);
+    const base = typeof sale.toObject === 'function' ? sale.toObject() : sale;
+    return {
+      ...base,
+      items,
+      ...totals
+    };
   }
 }

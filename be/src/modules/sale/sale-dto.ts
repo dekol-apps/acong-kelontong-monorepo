@@ -47,9 +47,6 @@ export class SaleItemDto {
   @IsNumber()
   discount_percent?: number;
 
-  @IsOptional()
-  @IsNumber()
-  ppn_rate?: number; // e.g. 11 for 11%
 }
 
 export class SaleDto {
@@ -79,6 +76,7 @@ export class SellingSaleDto {
 }
 
 export interface CalculateSaleResult {
+  ppn_rate: number;
   total_before_tax: Types.Decimal128;
   total_ppn: Types.Decimal128;
   grand_total: Types.Decimal128;

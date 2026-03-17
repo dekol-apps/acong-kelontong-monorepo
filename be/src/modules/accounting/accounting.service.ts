@@ -9,9 +9,10 @@ import { Accounting } from './accounting.schema';
 import { AccountingBalance } from './accounting-balance.schema';
 import { AccountingSnapshot } from './accounting-snapshot.schema';
 import { InventoryItem } from '../inventory-item/inventory-item.schema';
-import { decimalToNumber, toDecimal128 } from 'src/utils/helper';
+import { decimalToNumber, toDecimal, toDecimal128 } from 'src/utils/helper';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { TaxTransactionFilterDto } from './accounting.dto';
+import { defaultPpnRate } from 'src/types/constants';
 import Decimal from 'decimal.js';
 
 export interface IPortfolioData {
@@ -337,8 +338,32 @@ export class AccountingService {
         ppn = decimalToNumber(orderData.ppn_amount) || 0;
         faktur_pajak_no = orderData.ppn_facture_number as string;
       } else if (it.order_type === OrderType.SALE) {
-        tax_base = decimalToNumber(orderData.total_before_tax) || 0;
-        ppn = decimalToNumber(orderData.total_ppn) || 0;
+        // Recalculate if fields are missing or to ensure dynamic consistency
+        const items = orderData.items as any[];
+        let totalBase = new Decimal(0);
+        let totalPpn = new Decimal(0);
+
+        if (items && Array.isArray(items)) {
+          for (const item of items) {
+            const salePrice = toDecimal(item.sale_price);
+            const discountPercent = item.discount_percent || 0;
+            const discountAmount = salePrice.mul(new Decimal(discountPercent).div(100));
+            const netPrice = salePrice.minus(discountAmount);
+
+            // Using defaultPpnRate as per requirement for dynamic calculation
+            const ppnRate = new Decimal(defaultPpnRate).div(100);
+            const base = netPrice.div(new Decimal(1).plus(ppnRate));
+            const ppnVal = netPrice.minus(base);
+
+            totalBase = totalBase.plus(base);
+            totalPpn = totalPpn.plus(ppnVal);
+          }
+          tax_base = totalBase.toNumber();
+          ppn = totalPpn.toNumber();
+        } else {
+          tax_base = decimalToNumber(orderData.total_before_tax) || 0;
+          ppn = decimalToNumber(orderData.total_ppn) || 0;
+        }
       }
 
       const tx: ITaxTransaction = {

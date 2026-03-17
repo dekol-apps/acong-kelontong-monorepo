@@ -25,3 +25,4 @@ export const modules: TModules[] = [
   'role.view', 'role.create', 'role.edit', 'role.delete'
 ];
 
+export const defaultPpnRate = 11;
