@@ -31,6 +31,9 @@ export class Purchasing {
   status: PurchasingEn;
 
   @Prop()
+  ppn_facture_number?: string;
+
+  @Prop()
   invoice_number?: string;
 
   @Prop()

@@ -21,7 +21,7 @@ export class InventoryItemDto {
 
   @IsDecimal()
   @IsOptional()
-  landed_cost?: Types.Decimal128;
+  landed_cost: Types.Decimal128;
 }
 
 export class GInventoryItemDto extends InventoryItemDto {

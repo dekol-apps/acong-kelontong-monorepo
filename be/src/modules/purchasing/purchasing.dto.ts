@@ -18,6 +18,10 @@ export class PurchaseOrderApprovalDto {
 export class PurchaseOrderDto extends PurchaseOrderApprovalDto {
   @IsOptional()
   @IsString()
+  ppn_facture_number?: string;
+
+  @IsOptional()
+  @IsString()
   invoice_number?: string;
 
   @IsNotEmpty()

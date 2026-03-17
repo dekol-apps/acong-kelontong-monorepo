@@ -40,5 +40,5 @@ export interface MovedInventoryItemData {
   original_price: Types.Decimal128;
   original_ppn_rate: number;
   original_ppn_amount: Types.Decimal128;
-  landed_cost?: Types.Decimal128;
+  landed_cost: Types.Decimal128;
 }

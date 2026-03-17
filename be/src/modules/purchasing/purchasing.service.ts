@@ -102,6 +102,7 @@ export class PurchasingService {
       ppn_rate: data.ppn_rate,
       pph_amount: data.pph_amount,
       ppn_amount: data.ppn_amount,
+      ppn_facture_number: data.ppn_facture_number,
       shipping_cost: data.shipping_cost,
     }], { session });
 
@@ -130,18 +131,19 @@ export class PurchasingService {
           'notes',
           'completed_date',
           'invoice_number',
+          'ppn_facture_number',
           'purchasing_attachments',
         ],
         [PurchasingEn.PROCESS]: [
           'status',
           'invoice_number',
+          'ppn_facture_number',
           'purchasing_attachments',
           'payment_realization',
           'notes',
           'purchasing_attachments',
           'payment_realization',
           'notes',
-          'invoice_number',
           'purchasing_attachments',
           'payment_realization',
           'notes',
@@ -203,6 +205,7 @@ export class PurchasingService {
         if (field === 'supplier_name') purchase.supplier_name = supplier.supplier_name;
         if (field === 'due_date') purchase.due_date = data.due_date;
         if (field === 'invoice_number') purchase.invoice_number = data.invoice_number;
+        if (field === 'ppn_facture_number') purchase.ppn_facture_number = data.ppn_facture_number;
         if (field === 'purchasing_attachments') purchase.purchasing_attachments = data.purchasing_attachments;
         if (field === 'payment_realization') purchase.payment_realization = toDecimal128(toDecimal(data.payment_realization));
         if (field === 'reject_notes') purchase.reject_notes = data.reject_notes;
