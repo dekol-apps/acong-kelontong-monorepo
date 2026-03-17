@@ -60,6 +60,10 @@ import { SaleService } from './modules/sale/sale.service';
 import { Sale, SaleSchema } from './modules/sale/sale.schema';
 import { SaleItem, SaleItemSchema } from './modules/sale/sale-item.schema';
 import { AccountingController } from './modules/accounting/accounting.controller';
+import { ProductionController } from './modules/production/production.controller';
+import { ProductionService } from './modules/production/production.service';
+import { Production, ProductionSchema } from './modules/production/production.schema';
+import { ProductionIngredient, ProductionIngredientSchema } from './modules/production/production-ingerdient.schema';
 
 @Module({
   imports: [
@@ -124,6 +128,8 @@ import { AccountingController } from './modules/accounting/accounting.controller
       { name: Expense.name, schema: ExpenseSchema },
       { name: Sale.name, schema: SaleSchema },
       { name: SaleItem.name, schema: SaleItemSchema },
+      { name: Production.name, schema: ProductionSchema },
+      { name: ProductionIngredient.name, schema: ProductionIngredientSchema },
     ]),
     SeederModule,
   ],
@@ -144,7 +150,8 @@ import { AccountingController } from './modules/accounting/accounting.controller
     InvestmentController,
     ExpenseController,
     SaleController,
-    AccountingController
+    AccountingController,
+    ProductionController
   ],
   providers: [
     AppService,
@@ -166,6 +173,7 @@ import { AccountingController } from './modules/accounting/accounting.controller
     InvestmentService,
     ExpenseService,
     SaleService,
+    ProductionService,
   ]
 })
 export class AppModule implements OnModuleInit {
