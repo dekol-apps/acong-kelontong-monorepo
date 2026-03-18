@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { Permission } from 'src/global/permission.decoratior';
 import { UAuthGuard } from '../auth/auth.guard';
 import { BaseResponse } from 'src/utils/base-response';
@@ -51,6 +51,21 @@ export class SaleController {
     try {
       const saleDetail = await this.service.selling(body);
       return BaseResponse.success({ res, option: { message: "Success create sale transaction", detail: saleDetail } });
+    } catch (err) {
+      return BaseResponse.error({ res, err });
+    }
+  }
+
+  @Permission(['sale.edit'])
+  @Post('selling/:id')
+  async editSelling(
+    @Body() body: SellingSaleDto,
+    @Res() res: Response,
+    @Param('id') id: string,
+  ) {
+    try {
+      const saleDetail = await this.service.editSelling(id, body);
+      return BaseResponse.success({ res, option: { message: "Success update sale transaction", detail: saleDetail } });
     } catch (err) {
       return BaseResponse.error({ res, err });
     }

@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, ClientSession } from 'mongoose';
+import { Model, ClientSession, Types } from 'mongoose';
 import { GlobalService } from 'src/global/global.service';
 import { BaseResponse } from 'src/utils/base-response';
 import { AccountingService } from '../accounting/accounting.service';
@@ -294,5 +294,120 @@ export class SaleService {
       ppn_amount: toDecimal128(ppn),
       net_price: toDecimal128(netPrice),
     };
+  }
+
+  async editSelling(id: string, dto: SellingSaleDto, sessionIn?: ClientSession): Promise<Sale | undefined> {
+    return this.global.withTransaction(async (session) => {
+      const existing = await this.saleModel.findById(id).session(session);
+      if (!existing) {
+        throw BaseResponse.notFound({ err: 'editSelling !existing' });
+      }
+
+      // ─── Constraint 1: 6-hour window ──────────────────────────────────────
+      const now = new Date();
+      const createdAt = (existing as any).createdAt as Date;
+      const hoursDiff = (now.getTime() - createdAt.getTime()) / (1000 * 3600);
+      if (hoursDiff > 6) {
+        throw BaseResponse.invalid({
+          err: 'editSelling > 6 hours',
+          option: { message: 'Cannot edit selling after 6 hours from creation' }
+        });
+      }
+
+      // ─── Constraint 2: Accounting Snapshot check ──────────────────────────
+      const isLockedBySnapshot = await this.accounting.checkSnapshot(createdAt);
+      if (isLockedBySnapshot) {
+        throw BaseResponse.invalid({
+          err: 'editSelling snapshot locked',
+          option: { message: 'Cannot edit selling after accounting snapshot has been taken' }
+        });
+      }
+
+      // ─── Step 1: Revert old items back to the shelf ───────────────────────
+      // We recreate SaleItem records using the data stored in the existing Sale.
+      for (const item of existing.items) {
+        await this.saleItemModel.create([{
+          product: item.product,
+          brand_name: item.brand_name,
+          product_name: item.product_name,
+          barcode: item.barcode,
+          original_price: item.original_price,
+          original_ppn_rate: item.original_ppn_rate,
+          original_ppn_amount: item.original_ppn_amount,
+          sale_price: item.sale_price,
+          discount_percent: item.discount_percent,
+          discount_amount: item.discount_amount,
+          cogs: item.cogs,
+        }], { session });
+      }
+
+      // ─── Step 2: Process new items (similar to selling() method) ───────────
+      const itemSold: SaleItem[] = [];
+      for (const item of dto.items) {
+        const toConsume = await this.saleItemModel
+          .find({ product: item.product })
+          .limit(item.item_qty)
+          .session(session);
+
+        if (!toConsume || toConsume.length < item.item_qty) {
+          throw BaseResponse.invalid({ option: { message: `Insufficient stock for product ${item.product.toString()}` } });
+        }
+
+        for (const existItem of toConsume) {
+          itemSold.push({
+            product: existItem.product,
+            brand_name: existItem.brand_name,
+            product_name: existItem.product_name,
+            barcode: existItem.barcode,
+            original_price: existItem.original_price,
+            original_ppn_rate: existItem.original_ppn_rate,
+            original_ppn_amount: existItem.original_ppn_amount,
+            sale_price: existItem.sale_price,
+            discount_percent: existItem.discount_percent,
+            discount_amount: existItem.discount_amount,
+            cogs: existItem.cogs,
+          });
+          await existItem.deleteOne({ session });
+        }
+      }
+
+      const mappedItemSold = itemSold.map(it => this.mapSaleItemData(it));
+      const totals = this.calculateSale(mappedItemSold);
+
+      // ─── Step 3: Update existing Sale ─────────────────────────────────────
+      const updated = await this.saleModel.findByIdAndUpdate(
+        id,
+        {
+          items: mappedItemSold,
+          total_discount: totals.total_discount,
+          total_cogs: totals.total_cogs,
+          ppn_rate: totals.ppn_rate,
+          total_before_tax: totals.total_before_tax,
+          total_ppn: totals.total_ppn,
+          grand_total: totals.grand_total,
+        },
+        { session, new: true }
+      );
+
+      if (!updated) {
+        throw BaseResponse.unexpected({ err: 'editSelling !updated' });
+      }
+
+      // ─── Step 4: Update Accounting ───────────────────────────────────────
+      await this.accounting.editAccountingByOrderId(
+        updated._id as any,
+        {
+          transaction_amount: totals.grand_total,
+          tax_base: totals.total_before_tax,
+          ppn_amount: totals.total_ppn,
+          ppn_rate: totals.ppn_rate,
+          order_data: updated,
+          record_date: new Date(),
+        },
+        session
+      );
+
+      return updated;
+    }, sessionIn);
   }
 }

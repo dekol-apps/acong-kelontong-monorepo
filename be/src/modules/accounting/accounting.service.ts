@@ -110,35 +110,24 @@ export class AccountingService {
         throw BaseResponse.notFound({ err: 'editAccountingByOrderId !existing', option: { message: 'Accounting item not found' } });
       }
       const { flow_type, transaction_amount } = existing;
-      const difference = toDecimal(data.transaction_amount ?? existing.transaction_amount).minus(toDecimal(transaction_amount));
-      const highestAmount = toDecimal(data.transaction_amount ?? existing.transaction_amount).gt(toDecimal(existing.transaction_amount ?? data.transaction_amount)) ? data.transaction_amount : existing.transaction_amount;
+      const diff = toDecimal(data.transaction_amount ?? existing.transaction_amount).minus(toDecimal(transaction_amount));
+      const amountToInc = flow_type === FlowType.OUT ? diff.negated() : diff;
+
+      console.log({ data, diff: diff.toString(), amountToInc: amountToInc.toString() });
       const before = await this.balanceModel
         .findOne({ currency: CurrencyEn.IDR })
         .session(session);
-
-      let highest = 'existing';
-      if (toDecimal(existing.transaction_amount).gt(toDecimal(data.transaction_amount ?? existing.transaction_amount))) {
-        highest = 'existing';
-      } else {
-        highest = 'data';
-      }
-
-      console.log({ data });
       console.log('BEFORE:', before?.amount?.toString());
-      const filter =
-        (flow_type === FlowType.OUT && highest === 'data') || (flow_type === FlowType.IN && highest === 'existing')
-          ? { currency: CurrencyEn.IDR, amount: { $gte: highestAmount } }
-          : { currency: CurrencyEn.IDR };
 
-      const amount =
-        highest === 'existing'
-          ? toDecimal128(difference.negated())
-          : toDecimal128(difference);
+      const filter: any = { currency: CurrencyEn.IDR };
+      if (amountToInc.isNeg()) {
+        filter.amount = { $gte: toDecimal128(amountToInc.negated()) };
+      }
 
       const balance = await this.balanceModel.findOneAndUpdate(
         filter,
         {
-          $inc: { amount }
+          $inc: { amount: toDecimal128(amountToInc) }
         },
         {
           session,
@@ -436,5 +425,12 @@ export class AccountingService {
       meta: list.meta,
       data: data
     };
+  }
+
+  async checkSnapshot(date: Date): Promise<boolean> {
+    const exists = await this.snapshotModel.exists({
+      snapshot_date: { $gt: date }
+    });
+    return !!exists;
   }
 }
