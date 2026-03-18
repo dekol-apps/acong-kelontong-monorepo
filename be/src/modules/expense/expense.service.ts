@@ -5,10 +5,12 @@ import { GlobalService } from 'src/global/global.service';
 import { AccountingService } from '../accounting/accounting.service';
 import { Expense, ExpenseStatus } from './expense.schema';
 import { ExpenseApprovalDto, ExpenseDto } from './expense.dto';
-import { ApprovalType, FlowType, IListRes, OrderType } from 'src/types/interfaces';
+import { ApprovalType, FlowType, IListRes, OrderType, PPhType, PPnType } from 'src/types/interfaces';
 import { BaseResponse } from 'src/utils/base-response';
 import { PaginationDto } from 'src/global/global.dto';
 import { toDecimal, toDecimal128 } from 'src/utils/helper';
+import { Accounting } from '../accounting/accounting.schema';
+import Decimal from 'decimal.js';
 
 @Injectable()
 export class ExpenseService {
@@ -180,7 +182,12 @@ export class ExpenseService {
         order_data: expense,
         order_type: OrderType.EXPENSE,
         transaction_amount: expense.transaction_amount,
-      }, session);
+        tax_base: expense.transaction_amount,
+        pph_type: expense.pph_type || PPhType.NONE,
+        pph_rate: expense.pph_rate || 0,
+        pph_amount: expense.pph_amount || toDecimal128(new Decimal(0)),
+        record_date: new Date(),
+      } as Accounting, session);
       return expense;
     });
   }

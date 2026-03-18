@@ -475,7 +475,7 @@ export class PurchasingService {
       is_payment_match: isPaymentMatch,
     };
   }
-  async purchasingPayment(id: Types.ObjectId, dto: PurchaseOrderDto, sessionIn?: ClientSession): Promise<{ detail: Purchasing | undefined; removedAttachments: string[] }> {
+  async purchasingPayment(id: Types.ObjectId, dto: PurchaseOrderDto & { ppn_rate?: number, status?: PurchasingEn }, sessionIn?: ClientSession): Promise<{ detail: Purchasing | undefined; removedAttachments: string[] }> {
     return this.global.withTransaction(async (session) => {
       if (!dto.shipping_cost) throw BaseResponse.invalid({ option: { message: "shipping_cost is required" } });
       if (!dto.ppn_type) throw BaseResponse.invalid({ option: { message: "ppn_type is required" } });
@@ -486,6 +486,12 @@ export class PurchasingService {
       if (!purchasing) throw BaseResponse.notFound({ err: 'purchasingPayment !purchasing' });
       if (!dto.invoice_number) throw BaseResponse.invalid({ option: { message: 'invoice_number is required' } });
       if (!dto.purchasing_attachments?.length && purchasing.purchasing_attachments?.length) throw BaseResponse.invalid({ option: { message: 'purchasing_attachments is required' } });
+      const existing = await this.purchasingModel.findById(id).session(session);
+      if (!existing) throw BaseResponse.notFound({ err: 'purchasingPayment !existing' });
+      const ablePayment = [PurchasingEn.APPROVE, PurchasingEn.PROCESS];
+      if (!ablePayment.includes(existing.status)) throw BaseResponse.invalid({ option: { message: 'Only able to execute payment for purchasing with status: ' + ablePayment.join(', ') } });
+      dto.ppn_rate = defaultPpnRate;
+      dto.status = PurchasingEn.PROCESS;
       const edit = await this.editPurchasing(id, dto, session);
       if (!edit || !edit.detail) throw BaseResponse.unexpected({ err: 'purchasingPayment' });
       const {
@@ -512,12 +518,19 @@ export class PurchasingService {
       if (!is_ppn_valid) throw BaseResponse.invalid({ option: { message } })
       const accountingPayload: Accounting = {
         flow_type: FlowType.OUT,
-        order_id: edit.detail?._id,
+        order_id: id,
         order_data: edit.detail,
         order_type: OrderType.PURCHASING,
-        transaction_amount: toDecimal128(toDecimal(dto.payment_realization)),
+        transaction_amount: edit.detail.payment_realization!,
+        tax_base: edit.detail.total_purchase_price,
+        ppn_type: edit.detail.ppn_type,
+        ppn_rate: edit.detail.ppn_rate,
+        ppn_amount: edit.detail.ppn_amount,
+        tax_facture_number: edit.detail.ppn_facture_number,
+        record_date: new Date(),
       }
       await this.accounting.createAccountingItem(accountingPayload, session)
+
       return edit;
     }, sessionIn)
   }

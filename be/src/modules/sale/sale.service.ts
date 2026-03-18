@@ -10,7 +10,7 @@ import { SaleItem } from './sale-item.schema';
 import { Sale } from './sale.schema';
 import { Product } from '../product/product.schema';
 import { PaginationDto } from 'src/global/global.dto';
-import { FlowType, IListRes, OrderType } from 'src/types/interfaces';
+import { FlowType, IListRes, OrderType, PPhType, PPnType } from 'src/types/interfaces';
 import { Brand } from '../brand/brand.schema';
 import Decimal from 'decimal.js';
 import { toDecimal, toDecimal128 } from 'src/utils/helper';
@@ -242,11 +242,12 @@ export class SaleService {
         }
       }
 
-      const totals = this.calculateSale(itemSold);
+      const mappedItemSold = itemSold.map(it => this.mapSaleItemData(it));
+      const totals = this.calculateSale(mappedItemSold);
       const created = (
         await this.saleModel.create(
           [{
-            items: itemSold,
+            items: mappedItemSold,
             total_discount: totals.total_discount,
             total_cogs: totals.total_cogs,
             ppn_rate: totals.ppn_rate,
@@ -261,12 +262,17 @@ export class SaleService {
       const accountingPayload: Accounting = {
         flow_type: FlowType.IN,
         order_id: created._id,
-        order_data: this.mapSaleData(created),
+        order_data: created,
         order_type: OrderType.SALE,
         transaction_amount: totals.grand_total,
+        tax_base: totals.total_before_tax,
+        ppn_type: PPnType.INCLUSIVE,
+        ppn_rate: totals.ppn_rate,
+        ppn_amount: totals.total_ppn,
+        record_date: new Date(),
       };
       await this.accounting.createAccountingItem(accountingPayload, session);
-      return this.mapSaleData(created);
+      return created;
     }, sessionIn);
   }
 
@@ -287,17 +293,6 @@ export class SaleService {
       ppn_rate: defaultPpnRate,
       ppn_amount: toDecimal128(ppn),
       net_price: toDecimal128(netPrice),
-    };
-  }
-
-  mapSaleData(sale: any) {
-    const items = sale.items.map(it => this.mapSaleItemData(it));
-    const totals = this.calculateSale(sale.items);
-    const base = typeof sale.toObject === 'function' ? sale.toObject() : sale;
-    return {
-      ...base,
-      items,
-      ...totals
     };
   }
 }

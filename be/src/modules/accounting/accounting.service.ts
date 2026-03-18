@@ -5,14 +5,13 @@ import { GlobalService } from 'src/global/global.service';
 import { CurrencyEn, FlowType, OrderType } from 'src/types/interfaces';
 import { IListRes } from '../../types/interfaces';
 import { BaseResponse } from 'src/utils/base-response';
-import { Accounting } from './accounting.schema';
+import { Accounting, IEditAccountingByOrder } from './accounting.schema';
 import { AccountingBalance } from './accounting-balance.schema';
 import { AccountingSnapshot } from './accounting-snapshot.schema';
 import { InventoryItem } from '../inventory-item/inventory-item.schema';
 import { decimalToNumber, toDecimal, toDecimal128 } from 'src/utils/helper';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { TaxTransactionFilterDto } from './accounting.dto';
-import { defaultPpnRate } from 'src/types/constants';
 import Decimal from 'decimal.js';
 
 export interface IPortfolioData {
@@ -104,7 +103,83 @@ export class AccountingService {
     }, sessionIn);
   }
 
-  async editAccountingItem(data: Accounting, sessionIn?: ClientSession): Promise<Accounting | undefined> {
+  async editAccountingByOrderId(order_id: Types.ObjectId, data: IEditAccountingByOrder, sessionIn?: ClientSession): Promise<Accounting | undefined> {
+    return this.global.withTransaction(async (session) => {
+      const existing = await this.accountingModel.findOne({ order_id }).session(session);
+      if (!existing) {
+        throw BaseResponse.notFound({ err: 'editAccountingByOrderId !existing', option: { message: 'Accounting item not found' } });
+      }
+      const { flow_type, transaction_amount } = existing;
+      const difference = toDecimal(data.transaction_amount ?? existing.transaction_amount).minus(toDecimal(transaction_amount));
+      const highestAmount = toDecimal(data.transaction_amount ?? existing.transaction_amount).gt(toDecimal(existing.transaction_amount ?? data.transaction_amount)) ? data.transaction_amount : existing.transaction_amount;
+      const before = await this.balanceModel
+        .findOne({ currency: CurrencyEn.IDR })
+        .session(session);
+
+      let highest = 'existing';
+      if (toDecimal(existing.transaction_amount).gt(toDecimal(data.transaction_amount ?? existing.transaction_amount))) {
+        highest = 'existing';
+      } else {
+        highest = 'data';
+      }
+
+      console.log({ data });
+      console.log('BEFORE:', before?.amount?.toString());
+      const filter =
+        (flow_type === FlowType.OUT && highest === 'data') || (flow_type === FlowType.IN && highest === 'existing')
+          ? { currency: CurrencyEn.IDR, amount: { $gte: highestAmount } }
+          : { currency: CurrencyEn.IDR };
+
+      const amount =
+        highest === 'existing'
+          ? toDecimal128(difference.negated())
+          : toDecimal128(difference);
+
+      const balance = await this.balanceModel.findOneAndUpdate(
+        filter,
+        {
+          $inc: { amount }
+        },
+        {
+          session,
+          new: true,
+        },
+      );
+
+      if (!balance) {
+        throw BaseResponse.invalid({
+          err: 'editAccountingByOrderId Insufficient balance', option: { message: 'Insufficient balance' }
+        });
+      }
+
+      const edited = await this.accountingModel.findOneAndUpdate(
+        { order_id },
+        {
+          transaction_amount: data.transaction_amount ?? existing.transaction_amount,
+          order_data: data.order_data ?? existing.order_data,
+          tax_base: data.tax_base ?? existing.tax_base,
+          ppn_type: data.ppn_type ?? existing.ppn_type,
+          ppn_rate: data.ppn_rate ?? existing.ppn_rate,
+          ppn_amount: data.ppn_amount ?? existing.ppn_amount,
+          pph_type: data.pph_type ?? existing.pph_type,
+          pph_rate: data.pph_rate ?? existing.pph_rate,
+          pph_amount: data.pph_amount ?? existing.pph_amount,
+          tax_facture_number: data.tax_facture_number ?? existing.tax_facture_number,
+          record_date: new Date()
+        },
+        { session },
+      );
+
+      if (!edited) {
+        throw BaseResponse.unexpected({
+          err: 'Failed to edit accounting item',
+        });
+      }
+      return edited;
+    }, sessionIn);
+  }
+
+  async correctAccountingItem(data: Accounting, sessionIn?: ClientSession): Promise<Accounting | undefined> {
     return this.global.withTransaction(async (session) => {
       const { order_type, order_id } = data;
       const sortByNewest = await this.accountingModel.find({ order_type, order_id }).sort({ createdAt: -1 }).limit(1).session(session);
@@ -124,6 +199,14 @@ export class AccountingService {
           order_data: old.order_data,
           correction_id: old._id,
           correction_data: old,
+          tax_base: old.tax_base,
+          ppn_type: old.ppn_type,
+          ppn_rate: old.ppn_rate,
+          ppn_amount: old.ppn_amount,
+          pph_type: old.pph_type,
+          pph_rate: old.pph_rate,
+          pph_amount: old.pph_amount,
+          tax_facture_number: old.tax_facture_number,
           record_date
         },
         session,
@@ -317,8 +400,7 @@ export class AccountingService {
 
     if (isPpnOnly) {
       dbFilter.$or = [
-        { 'order_data.total_ppn': { $gt: 0 } }, // For SALES
-        { 'order_data.ppn_amount': { $gt: 0 } }  // For PURCHASING
+        { 'ppn_amount': { $gt: 0 } }
       ];
     }
 
@@ -336,53 +418,15 @@ export class AccountingService {
     );
 
     const data: ITaxTransaction[] = list.data.map(it => {
-      const orderData = it.order_data as Record<string, any>;
-      let tax_base = 0;
-      let ppn = 0;
-      let faktur_pajak_no: string | undefined = undefined;
-
-      if (it.order_type === OrderType.PURCHASING) {
-        tax_base = decimalToNumber(orderData.total_purchase_price) || 0;
-        ppn = decimalToNumber(orderData.ppn_amount) || 0;
-        faktur_pajak_no = orderData.ppn_facture_number as string;
-      } else if (it.order_type === OrderType.SALE) {
-        // Recalculate if fields are missing or to ensure dynamic consistency
-        const items = orderData.items as any[];
-        let totalBase = new Decimal(0);
-        let totalPpn = new Decimal(0);
-
-        if (items && Array.isArray(items)) {
-          for (const item of items) {
-            const salePrice = toDecimal(item.sale_price);
-            const discountPercent = item.discount_percent || 0;
-            const discountAmount = salePrice.mul(new Decimal(discountPercent).div(100));
-            const netPrice = salePrice.minus(discountAmount);
-
-            // Using defaultPpnRate as per requirement for dynamic calculation
-            const ppnRate = new Decimal(defaultPpnRate).div(100);
-            const base = netPrice.div(new Decimal(1).plus(ppnRate));
-            const ppnVal = netPrice.minus(base);
-
-            totalBase = totalBase.plus(base);
-            totalPpn = totalPpn.plus(ppnVal);
-          }
-          tax_base = totalBase.toNumber();
-          ppn = totalPpn.toNumber();
-        } else {
-          tax_base = decimalToNumber(orderData.total_before_tax) || 0;
-          ppn = decimalToNumber(orderData.total_ppn) || 0;
-        }
-      }
-
       const tx: ITaxTransaction = {
         id: it._id,
         type: it.flow_type,
         source_type: it.order_type,
         source_id: it.order_id,
         source_data: it.order_data,
-        tax_base,
-        ppn,
-        faktur_pajak_no,
+        tax_base: decimalToNumber(it.tax_base),
+        ppn: decimalToNumber(it.ppn_amount),
+        faktur_pajak_no: it.tax_facture_number,
         transaction_date: it.record_date || new Date(),
       };
       return tx;
