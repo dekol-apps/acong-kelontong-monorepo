@@ -13,7 +13,7 @@ import { PurchasingItemService } from '../purchasing-item/purchasing-item.servic
 import { PurchasingItemDto, ReceiveOrderItemDto } from '../purchasing-item/purchasing-item.dto';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { decreaseDays, digitShortDate, multiplyDecimal, subtractDecimal, toDecimal, toDecimal128 } from 'src/utils/helper';
-import { cleanupDays } from 'src/types/constants';
+import { cleanupDays, defaultPpnRate } from 'src/types/constants';
 import { Accounting } from '../accounting/accounting.schema';
 import { AccountingService } from '../accounting/accounting.service';
 import { InventoryMovementService } from '../inventory-movement/inventory-movement.service';
@@ -78,7 +78,7 @@ export class PurchasingService {
     }));
   }
 
-  async createPurchasing(data: PurchasingDto & { status: PurchasingEn }): Promise<Purchasing | undefined> {
+  async createPurchasing(data: PurchasingDto): Promise<Purchasing | undefined> {
     const session = await this.connection.startSession();
     session.startTransaction();
 
@@ -91,16 +91,16 @@ export class PurchasingService {
       supplier: supplier._id,
       supplier_name: supplier.supplier_name,
       due_date: data.due_date,
-      status: data.status,
-      invoice_number: data.invoice_number,
-      purchasing_attachments: data.purchasing_attachments,
-      payment_realization: data.payment_realization,
-      notes: data.notes,
-      ppn_type: data.ppn_type,
-      ppn_rate: data.ppn_rate,
-      ppn_amount: data.ppn_amount,
-      ppn_facture_number: data.ppn_facture_number,
-      shipping_cost: data.shipping_cost,
+      status: PurchasingEn.CREATE,
+      // invoice_number: data.invoice_number,
+      // purchasing_attachments: data.purchasing_attachments,
+      // payment_realization: data.payment_realization,
+      // notes: data.notes,
+      // ppn_type: data.ppn_type,
+      // ppn_rate: data.ppn_rate,
+      // ppn_amount: data.ppn_amount,
+      // ppn_facture_number: data.ppn_facture_number,
+      // shipping_cost: data.shipping_cost,
     }], { session });
 
     const createdPurchase = purchase[0];
@@ -479,7 +479,7 @@ export class PurchasingService {
     return this.global.withTransaction(async (session) => {
       if (!dto.shipping_cost) throw BaseResponse.invalid({ option: { message: "shipping_cost is required" } });
       if (!dto.ppn_type) throw BaseResponse.invalid({ option: { message: "ppn_type is required" } });
-      if (!dto.ppn_rate) throw BaseResponse.invalid({ option: { message: "ppn_rate is required" } });
+      // if (!dto.ppn_rate) throw BaseResponse.invalid({ option: { message: "ppn_rate is required" } });
       if (!dto.ppn_amount) throw BaseResponse.invalid({ option: { message: "ppn_amount is required" } });
       if (!dto.payment_realization) throw BaseResponse.invalid({ option: { message: "payment_realization is required" } });
       const purchasing = await this.purchasingModel.findById(id);
@@ -496,7 +496,7 @@ export class PurchasingService {
         is_payment_match,
       } = this.validatePayment({
         tax_base: edit.detail.total_purchase_price,
-        ppn_rate: dto.ppn_rate,
+        ppn_rate: defaultPpnRate,
         ppn_type: dto.ppn_type,
         ppn_amount: toDecimal128(toDecimal(dto.ppn_amount)),
         payment_realization: toDecimal128(toDecimal(dto.payment_realization)),

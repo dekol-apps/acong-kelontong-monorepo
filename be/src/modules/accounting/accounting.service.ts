@@ -68,7 +68,7 @@ export class AccountingService {
 
       const amount =
         flow_type === FlowType.OUT
-          ? Types.Decimal128.fromString(`-${data.transaction_amount.toString()}`)
+          ? toDecimal128(toDecimal(data.transaction_amount).negated())
           : data.transaction_amount;
 
       const balance = await this.balanceModel.findOneAndUpdate(
@@ -303,15 +303,23 @@ export class AccountingService {
 
   async listTaxTransactions(pagination: TaxTransactionFilterDto): Promise<IListRes<ITaxTransaction>> {
     const { page, size, sortBy, sortDir, search, hasPpnOnly, startDate, endDate } = pagination;
+    const isPpnOnly = (hasPpnOnly ?? '') === 'true';
 
-    const filter: any = {
+    const dbFilter: any = {
       order_type: { $in: [OrderType.PURCHASING, OrderType.SALE] }
     };
 
     if (startDate || endDate) {
-      filter.record_date = {};
-      if (startDate) filter.record_date.$gte = new Date(startDate);
-      if (endDate) filter.record_date.$lte = new Date(endDate);
+      dbFilter.record_date = {};
+      if (startDate) dbFilter.record_date.$gte = new Date(startDate);
+      if (endDate) dbFilter.record_date.$lte = new Date(endDate);
+    }
+
+    if (isPpnOnly) {
+      dbFilter.$or = [
+        { 'order_data.total_ppn': { $gt: 0 } }, // For SALES
+        { 'order_data.ppn_amount': { $gt: 0 } }  // For PURCHASING
+      ];
     }
 
     const list = await this.global.getList<Accounting>(
@@ -323,7 +331,7 @@ export class AccountingService {
         sortDir: sortDir || 'desc',
         search,
         searchFields: ['order_type'],
-        filter
+        filter: dbFilter
       }
     );
 
@@ -380,16 +388,9 @@ export class AccountingService {
       return tx;
     });
 
-    const isPpnOnly = (hasPpnOnly ?? '') === 'true';
-    const filteredData = isPpnOnly ? data.filter(it => it.ppn > 0) : data;
-
     return {
-      meta: list.meta ? {
-        ...list.meta,
-        total: isPpnOnly ? filteredData.length : list.meta.total,
-        totalPages: isPpnOnly ? Math.ceil(filteredData.length / (size || 10)) : list.meta.totalPages
-      } : undefined,
-      data: filteredData
+      meta: list.meta,
+      data: data
     };
   }
 }

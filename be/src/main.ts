@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { RequestMethod } from '@nestjs/common';
+import { RequestMethod, ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import { SanitizePipe } from './global/sanitizer.pipe';
 import { ErrResFactory } from './global/err-res-factory';
@@ -33,7 +33,7 @@ async function bootstrap(): Promise<void> {
     methods: ['HEAD', 'GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
-  app.useGlobalPipes(new SanitizePipe());
+  app.useGlobalPipes(new SanitizePipe(), new ValidationPipe({ transform: true, whitelist: true }));
   app.useGlobalFilters(new ErrResFactory());
 
   await app.listen(process.env.PORT ?? 3000);

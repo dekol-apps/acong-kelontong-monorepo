@@ -162,6 +162,11 @@ export class ProductionService {
       const product = await this.productModel.findById(existing.product).session(session);
       if (!product) throw BaseResponse.notFound({ err: 'Product not found' });
 
+      // Calculate unit cost based on total production cost
+      const totalCost = toDecimal(existing.grand_total_cost);
+      const unitCost = totalCost.div(new Decimal(existing.item_qty || 1));
+      const unitCostDecimal128 = toDecimal128(unitCost);
+
       await this.inventoryMovement.move(
         {
           movement_type: FlowType.IN,
@@ -173,8 +178,8 @@ export class ProductionService {
               product: existing.product,
               item_qty: existing.item_qty,
               receive_date: new Date(),
-              original_price: existing.price_per_item,
-              landed_cost: existing.price_per_item,
+              original_price: unitCostDecimal128,
+              landed_cost: unitCostDecimal128,
               original_ppn_rate: 0,
             },
           ],

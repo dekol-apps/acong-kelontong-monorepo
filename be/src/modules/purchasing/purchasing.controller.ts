@@ -60,11 +60,7 @@ export class PurchasingController {
     @Res() res: Response,
   ) {
     return this.purchasingMutation({ files, dto, req, res }, async () => {
-      const data: PurchasingDto & { status: PurchasingEn } = {
-        ...dto,
-        status: PurchasingEn.CREATE
-      }
-      const purchasing = await this.service.createPurchasing(data);
+      const purchasing = await this.service.createPurchasing(dto);
       return BaseResponse.success({ res, option: { message: "Success create purchasing", detail: purchasing } });
     })
   }

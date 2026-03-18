@@ -44,9 +44,9 @@ export class PurchaseOrderDto extends PurchaseOrderApprovalDto {
   })
   ppn_type?: PPnType;
 
-  @IsOptional()
-  @IsNumber()
-  ppn_rate?: number; // example 11 for 11%
+  // @IsOptional()
+  // @IsNumber()
+  // ppn_rate?: number; // example 11 for 11%
 
   @IsOptional()
   @IsNumber()
