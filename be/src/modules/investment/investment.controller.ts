@@ -1,4 +1,6 @@
-import { Body, Controller, Get, Param, Post, Put, Query, Req, Res, UploadedFiles } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query, Req, Res, UploadedFiles, UseGuards } from '@nestjs/common';
+import { Permission } from 'src/global/permission.decoratior';
+import { UAuthGuard } from '../auth/auth.guard';
 import { Types } from 'mongoose';
 import type { Request, Response } from 'express';
 import { BaseResponse } from 'src/utils/base-response';
@@ -15,6 +17,7 @@ interface headerArgs {
   res: Response;
 }
 
+@UseGuards(UAuthGuard)
 @Controller('investment')
 export class InvestmentController {
 
@@ -50,6 +53,7 @@ export class InvestmentController {
     }
   }
 
+  @Permission(['investment.create'])
   @Post('')
   @AttachmentsInterceptor('attachments', 5)
   async createInvestment(
@@ -65,6 +69,7 @@ export class InvestmentController {
     })
   }
 
+  @Permission(['investment.edit'])
   @Put(':investment_id')
   @AttachmentsInterceptor('attachments', 5)
   async editInvestment(
@@ -102,6 +107,7 @@ export class InvestmentController {
     });
   }
 
+  @Permission(['investment.view'])
   @Get('')
   async listInvestment(
     @Query() query: ListInvestmentDTO,
@@ -115,6 +121,7 @@ export class InvestmentController {
     }
   }
 
+  @Permission(['investment.view'])
   @Get(':investment_id')
   async detailInvestment(
     @Param('investment_id') investmentId: Types.ObjectId,

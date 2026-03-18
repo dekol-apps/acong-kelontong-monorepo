@@ -6,6 +6,7 @@ import type { Response } from 'express';
 import { BaseResponse } from 'src/utils/base-response';
 import { PaginationDto } from 'src/global/global.dto';
 import { Types } from 'mongoose';
+import { Permission } from 'src/global/permission.decoratior';
 
 @UseGuards(UAuthGuard)
 @Controller('brand')
@@ -14,6 +15,7 @@ export class BrandController {
         private readonly service: BrandService,
     ) { }
 
+    @Permission(['brand.create'])
     @Post('')
     async createBrand(
         @Body() body: Brand,
@@ -27,6 +29,7 @@ export class BrandController {
         }
     }
 
+    @Permission(['brand.view'])
     @Get('')
     async listBrand(
         @Query() query: PaginationDto,
@@ -40,6 +43,7 @@ export class BrandController {
         }
     }
 
+    @Permission(['brand.edit'])
     @Put(':brand_id')
     async editBrand(
         @Param('brand_id') brandId: Types.ObjectId,
@@ -54,6 +58,7 @@ export class BrandController {
         }
     }
 
+    @Permission(['brand.view'])
     @Get(':brand_id')
     async detailBrand(
         @Param('brand_id') brandId: Types.ObjectId,
@@ -68,6 +73,7 @@ export class BrandController {
     }
 
 
+    @Permission(['brand.delete'])
     @Delete(':brand_id')
     async deleteBrand(
         @Param('brand_id') brandId: Types.ObjectId,

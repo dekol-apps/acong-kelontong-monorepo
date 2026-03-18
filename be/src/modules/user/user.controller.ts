@@ -73,6 +73,7 @@ export class UserController {
   }
 
   @UseGuards(UAuthGuard)
+  @Permission(['user.view'])
   @Get('detail/:user_id')
   async detail(
     @Param('user_id') user_id: Types.ObjectId,

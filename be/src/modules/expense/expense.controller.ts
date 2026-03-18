@@ -1,4 +1,6 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, Res, UploadedFile } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, Res, UploadedFile, UseGuards } from '@nestjs/common';
+import { Permission } from 'src/global/permission.decoratior';
+import { UAuthGuard } from '../auth/auth.guard';
 import type { Request, Response } from 'express';
 import { Types } from 'mongoose';
 import { AttachmentsInterceptor } from 'src/global/attachments-interceptor';
@@ -16,6 +18,7 @@ interface headerArgs {
   dto?: ExpenseDto,
   res: Response,
 }
+@UseGuards(UAuthGuard)
 @Controller('expense')
 export class ExpenseController {
   constructor(
@@ -49,6 +52,7 @@ export class ExpenseController {
     }
   }
 
+  @Permission(['expenses.create'])
   @Post('')
   @AttachmentsInterceptor('expense_attachments', 5)
   async createExpense(
@@ -67,6 +71,7 @@ export class ExpenseController {
     })
   }
 
+  @Permission(['expenses.view'])
   @Get('')
   async listExpense(
     @Query() query: PaginationDto,
@@ -80,6 +85,7 @@ export class ExpenseController {
     }
   }
 
+  @Permission(['expenses.view'])
   @Get(':expense_id')
   async detailExpense(
     @Param('expense_id') expenseId: Types.ObjectId,
@@ -93,6 +99,7 @@ export class ExpenseController {
     }
   }
 
+  @Permission(['expenses.edit'])
   @Put(':expense_id')
   @AttachmentsInterceptor('expense_attachments', 5)
   async editExpense(
@@ -120,6 +127,7 @@ export class ExpenseController {
     })
   }
 
+  @Permission(['expenses.edit'])
   @Put(':expense_id/request')
   async expenseRequest(
     @Param('expense_id') expenseId: Types.ObjectId,
@@ -135,6 +143,7 @@ export class ExpenseController {
     });
   }
 
+  @Permission(['expenses.edit'])
   @Put(':expense_id/approval')
   async expenseApproval(
     @Param('expense_id') expenseId: Types.ObjectId,
@@ -152,6 +161,7 @@ export class ExpenseController {
   }
 
 
+  @Permission(['expenses.delete'])
   @Delete(':expense_id')
   async deleteExpense(
     @Param('expense_id') expenseId: Types.ObjectId,

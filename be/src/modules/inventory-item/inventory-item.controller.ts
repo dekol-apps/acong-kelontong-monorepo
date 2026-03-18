@@ -1,4 +1,6 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Res, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Res, Query, UseGuards } from '@nestjs/common';
+import { Permission } from 'src/global/permission.decoratior';
+import { UAuthGuard } from '../auth/auth.guard';
 import { Types } from 'mongoose';
 import type { Response } from 'express';
 import { BaseResponse } from 'src/utils/base-response';
@@ -6,6 +8,7 @@ import { InventoryItemDto, InventoryReconcileDto } from './inventory-item.dto';
 import { InventoryItemService } from './inventory-item.service';
 import { PaginationDto } from 'src/global/global.dto';
 
+@UseGuards(UAuthGuard)
 @Controller('inventory-item')
 export class InventoryItemController {
 
@@ -13,6 +16,7 @@ export class InventoryItemController {
     private readonly service: InventoryItemService,
   ) { }
 
+  @Permission(['inventory.create'])
   @Post('')
   async createInventoryItem(
     @Body() body: InventoryItemDto,
@@ -26,6 +30,7 @@ export class InventoryItemController {
     }
   }
 
+  @Permission(['inventory.view'])
   @Get('')
   async listInventoryItems(
     @Query() query: PaginationDto,
@@ -39,6 +44,7 @@ export class InventoryItemController {
     }
   }
 
+  @Permission(['inventory.edit'])
   @Put('reconcile')
   async inventoryReconcile(
     @Body() body: InventoryReconcileDto,
@@ -52,6 +58,7 @@ export class InventoryItemController {
     }
   }
 
+  @Permission(['inventory.edit'])
   @Put('item/:inventory_item_id')
   async editInventoryItem(
     @Param('inventory_item_id') inventoryItemId: Types.ObjectId,
@@ -66,6 +73,7 @@ export class InventoryItemController {
     }
   }
 
+  @Permission(['inventory.view'])
   @Get('item/:inventory_item_id')
   async detailInventoryItem(
     @Param('inventory_item_id') inventoryItemId: Types.ObjectId,
@@ -80,6 +88,7 @@ export class InventoryItemController {
   }
 
 
+  @Permission(['inventory.delete'])
   @Delete('item/:inventory_item_id')
   async deleteInventoryItem(
     @Param('inventory_item_id') inventoryItemId: Types.ObjectId,

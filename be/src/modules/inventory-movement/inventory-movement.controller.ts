@@ -1,10 +1,13 @@
-import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Res, UseGuards } from '@nestjs/common';
+import { Permission } from 'src/global/permission.decoratior';
+import { UAuthGuard } from '../auth/auth.guard';
 import { Types } from 'mongoose';
 import type { Response } from 'express';
 import { BaseResponse } from 'src/utils/base-response';
 import { InventoryMovementDto, ListInventoryMovementDTO } from './inventory-movement.dto';
 import { InventoryMovementService } from './inventory-movement.service';
 
+@UseGuards(UAuthGuard)
 @Controller('inventory-movement')
 export class InventoryMovementController {
 
@@ -12,6 +15,7 @@ export class InventoryMovementController {
     private readonly service: InventoryMovementService,
   ) { }
 
+  @Permission(['inventory.create'])
   @Post('')
   async inventoryMovement(
     @Body() body: InventoryMovementDto,
@@ -25,6 +29,7 @@ export class InventoryMovementController {
     }
   }
 
+  @Permission(['inventory.view'])
   @Get('')
   async listInventoryMovement(
     @Query() query: ListInventoryMovementDTO,
@@ -38,6 +43,7 @@ export class InventoryMovementController {
     }
   }
 
+  @Permission(['inventory.view'])
   @Get(':inventory_movement_id')
   async detailInventoryMovement(
     @Param('inventory_movement_id') inventoryMovementId: Types.ObjectId,

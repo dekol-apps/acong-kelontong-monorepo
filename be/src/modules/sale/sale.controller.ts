@@ -1,16 +1,20 @@
-import { Body, Controller, Get, Post, Query, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Res, UseGuards } from '@nestjs/common';
+import { Permission } from 'src/global/permission.decoratior';
+import { UAuthGuard } from '../auth/auth.guard';
 import { BaseResponse } from 'src/utils/base-response';
 import { SaleDto, SellingSaleDto } from './sale-dto';
 import { SaleService } from './sale.service';
 import type { Response } from 'express';
 import { PaginationDto } from 'src/global/global.dto';
 
+@UseGuards(UAuthGuard)
 @Controller('sale')
 export class SaleController {
   constructor(
     private readonly service: SaleService,
   ) { }
 
+  @Permission(['sale.create'])
   @Post('stock')
   async addStock(
     @Body() body: SaleDto,
@@ -24,6 +28,7 @@ export class SaleController {
     }
   }
 
+  @Permission(['sale.view'])
   @Get('stock')
   async listStock(
     @Query() query: PaginationDto,
@@ -37,6 +42,7 @@ export class SaleController {
     }
   }
 
+  @Permission(['sale.create'])
   @Post('selling')
   async selling(
     @Body() body: SellingSaleDto,

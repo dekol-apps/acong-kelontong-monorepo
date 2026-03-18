@@ -7,6 +7,7 @@ import { PurchasingEn } from '../purchasing/purchasing.schema';
 import { PurchasingService } from '../purchasing/purchasing.service';
 import { UAuthGuard } from '../auth/auth.guard';
 import { ApprovalType } from 'src/types/interfaces';
+import { Permission } from 'src/global/permission.decoratior';
 import { ExpenseService } from '../expense/expense.service';
 import { ExpenseStatus } from '../expense/expense.schema';
 
@@ -18,6 +19,7 @@ export class ApprovalController {
         private readonly expense: ExpenseService,
     ) { }
 
+    @Permission(['approval.view'])
     @Get('purchasing')
     async listApprovalPurchasing(
         @Query() query: PaginationDto,
@@ -37,6 +39,7 @@ export class ApprovalController {
         }
     }
 
+    @Permission(['approval.create'])
     @Put('purchasing/:purchasing_id/approve')
     async purchaseOrderApprove(
         @Param('purchasing_id') purchasingId: Types.ObjectId,
@@ -53,6 +56,7 @@ export class ApprovalController {
         }
     }
 
+    @Permission(['approval.create'])
     @Put('purchasing/:purchasing_id/reject')
     async purchaseOrderReject(
         @Param('purchasing_id') purchasingId: Types.ObjectId,
@@ -70,6 +74,7 @@ export class ApprovalController {
         }
     }
 
+    @Permission(['approval.view'])
     @Get('expense')
     async listApprovalExpense(
         @Query() query: PaginationDto,
@@ -89,6 +94,7 @@ export class ApprovalController {
         }
     }
 
+    @Permission(['approval.create'])
     @Put('expense/:expense_id/approve')
     async expenseApprove(
         @Param('expense_id') purchasingId: Types.ObjectId,
@@ -105,6 +111,7 @@ export class ApprovalController {
         }
     }
 
+    @Permission(['approval.create'])
     @Put('expense/:expense_id/reject')
     async expenseReject(
         @Param('expense_id') purchasingId: Types.ObjectId,

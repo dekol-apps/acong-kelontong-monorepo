@@ -6,6 +6,7 @@ import type { Response } from 'express';
 import { BaseResponse } from 'src/utils/base-response';
 import { PaginationDto } from 'src/global/global.dto';
 import { Types } from 'mongoose';
+import { Permission } from 'src/global/permission.decoratior';
 
 @UseGuards(UAuthGuard)
 @Controller('product')
@@ -14,6 +15,7 @@ export class ProductController {
         private readonly service: ProductService,
     ) { }
 
+    @Permission(['product.create'])
     @Post('')
     async createProduct(
         @Body() body: Product,
@@ -27,6 +29,7 @@ export class ProductController {
         }
     }
 
+    @Permission(['product.view'])
     @Get('')
     async listProduct(
         @Query() query: PaginationDto,
@@ -40,6 +43,7 @@ export class ProductController {
         }
     }
 
+    @Permission(['product.edit'])
     @Put(':product_id')
     async editProduct(
         @Param('product_id') productId: Types.ObjectId,
@@ -54,6 +58,7 @@ export class ProductController {
         }
     }
 
+    @Permission(['product.view'])
     @Get(':product_id')
     async detailProduct(
         @Param('product_id') productId: Types.ObjectId,
@@ -68,6 +73,7 @@ export class ProductController {
     }
 
 
+    @Permission(['product.delete'])
     @Delete(':product_id')
     async deleteProduct(
         @Param('product_id') productId: Types.ObjectId,

@@ -1,4 +1,6 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, Res, UploadedFile } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, Res, UploadedFile, UseGuards } from '@nestjs/common';
+import { UAuthGuard } from '../auth/auth.guard';
+import { Permission } from 'src/global/permission.decoratior';
 import { PaginationDto } from 'src/global/global.dto';
 import { BaseResponse } from 'src/utils/base-response';
 import { PurchasingService } from './purchasing.service';
@@ -17,6 +19,7 @@ interface headerArgs {
   dto?: PurchasingDto,
   res: Response,
 }
+@UseGuards(UAuthGuard)
 @Controller('purchasing')
 export class PurchasingController {
 
@@ -51,6 +54,7 @@ export class PurchasingController {
     }
   }
 
+  @Permission(['purchasing.create'])
   @Post('')
   @AttachmentsInterceptor('purchasing_attachments', 5)
   async createPurchasing(
@@ -65,6 +69,7 @@ export class PurchasingController {
     })
   }
 
+  @Permission(['purchasing.view'])
   @Get('')
   async listPurchasing(
     @Query() query: PaginationDto,
@@ -78,6 +83,7 @@ export class PurchasingController {
     }
   }
 
+  @Permission(['purchasing.edit'])
   @Put(':purchasing_id')
   @AttachmentsInterceptor('purchasing_attachments', 5)
   async editPurchasing(
@@ -106,6 +112,7 @@ export class PurchasingController {
     })
   }
 
+  @Permission(['purchasing.view'])
   @Get(':purchasing_id')
   async detailPurchasing(
     @Param('purchasing_id') id: string,
@@ -120,6 +127,7 @@ export class PurchasingController {
     }
   }
 
+  @Permission(['purchasing.delete'])
   @Delete(':purchasing_id')
   async deletePurchasing(
     @Param('purchasing_id') id: string,
@@ -143,6 +151,7 @@ export class PurchasingController {
     }
   }
 
+  @Permission(['purchasing.edit'])
   @Put(':purchasing_id/request')
   async purchaseOrder(
     @Param('purchasing_id') id: string,
@@ -159,6 +168,7 @@ export class PurchasingController {
     });
   }
 
+  @Permission(['purchasing.edit'])
   @Put(':purchasing_id/approval')
   async purchaseOrderApproval(
     @Param('purchasing_id') id: string,
@@ -176,6 +186,7 @@ export class PurchasingController {
     });
   }
 
+  @Permission(['purchasing.edit'])
   @Put(':purchasing_id/process')
   async purchaseOrderProcess(
     @Param('purchasing_id') id: string,
@@ -192,6 +203,7 @@ export class PurchasingController {
     });
   }
 
+  @Permission(['purchasing.delete'])
   @Put(':purchasing_id/drop')
   async purchaseOrderDrop(
     @Param('purchasing_id') id: string,
@@ -208,6 +220,7 @@ export class PurchasingController {
     });
   }
 
+  @Permission(['purchasing.edit'])
   @Put(':purchasing_id/payment')
   @AttachmentsInterceptor('purchasing_attachments', 5)
   async purchasingPayment(
@@ -237,6 +250,7 @@ export class PurchasingController {
   }
 
 
+  @Permission(['purchasing.edit'])
   @Put(':purchasing_id/receive')
   @AttachmentsInterceptor('purchasing_attachments', 5)
   async recieveOrder(
@@ -269,6 +283,7 @@ export class PurchasingController {
     });
   }
 
+  @Permission(['purchasing.view'])
   @Get(':purchasing_id/items')
   async listPurchasingItem(
     @Query() query: PaginationDto,
@@ -284,6 +299,7 @@ export class PurchasingController {
     }
   }
 
+  @Permission(['purchasing.edit'])
   @Post(':purchasing_id/items')
   async purchasingItemBulkUpdate(
     @Body() body: PurchasingItemDto[],
