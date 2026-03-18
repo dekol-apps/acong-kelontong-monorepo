@@ -433,4 +433,9 @@ export class AccountingService {
     });
     return !!exists;
   }
+
+  async existsByOrderId(order_id: Types.ObjectId): Promise<boolean> {
+    const exists = await this.accountingModel.exists({ order_id });
+    return !!exists;
+  }
 }

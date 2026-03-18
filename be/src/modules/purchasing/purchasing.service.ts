@@ -3,7 +3,7 @@ import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { ClientSession, Connection, Model, Types } from 'mongoose';
 import { PaginationDto } from 'src/global/global.dto';
 import { GlobalService } from 'src/global/global.service';
-import { ApprovalType, FlowType, IListRes, OrderType, PPhType, PPnType } from 'src/types/interfaces';
+import { ApprovalType, FlowType, IListRes, OrderType, PPnType } from 'src/types/interfaces';
 import { BaseResponse } from 'src/utils/base-response';
 import { Purchasing, PurchasingEn, ValidatePaymentInput, ValidatePaymentResult } from './purchasing.schema';
 import { PurchaseOrderApprovalDto, PurchaseOrderDto, PurchasingDetail, PurchasingDto } from './purchasing.dto';
@@ -128,7 +128,6 @@ export class PurchasingService {
           'notes',
           'completed_date',
           'invoice_number',
-          'ppn_facture_number',
           'purchasing_attachments',
         ],
         [PurchasingEn.PROCESS]: [
@@ -138,17 +137,8 @@ export class PurchasingService {
           'purchasing_attachments',
           'payment_realization',
           'notes',
-          'purchasing_attachments',
-          'payment_realization',
-          'notes',
-          'purchasing_attachments',
-          'payment_realization',
-          'notes',
-          'pph_type',
           'ppn_type',
-          'pph_rate',
           'ppn_rate',
-          'pph_amount',
           'ppn_amount',
           'shipping_cost'
         ],
@@ -197,7 +187,44 @@ export class PurchasingService {
         (url) => !newAttachments.includes(url),
       );
 
+      // ─── Enforce Constraints on Restricted Fields ─────────────────────────
+      const restrictedFields = [
+        'payment_realization',
+        'shipping_cost',
+        'ppn_type',
+        'ppn_rate',
+        'ppn_amount',
+        'ppn_facture_number'
+      ];
+
+      const changingRestricted = restrictedFields.some(field =>
+        (data as any)[field] !== undefined && (data as any)[field]?.toString() !== (purchase as any)[field]?.toString()
+      );
+
+      if (changingRestricted) {
+        // 1. 6-hour window check
+        const now = new Date();
+        const createdAt = (purchase as any).createdAt as Date;
+        const hoursDiff = (now.getTime() - createdAt.getTime()) / (1000 * 3600);
+        if (hoursDiff > 6) {
+          throw BaseResponse.invalid({
+            err: 'editPurchasing restricted fields > 6 hours',
+            option: { message: 'Cannot edit payment or tax related fields after 6 hours from creation' }
+          });
+        }
+
+        // 2. Accounting Snapshot check
+        const isLockedBySnapshot = await this.accounting.checkSnapshot(createdAt);
+        if (isLockedBySnapshot) {
+          throw BaseResponse.invalid({
+            err: 'editPurchasing restricted fields snapshot locked',
+            option: { message: 'Cannot edit payment or tax related fields after accounting snapshot has been taken' }
+          });
+        }
+      }
+
       fields.forEach((field: string) => {
+        const input = data as any;
         if (field === 'supplier') purchase.supplier = supplier._id;
         if (field === 'supplier_name') purchase.supplier_name = supplier.supplier_name;
         if (field === 'due_date') purchase.due_date = data.due_date;
@@ -205,12 +232,39 @@ export class PurchasingService {
         if (field === 'ppn_facture_number') purchase.ppn_facture_number = data.ppn_facture_number;
         if (field === 'purchasing_attachments') purchase.purchasing_attachments = data.purchasing_attachments;
         if (field === 'payment_realization') purchase.payment_realization = toDecimal128(toDecimal(data.payment_realization));
+        if (field === 'ppn_type') purchase.ppn_type = data.ppn_type ?? purchase.ppn_type;
+        if (field === 'ppn_rate') purchase.ppn_rate = data.ppn_rate ?? purchase.ppn_rate;
+        if (field === 'ppn_amount') purchase.ppn_amount = toDecimal128(toDecimal(data.ppn_amount));
+        if (field === 'shipping_cost') purchase.shipping_cost = toDecimal128(toDecimal(data.shipping_cost));
+        if (field === 'notes') purchase.notes = data.notes;
+        if (field === 'completed_date') purchase.completed_date = input.completed_date;
         if (field === 'reject_notes') purchase.reject_notes = data.reject_notes;
         if (field === 'status') purchase.status = data.status ?? purchase.status;
       });
 
       await purchase.save({ session });
       const detail = await this.detailPurchasing(purchase._id);
+
+      // ─── Sync with Accounting ─────────────────────────────────────────────
+      if (purchase.status === PurchasingEn.PROCESS || purchase.status === PurchasingEn.RECEIVE || purchase.status === PurchasingEn.COMPLETE) {
+        const hasAccounting = await this.accounting.existsByOrderId(purchase._id);
+        if (hasAccounting) {
+          await this.accounting.editAccountingByOrderId(
+            purchase._id as any,
+            {
+              transaction_amount: detail.payment_realization!,
+              tax_base: detail.total_purchase_price,
+              ppn_type: detail.ppn_type as any,
+              ppn_rate: detail.ppn_rate,
+              ppn_amount: detail.ppn_amount,
+              tax_facture_number: detail.ppn_facture_number,
+              order_data: detail,
+              record_date: new Date(),
+            },
+            session
+          );
+        }
+      }
 
       return {
         detail,
