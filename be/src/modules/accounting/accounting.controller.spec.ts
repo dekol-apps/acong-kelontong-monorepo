@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AccountingController } from './accounting.controller';
 import { AccountingService } from './accounting.service';
+import { UAuthGuard } from '../auth/auth.guard';
 
 describe('AccountingController', () => {
   let controller: AccountingController;
@@ -19,7 +20,10 @@ describe('AccountingController', () => {
           useValue: mockAccountingService,
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(UAuthGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = module.get<AccountingController>(AccountingController);
   });

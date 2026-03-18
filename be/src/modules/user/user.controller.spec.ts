@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { MailerService } from '@nestjs-modules/mailer';
+import { UAuthGuard } from '../auth/auth.guard';
 
 describe('UserController', () => {
   let controller: UserController;
@@ -36,7 +37,10 @@ describe('UserController', () => {
           useValue: mockMailerService,
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(UAuthGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = module.get<UserController>(UserController);
   });

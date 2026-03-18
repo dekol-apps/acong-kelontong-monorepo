@@ -24,10 +24,10 @@ export class Expense {
   @Prop({ required: true })
   expense_date: Date;
 
-  @Prop({ enum: ExpenseStatus, required: true })
+  @Prop({ type: String, enum: ExpenseStatus, required: true })
   status: ExpenseStatus;
 
-  @Prop({ enum: PPhType, default: PPhType.NONE })
+  @Prop({ type: String, enum: PPhType, default: PPhType.NONE })
   pph_type: PPhType;
 
   @Prop({ type: Number, default: 0 })

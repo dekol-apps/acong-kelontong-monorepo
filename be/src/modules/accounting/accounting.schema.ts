@@ -31,7 +31,7 @@ export class Accounting {
   @Prop({ type: Types.Decimal128, required: true, default: 0 })
   tax_base: Types.Decimal128;
 
-  @Prop({ enum: PPnType, default: PPnType.NONE })
+  @Prop({ type: String, enum: PPnType, default: PPnType.NONE })
   ppn_type?: PPnType;
 
   @Prop({ type: Number, default: 0 })
@@ -40,7 +40,7 @@ export class Accounting {
   @Prop({ type: Types.Decimal128, default: 0 })
   ppn_amount?: Types.Decimal128;
 
-  @Prop({ enum: PPhType, default: PPhType.NONE })
+  @Prop({ type: String, enum: PPhType, default: PPhType.NONE })
   pph_type?: PPhType;
 
   @Prop({ type: Number, default: 0 })

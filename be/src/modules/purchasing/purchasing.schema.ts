@@ -27,7 +27,7 @@ export class Purchasing {
   @Prop({ type: Date })
   due_date?: Date;
 
-  @Prop({ enum: PurchasingEn, required: true })
+  @Prop({ type: String, enum: PurchasingEn, required: true })
   status: PurchasingEn;
 
   @Prop()
@@ -51,7 +51,7 @@ export class Purchasing {
   @Prop({ type: Date })
   completed_date?: Date; // Receive order step
 
-  @Prop({ enum: PPnType, default: PPnType.NONE })
+  @Prop({ type: String, enum: PPnType, default: PPnType.NONE })
   ppn_type: PPnType;
 
   @Prop({ type: Number, default: 0 })

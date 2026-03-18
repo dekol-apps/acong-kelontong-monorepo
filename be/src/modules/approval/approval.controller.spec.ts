@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ApprovalController } from './approval.controller';
 import { PurchasingService } from '../purchasing/purchasing.service';
 import { ExpenseService } from '../expense/expense.service';
+import { UAuthGuard } from '../auth/auth.guard';
 
 describe('ApprovalController', () => {
   let controller: ApprovalController;
@@ -29,7 +30,10 @@ describe('ApprovalController', () => {
           useValue: mockExpenseService,
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(UAuthGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = module.get<ApprovalController>(ApprovalController);
   });

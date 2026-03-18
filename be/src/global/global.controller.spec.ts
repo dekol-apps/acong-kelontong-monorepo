@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { GlobalController } from './global.controller';
 import { GlobalService } from './global.service';
+import { UAuthGuard } from '../modules/auth/auth.guard';
 
 describe('GlobalController', () => {
   let controller: GlobalController;
@@ -18,7 +19,10 @@ describe('GlobalController', () => {
           useValue: mockGlobalService,
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(UAuthGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = module.get<GlobalController>(GlobalController);
   });

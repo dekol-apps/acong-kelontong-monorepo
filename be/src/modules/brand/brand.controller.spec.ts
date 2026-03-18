@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BrandController } from './brand.controller';
 import { BrandService } from './brand.service';
+import { UAuthGuard } from '../auth/auth.guard';
 
 describe('BrandController', () => {
   let controller: BrandController;
@@ -22,7 +23,10 @@ describe('BrandController', () => {
           useValue: mockBrandService,
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(UAuthGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = module.get<BrandController>(BrandController);
   });

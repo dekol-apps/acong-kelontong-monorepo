@@ -10,7 +10,7 @@ export class Product {
   product_name: string; // e.g. "PT Indofood Sukses Tbk"
   @Prop()
   product_description?: string;
-  @Prop({ default: UnitOfMeasure.PCS, enum: UnitOfMeasure })
+  @Prop({ type: String, default: UnitOfMeasure.PCS, enum: UnitOfMeasure })
   unit_of_measure?: UnitOfMeasure;
   @Prop()
   barcode?: string;

@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RoleController } from './role.controller';
 import { RoleService } from './role.service';
+import { UAuthGuard } from '../auth/auth.guard';
 
 describe('RoleController', () => {
   let controller: RoleController;
@@ -22,7 +23,10 @@ describe('RoleController', () => {
           useValue: mockRoleService,
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(UAuthGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = module.get<RoleController>(RoleController);
   });
