@@ -14,15 +14,13 @@ export const CASHIER: IMenu = {
     code: 'cashier',
     url: 'cashier',
     icon: '',
-    labelKey: 'Cashier',
-    permissions: ['cashier.view', 'cashier.create', 'cashier.edit', 'cashier.delete'],
+    permissions: ['sale.view', 'sale.create', 'sale.edit', 'sale.delete'],
 };
 export const SALES_HISTORY: IMenu = {
     code: 'sales-history',
     url: 'sales-history',
     icon: '',
-    labelKey: 'Sales History',
-    permissions: ['cashier.view', 'cashier.create', 'cashier.edit', 'cashier.delete'],
+    permissions: ['sale.view', 'sale.create', 'sale.edit', 'sale.delete'],
 };
 
 export const SUPPLIES: IMenu = {
@@ -43,7 +41,7 @@ export const SHOWCASE: IMenu = {
     url: 'showcase',
     icon: '',
     labelKey: 'Showcase',
-    permissions: ['showcase.view', 'showcase.create', 'showcase.edit', 'showcase.delete'],
+    permissions: ['inventory.view', 'inventory.create', 'inventory.edit', 'inventory.delete'],
 }
 
 export const CATALOGUE: IMenu = {
@@ -108,6 +106,13 @@ export const SUPPLIERS: IMenu = {
     labelKey: 'Suppliers',
     permissions: ['supplier.view', 'supplier.create', 'supplier.edit', 'supplier.delete'],
 }
+export const SUPPLIES_PRODUCTION: IMenu = {
+    code: 'production',
+    url: 'production',
+    icon: '',
+    labelKey: 'Production',
+    permissions: ['production.view', 'production.create', 'production.edit', 'production.delete'],
+}
 
 export const FINANCE: IMenu = {
     code: 'finance',
@@ -120,7 +125,7 @@ export const CASHFLOW: IMenu = {
     url: 'cashflow',
     icon: '',
     labelKey: 'Cashflow',
-    permissions: ['cashflow.view', 'cashflow.create', 'cashflow.edit', 'cashflow.delete'],
+    permissions: ['cashflow.view'],
 }
 export const EXPENSES: IMenu = {
     code: 'expenses',
@@ -134,7 +139,7 @@ export const CAPITAL: IMenu = {
     url: 'capital',
     icon: '',
     labelKey: 'Capital Account',
-    permissions: ['capital.view', 'capital.create', 'capital.edit', 'capital.delete'],
+    permissions: ['investment.view'],
 }
 
 export const ADMIN: IMenu = {
@@ -221,7 +226,8 @@ export const Menus: IMenu[] = [
         ...SUPPLIES,
         children: [
             INVENTORY,
-            SHOWCASE
+            SHOWCASE,
+            SUPPLIES_PRODUCTION
         ]
     },
     {
