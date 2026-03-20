@@ -1,0 +1,51 @@
+<div class="card">
+  <div class="card-header mb-4">
+    <div class="d-flex flex-row justify-content-between gap-4">
+      <h3 class="card-title">Inventory Item Detail ({{detail?.product_name}})</h3>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="d-flex flex-row flex-wrap justify-content-between gap-2 mb-5">
+      <table class="table">
+        <tbody>
+          <tr>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">Brand Name</th>
+            <td class="align-top">{{ detail?.product?.brand?.brand_name || '-' }}</td>
+          </tr>
+          <tr>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">Unit Of Measure</th>
+            <td class="align-top">{{ detail?.product?.unit_of_measure || '-' }}</td>
+          </tr>
+          <tr>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">Barcode</th>
+            <td class="align-top">{{ detail?.product?.barcode || '-' }}</td>
+          </tr>
+          <tr>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">Receive Date</th>
+            <td class="align-top">{{ (detail?.receive_date | date: DATE_FORMAT) || '-' }}</td>
+          </tr>
+          <tr>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">Landed Cost</th>
+            <td class="align-top">{{ (detail?.landed_cost | currency: CURRENCY_FORMAT) || '-' }}</td>
+          </tr>
+          <tr>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">Original Price</th>
+            <td class="align-top">{{ (detail?.original_price | currency: CURRENCY_FORMAT) || '-' }}</td>
+          </tr>
+          <tr>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">Original PPn Rate</th>
+            <td class="align-top">{{ (detail?.original_ppn_rate ? (detail?.original_ppn_rate+'%') : '-')
+              }}</td>
+          </tr>
+          <tr>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">Description</th>
+            <td class="align-top">{{ detail?.product?.product_description || '-' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card-footer d-flex gap-2">
+    <button class="btn btn-secondary" type="button" (click)="back()">Back</button>
+  </div>
+</div>

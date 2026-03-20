@@ -49,7 +49,7 @@
     </div>
     }
 
-    <div class="table-responsive scrollShadow border-top border-start border-end">
+    <div class="table-responsive scrollShadow border-top border-start border-end rounded-top">
         <table class="table table-row-bordered mb-0" aria-describedby="Generic Table">
             <thead>
                 <tr class="fw-bold fs-6 text-gray-800 text-uppercase">
@@ -128,6 +128,8 @@
                         {{ ( getRowDataValue(row, column.id)) || "-"}}
                         } @else if (column.dataType === 'DATE') {
                         {{ ( getRowDataValue(row, column.id) | date: DATE_FORMAT) || "-"}}
+                        } @else if (column.dataType === 'PERCENTAGE') {
+                        {{ ( getRowDataValue(row, column.id) + '%') || "-"}}
                         } @else {
                         {{ ( getRowDataValue(row, column.id) | currency:CURRENCY_FORMAT) || "-"}}
                         }

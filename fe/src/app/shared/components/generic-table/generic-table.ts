@@ -28,7 +28,7 @@ export interface ColumnProps {
   sort?: boolean;
   customElementId?: string; // Element ID for dynamic HTML content
   extraHeaderClass?: string;
-  dataType?: 'CURRENCY' | 'DATE';
+  dataType?: 'CURRENCY' | 'DATE' | 'PERCENTAGE';
 }
 
 export interface ITableQueryData extends ISort, IPaginationOutput {

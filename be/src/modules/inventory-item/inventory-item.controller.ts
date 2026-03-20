@@ -44,6 +44,21 @@ export class InventoryItemController {
     }
   }
 
+  @Permission(['inventory.view'])
+  @Get('product/:product_id')
+  async listInventoryItemsByProductId(
+    @Param('product_id') productId: string,
+    @Query() query: PaginationDto,
+    @Res() res: Response,
+  ) {
+    try {
+      const { data, meta } = await this.service.listInventoryItemsByProductId(new Types.ObjectId(productId), query);
+      return BaseResponse.success({ res, option: { message: 'Success get list inventory item', list: data, meta } });
+    } catch (err) {
+      return BaseResponse.error({ res, err });
+    }
+  }
+
   @Permission(['inventory.edit'])
   @Put('reconcile')
   async inventoryReconcile(
@@ -61,12 +76,12 @@ export class InventoryItemController {
   @Permission(['inventory.edit'])
   @Put('item/:inventory_item_id')
   async editInventoryItem(
-    @Param('inventory_item_id') inventoryItemId: Types.ObjectId,
+    @Param('inventory_item_id') inventoryItemId: string,
     @Body() body: InventoryItemDto,
     @Res() res: Response,
   ) {
     try {
-      const inventoryItem = await this.service.editInventoryItem(inventoryItemId, body);
+      const inventoryItem = await this.service.editInventoryItem(new Types.ObjectId(inventoryItemId), body);
       return BaseResponse.success({ res, option: { message: "Success edit inventoryItem", detail: inventoryItem } });
     } catch (err) {
       return BaseResponse.error({ res, err });
@@ -76,11 +91,11 @@ export class InventoryItemController {
   @Permission(['inventory.view'])
   @Get('item/:inventory_item_id')
   async detailInventoryItem(
-    @Param('inventory_item_id') inventoryItemId: Types.ObjectId,
+    @Param('inventory_item_id') inventoryItemId: string,
     @Res() res: Response,
   ) {
     try {
-      const inventoryItem = await this.service.detailInventoryItem(inventoryItemId);
+      const inventoryItem = await this.service.detailInventoryItem(new Types.ObjectId(inventoryItemId));
       return BaseResponse.success({ res, option: { message: "Success get detail inventoryItem", detail: inventoryItem } });
     } catch (err) {
       return BaseResponse.error({ res, err });
@@ -91,11 +106,11 @@ export class InventoryItemController {
   @Permission(['inventory.delete'])
   @Delete('item/:inventory_item_id')
   async deleteInventoryItem(
-    @Param('inventory_item_id') inventoryItemId: Types.ObjectId,
+    @Param('inventory_item_id') inventoryItemId: string,
     @Res() res: Response,
   ) {
     try {
-      const inventoryItem = await this.service.deleteInventoryItem(inventoryItemId);
+      const inventoryItem = await this.service.deleteInventoryItem(new Types.ObjectId(inventoryItemId));
       return BaseResponse.success({ res, option: { message: "Success get detail inventoryItem", detail: inventoryItem } });
     } catch (err) {
       return BaseResponse.error({ res, err });

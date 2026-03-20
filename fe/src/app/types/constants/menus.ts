@@ -36,6 +36,20 @@ export const INVENTORY: IMenu = {
     labelKey: 'Inventory',
     permissions: ['inventory.view', 'inventory.create', 'inventory.edit', 'inventory.delete'],
 }
+export const INVENTORY_PRODUCT: IMenu = {
+    code: 'inventory-product',
+    url: 'inventory/:product_id',
+    icon: '',
+    labelKey: 'Inventory Product',
+    permissions: ['inventory.view', 'inventory.create', 'inventory.edit', 'inventory.delete'],
+}
+export const INVENTORY_ITEM: IMenu = {
+    code: 'inventory-item',
+    url: 'inventory/:product_id/:inventory_item_id',
+    icon: '',
+    labelKey: 'Inventory Item',
+    permissions: ['inventory.view', 'inventory.create', 'inventory.edit', 'inventory.delete'],
+}
 export const SHOWCASE: IMenu = {
     code: 'showcase',
     url: 'showcase',

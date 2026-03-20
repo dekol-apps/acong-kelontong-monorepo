@@ -6,8 +6,8 @@ import { BaseResponse } from 'src/utils/base-response';
 import { Product } from '../product/product.schema';
 import { InventoryItemDto, InventoryReconcileDto } from './inventory-item.dto';
 import { InventoryItem } from './inventory-item.schema';
-import { IListRes } from 'src/types/interfaces';
-import { PaginationDto } from 'src/global/global.dto';
+import { IListRes, TOneOrMany } from 'src/types/interfaces';
+import { FilterDto, PaginationDto } from 'src/global/global.dto';
 import { InventoryReconcile, InventoryReconcileItem } from './inventory-reconcile.schema';
 
 @Injectable()
@@ -56,7 +56,8 @@ export class InventoryItemService {
           inventory: { $first: "$inventory" },
           item_qty: { $sum: 1 },
           // Option to track average landed_cost across batch
-          avg_landed_cost: { $avg: { $toDecimal: "$landed_cost" } }
+          avg_landed_cost: { $avg: { $toDecimal: "$landed_cost" } },
+          total_landed_cost: { $sum: { $toDecimal: "$landed_cost" } },
         }
       },
       { $sort: sortStage },
@@ -81,6 +82,36 @@ export class InventoryItemService {
         totalPages: Math.ceil(total / pageSize),
       }
     };
+  }
+
+  async listInventoryItemsByProductId(
+    productId: Types.ObjectId,
+    {
+      page,
+      size,
+      sortBy,
+      sortDir,
+      search,
+    }: PaginationDto
+  ): Promise<IListRes<any>> {
+    const filterQuery: TOneOrMany<FilterDto> = [
+      { column: 'product', value: productId }
+    ]
+    const searchFields: string[] = ['landed_cost', 'original_price', 'original_ppn_rate'];
+
+    const list = await this.global.getList<InventoryItem>(
+      this.inventoryItemModel,
+      {
+        page,
+        size,
+        sortBy,
+        sortDir,
+        search,
+        searchFields,
+        filter: filterQuery
+      }
+    )
+    return list;
   }
 
   async createInventoryItem(payload: InventoryItemDto, sessionIn?: ClientSession): Promise<InventoryItem | undefined> {
@@ -137,7 +168,12 @@ export class InventoryItemService {
       const detailInventory = await this.inventoryItemModel
         .findById(id)
         .session(session)
-        .populate(['inventory', 'product'])
+        .populate({
+          path: 'product',
+          populate: {
+            path: 'brand'
+          }
+        })
         .lean()
         .exec();
       return detailInventory || undefined

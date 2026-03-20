@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { MainLayout } from './layout/main-layout/main-layout';
-import { BRANDS, CASHIER, EXPENSES, CASHFLOW, PRODUCT, SUPPLIERS, USER, ROLE, DASHBOARD, ROLE_DETAIL, ROLE_CREATE, ROLE_EDIT, PURCHASE_ORDER, RECEIVE_ORDER, CAPITAL, SALES_HISTORY, INVENTORY, SHOWCASE, PURCHASE_ORDER_NEW, PURCHASE_ORDER_EDIT, APPROVAL, INVESTMENT, SUPPLIES_PRODUCTION, PURCHASE_ORDER_DETAIL, PURCHASE_ORDER_RECEIVE } from './types/constants/menus';
+import { BRANDS, CASHIER, EXPENSES, CASHFLOW, PRODUCT, SUPPLIERS, USER, ROLE, DASHBOARD, ROLE_DETAIL, ROLE_CREATE, ROLE_EDIT, PURCHASE_ORDER, RECEIVE_ORDER, CAPITAL, SALES_HISTORY, INVENTORY, SHOWCASE, PURCHASE_ORDER_NEW, PURCHASE_ORDER_EDIT, APPROVAL, INVESTMENT, SUPPLIES_PRODUCTION, PURCHASE_ORDER_DETAIL, PURCHASE_ORDER_RECEIVE, INVENTORY_PRODUCT, INVENTORY_ITEM } from './types/constants/menus';
 import { AuthGuardService } from './services/guards/auth-guard/auth-guard-service';
 import { PageGuardService } from './services/guards/page-guard/page-guard-service';
 
@@ -59,7 +59,19 @@ export const routes: Routes = [
         path: INVENTORY.url,
         canActivate: [PageGuardService],
         data: { ...INVENTORY },
-        loadComponent: () => import('./pages/catalogue/product/product').then(c => c.Product)
+        loadComponent: () => import('./pages/asset/inventory/inventory').then(c => c.Inventory)
+      },
+      {
+        path: INVENTORY_PRODUCT.url,
+        canActivate: [PageGuardService],
+        data: { ...INVENTORY_PRODUCT },
+        loadComponent: () => import('./pages/asset/inventory-item/inventory-item').then(c => c.InventoryItem)
+      },
+      {
+        path: INVENTORY_ITEM.url,
+        canActivate: [PageGuardService],
+        data: { ...INVENTORY_ITEM },
+        loadComponent: () => import('./pages/asset/inventory-item-detail/inventory-item-detail').then(c => c.InventoryItemDetail)
       },
       {
         path: SHOWCASE.url,

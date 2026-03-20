@@ -68,6 +68,12 @@ export const Endpoint = {
     return `${api}purchasing-item/${id}`
   },
 
+  // Inventory Item Endpoint
+  INVENTORY_ITEM: `${api}inventory-item`,
+  INVENTORY_ITEM_PRODUCT_ID: (id: string) => `${api}inventory-item/product/${id}`,
+  INVENTORY_ITEM_ID: (id: string) => `${api}inventory-item/item/${id}`,
+  INVENTORY_RECONCILE: `${api}inventory-item/reconcile`,
+
   // /* Account endpoints */
   // ACCOUNT_SETUP: `${api}account/setup`,
   // ACCOUNT_PROFILE: `${api}account/profile`,
