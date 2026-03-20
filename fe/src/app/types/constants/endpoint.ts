@@ -53,11 +53,15 @@ export const Endpoint = {
     return `${api}supplier/${id}`
   },
 
-  // Purchasing Endpoint
   PURCHASING: `${api}purchasing`,
   PURCHASING_ID: (id: string) => {
     return `${api}purchasing/${id}`
   },
+  PURCHASING_REQUEST: (id: string) => `${api}purchasing/${id}/request`,
+  PURCHASING_APPROVAL: (id: string) => `${api}purchasing/${id}/approval`,
+  PURCHASING_PROCESS: (id: string) => `${api}purchasing/${id}/process`,
+  PURCHASING_DROP: (id: string) => `${api}purchasing/${id}/drop`,
+  PURCHASING_PAYMENT: (id: string) => `${api}purchasing/${id}/payment`,
   PURCHASING_ITEM: `${api}purchasing-item`,
   PURCHASING_ITEM_ID: (id: string) => {
     return `${api}purchasing-item/${id}`

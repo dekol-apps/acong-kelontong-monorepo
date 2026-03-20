@@ -2,6 +2,16 @@
   <table class="table">
     <tbody>
       <tr>
+        <td class="fw-bold p-1 col-3 align-top">Status</td>
+        <td class="align-top">{{purchase?.status || '-'}}</td>
+      </tr>
+      @if (purchase?.status === PurchasingEn.REJECT) {
+      <tr>
+        <td class="fw-bold p-1 col-3 align-top">Reject Notes</td>
+        <td class="align-top">{{purchase?.reject_notes || '-'}}</td>
+      </tr>
+      }
+      <tr>
         <td class="fw-bold p-1 col-3 align-top">Invoice Number</td>
         <td class="align-top">{{purchase?.invoice_number || '-'}}</td>
       </tr>
@@ -18,8 +28,8 @@
         <td class="align-top">{{(purchase?.due_date | date: DATE_FORMAT) || '-'}}</td>
       </tr>
       <tr>
-        <td class="fw-bold p-1 col-3 align-top">Received Date</td>
-        <td class="align-top">{{(purchase?.received_at | date: DATE_FORMAT) || '-'}}</td>
+        <td class="fw-bold p-1 col-3 align-top">Completed Date</td>
+        <td class="align-top">{{(purchase?.completed_date | date: DATE_FORMAT) || '-'}}</td>
       </tr>
       <tr>
         <td class="fw-bold p-1 col-3 align-top">PPn Type</td>
@@ -32,6 +42,10 @@
       <tr>
         <td class="fw-bold p-1 col-3 align-top">PPn Amount</td>
         <td class="align-top">{{(purchase?.ppn_amount | currency: CURRENCY_FORMAT) || '-'}}</td>
+      </tr>
+      <tr>
+        <td class="fw-bold p-1 col-3 align-top">PPn Facture Number</td>
+        <td class="align-top">{{purchase?.ppn_facture_number || '-'}}</td>
       </tr>
       <tr>
         <td class="fw-bold p-1 col-3 align-top">Shipping Cost</td>

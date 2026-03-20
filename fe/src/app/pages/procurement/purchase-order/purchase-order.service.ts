@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { BaseService } from '../../../services/rest-api/base-service';
 import { AlertService } from '../../../shared/components/alert/alert-service';
-import { catchError, map, Observable, of } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { Endpoint } from '../../../types/constants/endpoint';
-import { IPaginationInput } from '../../../types/interfaces/common.interface';
+import { ApprovalType, IPaginationInput } from '../../../types/interfaces/common.interface';
 import { IResDetail, IResList } from '../../../types/interfaces/http.interface';
 import { ITableQueryData } from '../../../shared/components/generic-table/generic-table';
 import { IPurchasing, IPurchasingItem, IPurchasingItemDto } from '../../../types/interfaces/procurement.interface';
@@ -20,19 +20,11 @@ export class PurchaseOrderService extends BaseService {
   getPurchasings(
     qParams: ITableQueryData
   ): Observable<IResList<IPurchasing>> {
-    return this.getRequest({ url: Endpoint.PURCHASING, qParams, spinner: false }).pipe(
-      map((res: IResList<IPurchasing>) => {
-        const val = {
-          meta: res?.meta as IPaginationInput,
-          list: res?.list
-        };
-        return val;
-      })
-    );
+    return this.getRequest({ url: Endpoint.PURCHASING, qParams, spinner: false });
   }
 
   createPurchasing(
-    body: FormData|IPurchasing //refers to IPurchasingDto
+    body: FormData | IPurchasing //refers to IPurchasingDto
   ): Observable<IPurchasing> {
     return this.postRequest({ url: Endpoint.PURCHASING, body }).pipe(
       map((res: IResDetail<IPurchasing>) => {
@@ -43,7 +35,7 @@ export class PurchaseOrderService extends BaseService {
 
   editPurchasing(
     purchasing_id: string,
-    body: FormData|IPurchasing //refers to IPurchasingDto
+    body: FormData | IPurchasing //refers to IPurchasingDto
   ): Observable<IPurchasing> {
     return this.putRequest({ url: Endpoint.PURCHASING_ID(purchasing_id), body }).pipe(
       map((res: IResDetail<IPurchasing>) => {
@@ -61,7 +53,7 @@ export class PurchaseOrderService extends BaseService {
   }
 
   dropPurchasing(purchasing_id: string): Observable<IPurchasing> {
-    return this.putRequest({ url: `${Endpoint.PURCHASING_ID(purchasing_id)}/drop` }).pipe(
+    return this.putRequest({ url: Endpoint.PURCHASING_DROP(purchasing_id) }).pipe(
       map((res: IResDetail<IPurchasing>) => {
         return res.detail;
       })
@@ -120,8 +112,31 @@ export class PurchaseOrderService extends BaseService {
     );
   }
 
-  requestPO(purchasing_id: string): Observable<IResDetail<PurchaseOrder>> {
-    return this.putRequest({ url: `${Endpoint.PURCHASING_ID(purchasing_id)}/request` });
+  requestPO(purchasing_id: string): Observable<IPurchasing> {
+    return this.putRequest({ url: Endpoint.PURCHASING_REQUEST(purchasing_id) });
+  }
+
+  approvePO(purchasing_id: string): Observable<IPurchasing> {
+    return this.putRequest({
+      url: Endpoint.PURCHASING_APPROVAL(purchasing_id),
+      body: { approval: ApprovalType.APPROVE }
+    });
+  }
+
+  rejectPO(purchasing_id: string, reject_notes: string): Observable<IPurchasing> {
+    return this.putRequest({
+      url: Endpoint.PURCHASING_APPROVAL(purchasing_id),
+      body: { approval: ApprovalType.REJECT, reject_notes }
+    });
+  }
+
+  processPO(purchasing_id: string): Observable<IPurchasing> {
+    return this.putRequest({ url: Endpoint.PURCHASING_PROCESS(purchasing_id) });
+  }
+
+  paymentPO(purchasing_id: string, body: FormData | IPurchasing): Observable<IPurchasing> {
+    return this.putRequest({ url: Endpoint.PURCHASING_PAYMENT(purchasing_id), body });
   }
 }
+
 

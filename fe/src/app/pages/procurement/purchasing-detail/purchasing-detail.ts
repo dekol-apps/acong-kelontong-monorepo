@@ -4,7 +4,7 @@ import { TableColumn } from '../../../shared/directives/table-column/table-colum
 import { formType, IPaginationInput } from '../../../types/interfaces/common.interface';
 import { CURRENCY_FORMAT, DATE_FORMAT, SORT_DIR } from '../../../types/constants/common.constants';
 import { NgbActiveModal, NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
-import { IPurchasing, IPurchasingItem } from '../../../types/interfaces/procurement.interface';
+import { IPurchasing, IPurchasingItem, PurchasingEn } from '../../../types/interfaces/procurement.interface';
 import { PurchaseOrderService } from '../purchase-order/purchase-order.service';
 import { PurchaseOrderItemForm } from '../purchase-order/purchase-order-item/purchase-order-item-form/purchase-order-item-form';
 import { CommonModule } from '@angular/common';
@@ -25,6 +25,8 @@ export class PurchasingDetail implements OnChanges {
   isLoading: boolean = false;
   listPurchasingItem: IPurchasingItem[] = [];
   purchase?: IPurchasing;
+  PurchasingEn = PurchasingEn;
+
   @Output() onQueryDetail: EventEmitter<IPurchasing> = new EventEmitter<IPurchasing>();
 
   pagination: IPaginationInput = {

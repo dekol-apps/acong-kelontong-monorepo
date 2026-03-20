@@ -22,7 +22,7 @@ export class PurchasingStore {
     this.purchasingSubject.next(data);
   }
 
-  create(dto: FormData|IPurchasing) {
+  create(dto: FormData | IPurchasing) {
     return this.service.createPurchasing(dto).pipe(
       tap(detail => {
         this.purchasingSubject.next(detail);
@@ -30,7 +30,7 @@ export class PurchasingStore {
     );
   }
 
-  update(dto: FormData|IPurchasing) {
+  update(dto: FormData | IPurchasing) {
     const id = this.snapshot?._id;
     if (!id) throw new Error('Purchasing not initialized');
 
@@ -41,4 +41,14 @@ export class PurchasingStore {
     );
   }
 
+  payment(dto: FormData | IPurchasing) {
+    const id = this.snapshot?._id;
+    if (!id) throw new Error('Purchasing not initialized');
+
+    return this.service.paymentPO(id, dto).pipe(
+      tap(detail => {
+        this.purchasingSubject.next(detail);
+      })
+    );
+  }
 }

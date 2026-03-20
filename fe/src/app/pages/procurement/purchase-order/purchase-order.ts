@@ -4,18 +4,16 @@ import { TableColumn } from '../../../shared/directives/table-column/table-colum
 import { IPaginationInput, ISelectFilter } from '../../../types/interfaces/common.interface';
 import { NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { RouterLink } from '@angular/router';
-import { ConfirmModal } from '../../../shared/components/modals/confirm-modal/confirm-modal';
 import { IPurchasing } from '../../../types/interfaces/procurement.interface';
 import { PurchaseOrderService } from './purchase-order.service';
 
 @Component({
   selector: 'app-purchase-order',
-  imports: [GenericTable, TableColumn, RouterLink, ConfirmModal],
+  imports: [GenericTable, TableColumn, RouterLink],
   templateUrl: './purchase-order.html',
   styleUrl: './purchase-order.scss'
 })
 export class PurchaseOrder implements OnInit {
-  @ViewChild('DeleteModal') confrimDelete?: ConfirmModal;
   isLoading: boolean = false;
   listPurchasing: IPurchasing[] = [];
   pagination: IPaginationInput = {
@@ -50,7 +48,7 @@ export class PurchaseOrder implements OnInit {
   // supplier: ISupplier;
   // supplier_name: string;
   // status?: PurchasingEn;
-  // received_at?: Date;
+  // completed_date?: Date;
   // invoice_number?: string;
   // invoice_photo?: string;
   // total_purchase_price: number;
@@ -135,17 +133,4 @@ export class PurchaseOrder implements OnInit {
     this.getList(this.defaultQuery)
   }
 
-  deletePurchasing(purchasing_id: string) {
-    this.confrimDelete?.show().then((res: any) => {
-      if (res) {
-        this.execDeleteion(purchasing_id);
-      }
-    })
-  }
-
-  execDeleteion(purchasing_id: string) {
-    this.service.dropPurchasing(purchasing_id).subscribe(() => {
-      this.getList(this.defaultQuery);
-    });
-  }
 }

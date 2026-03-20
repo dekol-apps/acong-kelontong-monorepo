@@ -3,7 +3,6 @@ import { formType } from '../../../../types/interfaces/common.interface';
 import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { PurchaseOrderForm1 } from '../purchase-order-form1/purchase-order-form1';
 import { PurchaseOrderItem } from '../purchase-order-item/purchase-order-item';
-import { PurchaseOrderDetail } from '../purchase-order-detail/purchase-order-detail';
 import { ActivatedRoute, Router } from '@angular/router';
 import { IPurchasing, IPurchasingItem, PurchasingEn } from '../../../../types/interfaces/procurement.interface';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
@@ -15,7 +14,7 @@ import { nativeToNgbDate } from '../../../../shared/components/date-range-filter
 
 @Component({
   selector: 'app-purchase-order-form',
-  imports: [NgbNavModule, PurchaseOrderForm1, PurchaseOrderItem, PurchaseOrderDetail, PurchaseOrderFormPayment],
+  imports: [NgbNavModule, PurchaseOrderForm1, PurchaseOrderItem, PurchaseOrderFormPayment],
   templateUrl: './purchase-order-form.html',
   styleUrl: './purchase-order-form.scss',
 })
@@ -39,14 +38,7 @@ export class PurchaseOrderForm {
     const step = this.route.snapshot.paramMap.get('step') || undefined;
     this.purchase_id = this.route.snapshot.paramMap.get('po_id') || undefined;
     const type = this.route.snapshot.queryParamMap.get('type') || undefined;
-    if (type && ['view', 'new', 'edit'].includes(type)) {
-      this.type = type as formType;
-      if (this.type === 'view') {
-        this.activeStep = 4;
-      } else if (step) {
-        this.activeStep = Number(step);
-      }
-    } else if (step) {
+    if (step) {
       this.activeStep = Number(step);
     }
     if (this.purchase_id) {
@@ -61,11 +53,8 @@ export class PurchaseOrderForm {
     ppn_facture_number: new FormControl(null),
     purchasing_attachments: new FormControl(null),
     notes: new FormControl(null),
-    pph_type: new FormControl(null),
     ppn_type: new FormControl(null),
-    pph_rate: new FormControl(null),
     ppn_rate: new FormControl(null),
-    pph_amount: new FormControl(null),
     ppn_amount: new FormControl(null),
     shipping_cost: new FormControl(null),
     payment_realization: new FormControl(null),
@@ -80,7 +69,6 @@ export class PurchaseOrderForm {
       'notes',
       'completed_date',
       'invoice_number',
-      'ppn_facture_number',
       'purchasing_attachments',
     ],
     [PurchasingEn.PROCESS]: [
@@ -90,11 +78,8 @@ export class PurchaseOrderForm {
       'purchasing_attachments',
       'payment_realization',
       'notes',
-      'pph_type',
       'ppn_type',
-      'pph_rate',
       'ppn_rate',
-      'pph_amount',
       'ppn_amount',
       'shipping_cost'
     ],
@@ -166,7 +151,7 @@ export class PurchaseOrderForm {
   }
 
   submitFormPayment(val) {
-    this.nextStep()
+    this.router.navigate([`purchase-order/detail/${this.purchase_id}`]);
   }
 
   submitPurchasing(subject: PurchasingEn) {
@@ -183,7 +168,7 @@ export class PurchaseOrderForm {
   }
 
   nextStep() {
-    if (this.activeStep < 4)
+    if (this.activeStep < 3)
       this.activeStep += 1;
     if (this.purchase_id) {
       this.router.navigate([`purchase-order/form/${this.activeStep}/${this.purchase_id}`], { queryParams: { type: 'edit' } });

@@ -1,17 +1,18 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { FormValidation } from '../../../../shared/directives/form-validation/form-validation';
 import { AlertService } from '../../../../shared/components/alert/alert-service';
-import { IPurchasing } from '../../../../types/interfaces/procurement.interface';
+import { IPurchasing, PurchasingEn } from '../../../../types/interfaces/procurement.interface';
 import { IFielImg } from '../../../../shared/components/drag-drop-file/drag-drop-file.component';
 import { NgbDatepickerModule } from '@ng-bootstrap/ng-bootstrap';
 import { ngbToNativeDate } from '../../../../shared/components/date-range-filter/date-range-filter';
 import { formType } from '../../../../types/interfaces/common.interface';
 import { DragDropFileMulti } from '../../../../shared/components/drag-drop-file-multi/drag-drop-file-multi';
-import { PPHTYPES, PPNTYPES } from '../../../../types/constants/common.constants';
+import { PPNTYPES } from '../../../../types/constants/common.constants';
 import { PurchasingStore } from '../../../../shared/stores/purchasing.store';
 import { objToFormData } from '../../../../utils/helper';
 import { AutoWildcard } from '../../../../shared/directives/auto-wildcard/auto-wildcard';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-purchase-order-form-payment',
@@ -20,7 +21,6 @@ import { AutoWildcard } from '../../../../shared/directives/auto-wildcard/auto-w
   styleUrl: './purchase-order-form-payment.scss'
 })
 export class PurchaseOrderFormPayment implements OnInit {
-  pphTypes = PPHTYPES;
   ppnTypes = PPNTYPES
   purchasingDetail?: IPurchasing;
   @Output() next: EventEmitter<unknown> = new EventEmitter<unknown>()
@@ -29,16 +29,21 @@ export class PurchaseOrderFormPayment implements OnInit {
   @Input() purchase_id?: string;
   isLoading?: boolean;
   patchFileVal?: string;
+  PurchasingEn = PurchasingEn;
 
   @Input() form?: FormGroup;
 
-  constructor(private alert: AlertService, private store: PurchasingStore) { }
+  constructor(private alert: AlertService, private store: PurchasingStore, private router: Router) {
+    this.store.purchasing$.subscribe(val => {
+      this.purchasingDetail = val;
+    })
+  }
 
   ngOnInit(): void {
   }
 
   submit() {
-    const value = this.form?.value;
+    const value = this.form?.getRawValue();
     if (this.form?.invalid) return this.alert.error('Please check your inputs');
     const body = {
       ...value,
@@ -46,14 +51,18 @@ export class PurchaseOrderFormPayment implements OnInit {
       due_date: ngbToNativeDate(value.due_date),
       purchasing_attachments: value.purchasing_attachments?.map(it => it.file ?? it.src)
     };
-    console.log({body});
+    console.log({ body });
     const formData = objToFormData(body, { fileFields: ['purchasing_attachments'] });
-    this.store.update(formData).subscribe({
+    this.store.payment(formData).subscribe({
       next: (res) => {
         this.alert.success(`Success ${this.purchase_id ? 'edit' : 'create'} purchasing!`);
         this.next.emit(res)
       }
     })
+  }
+
+  exit() {
+    this.router.navigateByUrl('purchase-order');
   }
 
   addFile(evt: IFielImg[]) {

@@ -23,10 +23,15 @@ export class PurchaseOrderForm1 implements OnInit {
   @Input() type: formType = 'view';
   @Input() purchase_id?: string;
   patchFileVal?: string;
+  purchasingDetail?: IPurchasing;
 
   @Input() form?: FormGroup;
 
-  constructor(private alert: AlertService, private supplierSvc: SupplierService, private store: PurchasingStore) { }
+  constructor(private alert: AlertService, private supplierSvc: SupplierService, private store: PurchasingStore) {
+    this.store.purchasing$.subscribe(val => {
+      this.purchasingDetail = val;
+    })
+  }
 
   ngOnInit(): void {
     this.getSupplierDropdown();

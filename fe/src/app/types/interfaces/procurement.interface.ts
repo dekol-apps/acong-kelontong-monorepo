@@ -52,7 +52,6 @@ export interface IPurchasing {
   supplier_name?: string;
   due_date?: Date;
   status?: PurchasingEn;
-  received_at?: Date;
   ppn_facture_number?: string;
   invoice_number?: string;
   purchasing_attachments?: string[];

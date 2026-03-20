@@ -1,14 +1,39 @@
-<div class="card-body">
-  <app-purchasing-detail [purchase_id]="purchase_id" (onQueryDetail)="detail=$event"></app-purchasing-detail>
+<div class="card mb-4 p-4">
+  <div class="card-header mb-4">
+    <div class="d-flex flex-row justify-content-between gap-4">
+      <h3 class="card-title">Purchase Order Detail</h3>
+    </div>
+  </div>
+  <div class="card-body border-top border-start border-end rounded-top">
+    <app-purchasing-detail [purchase_id]="purchase_id" (onQueryDetail)="detail=$event"></app-purchasing-detail>
+  </div>
+  <div class="card-footer d-flex gap-2 rounded-bottom border-bottom border-start border-end">
+    <button class="btn btn-secondary" type="button" (click)="exit()">Exit</button>
+
+    @if (detail?.status === PurchasingEn.CREATE || detail?.status === PurchasingEn.REJECT) {
+    <button class="btn btn-warning" type="button" (click)="edit()">Edit</button>
+    <button class="btn btn-danger" type="button" (click)="deletePurchasing()">Delete</button>
+    <button class="btn btn-primary" type="button" (click)="request()">Submit PO Request</button>
+    }
+    @if (detail?.status===PurchasingEn.REQUEST) {
+    <button class="btn btn-danger" type="button" (click)="reject()">Reject PO</button>
+    <button class="btn btn-success" type="button" (click)="approve()">Approve PO</button>
+    }
+    @if (detail?.status===PurchasingEn.APPROVE) {
+    <button class="btn btn-primary" type="button" (click)="process()">Process PO</button>
+    }
+    @if (detail?.status===PurchasingEn.PROCESS) {
+    <button class="btn btn-primary" type="button" (click)="payment()">Payment</button>
+    }
+  </div>
 </div>
-<div class="card-footer d-flex gap-2">
-  @if (type === 'view') {
-  <button class="btn btn-primary" type="button" (click)="exit()">Exit</button>
-  } @else {
-  <button class="btn btn-secondary" type="button" (click)="clickBack()">Back</button>
-  <button class="btn btn-primary" type="button" (click)="exit()">Save & Exit</button>
-  }
-  @if (detail?.status===PurchasingEn.CREATE) {
-  <button class="btn btn-primary" type="button" (click)="clickSubmit()">Submit</button>
-  }
-</div>
+
+<app-confirm-modal #DeleteModal></app-confirm-modal>
+<app-confirm-modal #RequestModal [type]="'action'"></app-confirm-modal>
+<app-confirm-modal #ApproveModal [type]="'action'"></app-confirm-modal>
+<app-confirm-modal #RejectModal [type]="'action'">
+  <div class="w-100">
+    <label for="notes" class="form-label" appAutoWildcard>Description</label>
+    <textarea class="form-control" id="notes" rows="3" [(ngModel)]="rejectNotes"></textarea>
+  </div>
+</app-confirm-modal>

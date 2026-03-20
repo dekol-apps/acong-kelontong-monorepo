@@ -92,6 +92,13 @@ export const PURCHASE_ORDER_EDIT: IMenu = {
     labelKey: 'Edit Purchase Order',
     permissions: ['purchasing.create', 'purchasing.edit'],
 }
+export const PURCHASE_ORDER_DETAIL: IMenu = {
+    code: 'detail',
+    url: 'detail/:po_id',
+    icon: '',
+    labelKey: 'Purchase Order Detail',
+    permissions: ['purchasing.view'],
+}
 export const RECEIVE_ORDER: IMenu = {
     code: 'receive-order',
     url: 'receive-order',
