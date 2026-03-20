@@ -1,7 +1,7 @@
 import { Component, ElementRef, EventEmitter, HostListener, inject, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { NgbCalendar, NgbDate, NgbDateParserFormatter, NgbDatepickerModule, NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+
 import { IDateRangeFilter } from '../../../types/interfaces/common.interface';
 
 export function ngbToNativeDate(ngbDate: NgbDate | null): Date | undefined {
@@ -20,7 +20,7 @@ export function nativeToNgbDate(date?: Date): NgbDate | null {
 }
 @Component({
   selector: 'app-date-range-filter',
-  imports: [CommonModule, ReactiveFormsModule, NgbDatepickerModule, FormsModule],
+  imports: [ReactiveFormsModule, NgbDatepickerModule, FormsModule],
   templateUrl: './date-range-filter.html',
   styleUrl: './date-range-filter.scss'
 })

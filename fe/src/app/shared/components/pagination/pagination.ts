@@ -1,11 +1,11 @@
 import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { IPaginationOutput } from '../../../types/interfaces/common.interface';
-import { CommonModule } from '@angular/common';
+
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-pagination',
-  imports: [CommonModule, NgbPaginationModule],
+  imports: [NgbPaginationModule],
   templateUrl: './pagination.html',
   styleUrl: './pagination.scss'
 })
