@@ -36,8 +36,8 @@ export class GlobalService {
     model: Model<M>,
     params: IGetListParam
   ): Promise<IListRes<HydratedDocument<M>>> {
-    const pageNum = params.page ? Math.max(1, params.page) : undefined;
-    const pageSize = params.size ? Math.max(1, params.size) : undefined;
+    const pageNum = params.page !== undefined ? Math.max(1, params.page) : undefined;
+    const pageSize = params.size !== undefined ? Math.max(1, params.size) : undefined;
     const isPaginated = pageNum !== undefined && pageSize !== undefined;
     const skip = isPaginated ? (pageNum - 1) * pageSize : 0;
 
