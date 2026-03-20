@@ -9,7 +9,7 @@
     <div class="modal-body">
       <div class="d-flex flex-row flex-wrap justify-content-between gap-2">
         <div class="w-100">
-          <label for="brand" class="form-label required">Brand</label>
+          <label for="brand" class="form-label" appAutoWildcard>Brand</label>
           <select class="form-select" id="brand" formControlName="brand">
             <option selected disabled value="">Choose...</option>
             @for (brand of brands; track $index) {
@@ -19,12 +19,12 @@
         </div>
 
         <div class="w-100">
-          <label for="product_name" class="form-label required">Product name</label>
+          <label for="product_name" class="form-label" appAutoWildcard>Product name</label>
           <input type="text" class="form-control" id="product_name" formControlName="product_name" />
         </div>
 
         <div class="w-100">
-          <label for="unit_of_measure" class="form-label required">Unit Of Measure</label>
+          <label for="unit_of_measure" class="form-label" appAutoWildcard>Unit Of Measure</label>
           <select class="form-select" id="unit_of_measure" formControlName="unit_of_measure">
             <option selected disabled value="">Choose...</option>
             @for (uom of uoms; track $index) {
@@ -34,12 +34,12 @@
         </div>
 
         <div class="w-100">
-          <label for="barcode" class="form-label required">Barcode</label>
+          <label for="barcode" class="form-label" appAutoWildcard>Barcode</label>
           <input type="text" class="form-control" id="barcode" formControlName="barcode" />
         </div>
 
         <div class="w-100">
-          <label for="product_description" class="form-label required">Description</label>
+          <label for="product_description" class="form-label" appAutoWildcard>Description</label>
           <input type="text" class="form-control" id="product_description" formControlName="product_description" />
         </div>
       </div>

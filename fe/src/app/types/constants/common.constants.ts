@@ -16,8 +16,8 @@ export enum SORT_DIR {
   NONE = ''
 }
 
-export const UnitOfMeasure = ["G", "KG", "ML", "L", "PCS", "BOX"];
-export type TUOM = 'G' | 'KG' | 'ML' | 'L' | 'PCS' | 'BOX'
+export enum UnitOfMeasure { MG = "MG", G = "G", KG = "KG", ML = "ML", L = "L", KL = "KL", PCS = "PCS", BOX = "BOX" }
+export type TUOM = keyof typeof UnitOfMeasure;
 
 export const TenMegaByte: number = 10 * 1024 * 1024;
 

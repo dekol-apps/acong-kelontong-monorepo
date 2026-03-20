@@ -32,10 +32,10 @@ export class ProductService extends BaseService {
 
   createProduct(
     body: IProduct
-  ): Observable<IProduct> {
+  ): Observable<IResDetail<IProduct>> {
     return this.postRequest({ url: Endpoint.PRODUCT, body }).pipe(
       map((res: IResDetail<IProduct>) => {
-        return res.detail;
+        return res;
       })
     );
   }
@@ -43,18 +43,18 @@ export class ProductService extends BaseService {
   editProduct(
     product_id: string,
     body: { role: string }
-  ): Observable<IProduct> {
+  ): Observable<IResDetail<IProduct>> {
     return this.putRequest({ url: Endpoint.PRODUCT_ID(product_id), body }).pipe(
       map((res: IResDetail<IProduct>) => {
-        return res.detail;
+        return res;
       })
     );
   }
 
-  getProductDetail(product_id: string): Observable<IProduct> {
+  getProductDetail(product_id: string): Observable<IResDetail<IProduct>> {
     return this.getRequest({ url: Endpoint.PRODUCT_ID(product_id) }).pipe(
       map((res: IResDetail<IProduct>) => {
-        return res.detail;
+        return res;
       })
     );
   }
