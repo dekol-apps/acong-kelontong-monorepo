@@ -47,7 +47,6 @@ export interface ReceiveOrderItemDto {
 }
 export interface IPurchasing {
   _id?: string;
-  items?: IPurchasingItem[];
   supplier?: ISupplier;
   supplier_name?: string;
   due_date?: Date;

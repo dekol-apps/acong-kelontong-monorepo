@@ -38,10 +38,10 @@ export const PPHTYPES: ISelectValue[] = [
 
 export const PPNTYPES: ISelectValue[] = [
   {
-    value: 'EXCLUSIVE', label: 'In-Price',
+    value: 'INCLUSIVE', label: 'In-Price',
   },
   {
-    value: 'INCLUSIVE', label: 'Outside-Price',
+    value: 'EXCLUSIVE', label: 'Outside-Price',
   },
   {
     value: 'NONE', label: 'None',

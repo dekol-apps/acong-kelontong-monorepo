@@ -1,0 +1,69 @@
+<form [formGroup]="form" (ngSubmit)="submit()" appFormValidation>
+    <div class="card">
+        <div class="card-header mb-4">
+            <div class="d-flex flex-row justify-content-between gap-4">
+                <h3 class="card-title text-capitalize">Receive Purchase Order: {{ purchasingDetail?.supplier_name }}
+                </h3>
+                <span class="badge bg-primary align-self-center">{{ purchasingDetail?.status }}</span>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label for="invoice_number" class="form-label" appAutoWildcard>Invoice Number</label>
+                    <input type="text" id="invoice_number" formControlName="invoice_number" class="form-control"
+                        placeholder="Update Invoice Number (Optional)">
+                </div>
+            </div>
+
+            <div class="d-flex flex-column">
+                <h4 class="card-title mb-0">Order Items</h4>
+                <p class="text-muted small">Enter the quantity received for each item below.</p>
+            </div>
+
+            <app-generic-table [columns]="columns" [data]="listPurchasingItem" [usePagination]="true"
+                [total]="pagination.total" [page]="pagination.page" [size]="pagination.size" [useSearch]="true"
+                [isLoading]="isLoading" (OnDataRefresh)="getList($event)">
+
+                <!-- Received Now Column -->
+                <div appTableColumn customColumnId="received_qty">
+                    <ng-template let-row>
+                        <input type="number" class="form-control form-control-sm" [value]="receivedMap[row._id] || ''"
+                            (input)="onQtyChange(row, $any($event.target).value)" min="0" [placeholder]="'0'">
+                    </ng-template>
+                </div>
+
+                <!-- Remaining Column -->
+                <div appTableColumn customColumnId="remaining">
+                    <ng-template let-row>
+                        <div class="" [class.text-success]="getRemaining(row) <= 0">
+                            {{ getRemaining(row) }}
+                        </div>
+                    </ng-template>
+                </div>
+
+                <!-- Action Column -->
+                <div appTableColumn customColumnId="action">
+                    <ng-template let-row>
+                        <div class="d-flex justify-content-end">
+                            @if (receivedMap[row._id]) {
+                            <button type="button" class="btn btn-outline-warning btn-sm" (click)="clearItem(row._id)">
+                                Clear
+                            </button>
+                            }
+                        </div>
+                    </ng-template>
+                </div>
+
+            </app-generic-table>
+        </div>
+
+        <div class="card-footer d-flex gap-2 rounded-bottom">
+            <button type="button" class="btn btn-secondary" (click)="back()">Cancel</button>
+            <button type="submit" class="btn btn-success" [disabled]="isLoading">
+                Submit Receipt
+            </button>
+        </div>
+    </div>
+</form>

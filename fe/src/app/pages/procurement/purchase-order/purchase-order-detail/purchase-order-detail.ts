@@ -61,6 +61,9 @@ export class PurchaseOrderDetail {
   payment() {
     this.router.navigateByUrl(`purchase-order/form/3/${this.purchase_id}`);
   }
+  receive() {
+    this.router.navigateByUrl(`purchase-order/receive/${this.purchase_id}`);
+  }
   process() {
     this.service.processPO(this.purchase_id!).subscribe(() => {
       this.exit();

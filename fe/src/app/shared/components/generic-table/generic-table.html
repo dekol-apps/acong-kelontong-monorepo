@@ -119,6 +119,7 @@
                         <ng-container [ngTemplateOutlet]="columnTemplates[column.customElementId]"
                             [ngTemplateOutletContext]="{
                           $implicit: row,
+                          index: index,
                           value: getRowDataValue(row, column.id)
                         }">
                         </ng-container>

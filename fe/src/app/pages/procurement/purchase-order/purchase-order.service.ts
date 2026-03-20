@@ -137,6 +137,10 @@ export class PurchaseOrderService extends BaseService {
   paymentPO(purchasing_id: string, body: FormData | IPurchasing): Observable<IPurchasing> {
     return this.putRequest({ url: Endpoint.PURCHASING_PAYMENT(purchasing_id), body });
   }
+
+  receiveOrder(purchasing_id: string, body: { invoice_number?: string, receivedItems: any[] }): Observable<IPurchasing> {
+    return this.putRequest({ url: Endpoint.PURCHASING_RECEIVE(purchasing_id), body });
+  }
 }
 
 

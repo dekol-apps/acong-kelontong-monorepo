@@ -66,7 +66,6 @@ export class PurchaseOrderFormPayment implements OnInit {
         this.next.emit(res)
       },
       error: (err) => {
-        this.invalidPPn = err.error.message;
         if (err.error.error_code == 400) {
           this.invalidPPn = err.error.message;
         }

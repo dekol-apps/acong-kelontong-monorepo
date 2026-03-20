@@ -62,6 +62,7 @@ export const Endpoint = {
   PURCHASING_PROCESS: (id: string) => `${api}purchasing/${id}/process`,
   PURCHASING_DROP: (id: string) => `${api}purchasing/${id}/drop`,
   PURCHASING_PAYMENT: (id: string) => `${api}purchasing/${id}/payment`,
+  PURCHASING_RECEIVE: (id: string) => `${api}purchasing/${id}/receive`,
   PURCHASING_ITEM: `${api}purchasing-item`,
   PURCHASING_ITEM_ID: (id: string) => {
     return `${api}purchasing-item/${id}`
