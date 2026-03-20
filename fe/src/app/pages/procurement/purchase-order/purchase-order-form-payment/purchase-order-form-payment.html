@@ -9,6 +9,15 @@
             placeholder="Enter id number from purchasing invoice" />
         </div>
         <div class="w-100">
+          <label for="ppn_type" class="form-label" appAutoWildcard>PPn Type</label>
+          <select class="form-select" id="ppn_type" formControlName="ppn_type">
+            <option selected disabled value="">Choose...</option>
+            @for (ppnType of ppnTypes; track $index) {
+            <option [value]="ppnType.value">{{ppnType.label}}</option>
+            }
+          </select>
+        </div>
+        <div class="w-100">
           <label for="ppn_facture_number" class="form-label" appAutoWildcard>PPN Facture Number</label>
           <input type="text" class="form-control" id="ppn_facture_number" formControlName="ppn_facture_number"
             placeholder="Enter PPN facture number" />
@@ -42,6 +51,10 @@
           <app-drag-drop-file-multi [patchFileVal]="form.value.attachments" [loading]="isLoading"
             (fileChanged)="addFile($event)" message="Tambahkan Foto Sampul Kos"></app-drag-drop-file-multi>
         </div>
+        @if (invalidPPn) {
+        <div class="border border-danger rounded text-danger p-4 w-100" style="white-space: pre-wrap;"
+          [innerHTML]="invalidPPn"></div>
+        }
       </div>
     </div>
   </fieldset>

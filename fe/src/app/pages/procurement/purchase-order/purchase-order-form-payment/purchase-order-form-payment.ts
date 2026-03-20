@@ -30,7 +30,7 @@ export class PurchaseOrderFormPayment implements OnInit {
   isLoading?: boolean;
   patchFileVal?: string;
   PurchasingEn = PurchasingEn;
-
+  invalidPPn: string = '';
   @Input() form?: FormGroup;
 
   constructor(private alert: AlertService, private store: PurchasingStore, private router: Router) {
@@ -43,7 +43,10 @@ export class PurchaseOrderFormPayment implements OnInit {
   }
 
   submit() {
-    const value = this.form?.getRawValue();
+    let value = this.form?.value;
+    if (this.purchasingDetail?.status === PurchasingEn.PROCESS) {
+      value = this.form?.getRawValue();
+    }
     if (this.form?.invalid) return this.alert.error('Please check your inputs');
     const body = {
       ...value,
@@ -53,10 +56,20 @@ export class PurchaseOrderFormPayment implements OnInit {
     };
     console.log({ body });
     const formData = objToFormData(body, { fileFields: ['purchasing_attachments'] });
-    this.store.payment(formData).subscribe({
+    let subscriber = this.store.update(formData);
+    if (this.purchasingDetail?.status === PurchasingEn.PROCESS) {
+      subscriber = this.store.payment(formData)
+    }
+    subscriber.subscribe({
       next: (res) => {
         this.alert.success(`Success ${this.purchase_id ? 'edit' : 'create'} purchasing!`);
         this.next.emit(res)
+      },
+      error: (err) => {
+        this.invalidPPn = err.error.message;
+        if (err.error.error_code == 400) {
+          this.invalidPPn = err.error.message;
+        }
       }
     })
   }
