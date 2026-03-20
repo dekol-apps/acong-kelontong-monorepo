@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
-import { ClientSession, Connection, Model, Types } from 'mongoose';
+import { ClientSession, Connection, Document, Model, Types } from 'mongoose';
 import { PaginationDto } from 'src/global/global.dto';
 import { GlobalService } from 'src/global/global.service';
 import { ApprovalType, FlowType, IListRes, OrderType, PPnType } from 'src/types/interfaces';
@@ -12,7 +12,7 @@ import { PurchasingItem } from '../purchasing-item/purchasing-item.schema';
 import { PurchasingItemService } from '../purchasing-item/purchasing-item.service';
 import { PurchasingItemDto, ReceiveOrderItemDto } from '../purchasing-item/purchasing-item.dto';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { decreaseDays, digitShortDate, multiplyDecimal, subtractDecimal, toDecimal, toDecimal128 } from 'src/utils/helper';
+import { decreaseDays, digitShortDate, multiplyDecimal, subtractDecimal, toDecimal, toDecimal128, toNumber } from 'src/utils/helper';
 import { cleanupDays, defaultPpnRate } from 'src/types/constants';
 import { Accounting } from '../accounting/accounting.schema';
 import { AccountingService } from '../accounting/accounting.service';
@@ -504,12 +504,13 @@ export class PurchasingService {
       const base = total.div(new Decimal(1).plus(ppnRate));
       expectedPpn = total.minus(base);
     }
+    expectedPpn = expectedPpn.toDP(0);
     // =====================
     // 2️⃣ Expected Payable
     // =====================
-    const expectedPayable = total
-      .plus(shipping)
-      .plus(expectedPpn);
+    const expectedPayable = input.ppn_type === PPnType.INCLUSIVE
+      ? total.plus(shipping)
+      : total.plus(shipping).plus(expectedPpn);
     // =====================
     // 3️⃣ Predicted Additional Cost
     // =====================
@@ -565,13 +566,7 @@ export class PurchasingService {
         payment_realization: toDecimal128(toDecimal(dto.payment_realization)),
         shipping_cost: toDecimal128(toDecimal(dto.shipping_cost)),
       });
-      const message = `
-        Payment calculation result invalid:\n
-        PPn: ${is_ppn_valid ? 'Correct' : 'Incorrect'}\n
-        details:\n
-        expected_ppn_amount: ${expected_ppn_amount.toString()}\n,
-        expected_payable: ${expected_payable.toString()}\n,
-      `
+      const message = `PPn calculation result invalid:\n\nppn type: ${dto.ppn_type}\nppn rate: ${dto.ppn_rate}\nppn amount: ${dto.ppn_amount}\ntax base: ${edit.detail.total_purchase_price.toString()}\nexpected ppn amount (rounded): ${expected_ppn_amount.toString()}\nexpected minimum payment: ${expected_payable.toString()}\n`
       if (!is_ppn_valid) throw BaseResponse.invalid({ option: { message } })
       if (!is_payment_match) throw BaseResponse.invalid({ option: { message: 'Payment amount could not be less than payable amount' } })
       const accountingPayload: Accounting = {
@@ -593,9 +588,9 @@ export class PurchasingService {
     }, sessionIn)
   }
 
-  async receiveOrder(id: Types.ObjectId, dto: PurchaseOrderDto, updateItems: ReceiveOrderItemDto[]): Promise<{ detail: Purchasing | undefined; removedAttachments: string[] }> {
+  async receiveOrder(id: Types.ObjectId, dto: { invoice_number?: string, receivedItems: ReceiveOrderItemDto[] }): Promise<Purchasing & Document> {
     return this.global.withTransaction(async (session) => {
-      if (!updateItems.length) {
+      if (!dto.receivedItems.length) {
         throw BaseResponse.invalid({ option: { message: 'No items to receive' } });
       }
 
@@ -615,10 +610,10 @@ export class PurchasingService {
 
       const inventoryEntry = new Map<string, number>();
 
-      // Create loops for updateItems, to update received_qty and create inventory movement
-      for (const item of updateItems) {
+      // Create loops for receivedItems, to update received_qty and create inventory movement
+      for (const item of dto.receivedItems) {
         const existing = itemMap.get(item._id.toString());
-        if (!existing) throw BaseResponse.notFound({ err: 'receiveOrder !existing', option: { message: "You cannot add more product in this step, please create new purchasing order" } });
+        if (!existing) throw BaseResponse.notFound({ err: 'receiveOrder !existing', option: { message: "One of the item is not in purchasing list, please check your purchasing list" } });
 
         const delta = item.received_qty ?? 0;
         const newReceived = existing.received_qty + delta;
@@ -691,11 +686,11 @@ export class PurchasingService {
       );
 
       const body = {
-        ...dto,
+        invoice_number: dto.invoice_number ?? purchase.invoice_number,
         status: isComplete ? PurchasingEn.COMPLETE : PurchasingEn.RECEIVE,
         completed_date: isComplete ? new Date() : undefined
       }
-      const updatedPurchase = await this.editPurchasing(id, body, session);
+      const updatedPurchase = await this.purchasingModel.findByIdAndUpdate(id, body, { session })
       if (!updatedPurchase) throw BaseResponse.unexpected({ err: { text: 'receiveOrder failed to editPurchasing' } });
       return updatedPurchase;
     });

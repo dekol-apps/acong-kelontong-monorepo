@@ -77,8 +77,8 @@ Decimal.set({
 export const toDecimal = (val: Types.Decimal128 | number | undefined) =>
   new Decimal(val?.toString() ?? 0);
 
-export const toDecimal128 = (val: Decimal, scale = 0) => // scale IDR = 0, USD = 2
-  Types.Decimal128.fromString(val.toFixed(scale));
+export const toDecimal128 = (val: Decimal, scale?: number) =>
+  Types.Decimal128.fromString(scale !== undefined ? val.toFixed(scale) : val.toString());
 
 export function addDecimal(a?: Types.Decimal128, b?: Types.Decimal128) {
   const decA = new Decimal(a?.toString() ?? 0);

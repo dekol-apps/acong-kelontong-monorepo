@@ -30,7 +30,7 @@ export class PurchaseOrderDto {
   @IsString({ each: true })
   purchasing_attachments?: string[];
 
-  @IsNotEmpty()
+  @IsOptional()
   @Type(() => Number)
   @IsNumber()
   payment_realization: number;

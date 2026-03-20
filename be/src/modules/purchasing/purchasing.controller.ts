@@ -249,38 +249,21 @@ export class PurchasingController {
     })
   }
 
-
   @Permission(['purchasing.edit'])
   @Put(':purchasing_id/receive')
-  @AttachmentsInterceptor('purchasing_attachments', 5)
   async recieveOrder(
     @Param('purchasing_id') id: string,
-    @UploadedFile() files: Express.Multer.File[],
     @Req() req: Request,
-    @Body() dto: { purchase: PurchaseOrderDto, purhcaseItems: ReceiveOrderItemDto[] },
+    @Body() dto: { invoice_number?: string, receivedItems: ReceiveOrderItemDto[] },
     @Res() res: Response,
   ) {
-    return this.purchasingMutation({ files, dto: dto.purchase, req, res }, async () => {
+    try {
       const purchasingId = new Types.ObjectId(id);
-      const data: PurchaseOrderDto & { status: PurchasingEn } = {
-        ...dto.purchase,
-        status: PurchasingEn.RECEIVE
-      }
-      const { detail, removedAttachments } = await this.service.receiveOrder(purchasingId, data, dto.purhcaseItems);
-      // delete old files AFTER DB success
-      removedAttachments.forEach((url) => {
-        try {
-          const pathname = new URL(url).pathname;
-          fs.rmSync(`.${pathname}`, { force: true });
-        } catch (e) {
-          console.warn('Failed to remove attachment:', url);
-        }
-      });
-      return BaseResponse.success({
-        res,
-        option: { message: `Purchase order on receive`, detail },
-      });
-    });
+      const detail = await this.service.receiveOrder(purchasingId, dto);
+      return BaseResponse.success({ res, option: { message: `Purchase order on receive`, detail } });
+    } catch (err) {
+      return BaseResponse.error({ res, err });
+    }
   }
 
   @Permission(['purchasing.view'])
