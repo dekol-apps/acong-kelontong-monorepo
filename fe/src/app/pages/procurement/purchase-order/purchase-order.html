@@ -1,22 +1,24 @@
-<div class="card mb-4 p-4">
+<div class="card">
     <div class="card-header mb-4">
         <div class="d-flex flex-row justify-content-between gap-4">
             <h3 class="card-title">Purchase Order List</h3>
             <a class="btn btn-primary pointer" routerLink="./form">New Purchase Order</a>
         </div>
     </div>
-    <app-generic-table ngSkipHydration [columns]="columns" [data]="listPurchasing" [filterSelect]="filterSelect"
-        [usePagination]="true" [useSearch]="true" [total]="pagination.total" (OnDataRefresh)="getList($event)"
-        [isLoading]="isLoading">
-        <div appTableColumn customColumnId="action">
-            <ng-template let-item>
-                <div class="d-flex flex-row gap-1 justify-content-end">
-                    <a [routerLink]="['./detail/', item._id]" [queryParams]="{type: 'view'}"
-                        class="text-white pointer btn btn-secondary">
-                        <i class="fa-solid fa-eye"></i>
-                    </a>
-                </div>
-            </ng-template>
-        </div>
-    </app-generic-table>
+    <div class="card-body">
+        <app-generic-table ngSkipHydration [columns]="columns" [data]="listPurchasing" [filterSelect]="filterSelect"
+            [usePagination]="true" [useSearch]="true" [total]="pagination.total" (OnDataRefresh)="getList($event)"
+            [isLoading]="isLoading">
+            <div appTableColumn customColumnId="action">
+                <ng-template let-item>
+                    <div class="d-flex flex-row gap-1 justify-content-end">
+                        <a [routerLink]="['./detail/', item._id]" [queryParams]="{type: 'view'}"
+                            class="text-white pointer btn btn-secondary">
+                            <i class="fa-solid fa-eye"></i>
+                        </a>
+                    </div>
+                </ng-template>
+            </div>
+        </app-generic-table>
+    </div>
 </div>

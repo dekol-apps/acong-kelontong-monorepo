@@ -1,7 +1,7 @@
 @if (form) {
 <form [formGroup]="form" appFormValidation (ngSubmit)="submit()">
-  <fieldset [disabled]="type==='view'">
-    <div class="card-body">
+  <div class="card-body">
+    <fieldset [disabled]="type==='view'">
       <div class="d-flex flex-row flex-wrap justify-content-between gap-2">
         <div class="w-100">
           <label for="invoice_number" class="form-label" appAutoWildcard>Invoice Number</label>
@@ -56,8 +56,8 @@
           [innerHTML]="invalidPPn"></div>
         }
       </div>
-    </div>
-  </fieldset>
+    </fieldset>
+  </div>
   <div class="card-footer d-flex gap-2">
     @if (purchasingDetail?.status === PurchasingEn.PROCESS) {
     <button class="btn btn-secondary" type="button" (click)="exit()">Exit</button>

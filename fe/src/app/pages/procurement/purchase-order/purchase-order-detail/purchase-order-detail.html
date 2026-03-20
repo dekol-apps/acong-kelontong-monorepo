@@ -1,13 +1,13 @@
-<div class="card p-4">
+<div class="card">
   <div class="card-header mb-4">
     <div class="d-flex flex-row justify-content-between gap-4">
       <h3 class="card-title">Purchase Order Detail</h3>
     </div>
   </div>
-  <div class="card-body border-top border-start border-end rounded-top">
+  <div class="card-body">
     <app-purchasing-detail [purchase_id]="purchase_id" (onQueryDetail)="detail=$event"></app-purchasing-detail>
   </div>
-  <div class="card-footer d-flex gap-2 rounded-bottom border-bottom border-start border-end">
+  <div class="card-footer d-flex gap-2">
     <button class="btn btn-secondary" type="button" (click)="exit()">Exit</button>
 
     @if (detail?.status === PurchasingEn.CREATE || detail?.status === PurchasingEn.REJECT) {

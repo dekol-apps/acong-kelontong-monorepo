@@ -1,4 +1,4 @@
-<div class="mb-4 p-4 border rounded">
+<div class="p-4 border rounded">
     @if(useSearch || useDownloadButton || filterSelect || useFilterByDate || useCustomToolbar) {
     <div class="d-flex flex-row justify-content-between flex-wrap gap-2 mb-4">
         <div [ngClass]="useSearch ? 'col-md-7' : 'col-md-12'">
@@ -49,7 +49,7 @@
     </div>
     }
 
-    <div class="table-responsive scrollShadow py-2">
+    <div class="table-responsive scrollShadow border-top border-start border-end">
         <table class="table table-row-bordered mb-0" aria-describedby="Generic Table">
             <thead>
                 <tr class="fw-bold fs-6 text-gray-800 text-uppercase">
@@ -151,7 +151,7 @@
 
     <!-- Add TableFooter component here -->
     @if (usePagination) {
-    <div class="card-footer px-4 py-2">
+    <div class="card-footer px-4 py-2 border-bottom border-start border-end rounded-bottom">
         <app-pagination [size]="size" [page]="page-1" [totalData]="total"
             (paginationChanged)="changePage($event)"></app-pagination>
     </div>
