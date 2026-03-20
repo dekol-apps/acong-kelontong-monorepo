@@ -23,8 +23,7 @@
             </div>
 
             <app-generic-table [columns]="columns" [data]="listPurchasingItem" [usePagination]="true"
-                [total]="pagination.total" [page]="pagination.page" [size]="pagination.size" [useSearch]="true"
-                [isLoading]="isLoading" (OnDataRefresh)="getList($event)">
+                [total]="pagination.total" [useSearch]="true" [isLoading]="isLoading" (OnDataRefresh)="getList($event)">
 
                 <!-- Received Now Column -->
                 <div appTableColumn customColumnId="received_qty">

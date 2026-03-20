@@ -152,7 +152,7 @@
     <!-- Add TableFooter component here -->
     @if (usePagination) {
     <div class="card-footer px-4 py-2">
-        <app-pagination [size]="size" [page]="page" [totalData]="total"
+        <app-pagination [size]="size" [page]="page-1" [totalData]="total"
             (paginationChanged)="changePage($event)"></app-pagination>
     </div>
     }

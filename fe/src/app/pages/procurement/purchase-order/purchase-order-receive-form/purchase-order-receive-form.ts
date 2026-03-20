@@ -36,13 +36,13 @@ export class PurchaseOrderReceiveForm implements OnInit {
     totalPages: 1
   };
 
-  defaultTableParam: ITableQueryData = {
-    page: 1,
-    size: 10,
+  defaultTableParam = {
+    page: this.pagination.page,
+    size: this.pagination.size,
     sortBy: '',
     sortDir: SORT_DIR.ASC,
     search: '',
-  };
+  }
 
   columns: Array<ColumnProps> = [
     {
@@ -128,11 +128,12 @@ export class PurchaseOrderReceiveForm implements OnInit {
         next: (res) => {
           this.listPurchasingItem = res.list ?? [];
           this.pagination = {
-            page: res.meta?.page ?? 1,
+            page: res.meta?.page ?? this.defaultTableParam.page,
             total: res.meta?.total ?? 0,
-            size: res.meta?.size ?? 10,
-            totalPages: res.meta?.totalPages ?? 1
-          };
+            size: res.meta?.size ?? this.defaultTableParam.size,
+            totalPages: res.meta?.totalPages ?? this.defaultTableParam.page
+          }
+          console.log('pagination', this.pagination)
           this.isLoading = false;
           this.cdr.detectChanges();
         },

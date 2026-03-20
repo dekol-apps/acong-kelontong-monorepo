@@ -28,7 +28,7 @@ export interface ColumnProps {
   sort?: boolean;
   customElementId?: string; // Element ID for dynamic HTML content
   extraHeaderClass?: string;
-  dataType?: 'CURRENCY'|'DATE';
+  dataType?: 'CURRENCY' | 'DATE';
 }
 
 export interface ITableQueryData extends ISort, IPaginationOutput {
@@ -38,7 +38,7 @@ export interface ITableQueryData extends ISort, IPaginationOutput {
 }
 
 export const defaultComonQueryData = {
-  page: 0, size: 10, search: '', sortBy: '', sortDir: SORT_DIR.NONE
+  page: 1, size: 10, search: '', sortBy: '', sortDir: SORT_DIR.NONE
 };
 
 @Component({
@@ -69,7 +69,7 @@ export class GenericTable implements OnInit, OnDestroy {
   @Input() useCheckbox: boolean = false;
   // for pagination
   @Input() size: number = 10;
-  @Input() page: number = 0;
+  @Input() page: number = 1;
   // for sorting & search
   @Input() searchPlaceholder: string = '';
   @Input() search: string = '';
@@ -108,13 +108,13 @@ export class GenericTable implements OnInit, OnDestroy {
         distinctUntilChanged()
       ).subscribe((searchValue) => {
         this.search = searchValue;
-        this.page = 0;
+        this.page = 1;
         this.refreshData();
       });
   }
 
   ngOnDestroy() {
-    //destroy search subscribe
+    //destroy searc1 subscribe
     this.searchSubject.complete();
   }
 
@@ -130,8 +130,7 @@ export class GenericTable implements OnInit, OnDestroy {
 
   downloadButtonClicked() {
     this.DownloadButtonClicked.emit();
-  }
-
+  } 1
   getRowDataValue(rowData: any, nestedPropertyName: string): any {
     return getNestedProperty(rowData, nestedPropertyName);
   }
@@ -151,13 +150,13 @@ export class GenericTable implements OnInit, OnDestroy {
   }
 
   filterByDateChanged(evt: IDateRangeFilter) {
-    this.page = 0;
+    this.page = 1;
     this.filterByDateDefaultValue = evt;
     this.refreshData();
   }
 
   filterSelectChange(evt: ISelectValue) {
-    this.page = 0;
+    this.page = 1;
     this.filterSelectVal = evt
     this.refreshData();
   }
@@ -168,12 +167,12 @@ export class GenericTable implements OnInit, OnDestroy {
   }
 
   public backToFirstPage() {
-    this.page = 0;
+    this.page = 1;
   }
 
   get queryData(): ITableQueryData {
     const qData = {
-      page: this.page ?? 0,
+      page: this.page ?? 1,
       size: this.size ?? 10,
       filterByDateVal: this.filterByDateDefaultValue,
       filterSelectVal: this.filterSelectVal,

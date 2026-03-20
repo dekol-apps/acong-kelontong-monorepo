@@ -132,10 +132,10 @@ export class PurchaseOrderItem implements OnInit {
         next: (res) => {
           this.listPurchasingItem = res.list ?? [];
           this.pagination = {
-            page: res.meta?.page ?? 0,
+            page: res.meta?.page ?? this.defaultTableParam.page,
             total: res.meta?.total ?? 0,
-            size: res.meta?.size ?? 0,
-            totalPages: res.meta?.totalPages ?? 0
+            size: res.meta?.size ?? this.defaultTableParam.size,
+            totalPages: res.meta?.totalPages ?? this.defaultTableParam.page
           }
           console.log({ listPurchasingItem: this.listPurchasingItem })
           this.isLoading = false;

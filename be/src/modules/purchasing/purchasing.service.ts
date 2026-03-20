@@ -597,7 +597,7 @@ export class PurchasingService {
       const purchase = await this.purchasingModel.findById(id).session(session);
       if (!purchase)
         throw BaseResponse.notFound({ err: 'receiveOrder purchase not found' });
-      if (purchase.status !== PurchasingEn.PROCESS)
+      if (purchase.status !== PurchasingEn.PROCESS && purchase.status !== PurchasingEn.RECEIVE)
         throw BaseResponse.forbidden({ err: 'receiveOrder invalid status' });
 
       // Update value received_qty for each item and manage inventory movement
