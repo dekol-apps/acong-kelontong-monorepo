@@ -19,7 +19,7 @@
                         <i class="fa-solid fa-pencil"></i>
                     </a>
                     <button (click)="deletePurchasing(item._id)" class="text-white pointer btn btn-danger"
-                        [disabled]="item.status !== 'CREATE'">
+                        [disabled]="item.status !== 'CREATE' && item.status !== 'REQUEST' && item.status !== 'REJECT' && item.status !== 'APPROVE'">
                         <i class="fa-solid fa-trash"></i>
                     </button>
                 </div>

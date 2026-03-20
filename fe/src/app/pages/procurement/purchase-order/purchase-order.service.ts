@@ -60,8 +60,8 @@ export class PurchaseOrderService extends BaseService {
     );
   }
 
-  deletePurchasing(purchasing_id: string): Observable<IPurchasing> {
-    return this.deleteRequest({ url: Endpoint.PURCHASING_ID(purchasing_id) }).pipe(
+  dropPurchasing(purchasing_id: string): Observable<IPurchasing> {
+    return this.putRequest({ url: `${Endpoint.PURCHASING_ID(purchasing_id)}/drop` }).pipe(
       map((res: IResDetail<IPurchasing>) => {
         return res.detail;
       })

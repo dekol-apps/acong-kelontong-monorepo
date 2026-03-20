@@ -144,7 +144,7 @@ export class PurchaseOrder implements OnInit {
   }
 
   execDeleteion(purchasing_id: string) {
-    this.service.deletePurchasing(purchasing_id).subscribe(() => {
+    this.service.dropPurchasing(purchasing_id).subscribe(() => {
       this.getList(this.defaultQuery);
     });
   }
