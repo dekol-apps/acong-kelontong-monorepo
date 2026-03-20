@@ -1,7 +1,7 @@
-import { IsNotEmpty, IsString, IsDate, IsOptional, IsMongoId, IsArray, MinLength, IsEnum, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsString, IsDate, IsOptional, IsArray, MinLength, IsEnum, IsNumber } from 'class-validator';
+import { IsObjectId } from 'src/global/is-object-id.decorator';
 import { Types } from 'mongoose';
-import { PaginationDto } from 'src/global/global.dto';
-import { ApprovalType, PPhType, PPnType } from 'src/types/interfaces';
+import { ApprovalType, PPnType } from 'src/types/interfaces';
 import { Purchasing } from './purchasing.schema';
 
 export class PurchaseOrderApprovalDto {
@@ -58,7 +58,7 @@ export class PurchaseOrderDto extends PurchaseOrderApprovalDto {
 }
 
 export class PurchasingDto extends PurchaseOrderDto {
-  @IsMongoId()
+  @IsObjectId()
   @IsNotEmpty()
   supplier?: Types.ObjectId;
   @IsString()

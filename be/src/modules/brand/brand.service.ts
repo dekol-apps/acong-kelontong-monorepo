@@ -1,5 +1,6 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Brand } from './brand.schema';
+import { CreateBrandDto, UpdateBrandDto } from './brand.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { BaseResponse } from 'src/utils/base-response';
@@ -37,7 +38,7 @@ export class BrandService {
         )
     }
 
-    async createBrand(data: Brand): Promise<Brand> {
+    async createBrand(data: CreateBrandDto): Promise<Brand> {
         try {
             const newBrand = await this.brandModel.create(data);
             return newBrand;
@@ -46,7 +47,7 @@ export class BrandService {
         }
     }
 
-    async editBrand(id: Types.ObjectId, data: Brand): Promise<Brand | undefined> {
+    async editBrand(id: Types.ObjectId, data: UpdateBrandDto): Promise<Brand | undefined> {
         try {
             const updatedBrand = await this.brandModel.findByIdAndUpdate(
                 id,

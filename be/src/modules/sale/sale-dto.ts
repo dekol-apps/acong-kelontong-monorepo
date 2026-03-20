@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
+import { IsObjectId } from 'src/global/is-object-id.decorator';
 import {
-  IsMongoId,
   IsNotEmpty,
   IsOptional,
   IsNumber,
@@ -17,7 +17,7 @@ export class SaleItemDto {
   /**
    * The product to pull from inventory.
    */
-  @IsMongoId()
+  @IsObjectId()
   @IsNotEmpty()
   product: Types.ObjectId;
 
@@ -58,7 +58,7 @@ export class SaleDto {
 }
 
 export class SellingSaleItemDto {
-  @IsMongoId()
+  @IsObjectId()
   @IsNotEmpty()
   product: Types.ObjectId;
 

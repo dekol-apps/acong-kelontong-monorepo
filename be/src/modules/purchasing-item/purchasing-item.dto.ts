@@ -1,6 +1,7 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsMongoId, Min, IsInt } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, Min, IsInt } from 'class-validator';
+import { IsObjectId } from 'src/global/is-object-id.decorator';
 export class ReceiveOrderItemDto {
-  @IsMongoId() // checks it's a valid ObjectId string
+  @IsObjectId() // checks it's a valid ObjectId string
   @IsNotEmpty()
   _id: string;
   @IsOptional()
@@ -8,10 +9,10 @@ export class ReceiveOrderItemDto {
   received_qty?: number;
 }
 export class PurchasingItemDto {
-  @IsMongoId() // checks it's a valid ObjectId string
+  @IsObjectId() // checks it's a valid ObjectId string
   @IsNotEmpty()
   purchase_order: string;
-  @IsMongoId() // checks it's a valid ObjectId string
+  @IsObjectId() // checks it's a valid ObjectId string
   @IsNotEmpty()
   product: string;
   @IsInt()

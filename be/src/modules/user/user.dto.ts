@@ -3,9 +3,9 @@ import {
   IsOptional,
   IsEmail,
   IsNotEmpty,
-  IsMongoId,
   IsString,
 } from 'class-validator';
+import { IsObjectId } from 'src/global/is-object-id.decorator';
 import { Types } from 'mongoose';
 import { PaginationDto } from 'src/global/global.dto';
 import { UserDocument } from './user.schema';
@@ -24,7 +24,7 @@ export class InviteUserDto {
   first_name: string;
   @IsNotEmpty()
   last_name: string;
-  @IsMongoId() // ✅ checks it's a valid ObjectId string
+  @IsObjectId() // ✅ checks it's a valid ObjectId string
   role: Types.ObjectId;
 }
 

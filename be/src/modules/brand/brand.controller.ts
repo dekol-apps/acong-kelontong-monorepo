@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Res, UseGuards } from '@nestjs/common';
 import { UAuthGuard } from '../auth/auth.guard';
-import { Brand } from './brand.schema';
+import { CreateBrandDto, UpdateBrandDto } from './brand.dto';
 import { BrandService } from './brand.service';
 import type { Response } from 'express';
 import { BaseResponse } from 'src/utils/base-response';
@@ -18,7 +18,7 @@ export class BrandController {
     @Permission(['brand.create'])
     @Post('')
     async createBrand(
-        @Body() body: Brand,
+        @Body() body: CreateBrandDto,
         @Res() res: Response,
     ) {
         try {
@@ -47,7 +47,7 @@ export class BrandController {
     @Put(':brand_id')
     async editBrand(
         @Param('brand_id') brandId: Types.ObjectId,
-        @Body() body: Brand,
+        @Body() body: UpdateBrandDto,
         @Res() res: Response,
     ) {
         try {

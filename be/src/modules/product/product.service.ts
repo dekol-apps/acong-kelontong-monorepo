@@ -6,6 +6,7 @@ import { GlobalService, PopulateParam } from 'src/global/global.service';
 import { IListRes } from 'src/types/interfaces';
 import { BaseResponse } from 'src/utils/base-response';
 import { Product } from './product.schema';
+import { CreateProductDto, UpdateProductDto } from './product.dto';
 
 @Injectable()
 export class ProductService {
@@ -40,20 +41,22 @@ export class ProductService {
     )
   }
 
-  async createProduct(data: Product): Promise<Product> {
+  async createProduct(data: CreateProductDto): Promise<Product> {
     try {
-      const newProduct = await this.productModel.create(data);
+      const dataToSave = { ...data };
+      const newProduct = await this.productModel.create(dataToSave);
       return newProduct;
     } catch (err) {
       throw BaseResponse.unexpected({ err: { text: 'createProduct catch', err } })
     }
   }
 
-  async editProduct(id: Types.ObjectId, data: Product): Promise<Product | undefined> {
+  async editProduct(id: Types.ObjectId, data: UpdateProductDto): Promise<Product | undefined> {
     try {
+      const dataToUpdate: any = { ...data };
       const updatedProduct = await this.productModel.findByIdAndUpdate(
         id,
-        { $set: data },
+        { $set: dataToUpdate },
         {
           new: true,         // return the updated doc
           runValidators: true, // validate before saving

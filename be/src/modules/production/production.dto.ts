@@ -1,9 +1,10 @@
 import { Type } from 'class-transformer';
-import { IsMongoId, IsNotEmpty, IsInt, Min, ArrayMinSize, IsArray, ValidateNested, IsNumber } from 'class-validator';
+import { IsObjectId } from 'src/global/is-object-id.decorator';
+import { IsNotEmpty, IsInt, Min, ArrayMinSize, IsArray, ValidateNested, IsNumber } from 'class-validator';
 import { Types } from 'mongoose';
 
 export class ProductionDto {
-  @IsMongoId()
+  @IsObjectId()
   @IsNotEmpty()
   product: Types.ObjectId; // Product being made
 
@@ -27,7 +28,7 @@ export class ProductionDto {
 }
 
 export class ProductionIngredientItemDto {
-  @IsMongoId()
+  @IsObjectId()
   @IsNotEmpty()
   product: Types.ObjectId;
 

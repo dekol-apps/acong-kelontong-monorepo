@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Res, UseGuards } from '@nestjs/common';
 import { UAuthGuard } from '../auth/auth.guard';
-import { Product } from './product.schema';
+import { CreateProductDto, UpdateProductDto } from './product.dto';
 import { ProductService } from './product.service';
 import type { Response } from 'express';
 import { BaseResponse } from 'src/utils/base-response';
@@ -18,7 +18,7 @@ export class ProductController {
     @Permission(['product.create'])
     @Post('')
     async createProduct(
-        @Body() body: Product,
+        @Body() body: CreateProductDto,
         @Res() res: Response,
     ) {
         try {
@@ -47,7 +47,7 @@ export class ProductController {
     @Put(':product_id')
     async editProduct(
         @Param('product_id') productId: Types.ObjectId,
-        @Body() body: Product,
+        @Body() body: UpdateProductDto,
         @Res() res: Response,
     ) {
         try {

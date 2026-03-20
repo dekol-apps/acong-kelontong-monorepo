@@ -1,9 +1,10 @@
 import { Types } from 'mongoose';
 import { Type } from 'class-transformer';
-import { IsInt, IsMongoId, Min, ArrayMinSize, IsArray, IsNotEmpty, IsOptional, IsString, ValidateNested, IsDate, IsDecimal, IsNumber } from 'class-validator';
+import { IsInt, Min, ArrayMinSize, IsArray, IsNotEmpty, IsOptional, IsString, ValidateNested, IsDate, IsDecimal, IsNumber } from 'class-validator';
+import { IsObjectId } from 'src/global/is-object-id.decorator';
 import { InventoryReconcileItem } from './inventory-reconcile.schema';
 export class InventoryItemDto {
-  @IsMongoId()
+  @IsObjectId()
   @IsNotEmpty()
   product: Types.ObjectId;
 

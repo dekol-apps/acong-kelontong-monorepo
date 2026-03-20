@@ -34,6 +34,7 @@ async function bootstrap(): Promise<void> {
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
   app.useGlobalPipes(new SanitizePipe(), new ValidationPipe({ transform: true, whitelist: true }));
+  // whitelist: true, will automatically remove any properties that are not defined in the DTO, make sure every controller has DTO
   app.useGlobalFilters(new ErrResFactory());
 
   await app.listen(process.env.PORT ?? 3000);
