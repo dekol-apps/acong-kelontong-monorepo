@@ -14,7 +14,7 @@ export class BalanceSeederService {
   async run() {
     await this.balanceModel.updateOne(
       { currency: CurrencyEn.IDR },
-      { $setOnInsert: { amount: toDecimal128(toDecimal(0)) } },
+      { $setOnInsert: { amount: toDecimal128(toDecimal(1000000)) } },
       { upsert: true },
     );
     console.info(`🚀 Seeded account balance: ${CurrencyEn.IDR}`);
