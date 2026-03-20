@@ -42,7 +42,7 @@ export class PurchaseOrderForm {
     if (type && ['view', 'new', 'edit'].includes(type)) {
       this.type = type as formType;
       if (this.type === 'view') {
-        this.activeStep = 3;
+        this.activeStep = 4;
       } else if (step) {
         this.activeStep = Number(step);
       }
@@ -136,10 +136,9 @@ export class PurchaseOrderForm {
           purchasing_attachments: res.purchasing_attachments?.map(it => {
             return { src: it, file: null }
           }),
-          pph_amount: res.pph_amount?.$numberDecimal,
-          ppn_amount: res.ppn_amount?.$numberDecimal,
-          shipping_cost: res.shipping_cost?.$numberDecimal,
-          payment_realization: res.payment_realization?.$numberDecimal
+          ppn_amount: res.ppn_amount,
+          shipping_cost: res.shipping_cost,
+          payment_realization: res.payment_realization
         }
         this.form.patchValue(valToPatch)
         console.log({ valToPatch })
@@ -157,10 +156,9 @@ export class PurchaseOrderForm {
   }
 
   submitForm1(val) {
-    if (!this.purchase_id) {
+    if (!this.purchase_id && val && val._id) {
       this.purchase_id = val._id;
       this.store.setPurchasing(val);
-      console.log('submitForm1', this.purchase_id, val)
       this.nextStep()
     } else {
       this.nextStep()

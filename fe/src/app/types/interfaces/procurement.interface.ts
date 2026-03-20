@@ -60,16 +60,13 @@ export interface IPurchasing {
   reject_notes?: string; // APPROVAL step
   completed_date?: Date; // Receive order step
   createdAt?: Date;
-  shipping_cost?: { $numberDecimal: string };
-  payment_realization?: { $numberDecimal: string };
-  additional_cost?: { $numberDecimal: string };
-  total_purchase_price?: { $numberDecimal: string };
-  pph_type?: PPhType;
-  pph_rate?: number;
-  pph_amount?: { $numberDecimal: string };
+  shipping_cost?: string;
+  payment_realization?: string;
+  additional_cost?: string;
+  total_purchase_price?: string;
   ppn_type?: PPnType;
   ppn_rate?: number;
-  ppn_amount?: { $numberDecimal: string };
+  ppn_amount?: string;
 }
 export interface IPurchasingItem {
   _id?: string;
@@ -79,8 +76,8 @@ export interface IPurchasingItem {
   supplier_name?: string;
   purchase_qty?: number;
   received_qty?: number;
-  purchase_price?: { $numberDecimal: string };
-  sell_price?: { $numberDecimal: string };
+  purchase_price?: string;
+  sell_price?: string;
   exp_date?: Date;
 }
 export interface IListPurchasingItemsDTO extends ITableQueryData {

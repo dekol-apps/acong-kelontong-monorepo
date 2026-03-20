@@ -77,13 +77,13 @@ export class PurchaseOrder implements OnInit {
     },
     {
       label: 'Total Purchase Price',
-      id: 'total_purchase_price.$numberDecimal',
+      id: 'total_purchase_price',
       extraHeaderClass: 'uppercase-text',
       dataType: 'CURRENCY'
     },
     {
       label: 'Payment Realization',
-      id: 'payment_realization.$numberDecimal',
+      id: 'payment_realization',
       extraHeaderClass: 'uppercase-text',
       dataType: 'CURRENCY'
     },

@@ -66,7 +66,7 @@ export class ApprovalPurchasing implements OnInit {
     },
     {
       label: 'Total Purchase Price',
-      id: 'total_purchase_price.$numberDecimal',
+      id: 'total_purchase_price',
       extraHeaderClass: 'uppercase-text',
       dataType: 'CURRENCY'
     },
@@ -127,7 +127,7 @@ export class ApprovalPurchasing implements OnInit {
   }
 
   execDeleteion(purchasing_id: string) {
-    this.service.deletePurchasing(purchasing_id).subscribe(() => {
+    this.service.dropPurchasing(purchasing_id).subscribe(() => {
       this.getList(this.defaultQuery);
     });
   }

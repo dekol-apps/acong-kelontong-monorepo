@@ -43,7 +43,7 @@ export class PurchaseOrderItemForm implements OnInit, AfterViewInit, OnChanges {
           purchase_order: res.purchase_order?._id,
           product: res.product?._id,
           exp_date: nativeToNgbDate(res.exp_date),
-          purchase_price: res.purchase_price?.$numberDecimal
+          purchase_price: res.purchase_price
         });
       })
     }

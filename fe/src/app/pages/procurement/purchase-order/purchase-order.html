@@ -5,8 +5,9 @@
             <a class="btn btn-primary pointer" routerLink="./form">New Purchase Order</a>
         </div>
     </div>
-    <app-generic-table ngSkipHydration [columns]="columns" [data]="listPurchasing" [filterSelect]="filterSelect" [usePagination]="true"
-        [useSearch]="true" [total]="pagination.total" (OnDataRefresh)="getList($event)" [isLoading]="isLoading">
+    <app-generic-table ngSkipHydration [columns]="columns" [data]="listPurchasing" [filterSelect]="filterSelect"
+        [usePagination]="true" [useSearch]="true" [total]="pagination.total" (OnDataRefresh)="getList($event)"
+        [isLoading]="isLoading">
         <div appTableColumn customColumnId="action">
             <ng-template let-item>
                 <div class="d-flex flex-row gap-1 justify-content-end">

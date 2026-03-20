@@ -53,7 +53,7 @@ export class InvestmentForm implements AfterViewInit {
             return { src: it, file: null }
           })
         })
-        this.form.controls.transaction_amount.patchValue(decimalToNumber(res.transaction_amount?.$numberDecimal));
+        this.form.controls.transaction_amount.patchValue(decimalToNumber(res.transaction_amount));
         console.log('this.form.value', this.form.value)
       })
     }

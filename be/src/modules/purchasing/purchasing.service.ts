@@ -170,7 +170,7 @@ export class PurchasingService {
       const fields: string[] = purchase.status ? allowedFieldsByStatus[purchase.status] : [];
       // find invalid keys
       const invalidKeys = Object.keys(data).filter(
-        key => !fields.includes(key)
+        key => !fields.includes(key) && data[key] !== undefined && data[key] !== null && data[key] !== 'null' && data[key] !== 'undefined' && data[key] !== ''
       );
 
       if (invalidKeys.length) {
@@ -238,8 +238,8 @@ export class PurchasingService {
         if (field === 'shipping_cost') purchase.shipping_cost = toDecimal128(toDecimal(data.shipping_cost));
         if (field === 'notes') purchase.notes = data.notes;
         if (field === 'completed_date') purchase.completed_date = input.completed_date;
-        if (field === 'reject_notes') purchase.reject_notes = data.reject_notes;
-        if (field === 'status') purchase.status = data.status ?? purchase.status;
+        if (field === 'reject_notes') purchase.reject_notes = input.reject_notes;
+        if (field === 'status') purchase.status = input.status ?? purchase.status;
       });
 
       await purchase.save({ session });

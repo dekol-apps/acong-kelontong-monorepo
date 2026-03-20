@@ -27,7 +27,7 @@ export class Deposit {
   columns: Array<ColumnProps> = [
     {
       label: 'Amount',
-      id: 'transaction_amount.$numberDecimal',
+      id: 'transaction_amount',
       extraHeaderClass: 'uppercase-text',
       sort: true,
       dataType: 'CURRENCY'

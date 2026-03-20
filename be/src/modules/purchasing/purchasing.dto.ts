@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsString, IsDate, IsOptional, IsArray, MinLength, IsEnum, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsString, IsDate, IsOptional, IsArray, IsEnum, IsNumber } from 'class-validator';
+import { Type } from 'class-transformer';
 import { IsObjectId } from 'src/global/is-object-id.decorator';
 import { Types } from 'mongoose';
 import { ApprovalType, PPnType } from 'src/types/interfaces';
@@ -15,7 +16,7 @@ export class PurchaseOrderApprovalDto {
   reject_notes?: string;
 }
 
-export class PurchaseOrderDto extends PurchaseOrderApprovalDto {
+export class PurchaseOrderDto {
   @IsOptional()
   @IsString()
   ppn_facture_number?: string;
@@ -24,13 +25,13 @@ export class PurchaseOrderDto extends PurchaseOrderApprovalDto {
   @IsString()
   invoice_number?: string;
 
-  @IsNotEmpty()
-  @MinLength(1)
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
   purchasing_attachments?: string[];
 
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   payment_realization?: number;
 
@@ -44,26 +45,25 @@ export class PurchaseOrderDto extends PurchaseOrderApprovalDto {
   })
   ppn_type?: PPnType;
 
-  // @IsOptional()
-  // @IsNumber()
-  // ppn_rate?: number; // example 11 for 11%
-
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   ppn_amount?: number;
 
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   shipping_cost?: number;
 }
 
 export class PurchasingDto extends PurchaseOrderDto {
+  @IsOptional()
   @IsObjectId()
-  @IsNotEmpty()
   supplier?: Types.ObjectId;
-  @IsString()
+
+  @IsOptional()
+  @Type(() => Date)
   @IsDate()
-  @IsNotEmpty()
   due_date?: Date;
 }
 
