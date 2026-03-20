@@ -61,7 +61,7 @@ export interface IPurchasing {
   createdAt?: Date;
   shipping_cost?: string;
   payment_realization?: string;
-  additional_cost?: string;
+  cost_difference?: string;
   total_purchase_price?: string;
   ppn_type?: PPnType;
   ppn_rate?: number;

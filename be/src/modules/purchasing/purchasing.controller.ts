@@ -232,7 +232,7 @@ export class PurchasingController {
   ) {
     return this.purchasingMutation({ files, dto, req, res }, async () => {
       const purchasingId = new Types.ObjectId(id);
-      const { detail, removedAttachments } = await this.service.editPurchasing(purchasingId, dto);
+      const { detail, removedAttachments } = await this.service.purchasingPayment(purchasingId, dto);
       // delete old files AFTER DB success
       removedAttachments.forEach((url) => {
         try {

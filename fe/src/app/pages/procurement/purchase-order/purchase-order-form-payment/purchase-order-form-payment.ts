@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormValidation } from '../../../../shared/directives/form-validation/form-validation';
 import { AlertService } from '../../../../shared/components/alert/alert-service';
 import { IPurchasing, PurchasingEn } from '../../../../types/interfaces/procurement.interface';

@@ -58,7 +58,7 @@
       </tr>
       <tr>
         <td class="fw-bold p-1 col-3 align-top">Additional Cost</td>
-        <td class="align-top">{{(purchase?.additional_cost | currency: CURRENCY_FORMAT) || '-'}}</td>
+        <td class="align-top">{{(purchase?.cost_difference | currency: CURRENCY_FORMAT) || '-'}}</td>
       </tr>
       <tr>
         <td class="fw-bold p-1 col-3 align-top">Payment Realization</td>

@@ -116,8 +116,12 @@ export class PurchasingService {
       const purchase = await this.purchasingModel.findById(id).session(session);
       if (!purchase) throw BaseResponse.notFound({ err: 'Purchasing not found' });
 
-      const supplier = await this.supplierModel.findById(data.supplier).session(session);
-      if (!supplier) throw BaseResponse.notFound({ err: 'Supplier not found' });
+      let supplier = purchase.supplier as any;
+      if (data.supplier) {
+        const found = await this.supplierModel.findById(data.supplier).session(session);
+        if (!found) throw BaseResponse.notFound({ err: 'Supplier not found' });
+        supplier = found;
+      }
 
       const allowedFieldsByStatus = {
         [PurchasingEn.EXPIRED]: [''],
@@ -252,7 +256,7 @@ export class PurchasingService {
           await this.accounting.editAccountingByOrderId(
             purchase._id as any,
             {
-              transaction_amount: detail.payment_realization!,
+              transaction_amount: detail.payment_realization,
               tax_base: detail.total_purchase_price,
               ppn_type: detail.ppn_type as any,
               ppn_rate: detail.ppn_rate,
@@ -519,7 +523,7 @@ export class PurchasingService {
 
     const isPpnValid = expectedPpn.equals(providedPpn);
 
-    const isPaymentMatch = payment.equals(expectedPayable);
+    const isPaymentMatch = payment.greaterThanOrEqualTo(expectedPayable);
 
     return {
       expected_ppn_amount: toDecimal128(expectedPpn),
@@ -531,10 +535,9 @@ export class PurchasingService {
   }
   async purchasingPayment(id: Types.ObjectId, dto: PurchaseOrderDto & { ppn_rate?: number, status?: PurchasingEn }, sessionIn?: ClientSession): Promise<{ detail: Purchasing | undefined; removedAttachments: string[] }> {
     return this.global.withTransaction(async (session) => {
-      if (!dto.shipping_cost) throw BaseResponse.invalid({ option: { message: "shipping_cost is required" } });
       if (!dto.ppn_type) throw BaseResponse.invalid({ option: { message: "ppn_type is required" } });
       // if (!dto.ppn_rate) throw BaseResponse.invalid({ option: { message: "ppn_rate is required" } });
-      if (!dto.ppn_amount) throw BaseResponse.invalid({ option: { message: "ppn_amount is required" } });
+      // if (!dto.ppn_amount) throw BaseResponse.invalid({ option: { message: "ppn_amount is required" } });
       if (!dto.payment_realization) throw BaseResponse.invalid({ option: { message: "payment_realization is required" } });
       const purchasing = await this.purchasingModel.findById(id);
       if (!purchasing) throw BaseResponse.notFound({ err: 'purchasingPayment !purchasing' });
@@ -570,12 +573,13 @@ export class PurchasingService {
         expected_payable: ${expected_payable.toString()}\n,
       `
       if (!is_ppn_valid) throw BaseResponse.invalid({ option: { message } })
+      if (!is_payment_match) throw BaseResponse.invalid({ option: { message: 'Payment amount could not be less than payable amount' } })
       const accountingPayload: Accounting = {
         flow_type: FlowType.OUT,
         order_id: id,
         order_data: edit.detail,
         order_type: OrderType.PURCHASING,
-        transaction_amount: edit.detail.payment_realization!,
+        transaction_amount: edit.detail.payment_realization,
         tax_base: edit.detail.total_purchase_price,
         ppn_type: edit.detail.ppn_type,
         ppn_rate: edit.detail.ppn_rate,

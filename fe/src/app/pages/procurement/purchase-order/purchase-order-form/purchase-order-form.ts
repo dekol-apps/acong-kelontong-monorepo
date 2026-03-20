@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { formType } from '../../../../types/interfaces/common.interface';
 import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { PurchaseOrderForm1 } from '../purchase-order-form1/purchase-order-form1';
@@ -26,6 +26,7 @@ export class PurchaseOrderForm {
   purchase_id?: string;
 
   constructor(
+    private cdr: ChangeDetectorRef,
     private route: ActivatedRoute,
     private router: Router,
     private alert: AlertService,
@@ -136,6 +137,13 @@ export class PurchaseOrderForm {
         Object.keys(this.form.controls).forEach(element => {
           if (!allowed.includes(element)) this.form.controls[element].disable();
         });
+        if (res.status === PurchasingEn.PROCESS) {
+          this.form.controls.invoice_number.addValidators([Validators.required]);
+          this.form.controls.invoice_number.updateValueAndValidity();
+          this.form.controls.payment_realization.addValidators([Validators.required, Validators.min(1)]);
+          this.form.controls.payment_realization.updateValueAndValidity();
+          this.cdr.detectChanges();
+        }
       }
     });
   }

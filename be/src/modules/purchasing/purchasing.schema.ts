@@ -39,8 +39,8 @@ export class Purchasing {
   @Prop()
   purchasing_attachments?: string[];
 
-  @Prop({ type: Types.Decimal128, default: 0 })
-  payment_realization?: Types.Decimal128;
+  @Prop({ type: Types.Decimal128, required: true, default: 0 })
+  payment_realization: Types.Decimal128;
 
   @Prop()
   notes?: string; // for example: notes for additional cost
@@ -61,7 +61,7 @@ export class Purchasing {
   ppn_amount?: Types.Decimal128;
 
   @Prop({ type: Types.Decimal128, default: 0 })
-  shipping_cost: Types.Decimal128;
+  shipping_cost?: Types.Decimal128;
 }
 
 export type PurchasingDocument = Purchasing & Document & { supplier: SupplierDocument };
