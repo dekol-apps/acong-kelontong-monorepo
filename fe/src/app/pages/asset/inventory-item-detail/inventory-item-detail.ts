@@ -52,6 +52,6 @@ export class InventoryItemDetail implements OnInit {
   }
 
   back() {
-    this.router.navigate(['/inventory', this.productId]);
+    this.router.navigate(['../'], { relativeTo: this.route });
   }
 }
