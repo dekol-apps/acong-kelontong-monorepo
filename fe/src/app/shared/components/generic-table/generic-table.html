@@ -70,7 +70,7 @@
                         @for (column of columns; track $index) {
                         <th [class.pointer]="column.sort"
                             (click)="column.sort && total > 0 ? sortChanged(column.id) : $event.stopPropagation()"
-                            [ngClass]="'whitespace-nowrap'">
+                            [ngClass]="'whitespace-nowrap'" [style]="column.customStyleHead" [style.max-width]="column.maxWidth">
                             <div class="d-flex gap-1">
                                 @if(column.sort) {
                                 <app-sort-icon [sortId]="column.id" [sortVal]="{sortBy, sortDir}"></app-sort-icon>
@@ -114,26 +114,33 @@
                     @for (column of columns; track $index) {
                     <td [ngClass]="{
                       'whitespace-nowrap': column.customElementId === 'action'
-                    }">
-                        @if (column.customElementId) {
-                        <ng-container [ngTemplateOutlet]="columnTemplates[column.customElementId]"
-                            [ngTemplateOutletContext]="{
-                          $implicit: row,
-                          index: index,
-                          value: getRowDataValue(row, column.id)
-                        }">
-                        </ng-container>
-                        } @else {
-                        @if (!column.dataType) {
-                        {{ ( getRowDataValue(row, column.id)) || "-"}}
-                        } @else if (column.dataType === 'DATE') {
-                        {{ ( getRowDataValue(row, column.id) | date: DATE_FORMAT) || "-"}}
-                        } @else if (column.dataType === 'PERCENTAGE') {
-                        {{ ( getRowDataValue(row, column.id) + '%') || "-"}}
-                        } @else {
-                        {{ ( getRowDataValue(row, column.id) | currency:CURRENCY_FORMAT) || "-"}}
-                        }
-                        }
+                    }" [style]="column.customStyleBody" [style.max-width]="column.maxWidth"
+                        [attr.title]="column.ellipsis ? getRowDataValue(row, column.id) : null">
+                        <div [style.display]="column.ellipsis ? 'block' : null"
+                             [style.overflow]="column.ellipsis ? 'hidden' : null"
+                             [style.text-overflow]="column.ellipsis ? 'ellipsis' : null"
+                             [style.white-space]="column.ellipsis ? 'nowrap' : null"
+                             [style.max-width]="column.ellipsis ? '100%' : null">
+                            @if (column.customElementId) {
+                            <ng-container [ngTemplateOutlet]="columnTemplates[column.customElementId]"
+                                [ngTemplateOutletContext]="{
+                              $implicit: row,
+                              index: index,
+                              value: getRowDataValue(row, column.id)
+                            }">
+                            </ng-container>
+                            } @else {
+                            @if (!column.dataType) {
+                            {{ ( getRowDataValue(row, column.id)) || "-"}}
+                            } @else if (column.dataType === 'DATE') {
+                            {{ ( getRowDataValue(row, column.id) | date: DATE_FORMAT) || "-"}}
+                            } @else if (column.dataType === 'PERCENTAGE') {
+                            {{ ( getRowDataValue(row, column.id) + '%') || "-"}}
+                            } @else {
+                            {{ ( getRowDataValue(row, column.id) | currency:CURRENCY_FORMAT) || "-"}}
+                            }
+                            }
+                        </div>
                     </td>
                     }
                 </tr>

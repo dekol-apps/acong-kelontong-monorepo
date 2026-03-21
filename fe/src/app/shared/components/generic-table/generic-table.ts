@@ -29,6 +29,10 @@ export interface ColumnProps {
   customElementId?: string; // Element ID for dynamic HTML content
   extraHeaderClass?: string;
   dataType?: 'CURRENCY' | 'DATE' | 'PERCENTAGE';
+  customStyleHead?: string;
+  customStyleBody?: string;
+  maxWidth?: string;
+  ellipsis?: boolean;
 }
 
 export interface ITableQueryData extends ISort, IPaginationOutput {
