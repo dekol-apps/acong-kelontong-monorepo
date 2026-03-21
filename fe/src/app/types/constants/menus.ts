@@ -57,7 +57,27 @@ export const SHOWCASE: IMenu = {
     labelKey: 'Showcase',
     permissions: ['inventory.view', 'inventory.create', 'inventory.edit', 'inventory.delete'],
 }
-
+export const INVENTORY_MOVEMENT: IMenu = {
+    code: 'inventory-movement',
+    url: 'inventory-movement',
+    icon: '',
+    labelKey: 'Inventory Movement',
+    permissions: ['inventory.view'],
+}
+export const INVENTORY_MOVEMENT_DETAIL: IMenu = {
+    code: 'inventory-movement-detail',
+    url: 'inventory-movement/:inventory_movement_id',
+    icon: '',
+    labelKey: 'Inventory Movement Detail',
+    permissions: ['inventory.view'],
+}
+export const INVENTORY_MOVEMENT_ITEM: IMenu = {
+    code: 'inventory-movement-item',
+    url: 'inventory-movement/:inventory_movement_id/:inventory_item_id',
+    icon: '',
+    labelKey: 'Inventory Movement Item',
+    permissions: ['inventory.view'],
+}
 export const CATALOGUE: IMenu = {
     code: 'catalogue',
     url: 'catalogue',
@@ -254,6 +274,7 @@ export const Menus: IMenu[] = [
         ...SUPPLIES,
         children: [
             INVENTORY,
+            INVENTORY_MOVEMENT,
             SHOWCASE,
             SUPPLIES_PRODUCTION
         ]

@@ -1,3 +1,4 @@
+import { FlowType, OrderType } from './common.interface';
 import { IProduct } from './catalogue.interface';
 
 export interface IInventorySummary {
@@ -29,4 +30,25 @@ export interface IInventoryReconcileItem {
 export interface IInventoryReconcileDto {
   description: string;
   items: IInventoryReconcileItem[];
+}
+
+export interface IInventoryMovementItem {
+  product: IProduct;
+  receive_date: Date;
+  product_name: string;
+  original_price: number;
+  original_ppn_rate: number;
+  original_ppn_amount: number;
+  landed_cost: number;
+}
+
+export interface IInventoryMovement {
+  _id: string;
+  movement_type: FlowType;
+  order_type: OrderType;
+  items: IInventoryMovementItem[];
+  description?: string;
+  source_id?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }

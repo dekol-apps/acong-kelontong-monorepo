@@ -1,0 +1,42 @@
+<div class="card">
+    <div class="card-header mb-4">
+        <div class="d-flex flex-row justify-content-between gap-4">
+            <h3 class="card-title">Detail Movement ({{detail?.createdAt | date}})</h3>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="d-flex flex-row flex-wrap justify-content-between gap-2 mb-5">
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <th scope="row" class="fw-bold p-1 col-3 align-top">Flow Type</th>
+                        <td class="align-top">{{ detail?.movement_type || '-' }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row" class="fw-bold p-1 col-3 align-top">Order Type</th>
+                        <td class="align-top">{{ detail?.order_type || '-' }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row" class="fw-bold p-1 col-3 align-top">Description</th>
+                        <td class="align-top">{{ detail?.description || '-' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <app-generic-table ngSkipHydration [columns]="columns" [data]="detail?.items ?? []" [usePagination]="false"
+            [useSearch]="false" [total]="detail?.items?.length ?? 0" [isLoading]="isLoading">
+            <div appTableColumn customColumnId="action">
+                <ng-template let-item>
+                    <div class="d-flex flex-row gap-1 justify-content-end">
+                        <a [routerLink]="['./', item._id]" class="text-white pointer btn btn-secondary">
+                            <i class="fa-solid fa-eye"></i>
+                        </a>
+                    </div>
+                </ng-template>
+            </div>
+        </app-generic-table>
+    </div>
+    <div class="card-footer d-flex gap-2">
+        <button class="btn btn-secondary" type="button" (click)="back()">Back</button>
+    </div>
+</div>

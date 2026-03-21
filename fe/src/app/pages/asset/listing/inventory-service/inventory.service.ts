@@ -1,11 +1,11 @@
 import { Injectable } from "@angular/core";
-import { Observable } from "rxjs";
+import { map, Observable } from "rxjs";
 import { BaseService } from "../../../../services/rest-api/base-service";
 import { AlertService } from "../../../../shared/components/alert/alert-service";
 import { ITableQueryData } from "../../../../shared/components/generic-table/generic-table";
 import { Endpoint } from "../../../../types/constants/endpoint";
 import { IResDetail, IResList } from "../../../../types/interfaces/http.interface";
-import { IInventoryItem, IInventorySummary } from "../../../../types/interfaces/inventory.interface";
+import { IInventoryItem, IInventoryMovement, IInventoryMovementItem, IInventorySummary } from "../../../../types/interfaces/inventory.interface";
 
 
 @Injectable({
@@ -31,5 +31,31 @@ export class InventoryService extends BaseService {
 
   getInventoryDetail(inventoryId: string): Observable<IResDetail<IInventoryItem>> {
     return this.getRequest({ url: Endpoint.INVENTORY_ITEM_ID(inventoryId), spinner: false });
+  }
+
+  getInventoryMovements(qParams: ITableQueryData): Observable<IResList<IInventoryMovement>> {
+    return this.getRequest({ url: Endpoint.INVENTORY_MOVEMENT, qParams, spinner: false }).pipe(
+      map((res: IResList<IInventoryMovement>) => {
+        const list = res.list.map((item) => {
+          // filter items to remove duplicates
+          const items = item.items.reduce((acc, item) => {
+            const existingItem = acc.find((i) => i.product.toString() === item.product.toString());
+            if (!existingItem) {
+              acc.push(item);
+            }
+            return acc;
+          }, [] as IInventoryMovementItem[]);
+          return {
+            ...item,
+            items,
+          };
+        });
+        return { meta: res.meta, list };
+      })
+    );
+  }
+
+  getInventoryMovementDetail(movementId: string): Observable<IResDetail<IInventoryMovement>> {
+    return this.getRequest({ url: Endpoint.INVENTORY_MOVEMENT_ID(movementId), spinner: false });
   }
 }
