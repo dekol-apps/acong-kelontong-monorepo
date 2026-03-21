@@ -29,6 +29,8 @@ export class InventoryMovementDto {
 }
 
 export class ListInventoryMovementDTO extends PaginationDto {
+  @IsOptional()
+  @IsEnum(FlowType)
   movement_type?: FlowType;
 }
 

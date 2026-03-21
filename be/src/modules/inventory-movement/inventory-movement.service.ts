@@ -298,10 +298,10 @@ export class InventoryMovementService {
     sortDir,
     search,
   }: ListInventoryMovementDTO): Promise<IListRes<InventoryMovement>> {
-    const searchFields: string[] = ['product_name', 'description', 'item_qty'];
-    const filter = { column: 'movement_type', value: movement_type };
+    const searchFields: string[] = ['order_type', 'description'];
+    const filter = { column: 'movement_type', value: movement_type?.toString() };
 
-    return this.global.getList<InventoryMovement>(
+    const res = await this.global.getList<InventoryMovement>(
       this.inventoryMovementModel,
       {
         page,
@@ -313,6 +313,7 @@ export class InventoryMovementService {
         filter,
       }
     )
+    return res;
   }
 
   async detailInventoryMovement(id: Types.ObjectId, sessionIn?: ClientSession): Promise<InventoryMovement | undefined> {
@@ -320,7 +321,12 @@ export class InventoryMovementService {
       const detailInventory = await this.inventoryMovementModel
         .findById(id)
         .session(session)
-        .populate(['product'])
+        .populate({
+          path: 'items.product',
+          populate: {
+            path: 'brand'
+          }
+        })
         .lean()
         .exec();
       return detailInventory || undefined
