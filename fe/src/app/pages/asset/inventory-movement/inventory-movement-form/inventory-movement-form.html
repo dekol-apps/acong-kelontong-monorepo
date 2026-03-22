@@ -1,0 +1,109 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" appFormValidation>
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Movement Information</h3>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="movement_type" class="form-label required">Movement Type</label>
+                    <select id="movement_type" class="form-select" formControlName="movement_type">
+                        <option [value]="FlowType.IN">Move IN</option>
+                        <option [value]="FlowType.OUT">Move OUT</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="order_type" class="form-label required">Order Type (Source)</label>
+                    <select id="order_type" class="form-select" formControlName="order_type">
+                        <option [value]="OrderType.ADJUSTMENT">Adjustment</option>
+                        <option [value]="OrderType.OPERATION">Operation</option>
+                        <option [value]="OrderType.ELSE">Else</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-12">
+                    <label for="description" class="form-label required">Description</label>
+                    <textarea id="description" class="form-control" formControlName="description" rows="2"
+                        placeholder="Reason for movement..."></textarea>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h4 class="mb-0">Movement Items</h4>
+                    <button type="button" class="btn btn-primary btn-sm" (click)="addItem()">
+                        <i class="bi bi-plus-lg me-1"></i> Add Item
+                    </button>
+                </div>
+
+                <app-generic-table [columns]="columns" [data]="items.controls" [usePagination]="false"
+                    [isLoading]="isLoading">
+
+                    <!-- Product Selection Column -->
+                    <div appTableColumn customColumnId="product">
+                        <ng-template let-control let-index="index">
+                            <div ngbDropdown container="body" class="d-inline-block w-100">
+                                <button type="button"
+                                    class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center"
+                                    id="productDropdown" ngbDropdownToggle>
+                                    <span class="text-truncate">
+                                        {{ items.at(index).get('product_name')?.value || 'Select Product' }}
+                                    </span>
+                                </button>
+                                <div ngbDropdownMenu aria-labelledby="productDropdown" class="w-100 shadow">
+                                    <div class="px-2 py-1 border-bottom">
+                                        <input type="text" class="form-control form-control-sm"
+                                            placeholder="Search product..." (input)="filterProducts($event)">
+                                    </div>
+                                    <div class="dropdown-items-scroll" style="max-height: 200px; overflow-y: auto;">
+                                        @for (product of filteredProducts; track product._id) {
+                                        <button type="button" ngbDropdownItem (click)="selectProduct(index, product)">
+                                            {{ product.product_name }}
+                                        </button>
+                                        }
+                                        @if (filteredProducts.length === 0) {
+                                        <div class="dropdown-item disabled">No products found</div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            @if (items.at(index).get('product')?.invalid && items.at(index).get('product')?.touched) {
+                            <small class="text-danger">Product is required</small>
+                            }
+                        </ng-template>
+                    </div>
+
+                    <!-- Quantity Column -->
+                    <div appTableColumn customColumnId="item_qty">
+                        <ng-template let-control let-index="index">
+                            <div [formGroup]="$any(items.at(index))">
+                                <input type="number" class="form-control" formControlName="item_qty" min="1">
+                            </div>
+                        </ng-template>
+                    </div>
+
+                    <!-- Action Column -->
+                    <div appTableColumn customColumnId="action">
+                        <ng-template let-control let-index="index">
+                            <button type="button" class="btn btn-danger btn-sm" (click)="removeItem(index)"
+                                [disabled]="items.length <= 1">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </ng-template>
+                    </div>
+
+                </app-generic-table>
+            </div>
+        </div>
+        <div class="card-footer d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
+            <button type="submit" class="btn btn-success" [disabled]="form.invalid || isLoading">
+                @if (isLoading) {
+                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                }
+                Save Movement
+            </button>
+        </div>
+    </div>
+</form>

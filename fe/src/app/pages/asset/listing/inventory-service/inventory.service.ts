@@ -58,4 +58,8 @@ export class InventoryService extends BaseService {
   getInventoryMovementDetail(movementId: string): Observable<IResDetail<IInventoryMovement>> {
     return this.getRequest({ url: Endpoint.INVENTORY_MOVEMENT_ID(movementId), spinner: false });
   }
+
+  moveInventory(body: any): Observable<IResDetail<IInventoryMovement>> {
+    return this.postRequest({ url: Endpoint.INVENTORY_MOVEMENT, body });
+  }
 }

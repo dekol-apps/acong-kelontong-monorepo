@@ -1,0 +1,21 @@
+.dropdown-items-scroll {
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.form-select {
+    cursor: pointer;
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.btn-outline-secondary {
+    border-color: #dee2e6;
+    &:hover {
+        background-color: #f8f9fa;
+        color: #212529;
+        border-color: #dee2e6;
+    }
+}

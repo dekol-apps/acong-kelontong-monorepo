@@ -1,6 +1,6 @@
 import { ArrayMinSize, IsArray, IsEnum, IsOptional, IsString, ValidateNested } from 'class-validator';
-import { FlowType, OrderType } from 'src/types/interfaces';
-import { PaginationDto } from 'src/global/global.dto';
+import { FlowType, OrderType } from '../../types/interfaces';
+import { PaginationDto } from '../../global/global.dto';
 import { Type } from 'class-transformer';
 import { GInventoryItemDto } from '../inventory-item/inventory-item.dto';
 import { Types } from 'mongoose';
@@ -12,7 +12,7 @@ export class InventoryMovementDto {
   })
   movement_type: FlowType;
 
-  @IsEnum(FlowType, {
+  @IsEnum(OrderType, {
     message: 'order_type invalid enum',
   })
   order_type: OrderType;

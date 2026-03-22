@@ -1,6 +1,9 @@
 <div class="card">
   <div class="card-header">
-    <h3 class="card-title">Inventory Movement History</h3>
+    <div class="d-flex flex-row gap-2 justify-content-between">
+      <h3 class="card-title">Inventory Movement History</h3>
+      <a class="btn btn-primary pointer" [routerLink]="['./form']">+ Manual Inventory Movement</a>
+    </div>
   </div>
   <div class="card-body">
     <ul ngbNav #nav="ngbNav" [(activeId)]="activeTab" class="nav-tabs" (navChange)="tabChange($event.nextId)">
