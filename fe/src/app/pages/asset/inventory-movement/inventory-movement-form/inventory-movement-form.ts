@@ -6,11 +6,11 @@ import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 import { InventoryService } from '../../listing/inventory-service/inventory.service';
 import { ProductService } from '../../../catalogue/product/product.service';
 import { AlertService } from '../../../../shared/components/alert/alert-service';
-import { FlowType, OrderType } from '../../../../types/interfaces/common.interface';
 import { IProduct } from '../../../../types/interfaces/catalogue.interface';
 import { ColumnProps, GenericTable } from '../../../../shared/components/generic-table/generic-table';
 import { TableColumn } from '../../../../shared/directives/table-column/table-column';
 import { FormValidation } from '../../../../shared/directives/form-validation/form-validation';
+import { FlowType, OrderType } from '../../../../types/enums/common.enum';
 
 @Component({
   selector: 'app-inventory-movement-form',
@@ -93,7 +93,7 @@ export class InventoryMovementForm implements OnInit {
 
   filterProducts(event: any): void {
     const query = event.target.value.toLowerCase();
-    this.filteredProducts = this.products.filter(p => 
+    this.filteredProducts = this.products.filter(p =>
       p.product_name.toLowerCase().includes(query)
     );
   }

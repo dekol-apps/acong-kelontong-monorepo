@@ -5,9 +5,9 @@ import { AlertService } from '../../../shared/components/alert/alert-service';
 import { IRole } from '../../../types/interfaces/user.interface';
 import { FormValidation } from '../../../shared/directives/form-validation/form-validation';
 import { IFielImg } from '../../../shared/components/drag-drop-file/drag-drop-file.component';
-import { InvestmentType } from '../../../types/interfaces/common.interface';
 import { decimalToNumber, objToFormData } from '../../../utils/helper';
 import { DragDropFileMulti } from '../../../shared/components/drag-drop-file-multi/drag-drop-file-multi';
+import { InvestmentType } from '../../../types/enums/common.enum';
 
 export type investmentFormType = 'deposit' | 'withdrawal';
 export type investmentFormPageType = 'new' | 'edit' | 'view';

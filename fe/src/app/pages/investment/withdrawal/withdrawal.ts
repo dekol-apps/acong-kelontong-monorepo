@@ -2,11 +2,12 @@ import { Component, ViewChild } from '@angular/core';
 import { NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { ColumnProps, GenericTable, ITableQueryData } from '../../../shared/components/generic-table/generic-table';
 import { ConfirmModal } from '../../../shared/components/modals/confirm-modal/confirm-modal';
-import { InvestmentType, IPaginationInput } from '../../../types/interfaces/common.interface';
+import { IPaginationInput } from '../../../types/interfaces/common.interface';
 import { IInvestment } from '../../../types/interfaces/investment.interface';
 import { investmentFormPageType, InvestmentForm } from '../investment-form/investment-form';
 import { InvestmentService } from '../investment.service';
 import { TableColumn } from '../../../shared/directives/table-column/table-column';
+import { InvestmentType } from '../../../types/enums/common.enum';
 
 @Component({
   selector: 'app-withdrawal',

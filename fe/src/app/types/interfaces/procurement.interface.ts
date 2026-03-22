@@ -1,7 +1,7 @@
 import { ITableQueryData } from '../../shared/components/generic-table/generic-table';
 import { IProduct } from './catalogue.interface';
-import { PPhType, PPnType } from './common.interface';
-import { InventoryEn } from './supplies.interface';
+import { PPnType } from '../enums/common.enum';
+import { InventoryEn } from '../enums/supplies.en';
 
 export interface ISupplier {
   _id?: string;

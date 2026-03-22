@@ -5,9 +5,9 @@ import { ColumnProps, GenericTable, ITableQueryData } from '../../../shared/comp
 import { TableColumn } from '../../../shared/directives/table-column/table-column';
 import { InventoryService } from '../listing/inventory-service/inventory.service';
 import { IInventoryMovement } from '../../../types/interfaces/inventory.interface';
-import { FlowType } from '../../../types/interfaces/common.interface';
 import { IPaginationInput } from '../../../types/interfaces/common.interface';
 import { RouterModule } from '@angular/router';
+import { FlowType } from '../../../types/enums/common.enum';
 
 @Component({
   selector: 'app-inventory-movement',

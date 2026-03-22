@@ -1,4 +1,4 @@
-import { FlowType, OrderType, PPhType, PPnType } from "./common.interface";
+import { FlowType, OrderType, PPhType, PPnType } from "../enums/common.enum";
 
 export interface IAccounting {
   _id?: string;

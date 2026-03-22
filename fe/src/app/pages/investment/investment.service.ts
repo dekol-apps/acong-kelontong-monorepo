@@ -4,9 +4,10 @@ import { BaseService } from '../../services/rest-api/base-service';
 import { AlertService } from '../../shared/components/alert/alert-service';
 import { ITableQueryData } from '../../shared/components/generic-table/generic-table';
 import { Endpoint } from '../../types/constants/endpoint';
-import { InvestmentType, IPaginationInput } from '../../types/interfaces/common.interface';
+import { IPaginationInput } from '../../types/interfaces/common.interface';
 import { IResList, IResDetail } from '../../types/interfaces/http.interface';
 import { IInvestment } from '../../types/interfaces/investment.interface';
+import { InvestmentType } from '../../types/enums/common.enum';
 
 export interface IListInvestment extends ITableQueryData {
   investment_type: InvestmentType

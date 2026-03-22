@@ -1,4 +1,4 @@
-import { FlowType, OrderType } from './common.interface';
+import { FlowType, OrderType } from '../enums/common.enum';
 import { IProduct } from './catalogue.interface';
 
 export interface IInventorySummary {

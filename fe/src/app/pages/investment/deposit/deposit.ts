@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
 import { ColumnProps, GenericTable, ITableQueryData } from '../../../shared/components/generic-table/generic-table';
-import { InvestmentType, IPaginationInput } from '../../../types/interfaces/common.interface';
 import { IInvestment } from '../../../types/interfaces/investment.interface';
 import { InvestmentService } from '../investment.service';
 import { NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { InvestmentForm, investmentFormPageType } from '../investment-form/investment-form';
 import { TableColumn } from '../../../shared/directives/table-column/table-column';
+import { InvestmentType } from '../../../types/enums/common.enum';
+import { IPaginationInput } from '../../../types/interfaces/common.interface';
 
 @Component({
   selector: 'app-deposit',

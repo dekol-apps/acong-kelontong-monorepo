@@ -3,11 +3,12 @@ import { BaseService } from '../../../services/rest-api/base-service';
 import { AlertService } from '../../../shared/components/alert/alert-service';
 import { map, Observable } from 'rxjs';
 import { Endpoint } from '../../../types/constants/endpoint';
-import { ApprovalType, IPaginationInput } from '../../../types/interfaces/common.interface';
+import { IPaginationInput } from '../../../types/interfaces/common.interface';
 import { IResDetail, IResList } from '../../../types/interfaces/http.interface';
 import { ITableQueryData } from '../../../shared/components/generic-table/generic-table';
 import { IPurchasing, IPurchasingItem, IPurchasingItemDto } from '../../../types/interfaces/procurement.interface';
 import { PurchaseOrder } from './purchase-order';
+import { ApprovalType } from '../../../types/enums/common.enum';
 
 @Injectable({
   providedIn: 'root'
