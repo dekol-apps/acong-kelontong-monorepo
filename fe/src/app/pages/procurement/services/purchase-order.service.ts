@@ -7,7 +7,7 @@ import { IPaginationInput } from '../../../types/interfaces/common.interface';
 import { IResDetail, IResList } from '../../../types/interfaces/http.interface';
 import { ITableQueryData } from '../../../shared/components/generic-table/generic-table';
 import { IPurchasing, IPurchasingItem, IPurchasingItemDto } from '../../../types/interfaces/procurement.interface';
-import { PurchaseOrder } from './purchase-order';
+import { PurchaseOrder } from '../purchase-order/purchase-order';
 import { ApprovalType } from '../../../types/enums/common.enum';
 
 @Injectable({

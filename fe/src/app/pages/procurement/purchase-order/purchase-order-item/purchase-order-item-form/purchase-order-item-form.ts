@@ -3,7 +3,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { AlertService } from '../../../../../shared/components/alert/alert-service';
 import { FormValidation } from '../../../../../shared/directives/form-validation/form-validation';
 import { formType } from '../../../../../types/interfaces/common.interface';
-import { PurchaseOrderService } from '../../purchase-order.service';
+import { PurchaseOrderService } from '../../../services/purchase-order.service';
 import { IProduct } from '../../../../../types/interfaces/catalogue.interface';
 import { ProductService } from '../../../../catalogue/product/product.service';
 import { ActivatedRoute } from '@angular/router';

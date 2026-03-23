@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { formType } from '../../../../types/interfaces/common.interface';
 import { IPurchasing, PurchasingEn } from '../../../../types/interfaces/procurement.interface';
 import { ConfirmModal } from '../../../../shared/components/modals/confirm-modal/confirm-modal';
-import { PurchaseOrderService } from '../purchase-order.service';
+import { PurchaseOrderService } from '../../services/purchase-order.service';
 import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-purchase-order-detail',

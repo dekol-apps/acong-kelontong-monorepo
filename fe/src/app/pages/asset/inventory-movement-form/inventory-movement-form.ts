@@ -3,14 +3,14 @@ import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } fr
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
-import { InventoryService } from '../../listing/inventory-service/inventory.service';
-import { ProductService } from '../../../catalogue/product/product.service';
-import { AlertService } from '../../../../shared/components/alert/alert-service';
-import { IProduct } from '../../../../types/interfaces/catalogue.interface';
-import { ColumnProps, GenericTable } from '../../../../shared/components/generic-table/generic-table';
-import { TableColumn } from '../../../../shared/directives/table-column/table-column';
-import { FormValidation } from '../../../../shared/directives/form-validation/form-validation';
-import { FlowType, OrderType } from '../../../../types/enums/common.enum';
+import { InventoryService } from '../listing/inventory-service/inventory.service';
+import { ProductService } from '../../catalogue/product/product.service';
+import { AlertService } from '../../../shared/components/alert/alert-service';
+import { IProduct } from '../../../types/interfaces/catalogue.interface';
+import { ColumnProps, GenericTable } from '../../../shared/components/generic-table/generic-table';
+import { TableColumn } from '../../../shared/directives/table-column/table-column';
+import { FormValidation } from '../../../shared/directives/form-validation/form-validation';
+import { FlowType, OrderType } from '../../../types/enums/common.enum';
 
 @Component({
   selector: 'app-inventory-movement-form',

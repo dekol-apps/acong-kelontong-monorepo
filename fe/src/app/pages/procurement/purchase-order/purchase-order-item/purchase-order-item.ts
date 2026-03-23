@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Inject, Input, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
 import { IPurchasingItem, PurchasingEn } from '../../../../types/interfaces/procurement.interface';
-import { PurchaseOrderService } from '../purchase-order.service';
+import { PurchaseOrderService } from '../../services/purchase-order.service';
 import { AlertService } from '../../../../shared/components/alert/alert-service';
 import { NgbActiveModal, NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { ColumnProps, GenericTable, ITableQueryData } from '../../../../shared/components/generic-table/generic-table';

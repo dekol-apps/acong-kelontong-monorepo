@@ -86,7 +86,7 @@ export const routes: Routes = [
             path: 'form',
             canActivate: [PageGuardService],
             data: { ...INVENTORY_MOVEMENT_NEW },
-            loadComponent: () => import('./pages/asset/inventory-movement/inventory-movement-form/inventory-movement-form').then(c => c.InventoryMovementForm)
+            loadComponent: () => import('./pages/asset/inventory-movement-form/inventory-movement-form').then(c => c.InventoryMovementForm)
           }
         ]
       },

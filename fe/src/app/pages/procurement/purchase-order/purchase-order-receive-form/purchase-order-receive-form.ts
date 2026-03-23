@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { PurchaseOrderService } from '../purchase-order.service';
+import { PurchaseOrderService } from '../../services/purchase-order.service';
 import { AlertService } from '../../../../shared/components/alert/alert-service';
 import { IPurchasing, IPurchasingItem } from '../../../../types/interfaces/procurement.interface';
 import { GenericTable, ColumnProps, ITableQueryData } from '../../../../shared/components/generic-table/generic-table';

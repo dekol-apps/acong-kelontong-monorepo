@@ -5,7 +5,7 @@ import { IPaginationInput, ISelectFilter } from '../../../types/interfaces/commo
 import { NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { RouterLink } from '@angular/router';
 import { IPurchasing } from '../../../types/interfaces/procurement.interface';
-import { PurchaseOrderService } from './purchase-order.service';
+import { PurchaseOrderService } from '../services/purchase-order.service';
 
 @Component({
   selector: 'app-purchase-order',

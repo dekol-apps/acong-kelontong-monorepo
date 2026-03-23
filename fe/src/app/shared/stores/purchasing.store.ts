@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, tap } from 'rxjs';
-import { PurchaseOrderService } from '../../pages/procurement/purchase-order/purchase-order.service';
+import { PurchaseOrderService } from '../../pages/procurement/services/purchase-order.service';
 import { IPurchasing } from '../../types/interfaces/procurement.interface';
 
 @Injectable({

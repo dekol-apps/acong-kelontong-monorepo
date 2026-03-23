@@ -7,7 +7,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { IPurchasing, IPurchasingItem, PurchasingEn } from '../../../../types/interfaces/procurement.interface';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { PurchaseOrderFormPayment } from "../purchase-order-form-payment/purchase-order-form-payment";
-import { PurchaseOrderService } from '../purchase-order.service';
+import { PurchaseOrderService } from '../../services/purchase-order.service';
 import { AlertService } from '../../../../shared/components/alert/alert-service';
 import { PurchasingStore } from '../../../../shared/stores/purchasing.store';
 import { nativeToNgbDate } from '../../../../shared/components/date-range-filter/date-range-filter';

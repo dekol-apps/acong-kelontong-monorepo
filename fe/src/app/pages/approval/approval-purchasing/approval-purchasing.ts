@@ -6,7 +6,7 @@ import { ConfirmModal } from '../../../shared/components/modals/confirm-modal/co
 import { TableColumn } from '../../../shared/directives/table-column/table-column';
 import { IPaginationInput, ISelectFilter } from '../../../types/interfaces/common.interface';
 import { IPurchasing } from '../../../types/interfaces/procurement.interface';
-import { PurchaseOrderService } from '../../procurement/purchase-order/purchase-order.service';
+import { PurchaseOrderService } from '../../procurement/services/purchase-order.service';
 
 @Component({
   selector: 'app-approval-purchasing',
