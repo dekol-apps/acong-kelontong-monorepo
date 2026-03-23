@@ -33,8 +33,8 @@ export class SaleItemDto {
    * (JS number in DTO; converted to Decimal128 in service)
    */
   @IsNotEmpty()
-  @IsNumber()
-  sale_price: number;
+  @IsDecimal()
+  sale_price: Types.Decimal128;
 
   /**
    * Original price of the item. comes from data collection from inventory item as Decimal128

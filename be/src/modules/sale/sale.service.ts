@@ -48,7 +48,7 @@ export class SaleService {
       // ─── Build a pricing lookup keyed by product ID ───────────────────────
       const pricingMap = new Map<
         string,
-        { sale_price: number; discount_percent?: number }
+        { sale_price: Types.Decimal128; discount_percent?: number }
       >();
 
       for (const group of data.items) {
@@ -102,8 +102,7 @@ export class SaleService {
           });
         }
         const brand = brandMap.get(product.brand?.toString() ?? '');
-        const sale_price = toDecimal128(new Decimal(pricing.sale_price))
-        const { discountAmount } = this.global.priceAfterDiscount(sale_price, pricing.discount_percent ?? 0);
+        const { discountAmount } = this.global.priceAfterDiscount(pricing.sale_price, pricing.discount_percent ?? 0);
         const discount_amount = toDecimal128(discountAmount)
         const saleItem: SaleItem = {
           product: movedItem.product,
@@ -113,10 +112,9 @@ export class SaleService {
           original_price: movedItem.original_price,
           original_ppn_rate: movedItem.original_ppn_rate,
           original_ppn_amount: movedItem.original_ppn_amount,
-          sale_price,
+          sale_price: pricing.sale_price,
           discount_percent: pricing.discount_percent ?? 0,
           discount_amount,
-          // COGS = landed_cost of this exact physical unit from inventory
           cogs: movedItem.landed_cost,
         };
 

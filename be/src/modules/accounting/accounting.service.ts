@@ -68,7 +68,7 @@ export class AccountingService {
       const amount =
         flow_type === FlowType.OUT
           ? toDecimal128(toDecimal(data.transaction_amount).negated())
-          : data.transaction_amount;
+          : toDecimal128(toDecimal(data.transaction_amount));
 
       const balance = await this.balanceModel.findOneAndUpdate(
         filter,

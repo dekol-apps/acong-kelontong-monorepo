@@ -1,4 +1,5 @@
-import { IsArray, IsEnum, IsNumber, IsNotEmpty, IsOptional, IsString, Min, MinLength } from 'class-validator';
+import { IsArray, IsEnum, IsNumber, IsNotEmpty, IsOptional, IsString, Min, MinLength, IsDecimal } from 'class-validator';
+import { Types } from 'mongoose';
 import { PaginationDto } from 'src/global/global.dto';
 import { InvestmentType } from 'src/types/interfaces';
 
@@ -8,13 +9,11 @@ export class InvestmentDto {
   })
   investment_type: InvestmentType;
 
+  @IsDecimal()
   @IsNotEmpty()
-  @IsNumber()
-  @Min(1)
-  transaction_amount: number;
+  transaction_amount: Types.Decimal128;
 
-  @IsNotEmpty()
-  @MinLength(1)
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
   attachments?: string[];

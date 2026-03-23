@@ -80,12 +80,8 @@ export class InvestmentController {
     @Res() res: Response,
   ) {
     return this.investmentMutation({ files, body, req, res }, async () => {
-      const data = {
-        ...body,
-        transaction_amount: toDecimal128(toDecimal(body.transaction_amount))
-      }
       const id = new Types.ObjectId(investment_id);
-      const { investment, removedAttachments } = await this.service.editInvestment(id, data);
+      const { investment, removedAttachments } = await this.service.editInvestment(id, body);
 
       // delete old files AFTER DB success
       removedAttachments.forEach((url) => {

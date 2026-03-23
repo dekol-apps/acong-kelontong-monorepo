@@ -43,9 +43,6 @@ export class ProductionService {
       const product = await this.productModel.findById(dto.product).session(session);
       if (!product) throw BaseResponse.notFound({ err: 'Product not found' });
 
-      // Calculate initial grand total (only operational cost at CREATE status)
-      const operationalCost = new Decimal(dto.operational_cost);
-      
       const initialIngredients = dto.ingredients.map(i => ({
         product: i.product,
         item_qty: i.item_qty,
@@ -55,9 +52,9 @@ export class ProductionService {
       const productionData: Partial<Production> = {
         product: dto.product,
         item_qty: dto.item_qty,
-        price_per_item: toDecimal128(new Decimal(dto.price_per_item)),
-        operational_cost: toDecimal128(operationalCost),
-        grand_total_cost: toDecimal128(operationalCost),
+        price_per_item: dto.price_per_item,
+        operational_cost: dto.operational_cost,
+        grand_total_cost: dto.operational_cost,
         ingredients: initialIngredients,
         status: ProductionEn.CREATE,
       };
@@ -71,19 +68,17 @@ export class ProductionService {
     return this.global.withTransaction(async (session) => {
       const existing = await this.productionModel.findById(id).session(session);
       if (!existing) throw BaseResponse.notFound({ err: 'Production not found' });
-      
+
       if (existing.status !== ProductionEn.CREATE) {
         throw BaseResponse.invalid({ option: { message: 'Can only edit production in CREATE status' }, err: 'production not in create status' });
       }
 
-      const operationalCost = new Decimal(dto.operational_cost ?? existing.operational_cost.toString());
-      
       const updateData: Partial<Production> = {
         product: dto.product ?? existing.product,
         item_qty: dto.item_qty ?? existing.item_qty,
-        price_per_item: dto.price_per_item ? toDecimal128(new Decimal(dto.price_per_item)) : existing.price_per_item,
-        operational_cost: toDecimal128(operationalCost),
-        grand_total_cost: toDecimal128(operationalCost),
+        price_per_item: dto.price_per_item ?? existing.price_per_item,
+        operational_cost: dto.operational_cost ?? existing.operational_cost,
+        grand_total_cost: dto.operational_cost ?? existing.operational_cost,
       };
 
       if (dto.ingredients) {
@@ -143,7 +138,7 @@ export class ProductionService {
       existing.ingredients = updatedIngredients;
       existing.grand_total_cost = toDecimal128(grandTotalCost);
       existing.status = ProductionEn.START;
-      
+
       await existing.save({ session });
       return existing;
     }, sessionIn);
@@ -181,6 +176,7 @@ export class ProductionService {
               original_price: unitCostDecimal128,
               landed_cost: unitCostDecimal128,
               original_ppn_rate: 0,
+              original_ppn_amount: toDecimal128(new Decimal(0)),
             },
           ],
         },

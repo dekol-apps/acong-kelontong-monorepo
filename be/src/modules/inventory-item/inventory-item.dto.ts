@@ -22,6 +22,10 @@ export class InventoryItemDto {
   original_price: Types.Decimal128;
 
   @IsDecimal()
+  @IsNotEmpty()
+  original_ppn_amount: Types.Decimal128;
+
+  @IsDecimal()
   @IsOptional()
   landed_cost: Types.Decimal128;
 }

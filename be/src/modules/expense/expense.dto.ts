@@ -1,4 +1,6 @@
-import { IsArray, IsEnum, IsNumber, IsNotEmpty, IsOptional, IsString, Min, MinLength } from 'class-validator';
+import { Types } from 'mongoose';
+import { IsArray, IsEnum, IsNumber, IsNotEmpty, IsOptional, IsString, MinLength, IsDecimal, IsDate } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ApprovalType, PPhType } from 'src/types/interfaces';
 
 export class ExpenseApprovalDto {
@@ -18,10 +20,14 @@ export class ExpenseDto {
   @IsString()
   subject: string;
 
+  @Type(() => Date)
+  @IsDate()
   @IsNotEmpty()
-  @IsNumber()
-  @Min(1)
-  transaction_amount: number;
+  expense_date: Date;
+
+  @IsNotEmpty()
+  @IsDecimal()
+  transaction_amount: Types.Decimal128;
 
   @IsNotEmpty()
   @MinLength(1)
@@ -38,6 +44,10 @@ export class ExpenseDto {
   @IsOptional()
   @IsNumber()
   pph_rate?: number; // example 2 for 2%
+
+  @IsOptional()
+  @IsDecimal()
+  pph_amount?: Types.Decimal128;
 
   @IsOptional()
   @IsString()

@@ -13,7 +13,7 @@ export class Investment {
   })
   investment_type: InvestmentType;
 
-  @Prop({ type: Types.Decimal128, required: true, min: 1, get: (v) => decimalToNumber(v) })
+  @Prop({ type: Types.Decimal128, required: true, min: 1 })
   transaction_amount: Types.Decimal128;
 
   @Prop()

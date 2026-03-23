@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import { IsObjectId } from 'src/global/is-object-id.decorator';
-import { IsNotEmpty, IsInt, Min, ArrayMinSize, IsArray, ValidateNested, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsInt, Min, ArrayMinSize, IsArray, ValidateNested, IsDecimal } from 'class-validator';
 import { Types } from 'mongoose';
 
 export class ProductionDto {
@@ -13,12 +13,12 @@ export class ProductionDto {
   item_qty: number; // Product being made qty
 
   @IsNotEmpty()
-  @IsNumber()
-  price_per_item: number;
+  @IsDecimal()
+  price_per_item: Types.Decimal128;
 
   @IsNotEmpty()
-  @IsNumber()
-  operational_cost: number;
+  @IsDecimal()
+  operational_cost: Types.Decimal128;
 
   @IsArray()
   @ArrayMinSize(1)

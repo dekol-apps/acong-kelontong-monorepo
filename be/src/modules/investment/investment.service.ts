@@ -3,13 +3,11 @@ import { InjectModel } from '@nestjs/mongoose';
 import { ClientSession, Model, Types } from 'mongoose';
 import { GlobalService } from 'src/global/global.service';
 import { Investment } from './investment.schema';
-import { FlowType, IListRes, InvestmentType, OrderType, PPhType, PPnType } from 'src/types/interfaces';
+import { FlowType, IListRes, InvestmentType, OrderType } from 'src/types/interfaces';
 import { BaseResponse } from 'src/utils/base-response';
 import { InvestmentDto, ListInvestmentDTO } from './investment.dto';
 import { AccountingService } from '../accounting/accounting.service';
 import { Accounting } from '../accounting/accounting.schema';
-import { toDecimal, toDecimal128 } from 'src/utils/helper';
-import Decimal from 'decimal.js';
 
 @Injectable()
 export class InvestmentService {
@@ -53,7 +51,7 @@ export class InvestmentService {
         investment_type: dto.investment_type,
         attachments: dto.attachments,
         description: dto.description,
-        transaction_amount: toDecimal128(toDecimal(dto.transaction_amount))
+        transaction_amount: dto.transaction_amount
       }
       const [newInvestment] = await this.investmentModel.create(
         [data],
@@ -65,8 +63,8 @@ export class InvestmentService {
         order_id: newInvestment._id,
         order_data: newInvestment,
         order_type: data.investment_type === InvestmentType.DEPOSIT ? OrderType.DEPOSIT : OrderType.WITHDRAWAL,
-        transaction_amount: toDecimal128(toDecimal(data.transaction_amount)),
-        tax_base: toDecimal128(toDecimal(data.transaction_amount)),
+        transaction_amount: data.transaction_amount,
+        tax_base: data.transaction_amount,
         record_date: new Date(),
       }
       await this.accounting.createAccountingItem(accountingPayload, session)
@@ -118,8 +116,8 @@ export class InvestmentService {
         order_id: id,
         order_data: updated,
         order_type: data.investment_type === InvestmentType.DEPOSIT ? OrderType.DEPOSIT : OrderType.WITHDRAWAL,
-        transaction_amount: toDecimal128(toDecimal(data.transaction_amount)),
-        tax_base: toDecimal128(toDecimal(data.transaction_amount)),
+        transaction_amount: data.transaction_amount,
+        tax_base: data.transaction_amount,
         record_date: new Date(),
       }
       await this.accounting.correctAccountingItem(accountingPayload, session)

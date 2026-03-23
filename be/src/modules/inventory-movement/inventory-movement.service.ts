@@ -68,11 +68,16 @@ export class InventoryMovementService {
       if (dto.movement_type === FlowType.IN) {
         // BURST: Insert N individual records based on items.length to track landed_cost per item
         await Promise.all(dto.items.map(async item => {
+          const { ppn } = this.global.getPPnAmount({
+            net_price: item.original_price,
+            ppn_rate: item.original_ppn_rate
+          });
           const newData: InventoryItemDto = {
             product: item.product,
             receive_date: item.receive_date,
             original_price: item.original_price,
             original_ppn_rate: item.original_ppn_rate,
+            original_ppn_amount: toDecimal128(ppn),
             landed_cost: item.landed_cost,
           };
           // Loop and create N individual items

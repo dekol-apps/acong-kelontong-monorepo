@@ -1,11 +1,12 @@
-import { IsNumber, IsNotEmpty, Min, IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsNotEmpty, Min, IsOptional, IsString, IsDecimal } from 'class-validator';
 import { PaginationDto } from 'src/global/global.dto';
 
+import { Types } from 'mongoose';
+
 export class AccountingDto {
+  @IsDecimal()
   @IsNotEmpty()
-  @IsNumber()
-  @Min(1)
-  transaction_amount: number;
+  transaction_amount: Types.Decimal128;
 }
 
 export class TaxTransactionFilterDto extends PaginationDto {

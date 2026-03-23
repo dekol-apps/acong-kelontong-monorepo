@@ -566,7 +566,7 @@ export class PurchasingService {
         payment_realization: toDecimal128(toDecimal(dto.payment_realization)),
         shipping_cost: toDecimal128(toDecimal(dto.shipping_cost)),
       });
-      const message = `PPn calculation result invalid:\n\nppn type: ${dto.ppn_type}\nppn rate: ${dto.ppn_rate}\nppn amount: ${dto.ppn_amount}\ntax base: ${edit.detail.total_purchase_price.toString()}\nexpected ppn amount (rounded): ${expected_ppn_amount.toString()}\nexpected minimum payment: ${expected_payable.toString()}\n`
+      const message = `PPn calculation result invalid:\n\nppn type: ${dto.ppn_type}\nppn rate: ${dto.ppn_rate}\nppn amount: ${dto.ppn_amount?.toString() ?? ''}\ntax base: ${edit.detail.total_purchase_price.toString()}\nexpected ppn amount (rounded): ${expected_ppn_amount.toString()}\nexpected minimum payment: ${expected_payable.toString()}\n`
       if (!is_ppn_valid) throw BaseResponse.invalid({ option: { message } })
       if (!is_payment_match) throw BaseResponse.invalid({ option: { message: 'Payment amount could not be less than payable amount' } })
       const accountingPayload: Accounting = {
@@ -658,12 +658,18 @@ export class PurchasingService {
             // Landed cost = Purchase Price + (Additional Cost / Total Items)
             const landed_cost = original_price.plus(additional_cost_per_item);
 
+            const { ppn: original_ppn_amount } = this.global.getPPnAmount({
+              net_price: toDecimal128(original_price),
+              ppn_rate: purchase.ppn_rate
+            });
+
             return {
               product: new Types.ObjectId(product),
               item_qty: qty,
               receive_date: new Date(),
               original_price: toDecimal128(original_price),
               original_ppn_rate: purchase.ppn_rate,
+              original_ppn_amount: toDecimal128(original_ppn_amount),
               landed_cost: toDecimal128(landed_cost)
             }
           }
