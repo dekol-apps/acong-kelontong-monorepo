@@ -73,8 +73,12 @@ export class PurchasingService {
     ).lean();
     const purchasings = expired.concat(dropped);
     await Promise.all(purchasings.map(async item => {
-      const deleted = await this.deletePurchasing(item._id)
-      if (deleted) this.logger.log(`Purchasing deleted, id: ${item._id.toString()}`);
+      try {
+        const deleted = await this.deletePurchasing(item._id as any);
+        if (deleted) this.logger.log(`Purchasing deleted, id: ${item._id.toString()}`);
+      } catch (err) {
+        this.logger.error(`Failed to delete purchasing ${item._id.toString()}`, err);
+      }
     }));
   }
 
@@ -105,13 +109,12 @@ export class PurchasingService {
 
     const createdPurchase = purchase[0];
 
-    await createdPurchase.save({ session });
     await session.commitTransaction();
     await session.endSession();
     return await this.detailPurchasing(createdPurchase._id);
   }
 
-  async editPurchasing(id: Types.ObjectId, data: PurchasingDto & { ppn_rate?: number, status?: PurchasingEn }, sessionIn?: ClientSession): Promise<{ detail: PurchasingDetail; removedAttachments: string[] }> {
+  async editPurchasing(id: Types.ObjectId, data: PurchasingDto, sessionIn?: ClientSession): Promise<{ detail: PurchasingDetail; removedAttachments: string[] }> {
     return this.global.withTransaction(async (session) => {
       const purchase = await this.purchasingModel.findById(id).session(session);
       if (!purchase) throw BaseResponse.notFound({ err: 'Purchasing not found' });
@@ -201,9 +204,17 @@ export class PurchasingService {
         'ppn_facture_number'
       ];
 
-      const changingRestricted = restrictedFields.some(field =>
-        (data as any)[field] !== undefined && (data as any)[field]?.toString() !== (purchase as any)[field]?.toString()
-      );
+      const changingRestricted = restrictedFields.some(field => {
+        const newVal = (data as any)[field];
+        if (newVal === undefined) return false;
+
+        if (['payment_realization', 'shipping_cost', 'ppn_rate', 'ppn_amount'].includes(field)) {
+          const oldVal = (purchase as any)[field] || 0;
+          return !toDecimal(newVal).equals(toDecimal(oldVal));
+        }
+
+        return newVal?.toString() !== (purchase as any)[field]?.toString();
+      });
 
       if (changingRestricted) {
         // 1. 6-hour window check
@@ -227,24 +238,21 @@ export class PurchasingService {
         }
       }
 
-      fields.forEach((field: string) => {
-        const input = data as any;
-        if (field === 'supplier') purchase.supplier = supplier._id;
-        if (field === 'supplier_name') purchase.supplier_name = supplier.supplier_name;
-        if (field === 'due_date') purchase.due_date = data.due_date;
-        if (field === 'invoice_number') purchase.invoice_number = data.invoice_number;
-        if (field === 'ppn_facture_number') purchase.ppn_facture_number = data.ppn_facture_number;
-        if (field === 'purchasing_attachments') purchase.purchasing_attachments = data.purchasing_attachments;
-        if (field === 'payment_realization') purchase.payment_realization = toDecimal128(toDecimal(data.payment_realization));
-        if (field === 'ppn_type') purchase.ppn_type = data.ppn_type ?? purchase.ppn_type;
-        if (field === 'ppn_rate') purchase.ppn_rate = data.ppn_rate ?? purchase.ppn_rate;
-        if (field === 'ppn_amount') purchase.ppn_amount = toDecimal128(toDecimal(data.ppn_amount));
-        if (field === 'shipping_cost') purchase.shipping_cost = toDecimal128(toDecimal(data.shipping_cost));
-        if (field === 'notes') purchase.notes = data.notes;
-        if (field === 'completed_date') purchase.completed_date = input.completed_date;
-        if (field === 'reject_notes') purchase.reject_notes = input.reject_notes;
-        if (field === 'status') purchase.status = input.status ?? purchase.status;
-      });
+      if (data.supplier !== undefined && fields.includes('supplier')) {
+        purchase.supplier = supplier._id;
+        purchase.supplier_name = supplier.supplier_name;
+      }
+      if (data.due_date !== undefined && fields.includes('due_date')) purchase.due_date = data.due_date;
+      if (data.invoice_number !== undefined && fields.includes('invoice_number')) purchase.invoice_number = data.invoice_number;
+      if (data.ppn_facture_number !== undefined && fields.includes('ppn_facture_number')) purchase.ppn_facture_number = data.ppn_facture_number;
+      if (data.purchasing_attachments !== undefined && fields.includes('purchasing_attachments')) purchase.purchasing_attachments = newAttachments;
+      if (data.payment_realization !== undefined && fields.includes('payment_realization')) purchase.payment_realization = toDecimal128(toDecimal(data.payment_realization));
+      if (data.ppn_type !== undefined && fields.includes('ppn_type')) purchase.ppn_type = data.ppn_type;
+      if (data.ppn_amount !== undefined && fields.includes('ppn_amount')) purchase.ppn_amount = toDecimal128(toDecimal(data.ppn_amount));
+      if (data.shipping_cost !== undefined && fields.includes('shipping_cost')) purchase.shipping_cost = toDecimal128(toDecimal(data.shipping_cost));
+      if (data.notes !== undefined && fields.includes('notes')) purchase.notes = data.notes;
+      if ((data as any).completed_date !== undefined && fields.includes('completed_date')) purchase.completed_date = (data as any).completed_date;
+      if ((data as any).reject_notes !== undefined && fields.includes('reject_notes')) purchase.reject_notes = (data as any).reject_notes;
 
       await purchase.save({ session });
       const detail = await this.detailPurchasing(purchase._id);
@@ -522,7 +530,7 @@ export class PurchasingService {
     // =====================
     const providedPpn = toDecimal(input.ppn_amount);
 
-    const isPpnValid = expectedPpn.equals(providedPpn);
+    const isPpnValid = expectedPpn.equals(providedPpn.toDP(0));
 
     const isPaymentMatch = payment.greaterThanOrEqualTo(expectedPayable);
 
@@ -540,16 +548,19 @@ export class PurchasingService {
       // if (!dto.ppn_rate) throw BaseResponse.invalid({ option: { message: "ppn_rate is required" } });
       // if (!dto.ppn_amount) throw BaseResponse.invalid({ option: { message: "ppn_amount is required" } });
       if (!dto.payment_realization) throw BaseResponse.invalid({ option: { message: "payment_realization is required" } });
-      const purchasing = await this.purchasingModel.findById(id);
-      if (!purchasing) throw BaseResponse.notFound({ err: 'purchasingPayment !purchasing' });
-      if (!dto.invoice_number) throw BaseResponse.invalid({ option: { message: 'invoice_number is required' } });
-      if (!dto.purchasing_attachments?.length && purchasing.purchasing_attachments?.length) throw BaseResponse.invalid({ option: { message: 'purchasing_attachments is required' } });
       const existing = await this.purchasingModel.findById(id).session(session);
       if (!existing) throw BaseResponse.notFound({ err: 'purchasingPayment !existing' });
+      if (!dto.invoice_number) throw BaseResponse.invalid({ option: { message: 'invoice_number is required' } });
+      if (!dto.purchasing_attachments?.length && existing.purchasing_attachments?.length) throw BaseResponse.invalid({ option: { message: 'purchasing_attachments is required' } });
       const ablePayment = [PurchasingEn.APPROVE, PurchasingEn.PROCESS];
       if (!ablePayment.includes(existing.status)) throw BaseResponse.invalid({ option: { message: 'Only able to execute payment for purchasing with status: ' + ablePayment.join(', ') } });
-      dto.ppn_rate = defaultPpnRate;
-      dto.status = PurchasingEn.PROCESS;
+
+      if (existing.status === PurchasingEn.APPROVE) {
+        existing.status = PurchasingEn.PROCESS;
+      }
+      existing.ppn_rate = defaultPpnRate;
+      await existing.save({ session });
+
       const edit = await this.editPurchasing(id, dto, session);
       if (!edit || !edit.detail) throw BaseResponse.unexpected({ err: 'purchasingPayment' });
       const {
@@ -646,41 +657,43 @@ export class PurchasingService {
       const additional_cost_per_item = total_items > 0 ? additional_cost.div(total_items) : new Decimal(0);
 
       const inventoryMovement: (InventoryMovementDto & { source_id: Types.ObjectId })[] = [];
-      // Create loops for inventory movement
-      inventoryMovement.push({
-        movement_type: FlowType.IN,
-        items: Array.from(inventoryEntry.entries()).map(
-          ([product, qty]) => {
-            // Retrieve the original purchase price from the existing items list
-            const originalItem = existingItems.find(i => i.product.toString() === product);
-            const original_price = originalItem ? toDecimal(originalItem.purchase_price) : new Decimal(0);
+      // Create loops for inventory movement if there are items received
+      if (inventoryEntry.size > 0) {
+        inventoryMovement.push({
+          movement_type: FlowType.IN,
+          items: Array.from(inventoryEntry.entries()).map(
+            ([product, qty]) => {
+              // Retrieve the original purchase price from the existing items list
+              const originalItem = existingItems.find(i => i.product.toString() === product);
+              const original_price = originalItem ? toDecimal(originalItem.purchase_price) : new Decimal(0);
 
-            // Landed cost = Purchase Price + (Additional Cost / Total Items)
-            const landed_cost = original_price.plus(additional_cost_per_item);
+              // Landed cost = Purchase Price + (Additional Cost / Total Items)
+              const landed_cost = original_price.plus(additional_cost_per_item);
 
-            const { ppn: original_ppn_amount } = this.global.getPPnAmount({
-              net_price: toDecimal128(original_price),
-              ppn_rate: purchase.ppn_rate
-            });
+              const { ppn: original_ppn_amount } = this.global.getPPnAmount({
+                net_price: toDecimal128(original_price),
+                ppn_rate: purchase.ppn_rate
+              });
 
-            return {
-              product: new Types.ObjectId(product),
-              item_qty: qty,
-              receive_date: new Date(),
-              original_price: toDecimal128(original_price),
-              original_ppn_rate: purchase.ppn_rate,
-              original_ppn_amount: toDecimal128(original_ppn_amount),
-              landed_cost: toDecimal128(landed_cost)
+              return {
+                product: new Types.ObjectId(product),
+                item_qty: qty,
+                receive_date: new Date(),
+                original_price: toDecimal128(original_price),
+                original_ppn_rate: purchase.ppn_rate,
+                original_ppn_amount: toDecimal128(original_ppn_amount),
+                landed_cost: toDecimal128(landed_cost)
+              }
             }
-          }
-        ),
-        order_type: OrderType.PURCHASING,
-        source_id: id,
-        description: `Purchasing receive order - date: ${digitShortDate(new Date())} - PO ID: ${id.toString()}`
-      });
+          ),
+          order_type: OrderType.PURCHASING,
+          source_id: id,
+          description: `Purchasing receive order - date: ${digitShortDate(new Date())} - PO ID: ${id.toString()}`
+        });
 
-      for (const movement of inventoryMovement) {
-        await this.inventoryMovementSvc.move(movement, session);
+        for (const movement of inventoryMovement) {
+          await this.inventoryMovementSvc.move(movement, session);
+        }
       }
 
       const refreshedItems = await this.purchasingItemModel.find({
