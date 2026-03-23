@@ -64,11 +64,11 @@ export const INVENTORY_MOVEMENT: IMenu = {
     labelKey: 'Inventory Movement',
     permissions: ['inventory.view'],
 }
-export const INVENTORY_MOVEMENT_NEW: IMenu = {
+export const INVENTORY_MOVEMENT_MANUAL: IMenu = {
     code: 'form',
     url: 'form',
     icon: '',
-    labelKey: 'New Inventory Movement',
+    labelKey: 'Manual Inventory Movement',
     permissions: ['inventory.create'],
 }
 export const INVENTORY_MOVEMENT_FORM: IMenu = {
@@ -291,7 +291,7 @@ export const Menus: IMenu[] = [
             {
                 ...INVENTORY_MOVEMENT,
                 children: [
-                    INVENTORY_MOVEMENT_NEW
+                    INVENTORY_MOVEMENT_MANUAL
                 ]
             },
             SHOWCASE,

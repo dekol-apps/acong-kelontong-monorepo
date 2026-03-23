@@ -47,3 +47,5 @@ export const PPNTYPES: ISelectValue[] = [
     value: 'NONE', label: 'None',
   }
 ]
+
+export const defaultPpnRate = 11;

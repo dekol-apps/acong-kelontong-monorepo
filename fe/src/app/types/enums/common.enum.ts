@@ -21,8 +21,6 @@ export enum OrderType {
     DEPOSIT = 'DEPOSIT',
     WITHDRAWAL = 'WITHDRAWAL',
     PRODUCTION = 'PRODUCTION',
-    OPERATION = 'OPERATION',
-    ELSE = 'ELSE'
 }
 
 export enum CurrencyEn {

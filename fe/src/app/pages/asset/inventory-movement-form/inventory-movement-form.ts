@@ -11,6 +11,7 @@ import { ColumnProps, GenericTable } from '../../../shared/components/generic-ta
 import { TableColumn } from '../../../shared/directives/table-column/table-column';
 import { FormValidation } from '../../../shared/directives/form-validation/form-validation';
 import { FlowType, OrderType } from '../../../types/enums/common.enum';
+import { defaultPpnRate } from '../../../types/constants/common.constants';
 
 @Component({
   selector: 'app-inventory-movement-form',
@@ -43,6 +44,13 @@ export class InventoryMovementForm implements OnInit {
     { id: 'action', label: 'Action', customElementId: 'action' },
   ];
 
+  fullColumns: ColumnProps[] = [
+    { id: 'product', label: 'Product', customElementId: 'product' },
+    { id: 'item_qty', label: 'Quantity', customElementId: 'item_qty' },
+    { id: 'original_price', label: 'Price', customElementId: 'original_price' },
+    { id: 'action', label: 'Action', customElementId: 'action' },
+  ];
+
   constructor(
     private inventoryService: InventoryService,
     private productService: ProductService,
@@ -60,6 +68,23 @@ export class InventoryMovementForm implements OnInit {
   ngOnInit(): void {
     this.getProducts();
     this.addItem(); // Start with one item
+    this.updateColumns(this.form.get('movement_type')?.value);
+
+    this.form.get('movement_type')?.valueChanges.subscribe(value => {
+      this.updateColumns(value);
+    });
+  }
+
+  updateColumns(movementType: FlowType) {
+    if (movementType === FlowType.IN) {
+      this.columns = this.fullColumns;
+    } else {
+      this.columns = [
+        { id: 'product', label: 'Product', customElementId: 'product' },
+        { id: 'item_qty', label: 'Quantity', customElementId: 'item_qty' },
+        { id: 'action', label: 'Action', customElementId: 'action' }
+      ];
+    }
   }
 
   get items(): FormArray {
@@ -71,8 +96,6 @@ export class InventoryMovementForm implements OnInit {
       product: new FormControl(null, [Validators.required]),
       product_name: new FormControl(''),
       item_qty: new FormControl(1, [Validators.required, Validators.min(1)]),
-      receive_date: new FormControl(new Date(), [Validators.required]),
-      original_ppn_rate: new FormControl(0, [Validators.required]),
       original_price: new FormControl(0, [Validators.required]),
     });
     this.items.push(itemForm);
@@ -100,6 +123,7 @@ export class InventoryMovementForm implements OnInit {
 
   selectProduct(index: number, product: IProduct): void {
     const item = this.items.at(index);
+    console.log('selectProduct', product)
     item.patchValue({
       product: product._id,
       product_name: product.product_name
@@ -113,15 +137,22 @@ export class InventoryMovementForm implements OnInit {
     }
 
     this.isLoading = true;
+    const isMoveIn = this.form.value.movement_type === FlowType.IN;
+
     const body = {
       ...this.form.value,
-      items: this.form.value.items.map((item: any) => ({
-        product: item.product,
-        item_qty: item.item_qty,
-        receive_date: item.receive_date,
-        original_ppn_rate: item.original_ppn_rate,
-        original_price: item.original_price.toString(),
-      }))
+      items: this.form.value.items.map((item: any) => {
+        const baseItem: any = {
+          product: item.product,
+          item_qty: item.item_qty,
+        };
+
+        if (isMoveIn) {
+          baseItem.original_price = item.original_price.toString();
+        }
+
+        return baseItem;
+      })
     };
 
     this.inventoryService.moveInventory(body).subscribe({

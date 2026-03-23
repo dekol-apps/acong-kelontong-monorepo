@@ -1,9 +1,40 @@
-import { ArrayMinSize, IsArray, IsEnum, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { ArrayMinSize, IsArray, IsEnum, IsOptional, IsString, ValidateNested, IsNotEmpty, IsInt, Min, IsDate, IsNumber, IsDecimal } from 'class-validator';
 import { FlowType, OrderType } from '../../types/interfaces';
 import { PaginationDto } from '../../global/global.dto';
 import { Type } from 'class-transformer';
-import { GInventoryItemDto } from '../inventory-item/inventory-item.dto';
 import { Types } from 'mongoose';
+import { IsObjectId } from '../../global/is-object-id.decorator';
+
+export class InventoryMovementItemDto {
+  @IsObjectId()
+  @IsNotEmpty()
+  product: Types.ObjectId;
+
+  @IsInt()
+  @Min(1)
+  item_qty: number;
+
+  @Type(() => Date)
+  @IsDate()
+  @IsOptional()
+  receive_date?: Date;
+
+  @IsNumber()
+  @IsOptional()
+  original_ppn_rate?: number;
+
+  @IsDecimal()
+  @IsOptional()
+  original_price?: Types.Decimal128;
+
+  @IsDecimal()
+  @IsOptional()
+  original_ppn_amount?: Types.Decimal128;
+
+  @IsDecimal()
+  @IsOptional()
+  landed_cost?: Types.Decimal128;
+}
 
 export class InventoryMovementDto {
 
@@ -20,8 +51,44 @@ export class InventoryMovementDto {
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
-  @Type(() => GInventoryItemDto)
-  items: GInventoryItemDto[];
+  @Type(() => InventoryMovementItemDto)
+  items: InventoryMovementItemDto[];
+
+  @IsString()
+  @IsOptional()
+  description?: string;
+}
+
+export class ManualInventoryMovementItemDto {
+  @IsObjectId()
+  @IsNotEmpty()
+  product: Types.ObjectId;
+
+  @IsInt()
+  @Min(1)
+  item_qty: number;
+
+  @IsDecimal()
+  @IsNotEmpty()
+  original_price: Types.Decimal128;
+}
+
+export class ManualInventoryMovementDTO {
+  @IsEnum(FlowType, {
+    message: 'movement_type must be either IN or OUT',
+  })
+  movement_type: FlowType;
+
+  @IsEnum(OrderType, {
+    message: 'order_type invalid enum',
+  })
+  order_type: OrderType;
+
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => ManualInventoryMovementItemDto)
+  items: ManualInventoryMovementItemDto[];
 
   @IsString()
   @IsOptional()

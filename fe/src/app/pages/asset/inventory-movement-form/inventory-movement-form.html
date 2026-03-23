@@ -1,35 +1,53 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()" appFormValidation>
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">Movement Information</h3>
+            <h3 class="card-title">Manual Inventory Movement</h3>
         </div>
         <div class="card-body">
-            <div class="row mb-3">
-                <div class="col-md-4">
+            <div class="w-100 mb-3 d-flex gap-3 flex-column">
+                <h4>Movement Information</h4>
+                <div class="w-100">
                     <label for="movement_type" class="form-label required">Movement Type</label>
                     <select id="movement_type" class="form-select" formControlName="movement_type">
                         <option [value]="FlowType.IN">Move IN</option>
-                        <option [value]="FlowType.OUT">Move OUT</option>
+                        <option [value]="FlowType.OUT" selected>Move OUT</option>
                     </select>
                 </div>
-                <div class="col-md-4">
+                <div class="border border-warning rounded text-warning p-4 w-100" style="white-space: pre-wrap;">
+                    <div><strong>Note:</strong> Becareful when using manual inventory movement!</div>
+                    <div>This is supposed to directly changes data.</div>
+                    <div>It is recommended to use regular flow for purchasing, sale and production to have more
+                        precise and complete data flow history.</div>
+                </div>
+                <div class="w-100">
                     <label for="order_type" class="form-label required">Order Type (Source)</label>
                     <select id="order_type" class="form-select" formControlName="order_type">
-                        <option [value]="OrderType.ADJUSTMENT">Adjustment</option>
-                        <option [value]="OrderType.OPERATION">Operation</option>
-                        <option [value]="OrderType.ELSE">Else</option>
+                        @if (form.get('movement_type')?.value === FlowType.IN) {
+                        <option [value]="OrderType.DEPOSIT">Physical Investment Deposit</option>
+                        <option [value]="OrderType.PURCHASING">Purchasing</option>
+                        } @else {
+                        <option [value]="OrderType.WITHDRAWAL" selected>Physical Investment Withdrawal</option>
+                        <option [value]="OrderType.EXPENSE">Operational Expense</option>
+                        <option [value]="OrderType.SALE">Sale</option>
+                        }
+                        <option [value]="OrderType.PRODUCTION">Production</option>
+                        <option [value]="OrderType.ADJUSTMENT">Adjustment (IE. Lost, Expired, etc...)</option>
                     </select>
                 </div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-12">
+                <div class="w-100">
                     <label for="description" class="form-label required">Description</label>
                     <textarea id="description" class="form-control" formControlName="description" rows="2"
                         placeholder="Reason for movement..."></textarea>
                 </div>
-            </div>
-
-            <div class="mt-4">
+                <hr>
+                @if (form.get('movement_type')?.value === FlowType.IN) {
+                <div class="border border-warning rounded text-warning p-4 w-100" style="white-space: pre-wrap;">
+                    <div><strong>Note:</strong> When moving IN, please ensure that the original price are correct.</div>
+                    <div>PPn rate and amount and type will be set to NONE PPn.</div>
+                    <div>Price will be regarded as original price and landed cost</div>
+                    <div>Use Purchasing flow if you want to set PPn rate, amount and type</div>
+                </div>
+                }
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h4 class="mb-0">Movement Items</h4>
                     <button type="button" class="btn btn-primary btn-sm" (click)="addItem()">
@@ -46,6 +64,7 @@
                             <div ngbDropdown container="body" class="d-inline-block w-100">
                                 <button type="button"
                                     class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center"
+                                    [class.is-invalid]="items.at(index).get('product')?.invalid && items.at(index).get('product')?.touched"
                                     id="productDropdown" ngbDropdownToggle>
                                     <span class="text-truncate">
                                         {{ items.at(index).get('product_name')?.value || 'Select Product' }}
@@ -68,7 +87,8 @@
                                     </div>
                                 </div>
                             </div>
-                            @if (items.at(index).get('product')?.invalid && items.at(index).get('product')?.touched) {
+                            @if (items.at(index).get('product')?.invalid && items.at(index).get('product')?.touched)
+                            {
                             <small class="text-danger">Product is required</small>
                             }
                         </ng-template>
@@ -83,6 +103,15 @@
                         </ng-template>
                     </div>
 
+                    <!-- Original Price Column -->
+                    <div appTableColumn customColumnId="original_price">
+                        <ng-template let-control let-index="index">
+                            <div [formGroup]="$any(items.at(index))">
+                                <input type="number" class="form-control" formControlName="original_price" min="0">
+                            </div>
+                        </ng-template>
+                    </div>
+
                     <!-- Action Column -->
                     <div appTableColumn customColumnId="action">
                         <ng-template let-control let-index="index">
@@ -92,17 +121,16 @@
                             </button>
                         </ng-template>
                     </div>
-
                 </app-generic-table>
             </div>
         </div>
-        <div class="card-footer d-flex justify-content-end gap-2">
+        <div class="card-footer d-flex gap-2">
             <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
-            <button type="submit" class="btn btn-success" [disabled]="form.invalid || isLoading">
+            <button type="submit" class="btn btn-primary" [disabled]="form.invalid || isLoading">
                 @if (isLoading) {
                 <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
                 }
-                Save Movement
+                Execute
             </button>
         </div>
     </div>

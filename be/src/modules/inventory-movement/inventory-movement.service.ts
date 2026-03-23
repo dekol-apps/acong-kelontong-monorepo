@@ -41,18 +41,24 @@ export class InventoryMovementService {
         if (!product) {
           throw BaseResponse.invalid({ option: { message: 'Product not found' }, err: 'createInventoryMovement !product' });
         }
+
+        if (item.original_price === undefined || item.original_ppn_rate === undefined || !item.receive_date) {
+            throw BaseResponse.invalid({ option: { message: 'original_price, original_ppn_rate, and receive_date are required for createInventoryMovement' }, err: 'createInventoryMovement missing fields' });
+        }
+
         const { ppn } = this.global.getPPnAmount({
           net_price: item.original_price,
           ppn_rate: item.original_ppn_rate
         });
+
         const movementItem = {
           product: item.product,
           receive_date: item.receive_date,
           product_name: product?.product_name,
           original_price: item.original_price,
           original_ppn_rate: item.original_ppn_rate,
-          original_ppn_amount: toDecimal128(ppn),
-          landed_cost: item.landed_cost,
+          original_ppn_amount: item.original_ppn_amount || toDecimal128(ppn),
+          landed_cost: item.landed_cost || toDecimal128(toDecimal(0)),
           item_qty: item.item_qty,
         }
         data.items.push(movementItem);
@@ -66,45 +72,48 @@ export class InventoryMovementService {
   async move(dto: InventoryMovementDto & { source_id?: Types.ObjectId }, sessionIn?: ClientSession): Promise<InventoryMovement | undefined> {
     return this.global.withTransaction(async (session) => {
       if (dto.movement_type === FlowType.IN) {
+        
+        // Ensure required fields have defaults before creating Flow IN records
+        for (const item of dto.items) {
+          item.original_price = item.original_price || toDecimal128(toDecimal(0));
+          item.original_ppn_rate = item.original_ppn_rate || 0;
+          item.receive_date = item.receive_date || new Date();
+        }
+
         // BURST: Insert N individual records based on items.length to track landed_cost per item
         await Promise.all(dto.items.map(async item => {
           const { ppn } = this.global.getPPnAmount({
-            net_price: item.original_price,
-            ppn_rate: item.original_ppn_rate
+            net_price: item.original_price as Types.Decimal128,
+            ppn_rate: item.original_ppn_rate as number
           });
           const newData: InventoryItemDto = {
             product: item.product,
-            receive_date: item.receive_date,
-            original_price: item.original_price,
-            original_ppn_rate: item.original_ppn_rate,
+            receive_date: item.receive_date as Date,
+            original_price: item.original_price as Types.Decimal128,
+            original_ppn_rate: item.original_ppn_rate as number,
             original_ppn_amount: toDecimal128(ppn),
-            landed_cost: item.landed_cost,
+            landed_cost: item.landed_cost as Types.Decimal128,
           };
           // Loop and create N individual items
           for (let i = 0; i < item.item_qty; i++) {
             await this.inventoryItem.createInventoryItem(newData, session);
           }
         }));
+        const result = await this.createInventoryMovement(dto, session);
+        return result;
       } else { // Move OUT
-        // BURST: Find N individual records for this product and delete them
-        await Promise.all(dto.items.map(async item => {
-          const product = await this.productModel.findById(item.product).session(session).lean();
-          const matchingItems = await this.inventoryItemModel.find({
-            product: item.product //sort by receive_date oldest to newest
-          }).sort({ receive_date: 'ascending' }).limit(item.item_qty).session(session);
-
-          if (matchingItems.length < item.item_qty) {
-            throw BaseResponse.invalid({ option: { message: `Insufficient stock for product ${product?.product_name ?? 'Unknown'}!` }, err: 'inventory move OUT no stock' })
-          }
-
-          // Delete the exact items we found (FIFO-ish based on natural insert order)
-          for (const matchingItem of matchingItems) {
-            await this.inventoryItem.deleteInventoryItem(matchingItem._id, session);
-          }
-        }));
+        // Use moveOutByProductAndQty to properly handle FIFO stock deletion and capture history
+        const result = await this.moveOutByProductAndQty(
+          {
+            order_type: dto.order_type,
+            description: dto.description,
+            source_id: dto.source_id,
+          },
+          dto.items.map(i => ({ product: i.product, item_qty: i.item_qty })),
+          session
+        );
+        return result?.movement;
       }
-      const result = await this.createInventoryMovement(dto, session);
-      return result;
     }, sessionIn)
   }
 

@@ -11,6 +11,7 @@ import { PurchaseOrderService } from '../../services/purchase-order.service';
 import { AlertService } from '../../../../shared/components/alert/alert-service';
 import { PurchasingStore } from '../../../../shared/stores/purchasing.store';
 import { nativeToNgbDate } from '../../../../shared/components/date-range-filter/date-range-filter';
+import { defaultPpnRate } from '../../../../types/constants/common.constants';
 
 @Component({
   selector: 'app-purchase-order-form',
@@ -55,7 +56,7 @@ export class PurchaseOrderForm {
     purchasing_attachments: new FormControl(null),
     notes: new FormControl(null),
     ppn_type: new FormControl(null),
-    ppn_rate: new FormControl(null),
+    ppn_rate: new FormControl(defaultPpnRate),
     ppn_amount: new FormControl(null),
     shipping_cost: new FormControl(null),
     payment_realization: new FormControl(null),

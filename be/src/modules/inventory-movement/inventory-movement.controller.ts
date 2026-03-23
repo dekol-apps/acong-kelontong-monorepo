@@ -4,7 +4,7 @@ import { UAuthGuard } from '../auth/auth.guard';
 import { Types } from 'mongoose';
 import type { Response } from 'express';
 import { BaseResponse } from 'src/utils/base-response';
-import { InventoryMovementDto, ListInventoryMovementDTO } from './inventory-movement.dto';
+import { InventoryMovementDto, ListInventoryMovementDTO, ManualInventoryMovementDTO } from './inventory-movement.dto';
 import { InventoryMovementService } from './inventory-movement.service';
 
 @UseGuards(UAuthGuard)
@@ -18,7 +18,7 @@ export class InventoryMovementController {
   @Permission(['inventory.create'])
   @Post('')
   async inventoryMovement(
-    @Body() body: InventoryMovementDto,
+    @Body() body: ManualInventoryMovementDTO,
     @Res() res: Response,
   ) {
     try {
