@@ -4,7 +4,7 @@ import { TableColumn } from '../../../shared/directives/table-column/table-colum
 import { IPaginationInput } from '../../../types/interfaces/common.interface';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { IInventorySummary } from '../../../types/interfaces/inventory.interface';
-import { InventoryService } from '../listing/inventory-service/inventory.service';
+import { InventoryService } from '../services/inventory-service/inventory.service';
 
 @Component({
   selector: 'app-inventory-item',

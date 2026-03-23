@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { InventoryService } from '../listing/inventory-service/inventory.service';
+import { InventoryService } from '../services/inventory-service/inventory.service';
 import { SharedInventoryItemDetail } from '../shared-inventory-item-detail/shared-inventory-item-detail';
 
 @Component({

@@ -3,7 +3,7 @@ import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } fr
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
-import { InventoryService } from '../listing/inventory-service/inventory.service';
+import { InventoryService } from '../services/inventory-service/inventory.service';
 import { ProductService } from '../../catalogue/product/product.service';
 import { AlertService } from '../../../shared/components/alert/alert-service';
 import { IProduct } from '../../../types/interfaces/catalogue.interface';

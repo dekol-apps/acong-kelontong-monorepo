@@ -1,7 +1,7 @@
 import { CommonModule, CurrencyPipe, DatePipe, PercentPipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { InventoryService } from '../listing/inventory-service/inventory.service';
+import { InventoryService } from '../services/inventory-service/inventory.service';
 import { IInventoryMovement, IInventoryMovementItem } from '../../../types/interfaces/inventory.interface';
 import { ColumnProps, ITableQueryData } from '../../../shared/components/generic-table/generic-table';
 import { IPaginationInput } from '../../../types/interfaces/common.interface';
