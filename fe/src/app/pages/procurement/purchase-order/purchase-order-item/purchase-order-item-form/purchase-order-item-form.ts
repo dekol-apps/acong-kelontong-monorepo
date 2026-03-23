@@ -84,6 +84,7 @@ export class PurchaseOrderItemForm implements OnInit, AfterViewInit, OnChanges {
     if (!this.purchase_id) return this.alert.error('Missing purchase id, please reload page')
     if (this.form.invalid) return this.alert.error('Please check your inputs');
     const body = this.form.value;
+    body.purchase_price = body.purchase_price.toString();
     body.exp_date = ngbToNativeDate(body.exp_date);
     let serviceArgs = this.service.createPurchaseItem(body);
     if (this.type === 'edit' && this.purchase_item_id) serviceArgs = this.service.editPurchaseItem(this.purchase_item_id, body);
