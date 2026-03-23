@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { MainLayout } from './layout/main-layout/main-layout';
-import { BRANDS, CASHIER, EXPENSES, CASHFLOW, PRODUCT, SUPPLIERS, USER, ROLE, DASHBOARD, ROLE_DETAIL, ROLE_CREATE, ROLE_EDIT, PURCHASE_ORDER, RECEIVE_ORDER, CAPITAL, SALES_HISTORY, INVENTORY, SHOWCASE, PURCHASE_ORDER_NEW, PURCHASE_ORDER_EDIT, APPROVAL, INVESTMENT, SUPPLIES_PRODUCTION, PURCHASE_ORDER_DETAIL, PURCHASE_ORDER_RECEIVE, INVENTORY_PRODUCT, INVENTORY_ITEM, INVENTORY_MOVEMENT, INVENTORY_MOVEMENT_DETAIL, INVENTORY_MOVEMENT_ITEM, INVENTORY_MOVEMENT_MANUAL } from './types/constants/menus';
+import { BRANDS, CASHIER, EXPENSES, CASHFLOW, PRODUCT, SUPPLIERS, USER, ROLE, DASHBOARD, ROLE_DETAIL, ROLE_CREATE, ROLE_EDIT, PURCHASE_ORDER, RECEIVE_ORDER, CAPITAL, SALES_HISTORY, INVENTORY, SHOWCASE, PURCHASE_ORDER_NEW, PURCHASE_ORDER_EDIT, APPROVAL, INVESTMENT, SUPPLIES_PRODUCTION, PURCHASE_ORDER_DETAIL, PURCHASE_ORDER_RECEIVE, INVENTORY_PRODUCT, INVENTORY_ITEM, INVENTORY_MOVEMENT, INVENTORY_MOVEMENT_DETAIL, INVENTORY_MOVEMENT_ITEM, INVENTORY_MOVEMENT_MANUAL, SALE_STOCK, SALE_STOCK_PRODUCT, SALE_STOCK_ITEM } from './types/constants/menus';
 import { AuthGuardService } from './services/guards/auth-guard/auth-guard-service';
 import { PageGuardService } from './services/guards/page-guard/page-guard-service';
 
@@ -20,6 +20,24 @@ export const routes: Routes = [
         path: DASHBOARD.url,
         data: { ...DASHBOARD },
         loadComponent: () => import('./pages/dashboard-v2/dashboard-v2').then(c => c.DashboardV2)
+      },
+      {
+        path: SALE_STOCK.url,
+        canActivate: [PageGuardService],
+        data: { ...SALE_STOCK },
+        loadComponent: () => import('./pages/sales/sale-stock/sale-stock').then(c => c.SaleStock)
+      },
+      {
+        path: SALE_STOCK_PRODUCT.url,
+        canActivate: [PageGuardService],
+        data: { ...SALE_STOCK_PRODUCT },
+        loadComponent: () => import('./pages/sales/sale-stock-item/sale-stock-item').then(c => c.SaleStockItem)
+      },
+      {
+        path: SALE_STOCK_ITEM.url,
+        canActivate: [PageGuardService],
+        data: { ...SALE_STOCK_ITEM },
+        loadComponent: () => import('./pages/sales/sale-stock-item-detail/sale-stock-item-detail').then(c => c.SaleStockItemDetail)
       },
       {
         path: CASHIER.url,

@@ -1,0 +1,55 @@
+<div class="card">
+  <div class="card-header mb-4">
+    <div class="d-flex flex-row justify-content-between gap-4">
+      <h3 class="card-title">Sale Stock Item Detail ({{detail?.product_name}})</h3>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="d-flex flex-row flex-wrap justify-content-between gap-2 mb-5">
+      <table class="table">
+        <tbody>
+          <tr>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">Brand Name</th>
+            <td class="align-top">{{ detail?.brand_name || '-' }}</td>
+          </tr>
+          <tr>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">Barcode</th>
+            <td class="align-top">{{ detail?.barcode || '-' }}</td>
+          </tr>
+          <tr>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">Created At</th>
+            <td class="align-top">{{ (detail?.createdAt | date) || '-' }}</td>
+          </tr>
+          <tr>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">Sale Price</th>
+            <td class="align-top">{{ (detail?.sale_price | currency) || '-' }}</td>
+          </tr>
+          <tr>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">Discount</th>
+            <td class="align-top">{{ (detail?.discount_percent ? (detail?.discount_percent+'%') : '-') }}</td>
+          </tr>
+          <tr>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">Discount Amount</th>
+            <td class="align-top">{{ (detail?.discount_amount | currency) || '-' }}</td>
+          </tr>
+          <tr>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">COGS</th>
+            <td class="align-top">{{ (detail?.cogs | currency) || '-' }}</td>
+          </tr>
+          <tr>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">Original Price</th>
+            <td class="align-top">{{ (detail?.original_price | currency) || '-' }}</td>
+          </tr>
+          <tr>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">Original PPn Rate</th>
+            <td class="align-top">{{ (detail?.original_ppn_rate ? (detail?.original_ppn_rate+'%') : '-') }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card-footer d-flex gap-2">
+    <button class="btn btn-secondary" type="button" (click)="back()"><i
+        class="fa-solid fa-arrow-left me-2"></i>Back</button>
+  </div>
+</div>

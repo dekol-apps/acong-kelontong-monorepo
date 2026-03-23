@@ -14,14 +14,37 @@ export const CASHIER: IMenu = {
     code: 'cashier',
     url: 'cashier',
     icon: '',
+    labelKey: 'Cashier',
     permissions: ['sale.view', 'sale.create', 'sale.edit', 'sale.delete'],
 };
 export const SALES_HISTORY: IMenu = {
     code: 'sales-history',
     url: 'sales-history',
     icon: '',
+    labelKey: 'Sales History',
     permissions: ['sale.view', 'sale.create', 'sale.edit', 'sale.delete'],
 };
+export const SALE_STOCK: IMenu = {
+    code: 'sale-stock',
+    url: 'sale-stock',
+    icon: '',
+    labelKey: 'Sale Stock',
+    permissions: ['sale.view'],
+}
+export const SALE_STOCK_PRODUCT: IMenu = {
+    code: 'sale-stock-product',
+    url: 'sale-stock/:product_id',
+    icon: '',
+    labelKey: 'Sale Stock Product',
+    permissions: ['sale.view'],
+}
+export const SALE_STOCK_ITEM: IMenu = {
+    code: 'sale-stock-item',
+    url: 'sale-stock/:product_id/:sale_item_id',
+    icon: '',
+    labelKey: 'Sale Stock Item',
+    permissions: ['sale.view'],
+}
 
 export const SUPPLIES: IMenu = {
     code: 'supplies',
@@ -281,7 +304,8 @@ export const Menus: IMenu[] = [
         ...SALES,
         children: [
             CASHIER,
-            SALES_HISTORY
+            SALES_HISTORY,
+            SALE_STOCK
         ]
     },
     {

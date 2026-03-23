@@ -88,4 +88,8 @@ export const Endpoint = {
   // RESEND_VERIF: `${api}auth/signup/resend-verification`,
   // RESEND_VERIF_CHANGE_EMAIL: `${api}auth/signup/resend-verification`,
   // SIGN_UP: `${api}auth/signup`,
+  // Sale Stock Endpoint
+  SALE_STOCK: `${api}sale/stock`,
+  SALE_STOCK_PRODUCT_ID: (product_id: string) => `${api}sale/stock/product/${product_id}`,
+  SALE_STOCK_ITEM_ID: (item_id: string) => `${api}sale/stock/item/${item_id}`,
 }

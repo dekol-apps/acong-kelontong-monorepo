@@ -9,13 +9,14 @@ import { CalculateSaleResult, SaleDto, SellingSaleDto } from './sale-dto';
 import { SaleItem } from './sale-item.schema';
 import { Sale } from './sale.schema';
 import { Product } from '../product/product.schema';
-import { PaginationDto } from 'src/global/global.dto';
-import { FlowType, IListRes, OrderType, PPhType, PPnType } from 'src/types/interfaces';
+import { FilterDto, PaginationDto } from 'src/global/global.dto';
+import { FlowType, IListRes, OrderType, PPhType, PPnType, TOneOrMany } from 'src/types/interfaces';
 import { Brand } from '../brand/brand.schema';
 import Decimal from 'decimal.js';
 import { toDecimal, toDecimal128 } from 'src/utils/helper';
 import { Accounting } from '../accounting/accounting.schema';
 import { defaultPpnRate } from 'src/types/constants';
+import { isArray } from 'class-validator';
 
 @Injectable()
 export class SaleService {
@@ -147,6 +148,42 @@ export class SaleService {
       ...result,
       data: result.data.map(it => this.mapSaleItemData(it)) as any
     };
+  }
+
+  async listStockByProductId(pagination: PaginationDto, productId: string): Promise<IListRes<SaleItem>> {
+    const { page, size, sortBy, sortDir, search, filter } = pagination;
+    const searchFields: string[] = ['product_name', 'barcode', 'brand_name'];
+    let filterQuery: TOneOrMany<FilterDto> = [{ column: 'product', value: productId }]
+    if (isArray(filter)) {
+      filterQuery = [...filter, { column: 'product', value: productId }]
+    } else if (filter) {
+      filterQuery = [filter, { column: 'product', value: productId }]
+    }
+    const result = await this.global.getList<SaleItem>(
+      this.saleItemModel,
+      {
+        page,
+        size,
+        sortBy,
+        sortDir,
+        search,
+        searchFields,
+        filter: filterQuery,
+      }
+    );
+
+    return {
+      ...result,
+      data: result.data.map(it => this.mapSaleItemData(it)) as any
+    };
+  }
+
+  async getStockDetail(saleItemId: string): Promise<SaleItem> {
+    const stockDetail = await this.saleItemModel.findOne({ _id: saleItemId }).lean();
+    if (!stockDetail) {
+      throw BaseResponse.notFound({ option: { message: 'Stock detail not found' }, err: 'getStockDetail !stockDetail' });
+    }
+    return stockDetail
   }
 
   /**
@@ -407,5 +444,33 @@ export class SaleService {
 
       return updated;
     }, sessionIn);
+  }
+
+  async listSelling(pagination: PaginationDto): Promise<IListRes<Sale>> {
+    const { page, size, sortBy, sortDir, search, filter } = pagination;
+    const searchFields: string[] = ['product_name', 'barcode', 'brand_name'];
+
+    const result = await this.global.getList<Sale>(
+      this.saleModel,
+      {
+        page,
+        size,
+        sortBy,
+        sortDir,
+        search,
+        searchFields,
+        filter,
+      }
+    );
+
+    return result;
+  }
+
+  async getSellingDetail(id: string): Promise<Sale> {
+    const saleDetail = await this.saleModel.findById(id).lean();
+    if (!saleDetail) {
+      throw BaseResponse.notFound({ option: { message: 'Sale detail not found' }, err: 'getSellingDetail !saleDetail' });
+    }
+    return saleDetail
   }
 }
