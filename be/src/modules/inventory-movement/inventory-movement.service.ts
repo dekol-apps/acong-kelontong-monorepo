@@ -10,7 +10,7 @@ import { InventoryItemService } from '../inventory-item/inventory-item.service';
 import { InventoryMovement } from './inventory-movement.schema';
 import { Product } from '../product/product.schema';
 import { InventoryMovementItem } from './inventory-movement-item.schema';
-import { InventoryItemDto } from '../inventory-item/inventory-item.dto';
+import { GInventoryItemDto, InventoryItemDto } from '../inventory-item/inventory-item.dto';
 import { toDecimal, toDecimal128 } from 'src/utils/helper';
 
 /** Snapshot of an InventoryItem captured just before it is deleted, returned by moveOutByItemIds */
@@ -46,7 +46,7 @@ export class InventoryMovementService {
           net_price: item.original_price,
           ppn_rate: item.original_ppn_rate
         });
-        const movementItem: InventoryMovementItem = {
+        const movementItem = {
           product: item.product,
           receive_date: item.receive_date,
           product_name: product?.product_name,
@@ -163,7 +163,7 @@ export class InventoryMovementService {
       }
 
       // Build a grouped movement summary (one entry per unique product)
-      const productMap = new Map<string, InventoryMovementItem>();
+      const productMap = new Map<string, GInventoryItemDto>();
       for (const item of movedItems) {
         const { ppn } = this.global.getPPnAmount({
           net_price: item.original_price,
@@ -174,16 +174,16 @@ export class InventoryMovementService {
           productMap.set(key, {
             product: item.product,
             receive_date: item.receive_date,
-            product_name: item.product_name,
             original_price: item.original_price,
             original_ppn_rate: item.original_ppn_rate,
             original_ppn_amount: toDecimal128(ppn),
             landed_cost: item.landed_cost,
+            item_qty: 1,
           });
         }
       }
 
-      const movementData: InventoryMovement = {
+      const movementData: InventoryMovementDto & { source_id?: Types.ObjectId } = {
         movement_type: FlowType.OUT,
         order_type: dto.order_type,
         items: Array.from(productMap.values()),
@@ -191,7 +191,7 @@ export class InventoryMovementService {
         source_id: dto.source_id,
       };
 
-      const [movement] = await this.inventoryMovementModel.create([movementData], { session });
+      const movement = await this.createInventoryMovement(movementData, session);
       if (!movement) throw BaseResponse.notFound({ err: 'moveOutByItemIds movement not created' });
 
       return { movement, movedItems };
