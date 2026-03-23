@@ -5,10 +5,9 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
-  Min,
   ValidateNested
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { Types } from 'mongoose';
 
 export class FilterDto {
@@ -17,7 +16,12 @@ export class FilterDto {
   column: string;
 
   @IsOptional()
-  value?: string | number | boolean | Array<string | number | boolean> | Types.ObjectId;
+  @Transform(({ value }) => {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return value;
+  })
+  value?: string | number | boolean | Types.ObjectId | Array<string | number | boolean | Types.ObjectId>;
 }
 export class PaginationDto {
   @IsOptional()
@@ -49,11 +53,19 @@ export class PaginationDto {
 
   /**
    * Accepts:
-   * - FilterDto
-   * - FilterDto[]
+   * - FilterDto (object)
+   * - FilterDto[] (array)
    */
   @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => FilterDto)
   filter?: FilterDto | FilterDto[];
+
+  @IsOptional()
+  @IsString()
+  start_date?: string;
+
+  @IsOptional()
+  @IsString()
+  end_date?: string;
 }

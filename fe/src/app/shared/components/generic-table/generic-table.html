@@ -71,8 +71,8 @@
                         <th [class.pointer]="column.sort"
                             (click)="column.sort && total > 0 ? sortChanged(column.id) : $event.stopPropagation()"
                             [style]="column.customStyleHead" [style.max-width]="column.maxWidth">
-                            <div class="d-flex gap-1"
-                                [ngClass]="{'w-100 d-flex justify-content-end': column.customElementId === 'action'}">
+                            <div class="d-flex flex-row gap-1 flex-nowrap whitespace-nowrap"
+                                [ngClass]="{'w-100 justify-content-end': column.customElementId === 'action'}">
                                 @if(column.sort) {
                                 <app-sort-icon [sortId]="column.id" [sortVal]="{sortBy, sortDir}"></app-sort-icon>
                                 }

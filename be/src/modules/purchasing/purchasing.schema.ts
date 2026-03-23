@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { Supplier, SupplierDocument } from '../supplier/supplier.schema';
-import { PPhType, PPnType } from 'src/types/interfaces';
+import { PPnType } from 'src/types/interfaces';
 
 export enum PurchasingEn {
   CREATE = 'CREATE',

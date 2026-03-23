@@ -21,6 +21,7 @@ export class IGetListParam {
   filter?: TOneOrMany<FilterDto>;
   // allow single or multiple populate options
   populate?: TOneOrMany<PopulateParam>;
+  customConditions?: Record<string, any>;
 }
 
 @Injectable()
@@ -41,8 +42,8 @@ export class GlobalService {
     const isPaginated = pageNum !== undefined && pageSize !== undefined;
     const skip = isPaginated ? (pageNum - 1) * pageSize : 0;
 
-    // ✅ Start with empty filter object
-    const conditions: FilterQuery<M> = {};
+    // ✅ Start with customConditions or empty filter object
+    const conditions: FilterQuery<M> = (params.customConditions ? { ...params.customConditions } : {}) as FilterQuery<M>;
 
     // 🔎 Search
     if (params.search && params.searchFields.length > 0) {

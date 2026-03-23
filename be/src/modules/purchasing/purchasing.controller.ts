@@ -5,7 +5,7 @@ import { PaginationDto } from 'src/global/global.dto';
 import { BaseResponse } from 'src/utils/base-response';
 import { PurchasingService } from './purchasing.service';
 import type { Request, Response } from 'express';
-import { PurchasingDto, PurchaseOrderApprovalDto, PurchaseOrderDto } from './purchasing.dto';
+import { ListPurchasingDto, PurchasingDto, PurchaseOrderApprovalDto, PurchaseOrderDto } from './purchasing.dto';
 import { Types } from 'mongoose';
 import { PurchasingEn } from './purchasing.schema';
 import { PurchasingItemDto, ReceiveOrderItemDto } from '../purchasing-item/purchasing-item.dto';
@@ -72,11 +72,14 @@ export class PurchasingController {
   @Permission(['purchasing.view'])
   @Get('')
   async listPurchasing(
-    @Query() query: PaginationDto,
+    @Query() query: ListPurchasingDto,
     @Res() res: Response,
   ) {
     try {
-      const { data, meta } = await this.service.listPurchasing(query);
+      const filter = query.status
+        ? { column: 'status', value: query.status }
+        : undefined;
+      const { data, meta } = await this.service.listPurchasing({ ...query, filter });
       return BaseResponse.success({ res, option: { message: 'Success get list purchasing', list: data, meta } });
     } catch (err) {
       return BaseResponse.error({ res, err });

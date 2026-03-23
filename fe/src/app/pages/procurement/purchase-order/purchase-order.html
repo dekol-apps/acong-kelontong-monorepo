@@ -7,7 +7,7 @@
     </div>
     <div class="card-body">
         <app-generic-table ngSkipHydration [columns]="columns" [data]="listPurchasing" [filterSelect]="filterSelect"
-            [usePagination]="true" [useSearch]="true" [total]="pagination.total" (OnDataRefresh)="getList($event)"
+            [useFilterByDate]="true" [usePagination]="true" [useSearch]="true" [total]="pagination.total" (OnDataRefresh)="getList($event)"
             [isLoading]="isLoading">
             <div appTableColumn customColumnId="action">
                 <ng-template let-item>

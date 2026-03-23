@@ -291,9 +291,19 @@ export class PurchasingService {
     sortBy,
     sortDir,
     search,
-    filter
+    filter,
+    start_date,
+    end_date
   }: PaginationDto): Promise<IListRes<Purchasing>> {
     const searchFields: string[] = ['supplier_name'];
+
+    const customConditions: any = {};
+    if (start_date && end_date) {
+      customConditions.createdAt = {
+        $gte: new Date(start_date),
+        $lte: new Date(end_date)
+      };
+    }
 
     const list = await this.global.getList<Purchasing>(
       this.purchasingModel,
@@ -304,7 +314,8 @@ export class PurchasingService {
         sortDir,
         search,
         searchFields,
-        filter
+        filter,
+        customConditions
       }
     )
     return {

@@ -4,7 +4,7 @@ import { InventoryItem } from '../inventory-item/inventory-item.schema';
 
 @Schema({ timestamps: true })
 export class InventoryMovementItem extends InventoryItem {
-    @Prop({ type: Number, required: true })
+    @Prop({ type: Number, required: true, default: 0 })
     item_qty: number;
 }
 

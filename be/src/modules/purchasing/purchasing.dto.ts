@@ -3,7 +3,14 @@ import { Type } from 'class-transformer';
 import { IsObjectId } from 'src/global/is-object-id.decorator';
 import { Types } from 'mongoose';
 import { ApprovalType, PPnType } from 'src/types/interfaces';
-import { Purchasing } from './purchasing.schema';
+import { Purchasing, PurchasingEn } from './purchasing.schema';
+import { PaginationDto } from 'src/global/global.dto';
+
+export class ListPurchasingDto extends PaginationDto {
+  @IsOptional()
+  @IsEnum(PurchasingEn)
+  status?: PurchasingEn;
+}
 
 export class PurchaseOrderApprovalDto {
   @IsNotEmpty()
