@@ -14,7 +14,7 @@ export class Pagination implements OnChanges {
   @Input() size: IPaginationOutput['size'] = 10; //DEFAULT
   @Input() totalData: number = 0;
   @Input() pageRange: number = 2;
-  @Input() zeroIndexed: boolean = true;
+  @Input() zeroIndexed: boolean = false;
   get adjuster(): number { return this.zeroIndexed ? 1 : 0 }
   displayPage: number = 1;
   @Input()
@@ -55,7 +55,7 @@ export class Pagination implements OnChanges {
   // }
 
   changeSize(evt: any) {
-    this.size = evt.target.value;
+    this.size = Number(evt.target.value);
     this.page = 0;
     this.paginationChanged.emit({ page: 0, size: this.size });
   }
