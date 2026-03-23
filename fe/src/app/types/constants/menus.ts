@@ -33,17 +33,24 @@ export const SALE_STOCK: IMenu = {
 }
 export const SALE_STOCK_PRODUCT: IMenu = {
     code: 'sale-stock-product',
-    url: 'sale-stock/:product_id',
+    url: 'sale-stock/data/:product_id',
     icon: '',
     labelKey: 'Sale Stock Product',
     permissions: ['sale.view'],
 }
 export const SALE_STOCK_ITEM: IMenu = {
     code: 'sale-stock-item',
-    url: 'sale-stock/:product_id/:sale_item_id',
+    url: 'sale-stock/data/:product_id/:sale_item_id',
     icon: '',
     labelKey: 'Sale Stock Item',
     permissions: ['sale.view'],
+}
+export const SALE_STOCK_FORM: IMenu = {
+    code: 'form',
+    url: 'sale-stock/form',
+    icon: '',
+    labelKey: 'Sale Stock Form',
+    permissions: ['sale.create'],
 }
 
 export const SUPPLIES: IMenu = {
@@ -305,7 +312,8 @@ export const Menus: IMenu[] = [
         children: [
             CASHIER,
             SALES_HISTORY,
-            SALE_STOCK
+            SALE_STOCK,
+            SALE_STOCK_FORM
         ]
     },
     {

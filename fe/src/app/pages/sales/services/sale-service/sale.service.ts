@@ -57,15 +57,16 @@ export class SaleService extends BaseService {
   }
 
   getSaleStockDetail(saleItemId: string): Observable<IResDetail<ISaleItem>> {
-    // There is no specific detail endpoint in BE yet for SaleItem, 
-    // but we can use the list with a filter by ID if needed, 
-    // or assume SALE_STOCK_ITEM_ID works as expected if we were to add it.
-    // However, looking at the BE controller, there's only `GET /stock`.
-    // I will use `GET /stock` with a filter for Level 2 and Level 3 if Level 3 is also a list or single item.
-    // The user said "detail of the stock item" which usually means a single record.
     return this.getRequest({
       url: Endpoint.SALE_STOCK_ITEM_ID(saleItemId),
       spinner: false
+    });
+  }
+
+  addStock(payload: any): Observable<any> {
+    return this.postRequest({
+      url: Endpoint.SALE_STOCK,
+      body: payload
     });
   }
 }

@@ -1,7 +1,8 @@
 <div class="card">
     <div class="card-header mb-4">
-        <div class="d-flex flex-row justify-content-between gap-4">
+        <div class="d-flex flex-row gap-2 justify-content-between">
             <h3 class="card-title">Sale Stock (Grouped)</h3>
+            <a class="btn btn-primary pointer" [routerLink]="['./form']">+ Stock</a>
         </div>
     </div>
     <div class="card-body">
@@ -10,7 +11,7 @@
             <div appTableColumn customColumnId="action">
                 <ng-template let-item>
                     <div class="d-flex flex-row gap-1 justify-content-end">
-                        <a [routerLink]="['./', item.product]" class="text-white pointer btn btn-secondary">
+                        <a [routerLink]="['./data/', item.product]" class="text-white pointer btn btn-secondary">
                             <i class="fa-solid fa-eye"></i>
                         </a>
                     </div>
