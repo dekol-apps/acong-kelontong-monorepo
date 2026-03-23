@@ -100,7 +100,7 @@ export const routes: Routes = [
         path: INVENTORY_MOVEMENT_ITEM.url,
         canActivate: [PageGuardService],
         data: { ...INVENTORY_MOVEMENT_ITEM },
-        loadComponent: () => import('./pages/asset/inventory-item-detail/inventory-item-detail').then(c => c.InventoryItemDetail)
+        loadComponent: () => import('./pages/asset/inventory-movement-item-detail/inventory-movement-item-detail').then(c => c.InventoryMovementItemDetail)
       },
       {
         path: SHOWCASE.url,
