@@ -5,8 +5,14 @@ export interface ISale {
   sale_number: string;
   customer_name?: string;
   items: ISaleItem[];
-  total_price: { $numberDecimal: string };
+  total_discount: string;
+  total_cogs: string;
+  ppn_rate: number;
+  total_before_tax: string;
+  total_ppn: string;
+  grand_total: string;
   createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface ISaleItem {

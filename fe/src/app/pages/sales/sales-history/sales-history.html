@@ -1,1 +1,30 @@
-<p>sales-history works!</p>
+<div class="card">
+    <div class="card-header mb-4">
+        <div class="d-flex flex-row justify-content-between gap-4">
+            <h3 class="card-title">Sales History</h3>
+        </div>
+    </div>
+    <div class="card-body">
+        <app-generic-table ngSkipHydration [columns]="columns" [data]="listSales" [usePagination]="true"
+            [useSearch]="true" [total]="pagination.total" (OnDataRefresh)="getList($event)" [isLoading]="isLoading">
+            <div appTableColumn customColumnId="items">
+                <ng-template let-item>
+                    <ul class="m-0">
+                        @for (product of item.items; track $index) {
+                        <li>{{ product.product_name }}</li>
+                        }
+                    </ul>
+                </ng-template>
+            </div>
+            <div appTableColumn customColumnId="action">
+                <ng-template let-item>
+                    <div class="d-flex flex-row gap-1 justify-content-end">
+                        <a [routerLink]="['./', item._id]" class="text-white pointer btn btn-secondary">
+                            <i class="fa-solid fa-eye"></i>
+                        </a>
+                    </div>
+                </ng-template>
+            </div>
+        </app-generic-table>
+    </div>
+</div>

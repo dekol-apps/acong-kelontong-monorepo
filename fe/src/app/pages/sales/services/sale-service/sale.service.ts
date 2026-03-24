@@ -5,7 +5,7 @@ import { AlertService } from "../../../../shared/components/alert/alert-service"
 import { ITableQueryData } from "../../../../shared/components/generic-table/generic-table";
 import { Endpoint } from "../../../../types/constants/endpoint";
 import { IResDetail, IResList } from "../../../../types/interfaces/http.interface";
-import { ISaleItem, ISaleStockSummary } from "../../../../types/interfaces/sales.interface";
+import { ISale, ISaleItem, ISaleStockSummary } from "../../../../types/interfaces/sales.interface";
 
 @Injectable({
   providedIn: 'root'
@@ -82,5 +82,38 @@ export class SaleService extends BaseService {
         return res;
       })
     );
+  }
+
+  listSelling(qParams: ITableQueryData): Observable<IResList<ISale>> {
+    return this.getRequest({
+      url: Endpoint.SALE_SELLING,
+      qParams,
+      spinner: false
+    }).pipe(
+      map((res: IResList<ISale>) => {
+        const list = res.list.map((item) => {
+          // filter items to remove duplicates
+          const items = item.items.reduce((acc, item) => {
+            const existingItem = acc.find((i) => i.product.toString() === item.product.toString());
+            if (!existingItem) {
+              acc.push(item);
+            }
+            return acc;
+          }, [] as ISaleItem[]);
+          return {
+            ...item,
+            items,
+          };
+        });
+        return { meta: res.meta, list };
+      })
+    );
+  }
+
+  getSellingDetail(id: string): Observable<IResDetail<ISale>> {
+    return this.getRequest({
+      url: Endpoint.SALE_SELLING_ID(id),
+      spinner: false
+    });
   }
 }

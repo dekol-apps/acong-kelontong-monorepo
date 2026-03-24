@@ -24,6 +24,13 @@ export const SALES_HISTORY: IMenu = {
     labelKey: 'Sales History',
     permissions: ['sale.view', 'sale.create', 'sale.edit', 'sale.delete'],
 };
+export const SALES_HISTORY_DETAIL: IMenu = {
+    code: 'sales-history-detail',
+    url: 'sales-history/:sale_id',
+    icon: '',
+    labelKey: 'Sales History Detail',
+    permissions: ['sale.view'],
+}
 export const SALE_STOCK: IMenu = {
     code: 'sale-stock',
     url: 'sale-stock',
@@ -78,13 +85,6 @@ export const INVENTORY_ITEM: IMenu = {
     url: 'inventory/:product_id/:inventory_item_id',
     icon: '',
     labelKey: 'Inventory Item',
-    permissions: ['inventory.view', 'inventory.create', 'inventory.edit', 'inventory.delete'],
-}
-export const SHOWCASE: IMenu = {
-    code: 'showcase',
-    url: 'showcase',
-    icon: '',
-    labelKey: 'Showcase',
     permissions: ['inventory.view', 'inventory.create', 'inventory.edit', 'inventory.delete'],
 }
 export const INVENTORY_MOVEMENT: IMenu = {
@@ -198,7 +198,7 @@ export const SUPPLIERS: IMenu = {
     labelKey: 'Suppliers',
     permissions: ['supplier.view', 'supplier.create', 'supplier.edit', 'supplier.delete'],
 }
-export const SUPPLIES_PRODUCTION: IMenu = {
+export const PRODUCTION: IMenu = {
     code: 'production',
     url: 'production',
     icon: '',
@@ -225,13 +225,6 @@ export const EXPENSES: IMenu = {
     icon: '',
     labelKey: 'Expenses',
     permissions: ['expenses.view', 'expenses.create', 'expenses.edit', 'expenses.delete'],
-}
-export const CAPITAL: IMenu = {
-    code: 'capital',
-    url: 'capital',
-    icon: '',
-    labelKey: 'Capital Account',
-    permissions: ['investment.view'],
 }
 
 export const ADMIN: IMenu = {
@@ -325,8 +318,7 @@ export const Menus: IMenu[] = [
                     INVENTORY_MOVEMENT_MANUAL
                 ]
             },
-            SHOWCASE,
-            SUPPLIES_PRODUCTION
+            PRODUCTION
         ]
     },
     {
@@ -349,7 +341,6 @@ export const Menus: IMenu[] = [
         children: [
             CASHFLOW,
             EXPENSES,
-            CAPITAL
         ]
     },
     {

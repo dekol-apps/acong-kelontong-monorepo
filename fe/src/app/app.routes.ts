@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { MainLayout } from './layout/main-layout/main-layout';
-import { BRANDS, CASHIER, EXPENSES, CASHFLOW, PRODUCT, SUPPLIERS, USER, ROLE, DASHBOARD, ROLE_DETAIL, ROLE_CREATE, ROLE_EDIT, PURCHASE_ORDER, RECEIVE_ORDER, CAPITAL, SALES_HISTORY, INVENTORY, SHOWCASE, PURCHASE_ORDER_NEW, PURCHASE_ORDER_EDIT, APPROVAL, INVESTMENT, SUPPLIES_PRODUCTION, PURCHASE_ORDER_DETAIL, PURCHASE_ORDER_RECEIVE, INVENTORY_PRODUCT, INVENTORY_ITEM, INVENTORY_MOVEMENT, INVENTORY_MOVEMENT_DETAIL, INVENTORY_MOVEMENT_ITEM, INVENTORY_MOVEMENT_MANUAL, SALE_STOCK, SALE_STOCK_PRODUCT, SALE_STOCK_ITEM, SALE_STOCK_FORM } from './types/constants/menus';
+import { BRANDS, CASHIER, EXPENSES, CASHFLOW, PRODUCT, SUPPLIERS, USER, ROLE, DASHBOARD, ROLE_DETAIL, ROLE_CREATE, ROLE_EDIT, PURCHASE_ORDER, RECEIVE_ORDER, CAPITAL, SALES_HISTORY, INVENTORY, SHOWCASE, PURCHASE_ORDER_NEW, PURCHASE_ORDER_EDIT, APPROVAL, INVESTMENT, PURCHASE_ORDER_DETAIL, PURCHASE_ORDER_RECEIVE, INVENTORY_PRODUCT, INVENTORY_ITEM, INVENTORY_MOVEMENT, INVENTORY_MOVEMENT_DETAIL, INVENTORY_MOVEMENT_ITEM, INVENTORY_MOVEMENT_MANUAL, SALE_STOCK, SALE_STOCK_PRODUCT, SALE_STOCK_ITEM, SALE_STOCK_FORM, SALES_HISTORY_DETAIL, PRODUCTION } from './types/constants/menus';
 import { AuthGuardService } from './services/guards/auth-guard/auth-guard-service';
 import { PageGuardService } from './services/guards/page-guard/page-guard-service';
 
@@ -55,7 +55,13 @@ export const routes: Routes = [
         path: SALES_HISTORY.url,
         data: { ...SALES_HISTORY },
         canActivate: [PageGuardService],
-        loadComponent: () => import('./pages/dashboard-v3/dashboard-v3').then(c => c.DashboardV3)
+        loadComponent: () => import('./pages/sales/sales-history/sales-history').then(c => c.SalesHistory)
+      },
+      {
+        path: SALES_HISTORY_DETAIL.url,
+        data: { ...SALES_HISTORY_DETAIL },
+        canActivate: [PageGuardService],
+        loadComponent: () => import('./pages/sales/sales-history-detail/sales-history-detail').then(c => c.SalesHistoryDetail)
       },
       {
         path: INVESTMENT.url,
@@ -133,10 +139,10 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/catalogue/product/product').then(c => c.Product)
       },
       {
-        path: SUPPLIES_PRODUCTION.url,
+        path: PRODUCTION.url,
         canActivate: [PageGuardService],
-        data: { ...SUPPLIES_PRODUCTION },
-        loadComponent: () => import('./pages/catalogue/product/product').then(c => c.Product)
+        data: { ...PRODUCTION },
+        loadComponent: () => import('./pages/production/production').then(c => c.Production)
       },
       {
         path: SUPPLIERS.url,

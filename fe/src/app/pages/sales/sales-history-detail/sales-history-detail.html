@@ -1,0 +1,68 @@
+@if (saleDetail) {
+<div class="card">
+  <div class="card-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <div class="d-flex justify-content-between align-items-center gap-2">
+        <h3 class="card-title fw-bold">Sale Invoice: {{ saleDetail.sale_number }}</h3>
+        <div class="text-muted small mt-1"><i class="bi bi-clock me-1"></i>{{ saleDetail.createdAt |
+          date:'dd/MMM/yyyy HH:mm' }}</div>
+      </div>
+      <div class="text-end">
+        <span class="badge bg-success rounded-pill px-3 py-2 fs-6">Complete</span>
+      </div>
+    </div>
+  </div>
+  <div class="card-body px-4 pb-4">
+    <div class="row mb-5 g-4">
+      <div class="col-md-6">
+        <div class="bg-light p-4 rounded-3 h-100">
+          <h6 class="fw-bold mb-3 text-uppercase small text-muted">Customer Information</h6>
+          <div class="fs-5 fw-bold text-dark">{{ saleDetail.customer_name || 'General Customer' }}</div>
+          <div class="small text-muted mt-1">Status: Regular Customer</div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="bg-light p-4 rounded-3 h-100 text-end">
+          <h6 class="fw-bold mb-3 text-uppercase small text-muted">Payment Summary</h6>
+          <div class="d-flex justify-content-end gap-5 mb-2">
+            <span class="text-muted">Sub Total</span>
+            <span class="fw-medium">{{ saleDetail.total_before_tax | currency:'IDR':'symbol':'1.0-0' }}</span>
+          </div>
+          <div class="d-flex justify-content-end gap-5 mb-2 text-danger" *ngIf="+saleDetail.total_discount > 0">
+            <span>Discount Total</span>
+            <span class="fw-medium">-{{ saleDetail.total_discount | currency:'IDR':'symbol':'1.0-0' }}</span>
+          </div>
+          <div class="d-flex justify-content-end gap-5 mb-3 border-bottom pb-2">
+            <span class="text-muted">Total PPN ({{ saleDetail.ppn_rate }}%)</span>
+            <span class="fw-medium">{{ saleDetail.total_ppn | currency:'IDR':'symbol':'1.0-0' }}</span>
+          </div>
+          <div class="d-flex justify-content-end align-items-baseline gap-4">
+            <span class="fw-bold text-dark fs-5">Grand Total</span>
+            <span class="fw-bold text-success fs-3">{{ saleDetail.grand_total | currency:'IDR':'symbol':'1.0-0'
+              }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-4">
+      <h5 class="fw-bold mb-3 d-flex align-items-center">
+        <i class="bi bi-box-seam me-2 text-primary"></i>Items Sold
+      </h5>
+      <div class="rounded-3 border overflow-hidden">
+        <app-generic-table [isLoading]="isLoading" [columns]="columns" [data]="saleDetail.items" [usePagination]="false"
+          [useSearch]="false">
+        </app-generic-table>
+      </div>
+    </div>
+  </div>
+  <div class="card-footer d-flex gap-2">
+    <button class="btn btn-outline-secondary" (click)="goBack()">
+      Back
+    </button>
+    <button class="btn btn-primary">
+      <i class="bi bi-printer me-1"></i> Print Invoice
+    </button>
+  </div>
+</div>
+}
