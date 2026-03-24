@@ -13,6 +13,7 @@ import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 export class DropdownSearch implements OnInit, OnDestroy {
 
   @Input() invalid?: boolean;
+  @Input() isLoading?: boolean;
   @Input() value: string = '';
   @Input() items: ISelectValue[] = [];
   @Input() placeholder: string = 'Select Item';

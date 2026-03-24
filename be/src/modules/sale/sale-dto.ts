@@ -39,7 +39,7 @@ export class SaleItemDto {
   /**
    * Original price of the item. comes from data collection from inventory item as Decimal128
    */
-  @IsNotEmpty()
+  @IsOptional()
   @IsDecimal()
   original_price: Types.Decimal128;
 

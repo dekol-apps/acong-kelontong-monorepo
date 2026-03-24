@@ -50,9 +50,9 @@ export class PurchaseOrderFormPayment implements OnInit {
     if (this.form?.invalid) return this.alert.error('Please check your inputs');
     const body = {
       ...value,
-      ppn_amount: value.ppn_amount.toString(),
-      shipping_cost: value.shipping_cost.toString(),
-      payment_realization: value.payment_realization.toString(),
+      ppn_amount: value.ppn_amount?.toString(),
+      shipping_cost: value.shipping_cost?.toString(),
+      payment_realization: value.payment_realization?.toString(),
       supplier: value.supplier,
       due_date: ngbToNativeDate(value.due_date),
       purchasing_attachments: value.purchasing_attachments?.map(it => it.file ?? it.src)

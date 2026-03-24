@@ -63,7 +63,7 @@
                         <ng-template let-control let-index="index">
                             <app-dropdown-search [items]="filteredProducts"
                                 [value]="items.at(index).get('product_name')?.value" [placeholder]="'Select Product'"
-                                [searchPlaceholder]="'Search Product'"
+                                [searchPlaceholder]="'Search Product'" [isLoading]="isLoading"
                                 [invalid]="items.at(index).get('product')?.invalid && items.at(index).get('product')?.touched"
                                 [searchLabel]="'product_name'" (onSelect)="selectProduct(index, $event)"
                                 (onSearch)="getProducts($event)"></app-dropdown-search>

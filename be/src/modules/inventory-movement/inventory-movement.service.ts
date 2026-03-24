@@ -43,7 +43,7 @@ export class InventoryMovementService {
         }
 
         if (item.original_price === undefined || item.original_ppn_rate === undefined || !item.receive_date) {
-            throw BaseResponse.invalid({ option: { message: 'original_price, original_ppn_rate, and receive_date are required for createInventoryMovement' }, err: 'createInventoryMovement missing fields' });
+          throw BaseResponse.invalid({ option: { message: 'original_price, original_ppn_rate, and receive_date are required for createInventoryMovement' }, err: 'createInventoryMovement missing fields' });
         }
 
         const { ppn } = this.global.getPPnAmount({
@@ -72,7 +72,7 @@ export class InventoryMovementService {
   async move(dto: InventoryMovementDto & { source_id?: Types.ObjectId }, sessionIn?: ClientSession): Promise<InventoryMovement | undefined> {
     return this.global.withTransaction(async (session) => {
       if (dto.movement_type === FlowType.IN) {
-        
+
         // Ensure required fields have defaults before creating Flow IN records
         for (const item of dto.items) {
           item.original_price = item.original_price || toDecimal128(toDecimal(0));
@@ -245,7 +245,7 @@ export class InventoryMovementService {
             .lean();
           throw BaseResponse.invalid({
             option: {
-              message: `Insufficient stock for product "${productDoc?.product_name ?? item.product.toString()}"`,
+              message: `Insufficient stock for product "${productDoc?.product_name ?? item.product.toString()}": ${item.item_qty} requested, ${candidates.length} available`,
             },
             err: 'moveOutByProductAndQty insufficient stock',
           });

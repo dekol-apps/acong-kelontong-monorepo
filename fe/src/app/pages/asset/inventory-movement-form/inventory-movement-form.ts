@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 import { InventoryService } from '../services/inventory-service/inventory.service';
 import { ProductService } from '../../catalogue/product/product.service';
 import { AlertService } from '../../../shared/components/alert/alert-service';
@@ -11,7 +10,6 @@ import { ColumnProps, GenericTable } from '../../../shared/components/generic-ta
 import { TableColumn } from '../../../shared/directives/table-column/table-column';
 import { FormValidation } from '../../../shared/directives/form-validation/form-validation';
 import { FlowType, OrderType } from '../../../types/enums/common.enum';
-import { defaultPpnRate } from '../../../types/constants/common.constants';
 import { DropdownSearch } from '../../../shared/components/dropdown-search/dropdown-search';
 import { ISelectValue } from '../../../types/interfaces/common.interface';
 
@@ -22,7 +20,6 @@ import { ISelectValue } from '../../../types/interfaces/common.interface';
     CommonModule,
     ReactiveFormsModule,
     RouterModule,
-    NgbDropdownModule,
     GenericTable,
     TableColumn,
     FormValidation,
@@ -109,6 +106,7 @@ export class InventoryMovementForm implements OnInit {
   }
 
   getProducts(search: string = ''): void {
+    this.isLoading = true;
     this.productService.getProducts({ search, page: 1, size: 50 }).subscribe({
       next: (res) => {
         this.products = res.list || [];
@@ -116,13 +114,15 @@ export class InventoryMovementForm implements OnInit {
           value: p,
           label: p.product_name
         }));
+        this.isLoading = false;
+      }, error: () => {
+        this.isLoading = false;
       }
     });
   }
 
   selectProduct(index: number, product: IProduct): void {
     const item = this.items.at(index);
-    console.log('selectProduct', product)
     item.patchValue({
       product: product._id,
       product_name: product.product_name
@@ -135,7 +135,6 @@ export class InventoryMovementForm implements OnInit {
       return;
     }
 
-    this.isLoading = true;
     const isMoveIn = this.form.value.movement_type === FlowType.IN;
 
     const body = {
@@ -158,11 +157,9 @@ export class InventoryMovementForm implements OnInit {
       next: () => {
         this.alertService.success('Inventory movement recorded successfully');
         this.router.navigate(['/inventory-movement']);
-        this.isLoading = false;
       },
       error: (err) => {
         this.alertService.error(err.message || 'Failed to record movement');
-        this.isLoading = false;
       }
     });
   }

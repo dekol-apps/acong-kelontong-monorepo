@@ -54,6 +54,11 @@ export class InventoryItemService {
           product: { $first: "$product" },
           product_name: { $first: "$product_name" },
           inventory: { $first: "$inventory" },
+          first_original_price: { $first: "$original_price" },
+          first_original_ppn_rate: { $first: "$original_ppn_rate" },
+          first_original_ppn_amount: { $first: "$original_ppn_amount" },
+          first_landed_cost: { $first: "$landed_cost" },
+          first_receive_date: { $first: "$receive_date" },
           item_qty: { $sum: 1 },
           // Option to track average landed_cost across batch
           avg_landed_cost: { $avg: { $toDecimal: "$landed_cost" } },

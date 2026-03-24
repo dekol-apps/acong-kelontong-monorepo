@@ -1,12 +1,15 @@
 import { FlowType, OrderType } from '../enums/common.enum';
 import { IProduct } from './catalogue.interface';
 
-export interface IInventorySummary {
-  _id: string; // Product ID
-  product: string;
+export interface IInventorySummary extends IInventoryItem {
   product_name: string;
   inventory: string;
   item_qty: number;
+  first_original_price: string;
+  first_original_ppn_rate: string;
+  first_original_ppn_amount: string;
+  first_landed_cost: string;
+  receive_date: Date;
   avg_landed_cost: string;
   total_landed_cost: string;
 }

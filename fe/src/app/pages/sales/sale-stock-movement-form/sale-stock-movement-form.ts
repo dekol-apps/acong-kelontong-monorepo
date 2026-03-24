@@ -2,12 +2,15 @@ import { Component, OnInit } from '@angular/core';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 import { SaleService } from '../services/sale-service/sale.service';
 import { ProductService } from '../../catalogue/product/product.service';
 import { AlertService } from '../../../shared/components/alert/alert-service';
 import { IProduct } from '../../../types/interfaces/catalogue.interface';
 import { FormValidation } from '../../../shared/directives/form-validation/form-validation';
+import { DropdownSearch } from '../../../shared/components/dropdown-search/dropdown-search';
+import { ISelectValue } from '../../../types/interfaces/common.interface';
+import { InventoryService } from '../../asset/services/inventory-service/inventory.service';
+import { IInventorySummary } from '../../../types/interfaces/inventory.interface';
 
 @Component({
   selector: 'app-sale-stock-movement-form',
@@ -16,7 +19,7 @@ import { FormValidation } from '../../../shared/directives/form-validation/form-
     CommonModule,
     ReactiveFormsModule,
     RouterModule,
-    NgbDropdownModule,
+    DropdownSearch,
     FormValidation
   ],
   templateUrl: './sale-stock-movement-form.html',
@@ -24,13 +27,13 @@ import { FormValidation } from '../../../shared/directives/form-validation/form-
 })
 export class SaleStockMovementForm implements OnInit {
   form: FormGroup;
-  products: IProduct[] = [];
-  filteredProducts: IProduct[] = [];
+  products: IInventorySummary[] = [];
+  filteredProducts: ISelectValue[] = [];
   isLoading = false;
-
+  errorReq?: string;
   constructor(
     private saleService: SaleService,
-    private productService: ProductService,
+    private inventorySvc: InventoryService,
     private alertService: AlertService,
     private router: Router
   ) {
@@ -54,7 +57,7 @@ export class SaleStockMovementForm implements OnInit {
       product_name: new FormControl(''),
       item_qty: new FormControl(1, [Validators.required, Validators.min(1)]),
       sale_price: new FormControl(0, [Validators.required, Validators.min(0)]),
-      original_price: new FormControl(0, [Validators.required, Validators.min(0)]),
+      avg_landed_cost: new FormControl(0, [Validators.required, Validators.min(0)]),
       discount_percent: new FormControl(0, [Validators.min(0), Validators.max(100)]),
     });
     this.items.push(itemForm);
@@ -66,27 +69,30 @@ export class SaleStockMovementForm implements OnInit {
     }
   }
 
-  getProducts(): void {
-    this.productService.getProducts({ page: 1, size: 1000 }).subscribe({
+  getProducts(search: string = ''): void {
+    this.isLoading = true;
+    this.inventorySvc.getInventoryItems({ search, page: 1, size: 50 }).subscribe({
       next: (res) => {
         this.products = res.list || [];
-        this.filteredProducts = [...this.products];
+        this.filteredProducts = this.products.map(p => ({
+          value: p,
+          label: p.product_name + p.item_qty
+        }));
+        this.isLoading = false;
+      },
+      error: () => {
+        this.isLoading = false;
       }
     });
   }
 
-  filterProducts(event: any): void {
-    const query = event.target.value.toLowerCase();
-    this.filteredProducts = this.products.filter(p =>
-      p.product_name.toLowerCase().includes(query)
-    );
-  }
-
-  selectProduct(index: number, product: IProduct): void {
+  selectProduct(index: number, inventory: IInventorySummary): void {
     const item = this.items.at(index);
     item.patchValue({
-      product: product._id,
-      product_name: product.product_name
+      product: inventory.product,
+      product_name: inventory.product_name,
+      avg_landed_cost: inventory.avg_landed_cost,
+      sale_price: inventory.avg_landed_cost,
     });
   }
 
@@ -96,13 +102,12 @@ export class SaleStockMovementForm implements OnInit {
       return;
     }
 
-    this.isLoading = true;
     const body = {
       items: this.form.value.items.map((item: any) => ({
         product: item.product,
         item_qty: item.item_qty,
         sale_price: item.sale_price.toString(),
-        original_price: item.original_price.toString(),
+        avg_landed_cost: item.avg_landed_cost.toString(),
         discount_percent: item.discount_percent
       }))
     };
@@ -113,11 +118,10 @@ export class SaleStockMovementForm implements OnInit {
       next: () => {
         this.alertService.success('Sale stock updated successfully');
         this.router.navigate(['/sales']);
-        this.isLoading = false;
       },
       error: (err) => {
-        this.alertService.error(err.error?.message || err.message || 'Failed to update sale stock');
-        this.isLoading = false;
+        console.log(err.error?.message)
+        this.errorReq = err.error?.message || err.message || 'Failed to update sale stock';
       }
     });
   }
