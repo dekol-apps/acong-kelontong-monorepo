@@ -1,9 +1,7 @@
 <div class="card">
     <div class="card-header mb-4">
-        <div class="d-flex flex-row justify-content-between gap-4 w-100">
-            <h3 class="card-title">Sale Stock Items for Product</h3>
-            <button class="btn btn-secondary" (click)="back()"><i class="fa-solid fa-arrow-left me-2"></i>Back</button>
-        </div>
+        <h3 class="card-title">Stock Items for {{listSaleStockItems[0].product_name}} (Total:
+            {{pagination.total}})</h3>
     </div>
     <div class="card-body">
         <app-generic-table ngSkipHydration [columns]="columns" [data]="listSaleStockItems" [usePagination]="true"
@@ -18,5 +16,8 @@
                 </ng-template>
             </div>
         </app-generic-table>
+    </div>
+    <div class="card-footer d-flex gap-2">
+        <button class="btn btn-secondary" type="button" (click)="back()">Back</button>
     </div>
 </div>

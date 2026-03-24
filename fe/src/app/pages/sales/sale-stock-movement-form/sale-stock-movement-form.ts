@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { SaleService } from '../services/sale-service/sale.service';
 import { ProductService } from '../../catalogue/product/product.service';
 import { AlertService } from '../../../shared/components/alert/alert-service';
@@ -35,7 +35,8 @@ export class SaleStockMovementForm implements OnInit {
     private saleService: SaleService,
     private inventorySvc: InventoryService,
     private alertService: AlertService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     this.form = new FormGroup({
       items: new FormArray([], [Validators.required, Validators.minLength(1)])
@@ -127,6 +128,6 @@ export class SaleStockMovementForm implements OnInit {
   }
 
   cancel(): void {
-    this.router.navigate(['/sales']);
+    this.router.navigate(['../'], { relativeTo: this.route });
   }
 }

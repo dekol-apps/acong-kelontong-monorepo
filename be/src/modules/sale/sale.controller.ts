@@ -6,6 +6,7 @@ import { SaleDto, SellingSaleDto } from './sale-dto';
 import { SaleService } from './sale.service';
 import type { Response } from 'express';
 import { PaginationDto } from 'src/global/global.dto';
+import { Types } from 'mongoose';
 
 @UseGuards(UAuthGuard)
 @Controller('sale')
@@ -50,7 +51,7 @@ export class SaleController {
     @Param('product_id') productId: string,
   ) {
     try {
-      const { data, meta } = await this.service.listStockByProductId(query, productId);
+      const { data, meta } = await this.service.listStockByProductId(query, new Types.ObjectId(productId));
       return BaseResponse.success({ res, option: { message: 'Success get list stock', list: data, meta } });
     } catch (err) {
       return BaseResponse.error({ res, err });
@@ -64,7 +65,7 @@ export class SaleController {
     @Res() res: Response,
   ) {
     try {
-      const stockDetail = await this.service.getStockDetail(saleItemId);
+      const stockDetail = await this.service.getStockDetail(new Types.ObjectId(saleItemId));
       return BaseResponse.success({ res, option: { message: 'Success get stock detail', detail: stockDetail } });
     } catch (err) {
       return BaseResponse.error({ res, err });
@@ -93,7 +94,7 @@ export class SaleController {
     @Param('id') id: string,
   ) {
     try {
-      const saleDetail = await this.service.editSelling(id, body);
+      const saleDetail = await this.service.editSelling(new Types.ObjectId(id), body);
       return BaseResponse.success({ res, option: { message: "Success update sale transaction", detail: saleDetail } });
     } catch (err) {
       return BaseResponse.error({ res, err });
@@ -121,7 +122,7 @@ export class SaleController {
     @Res() res: Response,
   ) {
     try {
-      const saleDetail = await this.service.getSellingDetail(id);
+      const saleDetail = await this.service.getSellingDetail(new Types.ObjectId(id));
       return BaseResponse.success({ res, option: { message: 'Success get selling detail', detail: saleDetail } });
     } catch (err) {
       return BaseResponse.error({ res, err });

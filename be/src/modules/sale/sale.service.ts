@@ -150,7 +150,7 @@ export class SaleService {
     };
   }
 
-  async listStockByProductId(pagination: PaginationDto, productId: string): Promise<IListRes<SaleItem>> {
+  async listStockByProductId(pagination: PaginationDto, productId: Types.ObjectId): Promise<IListRes<SaleItem>> {
     const { page, size, sortBy, sortDir, search, filter } = pagination;
     const searchFields: string[] = ['product_name', 'barcode', 'brand_name'];
     let filterQuery: TOneOrMany<FilterDto> = [{ column: 'product', value: productId }]
@@ -178,7 +178,7 @@ export class SaleService {
     };
   }
 
-  async getStockDetail(saleItemId: string): Promise<SaleItem> {
+  async getStockDetail(saleItemId: Types.ObjectId): Promise<SaleItem> {
     const stockDetail = await this.saleItemModel.findOne({ _id: saleItemId }).lean();
     if (!stockDetail) {
       throw BaseResponse.notFound({ option: { message: 'Stock detail not found' }, err: 'getStockDetail !stockDetail' });
@@ -331,7 +331,7 @@ export class SaleService {
     };
   }
 
-  async editSelling(id: string, dto: SellingSaleDto, sessionIn?: ClientSession): Promise<Sale | undefined> {
+  async editSelling(id: Types.ObjectId, dto: SellingSaleDto, sessionIn?: ClientSession): Promise<Sale | undefined> {
     return this.global.withTransaction(async (session) => {
       const existing = await this.saleModel.findById(id).session(session);
       if (!existing) {
@@ -466,7 +466,7 @@ export class SaleService {
     return result;
   }
 
-  async getSellingDetail(id: string): Promise<Sale> {
+  async getSellingDetail(id: Types.ObjectId): Promise<Sale> {
     const saleDetail = await this.saleModel.findById(id).lean();
     if (!saleDetail) {
       throw BaseResponse.notFound({ option: { message: 'Sale detail not found' }, err: 'getSellingDetail !saleDetail' });
