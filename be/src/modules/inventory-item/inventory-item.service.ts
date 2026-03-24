@@ -50,10 +50,9 @@ export class InventoryItemService {
       { $match: matchStage },
       {
         $group: {
-          _id: "$product",
+          _id: { $toObjectId: "$product" },
           product: { $first: "$product" },
           product_name: { $first: "$product_name" },
-          inventory: { $first: "$inventory" },
           first_original_price: { $first: "$original_price" },
           first_original_ppn_rate: { $first: "$original_ppn_rate" },
           first_original_ppn_amount: { $first: "$original_ppn_amount" },

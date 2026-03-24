@@ -4,21 +4,31 @@ export function sanitizeValue(value: any): any {
   if (value === 'undefined') return undefined;
   if (value === 'null') return null;
   if (value === '') return undefined; // optional: drop empty strings
-  
+
   // Transform valid ObjectId strings back to ObjectId instances
   if (typeof value === 'string' && Types.ObjectId.isValid(value) && String(new Types.ObjectId(value)) === value) {
     return new Types.ObjectId(value);
   }
-  
+
   return value;
 }
 
 export function sanitizeObject(obj: any): any {
-  if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
+  if (Array.isArray(obj)) {
+    return obj.map((item) => sanitizeObject(item));
+  }
+
+  if (obj && typeof obj === 'string') {
+    return sanitizeValue(obj);
+  }
+
+  if (obj && typeof obj === 'object' && !(obj instanceof Types.ObjectId)) {
     Object.keys(obj).forEach((key) => {
-      obj[key] = sanitizeValue(obj[key]);
-      if (typeof obj[key] === 'object') {
-        obj[key] = sanitizeObject(obj[key]); // recursive
+      const val = sanitizeValue(obj[key]);
+      if (val && typeof val === 'object' && !(val instanceof Types.ObjectId)) {
+        obj[key] = sanitizeObject(val);
+      } else {
+        obj[key] = val;
       }
     });
   }
