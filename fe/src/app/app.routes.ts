@@ -49,7 +49,7 @@ export const routes: Routes = [
         path: CASHIER.url,
         data: { ...CASHIER },
         canActivate: [PageGuardService],
-        loadComponent: () => import('./pages/dashboard-v2/dashboard-v2').then(c => c.DashboardV2)
+        loadComponent: () => import('./pages/sales/cashier/cashier').then(c => c.Cashier)
       },
       {
         path: SALES_HISTORY.url,

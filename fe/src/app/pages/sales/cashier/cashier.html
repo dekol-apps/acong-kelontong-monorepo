@@ -1,1 +1,119 @@
-<p>cashier works!</p>
+<div class="card">
+    <div class="card-header mb-4">
+        <div class="d-flex flex-row justify-content-between gap-4">
+            <h3 class="card-title">Cashier</h3>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="d-flex flex-row gap-4 flex-wrap w-100">
+            <!-- Left: Stock Items Table -->
+            <div class="flex-grow-1">
+                <div class="card card-outline card-primary shadow-sm">
+                    <div class="card-header bg-white border-bottom-0 pt-3">
+                        <h3 class="card-title fw-bold">Available Stock</h3>
+                    </div>
+                    <div class="card-body">
+                        <app-generic-table [isLoading]="isLoading" [columns]="columns" [data]="listStock"
+                            [useSearch]="true" searchPlaceholder="Search product by name or barcode..."
+                            [total]="pagination.total" [size]="pagination.size" [page]="pagination.page"
+                            (OnDataRefresh)="getList($event)">
+                            <div appTableColumn customColumnId="action">
+                                <ng-template let-item>
+                                    <button class="btn btn-sm btn-primary rounded-pill px-3" (click)="addToCart(item)"
+                                        [disabled]="item?.item_qty <= 0">
+                                        <i class="bi bi-plus-lg me-1"></i>
+                                    </button>
+                                </ng-template>
+                            </div>
+                        </app-generic-table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Cart Card -->
+            <div class="flex-shrink-0">
+                <div class="card card-outline card-success shadow-sm sticky-top" style="top: 1rem;">
+                    <div class="card-header bg-white border-bottom-0 pt-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h3 class="card-title fw-bold"><i class="bi bi-cart3 me-2 text-success"></i>Shopping Cart
+                            </h3>
+                            <span class="badge bg-success rounded-pill">{{ cart.length }} Items</span>
+                        </div>
+                    </div>
+                    <div class="card-body pt-0">
+                        <div class="cart-items-list overflow-auto" style="max-height: 50vh;">
+                            <div *ngIf="cart.length === 0" class="empty-cart text-center py-5">
+                                <i class="bi bi-cart-x fs-1 text-muted opacity-50"></i>
+                                <p class="text-muted mt-2">Your cart is currently empty</p>
+                            </div>
+
+                            <div *ngFor="let item of cart; let i = index" class="cart-item-row border-bottom py-3">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <div class="fw-bold text-dark">{{ item.product_name }}</div>
+                                        <div class="small text-muted font-monospace">{{ item.barcode }}</div>
+                                    </div>
+                                    <button class="btn btn-link text-danger p-0 border-0 shadow-none"
+                                        (click)="removeFromCart(i)" title="Remove item">
+                                        <i class="bi bi-x-circle-fill"></i>
+                                    </button>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="qty-control d-flex align-items-center bg-light rounded-pill p-1">
+                                        <button class="btn btn-sm btn-white rounded-circle shadow-sm p-0"
+                                            style="width: 24px; height: 24px;" (click)="updateQty(i, -1)">-</button>
+                                        <span class="mx-3 fw-bold">{{ item.qty }}</span>
+                                        <button class="btn btn-sm btn-white rounded-circle shadow-sm p-0"
+                                            style="width: 24px; height: 24px;" (click)="updateQty(i, 1)">+</button>
+                                    </div>
+                                    <div class="price-info text-end">
+                                        <div class="small text-muted">
+                                            @if (item.discount_percent > 0) {
+                                            <del>{{
+                                                decimalToNumber(item.sale_price) | currency:'IDR':'symbol':'1.0-0'
+                                                }}</del>
+                                            }
+                                            {{ decimalToNumber(item.sale_price) * (1 - item.discount_percent/100) |
+                                            currency:'IDR':'symbol':'1.0-0' }}
+                                        </div>
+                                        <div class="fw-bold text-success">{{ item.total |
+                                            currency:'IDR':'symbol':'1.0-0' }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light border-top-0 px-4 py-4">
+                        <div class="d-flex justify-content-between gap-2 mb-2">
+                            <span class="text-muted">Sub-total</span>
+                            <span class="fw-medium">{{ totals.subTotal | currency:'IDR':'symbol':'1.0-0' }}</span>
+                        </div>
+                        @if (totals.discountTotal > 0) {
+                        <div class="d-flex justify-content-between gap-2 mb-2 text-danger">
+                            <span>Discount</span>
+                            <span class="fw-medium">-{{ totals.discountTotal | currency:'IDR':'symbol':'1.0-0' }}</span>
+                        </div>
+                        }
+                        <div class="d-flex justify-content-between gap-2 mb-3 pb-3 border-bottom">
+                            <span class="text-muted">PPN (11%)</span>
+                            <span class="fw-medium">{{ totals.ppnTotal | currency:'IDR':'symbol':'1.0-0' }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between gap-2 align-items-center mb-4">
+                            <span class="fw-bold text-dark fs-5">Grand Total</span>
+                            <span class="fw-bold text-dark fs-4">{{ totals.grandTotal | currency:'IDR':'symbol':'1.0-0'
+                                }}</span>
+                        </div>
+                        <button class="btn btn-success btn-lg w-100 py-3 fw-bold rounded-3 shadow-sm border-0"
+                            [disabled]="cart.length === 0" (click)="confirmSelling()">
+                            <i class="bi bi-wallet2 me-2"></i> COMPLETE SALE
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<app-confirm-modal #confirmModal></app-confirm-modal>

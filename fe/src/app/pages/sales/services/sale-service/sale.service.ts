@@ -28,6 +28,8 @@ export class SaleService extends BaseService {
               product_name: item.product_name,
               brand_name: item.brand_name,
               barcode: item.barcode,
+              sale_price: item.sale_price,
+              discount_percent: item.discount_percent,
               item_qty: 0,
               total_qty: 0
             };
@@ -68,5 +70,17 @@ export class SaleService extends BaseService {
       url: Endpoint.SALE_STOCK,
       body: payload
     });
+  }
+
+  selling(payload: any): Observable<any> {
+    return this.postRequest({
+      url: Endpoint.SALE_SELLING,
+      body: payload
+    }).pipe(
+      map((res) => {
+        this.alert.success("Transaction success!");
+        return res;
+      })
+    );
   }
 }

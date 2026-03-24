@@ -92,4 +92,5 @@ export const Endpoint = {
   SALE_STOCK: `${api}sale/stock`,
   SALE_STOCK_PRODUCT_ID: (product_id: string) => `${api}sale/stock/product/${product_id}`,
   SALE_STOCK_ITEM_ID: (item_id: string) => `${api}sale/stock/item/${item_id}`,
+  SALE_SELLING: `${api}sale/selling`,
 }

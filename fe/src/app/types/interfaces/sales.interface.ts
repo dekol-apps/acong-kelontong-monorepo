@@ -36,6 +36,8 @@ export interface ISaleStockSummary {
   product_name: string;
   brand_name: string;
   barcode: string;
+  sale_price: string;
+  discount_percent: number;
   item_qty: number;
   total_qty: number;
 }
