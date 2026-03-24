@@ -57,7 +57,7 @@ export class GenericTable implements OnInit, OnDestroy {
 
   // trackByFn = trackByFn;
   @Input() columns: Array<ColumnProps> = [];
-  @Input() data: any[] = [];
+  @Input() data?: any[] = [];
   @Input() total: number = 0;
   //turn on / off function
   @Input() useSearch: boolean = false;
@@ -213,24 +213,24 @@ export class GenericTable implements OnInit, OnDestroy {
 
   isCheckedAll() {
     let checkeds = 0;
-    this.data.forEach(el => {
+    this.data?.forEach(el => {
       if (this.isChecked(el)) {
         checkeds += 1;
       }
     })
-    return checkeds === this.data.length;
+    return checkeds === this.data?.length;
   }
 
   onCheckedAll(evt: any) {
     if (evt.target.checked) {
-      this.data.forEach(el => {
+      this.data?.forEach(el => {
         if (!this.isChecked(el)) {
           this.checkBoxVal.push(el);
         };
       });
       this.trigerCheckboxChange();
     } else {
-      this.data.forEach((item) => {
+      this.data?.forEach((item) => {
         this.checkBoxVal.forEach((el, index) => {
           if (JSON.stringify(item) === JSON.stringify(el)) {
             this.checkBoxVal.splice(index, 1)

@@ -1,7 +1,9 @@
 import { Type } from 'class-transformer';
 import { IsObjectId } from 'src/global/is-object-id.decorator';
-import { IsNotEmpty, IsInt, Min, ArrayMinSize, IsArray, ValidateNested, IsDecimal } from 'class-validator';
+import { IsNotEmpty, IsInt, Min, ArrayMinSize, IsArray, ValidateNested, IsDecimal, IsEnum, IsOptional } from 'class-validator';
 import { Types } from 'mongoose';
+import { PaginationDto } from 'src/global/global.dto';
+import { ProductionEn } from './production.schema';
 
 export class ProductionDto {
   @IsObjectId()
@@ -35,4 +37,10 @@ export class ProductionIngredientItemDto {
   @IsInt()
   @Min(1)
   item_qty: number;
+}
+
+export class ListProductionDto extends PaginationDto {
+  @IsOptional()
+  @IsEnum(ProductionEn)
+  status?: ProductionEn;
 }

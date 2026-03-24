@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { MainLayout } from './layout/main-layout/main-layout';
-import { BRANDS, CASHIER, EXPENSES, CASHFLOW, PRODUCT, SUPPLIERS, USER, ROLE, DASHBOARD, ROLE_DETAIL, ROLE_CREATE, ROLE_EDIT, PURCHASE_ORDER, RECEIVE_ORDER, CAPITAL, SALES_HISTORY, INVENTORY, SHOWCASE, PURCHASE_ORDER_NEW, PURCHASE_ORDER_EDIT, APPROVAL, INVESTMENT, PURCHASE_ORDER_DETAIL, PURCHASE_ORDER_RECEIVE, INVENTORY_PRODUCT, INVENTORY_ITEM, INVENTORY_MOVEMENT, INVENTORY_MOVEMENT_DETAIL, INVENTORY_MOVEMENT_ITEM, INVENTORY_MOVEMENT_MANUAL, SALE_STOCK, SALE_STOCK_PRODUCT, SALE_STOCK_ITEM, SALE_STOCK_FORM, SALES_HISTORY_DETAIL, PRODUCTION } from './types/constants/menus';
+import { BRANDS, CASHIER, EXPENSES, CASHFLOW, PRODUCT, SUPPLIERS, USER, ROLE, DASHBOARD, ROLE_DETAIL, ROLE_CREATE, ROLE_EDIT, PURCHASE_ORDER, RECEIVE_ORDER, CAPITAL, SALES_HISTORY, INVENTORY, SHOWCASE, PURCHASE_ORDER_NEW, PURCHASE_ORDER_EDIT, APPROVAL, INVESTMENT, PURCHASE_ORDER_DETAIL, PURCHASE_ORDER_RECEIVE, INVENTORY_PRODUCT, INVENTORY_ITEM, INVENTORY_MOVEMENT, INVENTORY_MOVEMENT_DETAIL, INVENTORY_MOVEMENT_ITEM, INVENTORY_MOVEMENT_MANUAL, SALE_STOCK, SALE_STOCK_PRODUCT, SALE_STOCK_ITEM, SALE_STOCK_FORM, SALES_HISTORY_DETAIL, PRODUCTION, PRODUCTION_FORM, PRODUCTION_DETAIL } from './types/constants/menus';
 import { AuthGuardService } from './services/guards/auth-guard/auth-guard-service';
 import { PageGuardService } from './services/guards/page-guard/page-guard-service';
 
@@ -140,9 +140,32 @@ export const routes: Routes = [
       },
       {
         path: PRODUCTION.url,
-        canActivate: [PageGuardService],
         data: { ...PRODUCTION },
-        loadComponent: () => import('./pages/production/production').then(c => c.Production)
+        children: [
+          {
+            path: '',
+            canActivate: [PageGuardService],
+            loadComponent: () => import('./pages/asset/production/production').then(c => c.Production)
+          },
+          {
+            path: 'form',
+            canActivate: [PageGuardService],
+            data: { ...PRODUCTION_FORM },
+            loadComponent: () => import('./pages/asset/production-form/production-form').then(c => c.ProductionForm)
+          },
+          {
+            path: 'form/:id',
+            canActivate: [PageGuardService],
+            data: { ...PRODUCTION_FORM },
+            loadComponent: () => import('./pages/asset/production-form/production-form').then(c => c.ProductionForm)
+          },
+          {
+            path: 'detail/:id',
+            canActivate: [PageGuardService],
+            data: { ...PRODUCTION_DETAIL },
+            loadComponent: () => import('./pages/asset/production-detail/production-detail').then(c => c.ProductionDetail)
+          }
+        ]
       },
       {
         path: SUPPLIERS.url,

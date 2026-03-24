@@ -1,40 +1,78 @@
-import { Controller, Get, Post, Put, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Patch, Delete, Body, Param, Query, UseGuards, Res } from '@nestjs/common';
 import { Permission } from 'src/global/permission.decoratior';
 import { UAuthGuard } from '../auth/auth.guard';
 import { ProductionService } from './production.service';
-import { ProductionDto } from './production.dto';
-import { PaginationDto } from 'src/global/global.dto';
+import { ListProductionDto, ProductionDto } from './production.dto';
 import { Types } from 'mongoose';
-import { ProductionEn } from './production.schema';
+import { BaseResponse } from 'src/utils/base-response';
+import type { Response } from 'express';
 
 @UseGuards(UAuthGuard)
 @Controller('production')
 export class ProductionController {
-  constructor(private readonly productionService: ProductionService) {}
+  constructor(private readonly productionService: ProductionService) { }
 
   @Permission(['production.view'])
   @Get()
-  async list(@Query() pagination: PaginationDto) {
-    return this.productionService.list(pagination);
+  async list(
+    @Query() query: ListProductionDto,
+    @Res() res: Response,
+  ) {
+    try {
+      const filter = query.status
+        ? { column: 'status', value: query.status }
+        : undefined;
+      const { data, meta } = await this.productionService.list({ ...query, filter });
+      return BaseResponse.success({ res, option: { message: 'Success get list production', list: data, meta } });
+    } catch (err) {
+      return BaseResponse.error({ res, err });
+    }
   }
 
   @Permission(['production.view'])
-  @Get(':id')
-  async detail(@Param('id') id: string) {
-    return this.productionService.detail(new Types.ObjectId(id));
+  @Get(':production_id')
+  async detailProduction(
+    @Param('production_id') id: string,
+    @Res() res: Response,
+  ) {
+    try {
+      const productionId = new Types.ObjectId(id);
+      const production = await this.productionService.detail(productionId);
+      return BaseResponse.success({ res, option: { message: "Success get detail production", detail: production } });
+    } catch (err) {
+      return BaseResponse.error({ res, err });
+    }
   }
 
   @Permission(['production.create'])
-  @Post()
-  async create(@Body() dto: ProductionDto) {
-    return this.productionService.create(dto);
+  @Post('')
+  async createProduction(
+    @Body() body: ProductionDto,
+    @Res() res: Response,
+  ) {
+    try {
+      const production = await this.productionService.create(body);
+      return BaseResponse.success({ res, option: { message: "Success create production", detail: production } });
+    } catch (err) {
+      return BaseResponse.error({ res, err });
+    }
   }
 
   @Permission(['production.edit'])
-  @Put(':id')
-  async update(@Param('id') id: string, @Body() dto: ProductionDto) {
-    return this.productionService.update(new Types.ObjectId(id), dto);
+  @Put(':production_id')
+  async editProduction(
+    @Param('production_id') productionId: string,
+    @Body() body: ProductionDto,
+    @Res() res: Response,
+  ) {
+    try {
+      const production = await this.productionService.update(new Types.ObjectId(productionId), body);
+      return BaseResponse.success({ res, option: { message: "Success edit production", detail: production } });
+    } catch (err) {
+      return BaseResponse.error({ res, err });
+    }
   }
+
 
   @Permission(['production.edit'])
   @Patch(':id/start')
@@ -48,9 +86,18 @@ export class ProductionController {
     return this.productionService.finish(new Types.ObjectId(id));
   }
 
+
   @Permission(['production.delete'])
-  @Delete(':id')
-  async remove(@Param('id') id: string) {
-    return this.productionService.remove(new Types.ObjectId(id));
+  @Delete(':production_id')
+  async deleteProduction(
+    @Param('production_id') productionId: string,
+    @Res() res: Response,
+  ) {
+    try {
+      const production = await this.productionService.remove(new Types.ObjectId(productionId));
+      return BaseResponse.success({ res, option: { message: "Success delete production", detail: production } });
+    } catch (err) {
+      return BaseResponse.error({ res, err });
+    }
   }
 }

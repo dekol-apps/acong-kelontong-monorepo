@@ -23,13 +23,38 @@ export class ProductionService {
     @InjectModel(Product.name) private productModel: Model<Product>,
   ) { }
 
-  async list(pagination: PaginationDto): Promise<IListRes<ProductionDocument>> {
-    const params: IGetListParam = {
-      ...pagination,
-      searchFields: ['product_name'],
-      populate: { column: 'product' },
-    };
-    return this.global.getList(this.productionModel, params);
+  async list({
+    page,
+    size,
+    sortBy,
+    sortDir,
+    search,
+    filter,
+    start_date,
+    end_date
+  }: PaginationDto): Promise<IListRes<ProductionDocument>> {
+    const searchFields: string[] = ['product_name'];
+    const customConditions: any = {};
+    if (start_date && end_date) {
+      customConditions.createdAt = {
+        $gte: new Date(start_date),
+        $lte: new Date(end_date)
+      };
+    }
+    const list = await this.global.getList<Production>(
+      this.productionModel,
+      {
+        page,
+        size,
+        sortBy,
+        sortDir,
+        search,
+        searchFields,
+        filter,
+        customConditions
+      }
+    )
+    return list;
   }
 
   async detail(id: Types.ObjectId): Promise<ProductionDocument> {

@@ -94,4 +94,10 @@ export const Endpoint = {
   SALE_STOCK_ITEM_ID: (item_id: string) => `${api}sale/stock/item/${item_id}`,
   SALE_SELLING: `${api}sale/selling`,
   SALE_SELLING_ID: (id: string) => `${api}sale/selling/${id}`,
+
+  // Production Endpoint
+  PRODUCTION: `${api}production`,
+  PRODUCTION_ID: (id: string) => `${api}production/${id}`,
+  PRODUCTION_ID_START: (id: string) => `${api}production/${id}/start`,
+  PRODUCTION_ID_FINISH: (id: string) => `${api}production/${id}/finish`,
 }

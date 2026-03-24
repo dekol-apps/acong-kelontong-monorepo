@@ -205,6 +205,20 @@ export const PRODUCTION: IMenu = {
     labelKey: 'Production',
     permissions: ['production.view', 'production.create', 'production.edit', 'production.delete'],
 }
+export const PRODUCTION_FORM: IMenu = {
+    code: 'form',
+    url: 'production/form',
+    icon: '',
+    labelKey: 'Production Form',
+    permissions: ['production.create', 'production.edit'],
+}
+export const PRODUCTION_DETAIL: IMenu = {
+    code: 'production-detail',
+    url: 'production/detail/:id',
+    icon: '',
+    labelKey: 'Production Detail',
+    permissions: ['production.view'],
+}
 
 export const FINANCE: IMenu = {
     code: 'finance',
@@ -218,6 +232,20 @@ export const CASHFLOW: IMenu = {
     icon: '',
     labelKey: 'Cashflow',
     permissions: ['cashflow.view'],
+}
+export const CAPITAL: IMenu = {
+    code: 'capital',
+    url: 'capital',
+    icon: '',
+    labelKey: 'Capital',
+    permissions: ['investment.view'],
+}
+export const SHOWCASE: IMenu = {
+    code: 'showcase',
+    url: 'showcase',
+    icon: '',
+    labelKey: 'Showcase',
+    permissions: ['product.view'],
 }
 export const EXPENSES: IMenu = {
     code: 'expenses',

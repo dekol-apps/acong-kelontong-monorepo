@@ -59,6 +59,17 @@ export class BaseService {
     return this.http.put(req.url, req.body, { params: req.qParams, withCredentials: true });
   }
 
+  patchRequest(req: IReqMutation): Observable<any> {
+    if (req.qParams) {
+      req.qParams['spinner'] = req.spinner
+    } else {
+      req.qParams = {
+        spinner: req.spinner
+      }
+    }
+    return this.http.patch(req.url, req.body, { params: req.qParams, withCredentials: true });
+  }
+
   deleteRequest(req: IRequest): Observable<any> {
     const headers = {
       'Content-Type': 'application/json',

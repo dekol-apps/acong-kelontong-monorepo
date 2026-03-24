@@ -1,0 +1,80 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" appFormValidation>
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">{{ productionId ? 'Edit' : 'New' }} Production</h4>
+        </div>
+        <div class="card-body d-flex flex-column gap-4">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label id="product-label" class="form-label">Product to Produce</label>
+                    <div class="dropdown-container">
+                        <app-dropdown-search aria-labelledby="product-label" [items]="filteredProducts"
+                            [placeholder]="'Search Product...'" [value]="form.get('product_name')?.value"
+                            (onSelect)="selectMainProduct($event)">
+                        </app-dropdown-search>
+                        <input type="hidden" formControlName="product">
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="item_qty" class="form-label">Quantity</label>
+                    <input type="number" id="item_qty" class="form-control" formControlName="item_qty">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="price_per_item" class="form-label">Price Per Item (Est.)</label>
+                    <input type="number" id="price_per_item" class="form-control" formControlName="price_per_item">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="operational_cost" class="form-label">Operational Cost</label>
+                    <input type="number" id="operational_cost" class="form-control" formControlName="operational_cost">
+                </div>
+            </div>
+            <hr>
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Ingredients</h5>
+                <button type="button" class="btn btn-sm btn-outline-primary" (click)="addIngredient()">
+                    <i class="bi bi-plus"></i> Add Ingredient
+                </button>
+            </div>
+            <app-generic-table [columns]="columns" [data]="ingredients.controls" [usePagination]="false">
+                <div appTableColumn customColumnId="product">
+                    <ng-template let-item let-index="index">
+                        <div [formGroup]="$any(item)">
+                            <app-dropdown-search aria-label="Ingredient Search" [items]="filteredProducts"
+                                [placeholder]="'Search Ingredient...'" [value]="item.get('product_name')?.value"
+                                (onSelect)="selectIngredientProduct(index, $event)">
+                            </app-dropdown-search>
+                            <input type="hidden" formControlName="product">
+                        </div>
+                    </ng-template>
+                </div>
+
+                <div appTableColumn customColumnId="item_qty">
+                    <ng-template let-item>
+                        <div [formGroup]="$any(item)">
+                            <input aria-label="Ingredient Quantity" type="number" class="form-control form-control-sm"
+                                formControlName="item_qty">
+                        </div>
+                    </ng-template>
+                </div>
+
+                <div appTableColumn customColumnId="action">
+                    <ng-template let-index="index">
+                        <button type="button" aria-label="Remove Ingredient" class="btn btn-sm btn-outline-danger"
+                            (click)="removeIngredient(index)" [disabled]="ingredients.length <= 1">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </ng-template>
+                </div>
+            </app-generic-table>
+        </div>
+        <div class="card-footer d-flex gap-2">
+            <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
+                {{ productionId ? 'Update' : 'Create' }} Production
+            </button>
+        </div>
+    </div>
+</form>
