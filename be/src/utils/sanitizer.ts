@@ -15,11 +15,14 @@ export function sanitizeValue(value: any): any {
 
 export function sanitizeObject(obj: any): any {
   if (Array.isArray(obj)) {
-    return obj.map((item) => sanitizeObject(item));
-  }
-
-  if (obj && typeof obj === 'string') {
-    return sanitizeValue(obj);
+    obj.forEach((item, index) => {
+      if (item && typeof item === 'string') {
+        obj[index] = sanitizeValue(item);
+      } else {
+        sanitizeObject(item);
+      }
+    });
+    return obj;
   }
 
   if (obj && typeof obj === 'object' && !(obj instanceof Types.ObjectId)) {
