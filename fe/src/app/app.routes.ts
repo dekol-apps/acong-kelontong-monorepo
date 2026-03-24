@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { MainLayout } from './layout/main-layout/main-layout';
-import { BRANDS, CASHIER, EXPENSES, CASHFLOW, PRODUCT, SUPPLIERS, USER, ROLE, DASHBOARD, ROLE_DETAIL, ROLE_CREATE, ROLE_EDIT, PURCHASE_ORDER, RECEIVE_ORDER, CAPITAL, SALES_HISTORY, INVENTORY, SHOWCASE, PURCHASE_ORDER_NEW, PURCHASE_ORDER_EDIT, APPROVAL, INVESTMENT, PURCHASE_ORDER_DETAIL, PURCHASE_ORDER_RECEIVE, INVENTORY_PRODUCT, INVENTORY_ITEM, INVENTORY_MOVEMENT, INVENTORY_MOVEMENT_DETAIL, INVENTORY_MOVEMENT_ITEM, INVENTORY_MOVEMENT_MANUAL, SALE_STOCK, SALE_STOCK_PRODUCT, SALE_STOCK_ITEM, SALE_STOCK_FORM, SALES_HISTORY_DETAIL, PRODUCTION, PRODUCTION_FORM, PRODUCTION_DETAIL } from './types/constants/menus';
+import { BRANDS, CASHIER, EXPENSES, CASHFLOW, CASHFLOW_DETAIL, FINANCE_REPORT, PRODUCT, SUPPLIERS, USER, ROLE, DASHBOARD, ROLE_DETAIL, ROLE_CREATE, ROLE_EDIT, PURCHASE_ORDER, RECEIVE_ORDER, CAPITAL, SALES_HISTORY, INVENTORY, SHOWCASE, PURCHASE_ORDER_NEW, PURCHASE_ORDER_EDIT, APPROVAL, INVESTMENT, PURCHASE_ORDER_DETAIL, PURCHASE_ORDER_RECEIVE, INVENTORY_PRODUCT, INVENTORY_ITEM, INVENTORY_MOVEMENT, INVENTORY_MOVEMENT_DETAIL, INVENTORY_MOVEMENT_ITEM, INVENTORY_MOVEMENT_MANUAL, SALE_STOCK, SALE_STOCK_PRODUCT, SALE_STOCK_ITEM, SALE_STOCK_FORM, SALES_HISTORY_DETAIL, PRODUCTION, PRODUCTION_FORM, PRODUCTION_DETAIL } from './types/constants/menus';
 import { AuthGuardService } from './services/guards/auth-guard/auth-guard-service';
 import { PageGuardService } from './services/guards/page-guard/page-guard-service';
 
@@ -223,7 +223,19 @@ export const routes: Routes = [
         path: CASHFLOW.url,
         canActivate: [PageGuardService],
         data: { ...CASHFLOW },
-        loadComponent: () => import('./pages/forms/general-elements/general-elements').then(c => c.GeneralElements)
+        loadComponent: () => import('./pages/finance/cashflow/cashflow').then(c => c.Cashflow)
+      },
+      {
+        path: CASHFLOW_DETAIL.url,
+        canActivate: [PageGuardService],
+        data: { ...CASHFLOW_DETAIL },
+        loadComponent: () => import('./pages/finance/cashflow-detail/cashflow-detail').then(c => c.CashflowDetail)
+      },
+      {
+        path: FINANCE_REPORT.url,
+        canActivate: [PageGuardService],
+        data: { ...FINANCE_REPORT },
+        loadComponent: () => import('./pages/finance/finance-report/finance-report').then(c => c.FinanceReport)
       },
       {
         path: EXPENSES.url,

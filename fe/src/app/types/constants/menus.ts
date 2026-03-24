@@ -233,6 +233,20 @@ export const CASHFLOW: IMenu = {
     labelKey: 'Cashflow',
     permissions: ['cashflow.view'],
 }
+export const CASHFLOW_DETAIL: IMenu = {
+    code: 'cashflow-detail',
+    url: 'cashflow/:accounting_id',
+    icon: '',
+    labelKey: 'Cashflow Detail',
+    permissions: ['cashflow.view'],
+}
+export const FINANCE_REPORT: IMenu = {
+    code: 'finance-report',
+    url: 'finance-report',
+    icon: '',
+    labelKey: 'Finance Report',
+    permissions: ['cashflow.view'],
+}
 export const CAPITAL: IMenu = {
     code: 'capital',
     url: 'capital',
@@ -367,6 +381,7 @@ export const Menus: IMenu[] = [
     {
         ...FINANCE,
         children: [
+            FINANCE_REPORT,
             CASHFLOW,
             EXPENSES,
         ]

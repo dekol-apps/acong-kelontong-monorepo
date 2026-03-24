@@ -11,7 +11,7 @@ import { AccountingSnapshot } from './accounting-snapshot.schema';
 import { InventoryItem } from '../inventory-item/inventory-item.schema';
 import { decimalToNumber, toDecimal, toDecimal128 } from 'src/utils/helper';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { TaxTransactionFilterDto } from './accounting.dto';
+import { ListAccountingDto, TaxTransactionFilterDto } from './accounting.dto';
 import Decimal from 'decimal.js';
 
 export interface IPortfolioData {
@@ -437,5 +437,39 @@ export class AccountingService {
   async existsByOrderId(order_id: Types.ObjectId): Promise<boolean> {
     const exists = await this.accountingModel.exists({ order_id });
     return !!exists;
+  }
+
+  async listAccountingHistory(pagination: ListAccountingDto): Promise<IListRes<Accounting>> {
+    const { page, size, sortBy, sortDir, search, flow_type, order_type, startDate, endDate } = pagination;
+
+    const dbFilter: any = {};
+    if (flow_type) dbFilter['flow_type'] = flow_type;
+    if (order_type) dbFilter['order_type'] = order_type;
+    if (startDate || endDate) {
+      dbFilter['record_date'] = {};
+      if (startDate) dbFilter['record_date']['$gte'] = new Date(startDate);
+      if (endDate) dbFilter['record_date']['$lte'] = new Date(endDate);
+    }
+
+    return this.global.getList<Accounting>(
+      this.accountingModel,
+      {
+        page,
+        size,
+        sortBy: sortBy || 'record_date',
+        sortDir: sortDir || 'desc',
+        search,
+        searchFields: ['order_type'],
+        filter: dbFilter,
+      }
+    );
+  }
+
+  async getAccountingById(id: string): Promise<Accounting> {
+    const item = await this.accountingModel.findById(id);
+    if (!item) {
+      throw BaseResponse.notFound({ err: 'getAccountingById !item', option: { message: 'Accounting record not found' } });
+    }
+    return item;
   }
 }

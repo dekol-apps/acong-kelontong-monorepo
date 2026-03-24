@@ -1,0 +1,30 @@
+.cashflow-page {
+  .cashflow-tabs {
+    border-bottom: 2px solid #dee2e6;
+    margin-top: 1rem;
+
+    .nav-link {
+      font-weight: 500;
+      color: #6c757d;
+      border: none;
+      border-bottom: 3px solid transparent;
+      border-radius: 0;
+      padding: 0.6rem 1.2rem;
+      transition: all 0.2s ease;
+      background: transparent;
+      cursor: pointer;
+
+      &:hover {
+        color: #0d6efd;
+        border-bottom-color: #0d6efd40;
+      }
+
+      &.active {
+        color: #0d6efd;
+        border-bottom-color: #0d6efd;
+        background: transparent;
+        font-weight: 600;
+      }
+    }
+  }
+}

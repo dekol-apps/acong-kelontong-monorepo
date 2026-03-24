@@ -4,6 +4,8 @@ const api = `${environment.apiUrl}/`;
 
 export const Endpoint = {
   ACCOUNTING: `${api}accounting`,
+  ACCOUNTING_HISTORY: `${api}accounting/history`,
+  ACCOUNTING_HISTORY_ID: (id: string) => `${api}accounting/history/${id}`,
 
   INVESTMENT: `${api}investment`,
   INVESTMENT_ID: (id: string) => {

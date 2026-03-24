@@ -1,9 +1,9 @@
-import { Controller, Get, Query, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Query, Res, UseGuards } from '@nestjs/common';
 import { UAuthGuard } from '../auth/auth.guard';
 import { AccountingService } from './accounting.service';
 import type { Response } from 'express';
 import { BaseResponse } from 'src/utils/base-response';
-import { TaxTransactionFilterDto } from './accounting.dto';
+import { ListAccountingDto, TaxTransactionFilterDto } from './accounting.dto';
 import { Permission } from 'src/global/permission.decoratior';
 
 
@@ -22,6 +22,34 @@ export class AccountingController {
     try {
       const detail = await this.service.getPortofolio();
       return BaseResponse.success({ res, option: { message: 'Success get portofolio', detail } });
+    } catch (err) {
+      return BaseResponse.error({ res, err })
+    }
+  }
+
+  @Permission(['cashflow.view'])
+  @Get('history')
+  async getAccountingHistory(
+    @Res() res: Response,
+    @Query() filter: ListAccountingDto,
+  ) {
+    try {
+      const result = await this.service.listAccountingHistory(filter);
+      return BaseResponse.success({ res, option: { message: 'Success get accounting history', list: result.data, meta: result.meta } });
+    } catch (err) {
+      return BaseResponse.error({ res, err })
+    }
+  }
+
+  @Permission(['cashflow.view'])
+  @Get('history/:id')
+  async getAccountingDetail(
+    @Res() res: Response,
+    @Param('id') id: string,
+  ) {
+    try {
+      const detail = await this.service.getAccountingById(id);
+      return BaseResponse.success({ res, option: { message: 'Success get accounting detail', detail } });
     } catch (err) {
       return BaseResponse.error({ res, err })
     }

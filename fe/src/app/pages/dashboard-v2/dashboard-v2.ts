@@ -7,8 +7,12 @@ export interface IPortofolio {
   investment?: number,
   capValue?: number,
   totalAsset?: number,
+  totalAssets?: number,
+  inventoryValue?: number,
   revenue?: number,
   profit?: number,
+  cogs?: number,
+  equity?: number,
 }
 
 @Component({
