@@ -12,6 +12,8 @@ import { TableColumn } from '../../../shared/directives/table-column/table-colum
 import { FormValidation } from '../../../shared/directives/form-validation/form-validation';
 import { FlowType, OrderType } from '../../../types/enums/common.enum';
 import { defaultPpnRate } from '../../../types/constants/common.constants';
+import { DropdownSearch } from '../../../shared/components/dropdown-search/dropdown-search';
+import { ISelectValue } from '../../../types/interfaces/common.interface';
 
 @Component({
   selector: 'app-inventory-movement-form',
@@ -23,7 +25,8 @@ import { defaultPpnRate } from '../../../types/constants/common.constants';
     NgbDropdownModule,
     GenericTable,
     TableColumn,
-    FormValidation
+    FormValidation,
+    DropdownSearch
   ],
   templateUrl: './inventory-movement-form.html',
   styleUrl: './inventory-movement-form.scss'
@@ -31,7 +34,7 @@ import { defaultPpnRate } from '../../../types/constants/common.constants';
 export class InventoryMovementForm implements OnInit {
   form: FormGroup;
   products: IProduct[] = [];
-  filteredProducts: IProduct[] = [];
+  filteredProducts: ISelectValue[] = [];
   searchControl = new FormControl('');
   isLoading = false;
 
@@ -105,20 +108,16 @@ export class InventoryMovementForm implements OnInit {
     this.items.removeAt(index);
   }
 
-  getProducts(): void {
-    this.productService.getProducts({ page: 1, size: 1000 }).subscribe({
+  getProducts(search: string = ''): void {
+    this.productService.getProducts({ search, page: 1, size: 50 }).subscribe({
       next: (res) => {
         this.products = res.list || [];
-        this.filteredProducts = [...this.products];
+        this.filteredProducts = this.products.map(p => ({
+          value: p,
+          label: p.product_name
+        }));
       }
     });
-  }
-
-  filterProducts(event: any): void {
-    const query = event.target.value.toLowerCase();
-    this.filteredProducts = this.products.filter(p =>
-      p.product_name.toLowerCase().includes(query)
-    );
   }
 
   selectProduct(index: number, product: IProduct): void {

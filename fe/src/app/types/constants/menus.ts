@@ -312,8 +312,7 @@ export const Menus: IMenu[] = [
         children: [
             CASHIER,
             SALES_HISTORY,
-            SALE_STOCK,
-            SALE_STOCK_FORM
+            SALE_STOCK
         ]
     },
     {
