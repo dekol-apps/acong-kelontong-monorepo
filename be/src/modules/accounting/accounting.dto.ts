@@ -26,11 +26,11 @@ export class TaxTransactionFilterDto extends PaginationDto {
 
 export class ListAccountingDto extends PaginationDto {
   @IsOptional()
-  @IsEnum(FlowType)
+  @IsEnum(FlowType, { message: `flow_type must be either 'IN' or 'OUT'` })
   flow_type?: FlowType;
 
   @IsOptional()
-  @IsEnum(OrderType)
+  @IsEnum(OrderType, { message: `order_type must be either 'SALES' or 'PURCHASE'` })
   order_type?: OrderType;
 
   @IsOptional()

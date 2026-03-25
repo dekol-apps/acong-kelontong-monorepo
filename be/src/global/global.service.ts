@@ -17,7 +17,7 @@ export class IGetListParam {
   sortBy?: string = '';
   sortDir?: 'asc' | 'desc' = 'asc';
   search?: string = '';
-  searchFields: string[] = [];
+  searchFields?: string[] = [];
   filter?: TOneOrMany<FilterDto>;
   // allow single or multiple populate options
   populate?: TOneOrMany<PopulateParam>;
@@ -46,8 +46,8 @@ export class GlobalService {
     const conditions: FilterQuery<M> = (params.customConditions ? { ...params.customConditions } : {}) as FilterQuery<M>;
 
     // 🔎 Search
-    if (params.search && params.searchFields.length > 0) {
-      const conditionList = params.searchFields.map((field: string) => ({
+    if (params.search && params.searchFields && params.searchFields?.length > 0) {
+      const conditionList = params.searchFields?.map((field: string) => ({
         [field]: { $regex: params.search, $options: 'i' },
       } as FilterQuery<M>));
       conditions['$or'] = conditionList;

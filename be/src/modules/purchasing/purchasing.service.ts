@@ -584,9 +584,9 @@ export class PurchasingService {
         tax_base: edit.detail.total_purchase_price,
         ppn_rate: defaultPpnRate,
         ppn_type: dto.ppn_type,
-        ppn_amount: toDecimal128(toDecimal(dto.ppn_amount)),
-        payment_realization: toDecimal128(toDecimal(dto.payment_realization)),
-        shipping_cost: toDecimal128(toDecimal(dto.shipping_cost)),
+        ppn_amount: dto.ppn_amount ?? Types.Decimal128.fromString('0'),
+        payment_realization: dto.payment_realization,
+        shipping_cost: dto.shipping_cost ?? Types.Decimal128.fromString('0'),
       });
       const message = `PPn calculation result invalid:\n\nppn type: ${dto.ppn_type}\nppn rate: ${dto.ppn_rate}\nppn amount: ${dto.ppn_amount?.toString() ?? ''}\ntax base: ${edit.detail.total_purchase_price.toString()}\nexpected ppn amount (rounded): ${expected_ppn_amount.toString()}\nexpected minimum payment: ${expected_payable.toString()}\n`
       if (!is_ppn_valid) throw BaseResponse.invalid({ option: { message } })

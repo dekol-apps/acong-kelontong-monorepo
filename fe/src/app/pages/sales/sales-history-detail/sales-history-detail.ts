@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { SaleService } from '../services/sale-service/sale.service';
@@ -14,7 +14,8 @@ import { ColumnProps, GenericTable } from '../../../shared/components/generic-ta
 })
 export class SalesHistoryDetail implements OnInit {
   isLoading: boolean = false;
-  saleDetail?: ISale;
+  @Input() custom?: boolean;
+  @Input() saleDetail?: ISale;
 
   columns: Array<ColumnProps> = [
     { label: 'Barcode', id: 'barcode' },

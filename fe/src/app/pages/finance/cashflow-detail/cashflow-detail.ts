@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { AccountingService } from '../../../services/accounting/accounting.service';
 import { IAccounting } from '../../../types/interfaces/finance.interface';
-import { FlowType } from '../../../types/enums/common.enum';
+import { FlowType, OrderType } from '../../../types/enums/common.enum';
+import { SalesHistoryDetail } from '../../sales/sales-history-detail/sales-history-detail';
 
 @Component({
   selector: 'app-cashflow-detail',
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, SalesHistoryDetail],
   templateUrl: './cashflow-detail.html',
   styleUrl: './cashflow-detail.scss',
 })
@@ -15,6 +16,7 @@ export class CashflowDetail implements OnInit {
   isLoading = false;
   detail?: IAccounting;
   FlowType = FlowType;
+  OrderType = OrderType
 
   private route = inject(ActivatedRoute);
   private accountingService = inject(AccountingService);

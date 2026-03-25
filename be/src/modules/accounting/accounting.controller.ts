@@ -5,6 +5,7 @@ import type { Response } from 'express';
 import { BaseResponse } from 'src/utils/base-response';
 import { ListAccountingDto, TaxTransactionFilterDto } from './accounting.dto';
 import { Permission } from 'src/global/permission.decoratior';
+import { FlowType } from 'src/types/interfaces';
 
 
 @UseGuards(UAuthGuard)
@@ -31,10 +32,10 @@ export class AccountingController {
   @Get('history')
   async getAccountingHistory(
     @Res() res: Response,
-    @Query() filter: ListAccountingDto,
+    @Query() dto: ListAccountingDto,
   ) {
     try {
-      const result = await this.service.listAccountingHistory(filter);
+      const result = await this.service.listAccountingHistory(dto);
       return BaseResponse.success({ res, option: { message: 'Success get accounting history', list: result.data, meta: result.meta } });
     } catch (err) {
       return BaseResponse.error({ res, err })

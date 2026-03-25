@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, ClientSession, Types } from 'mongoose';
-import { GlobalService } from 'src/global/global.service';
+import { GlobalService, IGetListParam } from 'src/global/global.service';
 import { CurrencyEn, FlowType, OrderType } from 'src/types/interfaces';
 import { IListRes } from '../../types/interfaces';
 import { BaseResponse } from 'src/utils/base-response';
@@ -439,28 +439,31 @@ export class AccountingService {
     return !!exists;
   }
 
-  async listAccountingHistory(pagination: ListAccountingDto): Promise<IListRes<Accounting>> {
-    const { page, size, sortBy, sortDir, search, flow_type, order_type, startDate, endDate } = pagination;
-
-    const dbFilter: any = {};
-    if (flow_type) dbFilter['flow_type'] = flow_type;
-    if (order_type) dbFilter['order_type'] = order_type;
-    if (startDate || endDate) {
-      dbFilter['record_date'] = {};
-      if (startDate) dbFilter['record_date']['$gte'] = new Date(startDate);
-      if (endDate) dbFilter['record_date']['$lte'] = new Date(endDate);
+  async listAccountingHistory(dto: ListAccountingDto): Promise<IListRes<Accounting>> {
+    const filter = [
+      ...(dto.flow_type ? [{ column: 'flow_type', value: dto.flow_type }] : []),
+      ...(dto.order_type ? [{ column: 'order_type', value: dto.order_type }] : []),
+    ];
+    let customConditions = {};
+    if (dto.startDate && dto.endDate) {
+      customConditions = {
+        createdAt: {
+          $gte: new Date(dto.startDate),
+          $lte: new Date(dto.endDate)
+        }
+      }
     }
-
     return this.global.getList<Accounting>(
       this.accountingModel,
       {
-        page,
-        size,
-        sortBy: sortBy || 'record_date',
-        sortDir: sortDir || 'desc',
-        search,
-        searchFields: ['order_type'],
-        filter: dbFilter,
+        page: dto.page,
+        size: dto.size,
+        sortBy: dto.sortBy || 'record_date',
+        sortDir: dto.sortDir || 'desc',
+        search: dto.search,
+        searchFields: ['transaction_amount', 'order_data', 'tax_base', 'ppn_amount', 'pph_amount', 'tax_facture_number'],
+        filter,
+        customConditions
       }
     );
   }

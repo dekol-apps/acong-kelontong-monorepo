@@ -232,10 +232,10 @@ export class SaleService {
     const grandTotal = totalBeforeTax.plus(totalPpn);
     return {
       ppn_rate: defaultPpnRate,
-      total_before_tax: toDecimal128(totalBeforeTax),
-      total_ppn: toDecimal128(totalPpn),
-      grand_total: toDecimal128(grandTotal),
-      total_discount: toDecimal128(totalDiscount),
+      total_before_tax: toDecimal128(totalBeforeTax.toDP(0)),
+      total_ppn: toDecimal128(totalPpn.toDP(0)),
+      grand_total: toDecimal128(grandTotal.toDP(0)),
+      total_discount: toDecimal128(totalDiscount.toDP(0)),
       total_cogs: toDecimal128(totalCogs),
     };
   }
