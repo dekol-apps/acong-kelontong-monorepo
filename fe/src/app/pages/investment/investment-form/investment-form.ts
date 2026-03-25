@@ -5,7 +5,7 @@ import { AlertService } from '../../../shared/components/alert/alert-service';
 import { IRole } from '../../../types/interfaces/user.interface';
 import { FormValidation } from '../../../shared/directives/form-validation/form-validation';
 import { IFielImg } from '../../../shared/components/drag-drop-file/drag-drop-file.component';
-import { decimalToNumber, objToFormData } from '../../../utils/helper';
+import { MONEY_REGEX, decimalToNumber, objToFormData, toMoneyString } from '../../../utils/helper';
 import { DragDropFileMulti } from '../../../shared/components/drag-drop-file-multi/drag-drop-file-multi';
 import { InvestmentType } from '../../../types/enums/common.enum';
 
@@ -28,7 +28,7 @@ export class InvestmentForm implements AfterViewInit {
   roles: IRole[] = [];
 
   form: FormGroup = new FormGroup({
-    transaction_amount: new FormControl(null, [Validators.required]),
+    transaction_amount: new FormControl(null, [Validators.required, Validators.pattern(MONEY_REGEX)]),
     investment_type: new FormControl(null, [Validators.required]),
     attachments: new FormControl(null),
     description: new FormControl(null),
@@ -70,6 +70,7 @@ export class InvestmentForm implements AfterViewInit {
     if (this.form.invalid) return this.alert.error('Please check your inputs');
     const body = {
       ...this.form.value,
+      transaction_amount: toMoneyString(this.form.value.transaction_amount),
       attachments: this.form.value.attachments?.map(it => it.file ?? it.src)
     };
     const formData = objToFormData(body, { fileFields: ['attachments'] });

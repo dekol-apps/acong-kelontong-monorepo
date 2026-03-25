@@ -52,16 +52,16 @@
                         <tbody>
                             <tr>
                                 <th class="text-muted fw-normal ps-3" style="width: 150px;">Price Per Item:</th>
-                                <td>{{ detail?.price_per_item | currency:'IDR':'symbol':'1.0-2' }}</td>
+                                <td>{{ detail?.price_per_item | currency:'IDR':'symbol':'1.2-2' }}</td>
                             </tr>
                             <tr>
                                 <th class="text-muted fw-normal ps-3">Operational Cost:</th>
-                                <td>{{ detail?.operational_cost | currency:'IDR':'symbol':'1.0-2' }}</td>
+                                <td>{{ detail?.operational_cost | currency:'IDR':'symbol':'1.2-2' }}</td>
                             </tr>
                             <tr class="border-top">
                                 <th class="text-muted fw-bold ps-3">Grand Total Cost:</th>
                                 <td class="fw-bold">
-                                    <strong>{{ detail?.grand_total_cost | currency:'IDR':'symbol':'1.0-2' }}</strong>
+                                    <strong>{{ detail?.grand_total_cost | currency:'IDR':'symbol':'1.2-2' }}</strong>
                                 </td>
                             </tr>
                         </tbody>

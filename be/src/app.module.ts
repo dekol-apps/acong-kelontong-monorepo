@@ -64,6 +64,7 @@ import { ProductionController } from './modules/production/production.controller
 import { ProductionService } from './modules/production/production.service';
 import { Production, ProductionSchema } from './modules/production/production.schema';
 import { ProductionIngredient, ProductionIngredientSchema } from './modules/production/production-ingerdient.schema';
+import { decimal128MoneyPlugin } from './database/plugins/decimal128-money.plugin';
 
 @Module({
   imports: [
@@ -74,6 +75,10 @@ import { ProductionIngredient, ProductionIngredientSchema } from './modules/prod
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         uri: config.get<string>('MONGO_URI'),
+        connectionFactory: (connection) => {
+          connection.plugin(decimal128MoneyPlugin);
+          return connection;
+        },
       }),
     }),
     MailerModule.forRootAsync({

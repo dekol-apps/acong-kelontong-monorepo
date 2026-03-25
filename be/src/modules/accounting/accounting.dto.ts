@@ -1,11 +1,12 @@
-import { IsNotEmpty, IsOptional, IsString, IsDecimal, IsEnum } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsEnum } from 'class-validator';
 import { PaginationDto } from 'src/global/global.dto';
 
 import { Types } from 'mongoose';
 import { FlowType, OrderType } from 'src/types/interfaces';
+import { IsMoney } from 'src/global/is-money.decorator';
 
 export class AccountingDto {
-  @IsDecimal()
+  @IsMoney()
   @IsNotEmpty()
   transaction_amount: Types.Decimal128;
 }

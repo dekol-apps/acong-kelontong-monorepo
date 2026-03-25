@@ -1,9 +1,10 @@
 import { Type } from 'class-transformer';
 import { IsObjectId } from 'src/global/is-object-id.decorator';
-import { IsNotEmpty, IsInt, Min, ArrayMinSize, IsArray, ValidateNested, IsDecimal, IsEnum, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsInt, Min, ArrayMinSize, IsArray, ValidateNested, IsEnum, IsOptional } from 'class-validator';
 import { Types } from 'mongoose';
 import { PaginationDto } from 'src/global/global.dto';
 import { ProductionEn } from './production.schema';
+import { IsMoney } from 'src/global/is-money.decorator';
 
 export class ProductionDto {
   @IsObjectId()
@@ -15,11 +16,11 @@ export class ProductionDto {
   item_qty: number; // Product being made qty
 
   @IsNotEmpty()
-  @IsDecimal()
+  @IsMoney()
   price_per_item: Types.Decimal128;
 
   @IsNotEmpty()
-  @IsDecimal()
+  @IsMoney()
   operational_cost: Types.Decimal128;
 
   @IsArray()

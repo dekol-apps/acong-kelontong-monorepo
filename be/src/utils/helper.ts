@@ -74,31 +74,67 @@ Decimal.set({
   precision: 20
 }); // middle rounding: 10.4 = 10, 10.5 = 11
 
+export const MONEY_SCALE = 2;
+export const TAX_REPORTING_SCALE = 0;
+
 export const toDecimal = (val: Types.Decimal128 | number | undefined) =>
   new Decimal(val?.toString() ?? 0);
 
 export const toDecimal128 = (val: Decimal, scale?: number) =>
-  Types.Decimal128.fromString(scale !== undefined ? val.toFixed(scale) : val.toString());
+  Types.Decimal128.fromString(val.toFixed(scale ?? MONEY_SCALE));
+
+type MoneyInput = Types.Decimal128 | Decimal | number | string | undefined | null;
+
+const normalizeMoneyInput = (val: MoneyInput): Decimal.Value => {
+  if (val instanceof Decimal) return val;
+  if (val instanceof Types.Decimal128) return val.toString();
+  if (typeof val === 'string' || typeof val === 'number') return val;
+  return 0;
+};
+
+export const toMoneyDecimal = (val: MoneyInput) =>
+  new Decimal(normalizeMoneyInput(val)).toDecimalPlaces(MONEY_SCALE, Decimal.ROUND_HALF_UP);
+
+export const toTaxReportingDecimal = (val: MoneyInput) =>
+  new Decimal(normalizeMoneyInput(val)).toDecimalPlaces(TAX_REPORTING_SCALE, Decimal.ROUND_HALF_UP);
+
+export const isMaxTwoDecimalMoney = (val: MoneyInput) => {
+  if (val === undefined || val === null || val === '') return true;
+  const dec = new Decimal(normalizeMoneyInput(val));
+  return dec.equals(dec.toDecimalPlaces(MONEY_SCALE, Decimal.ROUND_HALF_UP));
+};
+
+export const toMoneyDecimal128 = (val: MoneyInput) =>
+  Types.Decimal128.fromString(toMoneyDecimal(val).toFixed(MONEY_SCALE));
+
+export const toTaxReportingDecimal128 = (val: MoneyInput) =>
+  Types.Decimal128.fromString(toTaxReportingDecimal(val).toFixed(TAX_REPORTING_SCALE));
+
+export const isWholeRupiahMoney = (val: MoneyInput) => {
+  if (val === undefined || val === null || val === '') return true;
+  const dec = new Decimal(normalizeMoneyInput(val));
+  return dec.equals(dec.toDecimalPlaces(TAX_REPORTING_SCALE, Decimal.ROUND_HALF_UP));
+};
 
 export function addDecimal(a?: Types.Decimal128, b?: Types.Decimal128) {
   const decA = new Decimal(a?.toString() ?? 0);
   const decB = new Decimal(b?.toString() ?? 0);
   const result = new Decimal(decA.toString()).plus(new Decimal(decB.toString()));
-  return Types.Decimal128.fromString(result.toFixed());
+  return Types.Decimal128.fromString(result.toFixed(MONEY_SCALE));
 }
 
 export function subtractDecimal(a?: Types.Decimal128, b?: Types.Decimal128) {
   const decA = new Decimal(a?.toString() ?? 0);
   const decB = new Decimal(b?.toString() ?? 0);
   const result = new Decimal(decA.toString()).minus(new Decimal(decB.toString()));
-  return Types.Decimal128.fromString(result.toFixed());
+  return Types.Decimal128.fromString(result.toFixed(MONEY_SCALE));
 }
 
 export function multiplyDecimal(a?: Types.Decimal128, b?: number) {
   const decimal = new Decimal(a?.toString() ?? 0);
   const multiplier = new Decimal(b ?? 0);
   const result = decimal.times(multiplier);
-  return Types.Decimal128.fromString(result.toFixed());
+  return Types.Decimal128.fromString(result.toFixed(MONEY_SCALE));
 }
 
 export function decimalToNumber(val?: Types.Decimal128 | Decimal) {

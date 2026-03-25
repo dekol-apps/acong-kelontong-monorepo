@@ -523,25 +523,25 @@ export class PurchasingService {
       const base = total.div(new Decimal(1).plus(ppnRate));
       expectedPpn = total.minus(base);
     }
-    expectedPpn = expectedPpn.toDP(0);
+    expectedPpn = expectedPpn.toDP(2);
     // =====================
     // 2️⃣ Expected Payable
     // =====================
-    const expectedPayable = input.ppn_type === PPnType.INCLUSIVE
+    const expectedPayable = (input.ppn_type === PPnType.INCLUSIVE
       ? total.plus(shipping)
-      : total.plus(shipping).plus(expectedPpn);
+      : total.plus(shipping).plus(expectedPpn)).toDP(2);
     // =====================
     // 3️⃣ Predicted Additional Cost
     // =====================
     const payment = toDecimal(input.payment_realization);
     const predictedAdditionalCost =
-      payment.minus(expectedPayable);
+      payment.minus(expectedPayable).toDP(2);
     // =====================
     // 5️⃣ Validation Flags
     // =====================
     const providedPpn = toDecimal(input.ppn_amount);
 
-    const isPpnValid = expectedPpn.equals(providedPpn.toDP(0));
+    const isPpnValid = expectedPpn.equals(providedPpn.toDP(2));
 
     const isPaymentMatch = payment.greaterThanOrEqualTo(expectedPayable);
 

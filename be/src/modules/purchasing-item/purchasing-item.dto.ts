@@ -1,6 +1,7 @@
-import { IsNotEmpty, IsNumber, IsOptional, Min, IsInt, IsDecimal } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, Min, IsInt } from 'class-validator';
 import { IsObjectId } from 'src/global/is-object-id.decorator';
 import { Types } from 'mongoose';
+import { IsMoney } from 'src/global/is-money.decorator';
 export class ReceiveOrderItemDto {
   @IsObjectId() // checks it's a valid ObjectId string
   @IsNotEmpty()
@@ -19,7 +20,7 @@ export class PurchasingItemDto {
   @IsInt()
   @Min(1)
   purchase_qty: number;
-  @IsDecimal()
+  @IsMoney()
   @IsNotEmpty()
   purchase_price: Types.Decimal128;
 }

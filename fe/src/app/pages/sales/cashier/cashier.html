@@ -70,14 +70,14 @@
                                         <div class="small text-muted">
                                             @if (item.discount_percent > 0) {
                                             <del>{{
-                                                decimalToNumber(item.sale_price) | currency:'IDR':'symbol':'1.0-0'
+                                                decimalToNumber(item.sale_price) | currency:'IDR':'symbol':'1.2-2'
                                                 }}</del>
                                             }
                                             {{ decimalToNumber(item.sale_price) * (1 - item.discount_percent/100) |
-                                            currency:'IDR':'symbol':'1.0-0' }}
+                                            currency:'IDR':'symbol':'1.2-2' }}
                                         </div>
                                         <div class="fw-bold text-success">{{ item.total |
-                                            currency:'IDR':'symbol':'1.0-0' }}
+                                            currency:'IDR':'symbol':'1.2-2' }}
                                         </div>
                                     </div>
                                 </div>
@@ -87,21 +87,21 @@
                     <div class="card-footer bg-light border-top-0 px-4 py-4">
                         <div class="d-flex justify-content-between gap-2 mb-2">
                             <span class="text-muted">Sub-total</span>
-                            <span class="fw-medium">{{ totals.subTotal | currency:'IDR':'symbol':'1.0-0' }}</span>
+                            <span class="fw-medium">{{ totals.subTotal | currency:'IDR':'symbol':'1.2-2' }}</span>
                         </div>
                         @if (totals.discountTotal > 0) {
                         <div class="d-flex justify-content-between gap-2 mb-2 text-danger">
                             <span>Discount</span>
-                            <span class="fw-medium">-{{ totals.discountTotal | currency:'IDR':'symbol':'1.0-0' }}</span>
+                            <span class="fw-medium">-{{ totals.discountTotal | currency:'IDR':'symbol':'1.2-2' }}</span>
                         </div>
                         }
                         <div class="d-flex justify-content-between gap-2 mb-3 pb-3 border-bottom">
                             <span class="text-muted">PPN (11%)</span>
-                            <span class="fw-medium">{{ totals.ppnTotal | currency:'IDR':'symbol':'1.0-0' }}</span>
+                            <span class="fw-medium">{{ totals.ppnTotal | currency:'IDR':'symbol':'1.2-2' }}</span>
                         </div>
                         <div class="d-flex justify-content-between gap-2 align-items-center mb-4">
                             <span class="fw-bold text-dark fs-5">Grand Total</span>
-                            <span class="fw-bold text-dark fs-4">{{ totals.grandTotal | currency:'IDR':'symbol':'1.0-0'
+                            <span class="fw-bold text-dark fs-4">{{ totals.grandTotal | currency:'IDR':'symbol':'1.2-2'
                                 }}</span>
                         </div>
                         <button class="btn btn-success btn-lg w-100 py-3 fw-bold rounded-3 shadow-sm border-0"

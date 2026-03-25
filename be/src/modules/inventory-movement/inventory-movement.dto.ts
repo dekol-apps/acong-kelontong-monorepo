@@ -1,9 +1,10 @@
-import { ArrayMinSize, IsArray, IsEnum, IsOptional, IsString, ValidateNested, IsNotEmpty, IsInt, Min, IsDate, IsNumber, IsDecimal } from 'class-validator';
+import { ArrayMinSize, IsArray, IsEnum, IsOptional, IsString, ValidateNested, IsNotEmpty, IsInt, Min, IsDate, IsNumber } from 'class-validator';
 import { FlowType, OrderType } from '../../types/interfaces';
 import { PaginationDto } from '../../global/global.dto';
 import { Type } from 'class-transformer';
 import { Types } from 'mongoose';
 import { IsObjectId } from '../../global/is-object-id.decorator';
+import { IsMoney } from 'src/global/is-money.decorator';
 
 export class InventoryMovementItemDto {
   @IsObjectId()
@@ -23,15 +24,15 @@ export class InventoryMovementItemDto {
   @IsOptional()
   original_ppn_rate?: number;
 
-  @IsDecimal()
+  @IsMoney()
   @IsOptional()
   original_price?: Types.Decimal128;
 
-  @IsDecimal()
+  @IsMoney()
   @IsOptional()
   original_ppn_amount?: Types.Decimal128;
 
-  @IsDecimal()
+  @IsMoney()
   @IsOptional()
   landed_cost?: Types.Decimal128;
 }
@@ -68,7 +69,7 @@ export class ManualInventoryMovementItemDto {
   @Min(1)
   item_qty: number;
 
-  @IsDecimal()
+  @IsMoney()
   @IsNotEmpty()
   original_price: Types.Decimal128;
 }

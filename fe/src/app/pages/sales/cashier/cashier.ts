@@ -7,7 +7,7 @@ import { ColumnProps, GenericTable, ITableQueryData } from '../../../shared/comp
 import { TableColumn } from '../../../shared/directives/table-column/table-column';
 import { IPaginationInput } from '../../../types/interfaces/common.interface';
 import { ConfirmModal } from '../../../shared/components/modals/confirm-modal/confirm-modal';
-import { decimalToNumber } from '../../../utils/helper';
+import { decimalToNumber, roundMoney } from '../../../utils/helper';
 import { defaultPpnRate } from '../../../types/constants/common.constants';
 
 interface ICartItem extends ISaleStockSummary {
@@ -120,23 +120,23 @@ export class Cashier implements OnInit {
       const price = decimalToNumber(item.sale_price);
       const discountPercent = item.discount_percent || 0;
 
-      const itemTotalBeforeDiscount = price * item.qty;
-      const itemDiscountAmount = itemTotalBeforeDiscount * (discountPercent / 100);
-      const itemNetPrice = itemTotalBeforeDiscount - itemDiscountAmount;
+      const itemTotalBeforeDiscount = roundMoney(price * item.qty);
+      const itemDiscountAmount = roundMoney(itemTotalBeforeDiscount * (discountPercent / 100));
+      const itemNetPrice = roundMoney(itemTotalBeforeDiscount - itemDiscountAmount);
 
-      const base = itemNetPrice / (1 + defaultPpnRate / 100);
-      const ppn = itemNetPrice - base;
+      const base = roundMoney(itemNetPrice / (1 + defaultPpnRate / 100));
+      const ppn = roundMoney(itemNetPrice - base);
 
       item.total = itemNetPrice;
-      subTotal += base;
-      ppnTotal += ppn;
-      discountTotal += itemDiscountAmount;
+      subTotal = roundMoney(subTotal + base);
+      ppnTotal = roundMoney(ppnTotal + ppn);
+      discountTotal = roundMoney(discountTotal + itemDiscountAmount);
     });
 
     this.totals.subTotal = subTotal;
     this.totals.ppnTotal = ppnTotal;
     this.totals.discountTotal = discountTotal;
-    this.totals.grandTotal = subTotal + ppnTotal;
+    this.totals.grandTotal = roundMoney(subTotal + ppnTotal);
   }
 
   confirmSelling() {

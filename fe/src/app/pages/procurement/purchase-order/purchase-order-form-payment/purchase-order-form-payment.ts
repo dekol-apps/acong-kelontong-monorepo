@@ -10,7 +10,7 @@ import { formType } from '../../../../types/interfaces/common.interface';
 import { DragDropFileMulti } from '../../../../shared/components/drag-drop-file-multi/drag-drop-file-multi';
 import { PPNTYPES } from '../../../../types/constants/common.constants';
 import { PurchasingStore } from '../../../../shared/stores/purchasing.store';
-import { objToFormData } from '../../../../utils/helper';
+import { objToFormData, toMoneyString } from '../../../../utils/helper';
 import { AutoWildcard } from '../../../../shared/directives/auto-wildcard/auto-wildcard';
 import { Router } from '@angular/router';
 
@@ -50,9 +50,9 @@ export class PurchaseOrderFormPayment implements OnInit {
     if (this.form?.invalid) return this.alert.error('Please check your inputs');
     const body = {
       ...value,
-      ppn_amount: value.ppn_amount?.toString(),
-      shipping_cost: value.shipping_cost?.toString(),
-      payment_realization: value.payment_realization?.toString(),
+      ppn_amount: value.ppn_amount !== undefined && value.ppn_amount !== null ? toMoneyString(value.ppn_amount) : undefined,
+      shipping_cost: value.shipping_cost !== undefined && value.shipping_cost !== null ? toMoneyString(value.shipping_cost) : undefined,
+      payment_realization: value.payment_realization !== undefined && value.payment_realization !== null ? toMoneyString(value.payment_realization) : undefined,
       supplier: value.supplier,
       due_date: ngbToNativeDate(value.due_date),
       purchasing_attachments: value.purchasing_attachments?.map(it => it.file ?? it.src)

@@ -21,6 +21,18 @@ export function decimalToNumber(val?: any) {
   return parseFloat(val?.toString() ?? '0');
 }
 
+export const MONEY_REGEX = /^\d+(\.\d{1,2})?$/;
+
+export function roundMoney(val: number): number {
+  if (!Number.isFinite(val)) return 0;
+  return Math.round((val + Number.EPSILON) * 100) / 100;
+}
+
+export function toMoneyString(val: unknown): string {
+  const parsed = typeof val === 'number' ? val : Number(val ?? 0);
+  return roundMoney(parsed).toFixed(2);
+}
+
 // Recursively transform any type of object into form data 
 export const objToFormData = (
   body: any,

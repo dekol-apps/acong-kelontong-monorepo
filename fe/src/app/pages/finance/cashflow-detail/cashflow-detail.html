@@ -43,7 +43,7 @@
           <div class="fw-bold fs-5" [class.text-success]="detail?.flow_type === FlowType.IN"
             [class.text-danger]="detail?.flow_type !== FlowType.IN">
             @if (detail?.flow_type === FlowType.IN) { + } @else { - }
-            {{ getAmount(detail) | currency:'IDR':'symbol':'1.0-0' }}
+            {{ getAmount(detail) | currency:'IDR':'symbol':'1.2-2' }}
           </div>
         </div>
       </div>
@@ -52,7 +52,7 @@
         <div class="card text-center p-4">
           <div class="small text-uppercase fw-semibold mb-2 text-muted">Tax Base</div>
           <div class="fw-bold fs-5">
-            {{ getDecimalValue(detail?.tax_base) | currency:'IDR':'symbol':'1.0-0' }}
+            {{ getDecimalValue(detail?.tax_base) | currency:'IDR':'symbol':'1.2-2' }}
           </div>
         </div>
       </div>
@@ -61,7 +61,7 @@
         <div class="card text-center p-4">
           <div class="small text-uppercase fw-semibold mb-2 text-muted">PPN Amount</div>
           <div class="fw-bold fs-5">
-            {{ getDecimalValue(detail?.ppn_amount) | currency:'IDR':'symbol':'1.0-0' }}
+            {{ getDecimalValue(detail?.ppn_amount) | currency:'IDR':'symbol':'1.2-2' }}
           </div>
         </div>
       </div>
@@ -135,7 +135,7 @@
                 </tr>
                 <tr>
                   <td class="text-muted fw-semibold">PPN Amount</td>
-                  <td>{{ getDecimalValue(detail?.ppn_amount) | currency:'IDR':'symbol':'1.0-0' }}</td>
+                  <td>{{ getDecimalValue(detail?.ppn_amount) | currency:'IDR':'symbol':'1.2-2' }}</td>
                 </tr>
                 @if (detail?.flow_type === FlowType.OUT && detail?.order_type === OrderType.EXPENSE) {
                 <tr>

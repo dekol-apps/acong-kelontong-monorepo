@@ -1,10 +1,11 @@
-import { IsNotEmpty, IsString, IsDate, IsOptional, IsArray, IsEnum, IsDecimal } from 'class-validator';
+import { IsNotEmpty, IsString, IsDate, IsOptional, IsArray, IsEnum } from 'class-validator';
 import { Type } from 'class-transformer';
 import { IsObjectId } from 'src/global/is-object-id.decorator';
 import { Types } from 'mongoose';
 import { ApprovalType, PPnType } from 'src/types/interfaces';
 import { Purchasing, PurchasingEn } from './purchasing.schema';
 import { PaginationDto } from 'src/global/global.dto';
+import { IsMoney } from 'src/global/is-money.decorator';
 
 export class ListPurchasingDto extends PaginationDto {
   @IsOptional()
@@ -38,7 +39,7 @@ export class PurchaseOrderDto {
   purchasing_attachments?: string[];
 
   @IsOptional()
-  @IsDecimal()
+  @IsMoney()
   payment_realization: Types.Decimal128;
 
   @IsOptional()
@@ -52,11 +53,11 @@ export class PurchaseOrderDto {
   ppn_type?: PPnType;
 
   @IsOptional()
-  @IsDecimal()
+  @IsMoney()
   ppn_amount?: Types.Decimal128;
 
   @IsOptional()
-  @IsDecimal()
+  @IsMoney()
   shipping_cost?: Types.Decimal128;
 }
 

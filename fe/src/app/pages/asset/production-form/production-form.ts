@@ -11,6 +11,7 @@ import { TableColumn } from '../../../shared/directives/table-column/table-colum
 import { FormValidation } from '../../../shared/directives/form-validation/form-validation';
 import { ISelectValue } from '../../../types/interfaces/common.interface';
 import { DropdownSearch } from '../../../shared/components/dropdown-search/dropdown-search';
+import { MONEY_REGEX, toMoneyString } from '../../../utils/helper';
 
 @Component({
   selector: 'app-production-form',
@@ -51,8 +52,8 @@ export class ProductionForm implements OnInit {
       product: new FormControl(null, [Validators.required]),
       product_name: new FormControl(''),
       item_qty: new FormControl(1, [Validators.required, Validators.min(1)]),
-      price_per_item: new FormControl(0, [Validators.required, Validators.min(0)]),
-      operational_cost: new FormControl(0, [Validators.required, Validators.min(0)]),
+      price_per_item: new FormControl(0, [Validators.required, Validators.min(0), Validators.pattern(MONEY_REGEX)]),
+      operational_cost: new FormControl(0, [Validators.required, Validators.min(0), Validators.pattern(MONEY_REGEX)]),
       ingredients: new FormArray([], [Validators.required, Validators.minLength(1)])
     });
   }
@@ -154,8 +155,8 @@ export class ProductionForm implements OnInit {
 
     const body = {
       ...this.form.value,
-      price_per_item: this.form.value.price_per_item.toString(),
-      operational_cost: this.form.value.operational_cost.toString(),
+      price_per_item: toMoneyString(this.form.value.price_per_item),
+      operational_cost: toMoneyString(this.form.value.operational_cost),
       ingredients: this.form.value.ingredients.map((ing: any) => ({
         product: ing.product,
         item_qty: ing.item_qty

@@ -9,9 +9,9 @@ import {
   ArrayMinSize,
   IsArray,
   ValidateNested,
-  IsDecimal,
 } from 'class-validator';
 import { Types } from 'mongoose';
+import { IsMoney } from 'src/global/is-money.decorator';
 
 export class SaleItemDto {
   /**
@@ -33,14 +33,14 @@ export class SaleItemDto {
    * (JS number in DTO; converted to Decimal128 in service)
    */
   @IsNotEmpty()
-  @IsDecimal()
+  @IsMoney()
   sale_price: Types.Decimal128;
 
   /**
    * Original price of the item. comes from data collection from inventory item as Decimal128
    */
   @IsOptional()
-  @IsDecimal()
+  @IsMoney()
   original_price: Types.Decimal128;
 
   @IsOptional()

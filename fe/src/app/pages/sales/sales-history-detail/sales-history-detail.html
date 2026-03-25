@@ -26,19 +26,19 @@
           <h6 class="fw-bold mb-3 text-uppercase small text-muted">Payment Summary</h6>
           <div class="d-flex justify-content-end gap-5 mb-2">
             <span class="text-muted">Sub Total</span>
-            <span class="fw-medium">{{ saleDetail.total_before_tax | currency:'IDR':'symbol':'1.0-0' }}</span>
+            <span class="fw-medium">{{ saleDetail.total_before_tax | currency:'IDR':'symbol':'1.2-2' }}</span>
           </div>
           <div class="d-flex justify-content-end gap-5 mb-2 text-danger" *ngIf="+saleDetail.total_discount > 0">
             <span>Discount Total</span>
-            <span class="fw-medium">-{{ saleDetail.total_discount | currency:'IDR':'symbol':'1.0-0' }}</span>
+            <span class="fw-medium">-{{ saleDetail.total_discount | currency:'IDR':'symbol':'1.2-2' }}</span>
           </div>
           <div class="d-flex justify-content-end gap-5 mb-3 border-bottom pb-2">
             <span class="text-muted">Total PPN ({{ saleDetail.ppn_rate }}%)</span>
-            <span class="fw-medium">{{ saleDetail.total_ppn | currency:'IDR':'symbol':'1.0-0' }}</span>
+            <span class="fw-medium">{{ saleDetail.total_ppn | currency:'IDR':'symbol':'1.2-2' }}</span>
           </div>
           <div class="d-flex justify-content-end align-items-baseline gap-4">
             <span class="fw-bold text-dark fs-5">Grand Total</span>
-            <span class="fw-bold text-success fs-3">{{ saleDetail.grand_total | currency:'IDR':'symbol':'1.0-0'
+            <span class="fw-bold text-success fs-3">{{ saleDetail.grand_total | currency:'IDR':'symbol':'1.2-2'
               }}</span>
           </div>
         </div>

@@ -30,16 +30,19 @@
         <div class="w-100">
           <label for="ppn_amount" class="form-label" appAutoWildcard>PPn Amount (Rp)</label>
           <input type="number" class="form-control" id="ppn_amount" formControlName="ppn_amount"
+            step="0.01"
             placeholder="Total PPn amount in rupiah" />
         </div>
         <div class="w-100">
           <label for="shipping_cost" class="form-label" appAutoWildcard>Shipping Cost (Rp)</label>
           <input type="number" class="form-control" id="shipping_cost" formControlName="shipping_cost"
+            step="0.01"
             placeholder="Cost amount in rupiah" />
         </div>
         <div class="w-100">
           <label for="payment_realization" class="form-label required" appAutoWildcard>Payment Realization (Rp)</label>
           <input type="number" class="form-control" id="payment_realization" formControlName="payment_realization"
+            step="0.01"
             placeholder="Total amount of money spent in rupiah" />
         </div>
         <div class="w-100">

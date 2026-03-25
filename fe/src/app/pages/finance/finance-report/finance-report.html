@@ -36,7 +36,7 @@
             </div>
           </div>
           <div class="card-value fw-bold">
-            {{ card.value | currency:'IDR':'symbol':'1.0-0' }}
+            {{ card.value | currency:'IDR':'symbol':'1.2-2' }}
           </div>
           <div class="card-desc text-muted small mt-1">{{ card.description }}</div>
         </div>
@@ -63,7 +63,7 @@
               <div class="d-flex justify-content-between align-items-center mb-1">
                 <span class="bar-label small fw-semibold">{{ bar.label }}</span>
                 <span class="bar-value small text-muted">
-                  {{ bar.value | currency:'IDR':'symbol':'1.0-0' }}
+                  {{ bar.value | currency:'IDR':'symbol':'1.2-2' }}
                 </span>
               </div>
               <div class="progress" style="height: 22px; border-radius: 8px;">
@@ -130,7 +130,7 @@
             <div class="d-flex justify-content-between align-items-center">
               <div>
                 <div class="small text-muted">COGS</div>
-                <div class="fw-bold">{{ portfolio?.cogs ?? 0 | currency:'IDR':'symbol':'1.0-0' }}</div>
+                <div class="fw-bold">{{ portfolio?.cogs ?? 0 | currency:'IDR':'symbol':'1.2-2' }}</div>
               </div>
               <i class="bi bi-box text-warning fs-4"></i>
             </div>
@@ -140,7 +140,7 @@
             <div class="d-flex justify-content-between align-items-center">
               <div>
                 <div class="small text-muted">Inventory Value</div>
-                <div class="fw-bold">{{ portfolio?.inventoryValue ?? 0 | currency:'IDR':'symbol':'1.0-0' }}</div>
+                <div class="fw-bold">{{ portfolio?.inventoryValue ?? 0 | currency:'IDR':'symbol':'1.2-2' }}</div>
               </div>
               <i class="bi bi-archive text-info fs-4"></i>
             </div>

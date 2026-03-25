@@ -8,7 +8,7 @@ import { Document } from 'mongoose';
 import { FilterDto } from './global.dto';
 import { BaseResponse } from 'src/utils/base-response';
 import Decimal from 'decimal.js';
-import { toDecimal, toDecimal128 } from 'src/utils/helper';
+import { toDecimal, toDecimal128, toTaxReportingDecimal128 } from 'src/utils/helper';
 
 export type PopulateParam = { column: string; select?: any; match?: any; options?: any };
 export class IGetListParam {
@@ -169,8 +169,8 @@ export class GlobalService {
   priceAfterDiscount(price: Types.Decimal128, discountPercent?: number) {
     const priceDecimal = toDecimal(price);
     const discountPercentDecimal = new Decimal(discountPercent || 0);
-    const discountAmount = priceDecimal.mul(discountPercentDecimal.div(100));
-    const net = priceDecimal.minus(discountAmount);
+    const discountAmount = priceDecimal.mul(discountPercentDecimal.div(100)).toDP(2);
+    const net = priceDecimal.minus(discountAmount).toDP(2);
     return { net, discountAmount };
   }
 
@@ -189,8 +189,8 @@ export class GlobalService {
     const price = toDecimal(item.net_price);
     const ppnRate = new Decimal(item.ppn_rate || 0).div(100);
 
-    const base = price.div(new Decimal(1).plus(ppnRate));
-    const ppn = price.minus(base);
+    const base = price.div(new Decimal(1).plus(ppnRate)).toDP(2);
+    const ppn = price.minus(base).toDP(2);
 
     return { base, ppn };
   }
@@ -201,5 +201,10 @@ export class GlobalService {
     const pphRate = new Decimal(item.pph_rate || 0).div(100);
     const pph = price.times(pphRate);
     return toDecimal128(pph);
+  }
+
+  // NOTES: Use this when preparing statutory outputs that require whole-rupiah representation.
+  toTaxReportingMoney(value: Types.Decimal128 | Decimal | number | string | undefined) {
+    return toTaxReportingDecimal128(value);
   }
 }
