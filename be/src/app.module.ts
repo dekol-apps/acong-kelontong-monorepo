@@ -65,6 +65,7 @@ import { ProductionService } from './modules/production/production.service';
 import { Production, ProductionSchema } from './modules/production/production.schema';
 import { ProductionIngredient, ProductionIngredientSchema } from './modules/production/production-ingerdient.schema';
 import { decimal128MoneyPlugin } from './database/plugins/decimal128-money.plugin';
+import { PurchasingReceiveController } from './modules/purchasing-receive/purchasing-receive.controller';
 
 @Module({
   imports: [
@@ -156,7 +157,8 @@ import { decimal128MoneyPlugin } from './database/plugins/decimal128-money.plugi
     ExpenseController,
     SaleController,
     AccountingController,
-    ProductionController
+    ProductionController,
+    PurchasingReceiveController
   ],
   providers: [
     AppService,
