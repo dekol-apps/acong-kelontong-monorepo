@@ -1,10 +1,10 @@
 import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
-import { PurchasingDetail } from '../../purchasing-detail/purchasing-detail';
+import { PurchasingDetail } from '../purchasing-detail/purchasing-detail';
 import { ActivatedRoute, Router } from '@angular/router';
-import { formType } from '../../../../types/interfaces/common.interface';
-import { IPurchasing, PurchasingEn } from '../../../../types/interfaces/procurement.interface';
-import { ConfirmModal } from '../../../../shared/components/modals/confirm-modal/confirm-modal';
-import { PurchaseOrderService } from '../../services/purchase-order.service';
+import { formType } from '../../../types/interfaces/common.interface';
+import { IPurchasing, PurchasingEn } from '../../../types/interfaces/procurement.interface';
+import { ConfirmModal } from '../../../shared/components/modals/confirm-modal/confirm-modal';
+import { PurchaseOrderService } from '../services/purchase-order.service';
 import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-purchase-order-detail',
@@ -21,12 +21,16 @@ export class PurchaseOrderDetail {
   purchase_id?: string;
   detail?: IPurchasing;
   PurchasingEn = PurchasingEn;
+
+  isReceiveOrder?: boolean;
   constructor(private route: ActivatedRoute, private router: Router, private service: PurchaseOrderService) {
     this.purchase_id = this.route.snapshot.paramMap.get('po_id') || undefined;
+    // check url if it include receive-order
+    this.isReceiveOrder = this.router.url.includes('receive-order');
   }
 
   exit() {
-    this.router.navigateByUrl('purchase-order');
+    this.router.navigate(['../../'], { relativeTo: this.route });
   }
 
   deletePurchasing() {
@@ -62,7 +66,7 @@ export class PurchaseOrderDetail {
     this.router.navigateByUrl(`purchase-order/form/3/${this.purchase_id}`);
   }
   receive() {
-    this.router.navigateByUrl(`purchase-order/receive/${this.purchase_id}`);
+    this.router.navigate([`./receive`], { relativeTo: this.route });
   }
   process() {
     this.service.processPO(this.purchase_id!).subscribe(() => {

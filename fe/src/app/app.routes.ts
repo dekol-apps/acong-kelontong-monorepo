@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { MainLayout } from './layout/main-layout/main-layout';
-import { BRANDS, CASHIER, EXPENSES, CASHFLOW, CASHFLOW_DETAIL, FINANCE_REPORT, PRODUCT, SUPPLIERS, USER, ROLE, DASHBOARD, ROLE_DETAIL, ROLE_CREATE, ROLE_EDIT, PURCHASE_ORDER, RECEIVE_ORDER, CAPITAL, SALES_HISTORY, INVENTORY, SHOWCASE, PURCHASE_ORDER_NEW, PURCHASE_ORDER_EDIT, APPROVAL, INVESTMENT, PURCHASE_ORDER_DETAIL, PURCHASE_ORDER_RECEIVE, INVENTORY_PRODUCT, INVENTORY_ITEM, INVENTORY_MOVEMENT, INVENTORY_MOVEMENT_DETAIL, INVENTORY_MOVEMENT_ITEM, INVENTORY_MOVEMENT_MANUAL, SALE_STOCK, SALE_STOCK_PRODUCT, SALE_STOCK_ITEM, SALE_STOCK_FORM, SALES_HISTORY_DETAIL, PRODUCTION, PRODUCTION_FORM, PRODUCTION_DETAIL } from './types/constants/menus';
+import { BRANDS, CASHIER, EXPENSES, CASHFLOW, CASHFLOW_DETAIL, FINANCE_REPORT, PRODUCT, SUPPLIERS, USER, ROLE, DASHBOARD, ROLE_DETAIL, ROLE_CREATE, ROLE_EDIT, PURCHASE_ORDER, RECEIVE_ORDER, CAPITAL, SALES_HISTORY, INVENTORY, SHOWCASE, PURCHASE_ORDER_NEW, PURCHASE_ORDER_EDIT, APPROVAL, INVESTMENT, PURCHASE_ORDER_DETAIL, PURCHASE_ORDER_RECEIVE, INVENTORY_PRODUCT, INVENTORY_ITEM, INVENTORY_MOVEMENT, INVENTORY_MOVEMENT_DETAIL, INVENTORY_MOVEMENT_ITEM, INVENTORY_MOVEMENT_MANUAL, SALE_STOCK, SALE_STOCK_PRODUCT, SALE_STOCK_ITEM, SALE_STOCK_FORM, SALES_HISTORY_DETAIL, PRODUCTION, PRODUCTION_FORM, PRODUCTION_DETAIL, RECEIVE_ORDER_DETAIL } from './types/constants/menus';
 import { AuthGuardService } from './services/guards/auth-guard/auth-guard-service';
 import { PageGuardService } from './services/guards/page-guard/page-guard-service';
 
@@ -203,13 +203,7 @@ export const routes: Routes = [
             path: PURCHASE_ORDER_DETAIL.url,
             canActivate: [PageGuardService],
             data: { ...PURCHASE_ORDER_DETAIL },
-            loadComponent: () => import('./pages/procurement/purchase-order/purchase-order-detail/purchase-order-detail').then(c => c.PurchaseOrderDetail)
-          },
-          {
-            path: PURCHASE_ORDER_RECEIVE.url,
-            canActivate: [PageGuardService],
-            data: { ...PURCHASE_ORDER_RECEIVE },
-            loadComponent: () => import('./pages/procurement/purchase-order/purchase-order-receive-form/purchase-order-receive-form').then(c => c.PurchaseOrderReceiveForm)
+            loadComponent: () => import('./pages/procurement/purchase-order-detail/purchase-order-detail').then(c => c.PurchaseOrderDetail)
           },
         ]
       },
@@ -217,7 +211,25 @@ export const routes: Routes = [
         path: RECEIVE_ORDER.url,
         canActivate: [PageGuardService],
         data: { ...RECEIVE_ORDER },
-        loadComponent: () => import('./pages/procurement/receive-order/receive-order').then(c => c.ReceiveOrder)
+        children: [
+          {
+            path: '',
+            canActivate: [PageGuardService],
+            loadComponent: () => import('./pages/procurement/receive-order/receive-order').then(c => c.ReceiveOrder)
+          },
+          {
+            path: RECEIVE_ORDER_DETAIL.url,
+            canActivate: [PageGuardService],
+            data: { ...RECEIVE_ORDER_DETAIL },
+            loadComponent: () => import('./pages/procurement/purchase-order-detail/purchase-order-detail').then(c => c.PurchaseOrderDetail)
+          },
+          {
+            path: PURCHASE_ORDER_RECEIVE.url,
+            canActivate: [PageGuardService],
+            data: { ...PURCHASE_ORDER_RECEIVE },
+            loadComponent: () => import('./pages/procurement/receive-order/receive-order-form/receive-order-form').then(c => c.ReceiveOrderForm)
+          },
+        ]
       },
       {
         path: CASHFLOW.url,

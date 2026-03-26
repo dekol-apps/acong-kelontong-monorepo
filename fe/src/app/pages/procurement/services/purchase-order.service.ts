@@ -24,6 +24,12 @@ export class PurchaseOrderService extends BaseService {
     return this.getRequest({ url: Endpoint.PURCHASING, qParams, spinner: false });
   }
 
+  getPurchasingReceives(
+    qParams: ITableQueryData
+  ): Observable<IResList<IPurchasing>> {
+    return this.getRequest({ url: Endpoint.PURCHASING_RECEIVE_LIST, qParams, spinner: false });
+  }
+
   createPurchasing(
     body: FormData | IPurchasing //refers to IPurchasingDto
   ): Observable<IPurchasing> {

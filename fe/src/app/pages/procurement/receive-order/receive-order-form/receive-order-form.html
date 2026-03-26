@@ -46,11 +46,9 @@
                 <div appTableColumn customColumnId="action">
                     <ng-template let-row>
                         <div class="d-flex justify-content-end">
-                            @if (receivedMap[row._id]) {
-                            <button type="button" class="btn btn-outline-warning btn-sm" (click)="clearItem(row._id)">
+                            <button type="button" class="btn btn-outline-warning btn-sm" [disabled]="!receivedMap[row._id]" (click)="clearItem(row._id)">
                                 Clear
                             </button>
-                            }
                         </div>
                     </ng-template>
                 </div>

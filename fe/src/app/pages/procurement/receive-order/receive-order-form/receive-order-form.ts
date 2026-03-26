@@ -1,26 +1,26 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ReactiveFormsModule, FormGroup, FormBuilder } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { PurchaseOrderService } from '../../services/purchase-order.service';
 import { AlertService } from '../../../../shared/components/alert/alert-service';
-import { IPurchasing, IPurchasingItem } from '../../../../types/interfaces/procurement.interface';
 import { GenericTable, ColumnProps, ITableQueryData } from '../../../../shared/components/generic-table/generic-table';
-import { TableColumn } from '../../../../shared/directives/table-column/table-column';
-import { FormValidation } from '../../../../shared/directives/form-validation/form-validation';
 import { AutoWildcard } from '../../../../shared/directives/auto-wildcard/auto-wildcard';
+import { FormValidation } from '../../../../shared/directives/form-validation/form-validation';
+import { TableColumn } from '../../../../shared/directives/table-column/table-column';
 import { SORT_DIR } from '../../../../types/constants/common.constants';
 import { IPaginationInput } from '../../../../types/interfaces/common.interface';
+import { IPurchasing, IPurchasingItem } from '../../../../types/interfaces/procurement.interface';
+import { PurchaseOrderService } from '../../services/purchase-order.service';
 
 @Component({
-  selector: 'app-purchase-order-receive-form',
+  selector: 'app-receive-order-form',
   imports: [CommonModule, ReactiveFormsModule, GenericTable, TableColumn, FormValidation, AutoWildcard],
   standalone: true,
-  templateUrl: './purchase-order-receive-form.html',
-  styleUrl: './purchase-order-receive-form.scss',
+  templateUrl: './receive-order-form.html',
+  styleUrl: './receive-order-form.scss',
 })
-export class PurchaseOrderReceiveForm implements OnInit {
-  purchase_id: string = '';
+export class ReceiveOrderForm implements OnInit {
+  purchasingId: string = '';
   purchasingDetail?: IPurchasing;
   listPurchasingItem: IPurchasingItem[] = [];
   form: FormGroup;
@@ -94,8 +94,8 @@ export class PurchaseOrderReceiveForm implements OnInit {
   }
 
   ngOnInit(): void {
-    this.purchase_id = this.route.snapshot.paramMap.get('purchase_id') || '';
-    if (this.purchase_id) {
+    this.purchasingId = this.route.snapshot.paramMap.get('po_id') || '';
+    if (this.purchasingId) {
       this.getDetail();
       this.getList(this.defaultTableParam);
     } else {
@@ -105,7 +105,7 @@ export class PurchaseOrderReceiveForm implements OnInit {
   }
 
   getDetail() {
-    this.poService.getPurchasingDetail(this.purchase_id).subscribe({
+    this.poService.getPurchasingDetail(this.purchasingId).subscribe({
       next: (res) => {
         this.purchasingDetail = res;
         this.form.patchValue({ invoice_number: res.invoice_number });
@@ -117,7 +117,7 @@ export class PurchaseOrderReceiveForm implements OnInit {
   getList(evt: ITableQueryData) {
     this.isLoading = true;
     this.poService.getPurchasingItems(
-      this.purchase_id,
+      this.purchasingId,
       {
         page: evt.page,
         size: evt.size,
@@ -195,10 +195,10 @@ export class PurchaseOrderReceiveForm implements OnInit {
     };
 
     this.isLoading = true;
-    this.poService.receiveOrder(this.purchase_id, payload).subscribe({
+    this.poService.receiveOrder(this.purchasingId, payload).subscribe({
       next: () => {
         this.alert.success('Purchase Order received successfully');
-        this.router.navigate(['/purchase-order/detail', this.purchase_id]);
+        this.router.navigate(['/purchase-order/detail', this.purchasingId]);
       },
       error: (err) => {
         this.isLoading = false;
@@ -209,6 +209,6 @@ export class PurchaseOrderReceiveForm implements OnInit {
   }
 
   back() {
-    this.router.navigate(['/purchase-order/detail', this.purchase_id]);
+    this.router.navigate(['/purchase-order/detail', this.purchasingId]);
   }
 }

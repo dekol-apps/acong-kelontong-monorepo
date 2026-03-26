@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { PurchaseOrderReceiveForm } from './purchase-order-receive-form';
+import { ReceiveOrderForm } from './receive-order-form';
 
-describe('PurchaseOrderReceiveForm', () => {
-  let component: PurchaseOrderReceiveForm;
-  let fixture: ComponentFixture<PurchaseOrderReceiveForm>;
+describe('ReceiveOrderForm', () => {
+  let component: ReceiveOrderForm;
+  let fixture: ComponentFixture<ReceiveOrderForm>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PurchaseOrderReceiveForm]
+      imports: [ReceiveOrderForm]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(PurchaseOrderReceiveForm);
+    fixture = TestBed.createComponent(ReceiveOrderForm);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
