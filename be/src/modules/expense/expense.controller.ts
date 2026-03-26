@@ -25,17 +25,20 @@ export class ExpenseController {
     private readonly service: ExpenseService,
   ) { }
 
+  private getUploadDirs(files: Express.Multer.File[] = []): string[] {
+    return Array.from(new Set(files.map((file) => file.destination).filter(Boolean)));
+  }
+
   async expenseMutation<T>(
     args: headerArgs,
     cb: () => Promise<T>,
   ): Promise<T> {
     try {
       if (args.files?.length && args.dto) {
-        const uploadPath = (args.req as any).uploadPath;
         const existingAttachments = args.dto.expense_attachments?.filter(item => typeof item === 'string') ?? [];
         const newAttachements = args.files.map((file) => {
-          const filePath = `/uploads/${uploadPath}/${file.originalname}`;
-          return `${args.req.protocol}://${args.req.get('host')}${filePath}`;
+          const normalizedDestination = file.destination.replace(/\\/g, '/');
+          return `${args.req.protocol}://${args.req.get('host')}/${normalizedDestination}/${file.filename}`;
         });
         args.dto.expense_attachments = [...existingAttachments, ...newAttachements]
       }
@@ -43,10 +46,8 @@ export class ExpenseController {
       return await cb();
     } catch (err) {
       if (args.files?.length) {
-        const uploadPath = (args.req as any).uploadPath;
-        const dirPath = `./uploads/${uploadPath}`;
-
-        fs.rmSync(dirPath, { recursive: true, force: true });
+        const dirs = this.getUploadDirs(args.files);
+        dirs.forEach((dirPath) => fs.rmSync(dirPath, { recursive: true, force: true }));
       }
       return BaseResponse.error({ res: args.res, err });
     }

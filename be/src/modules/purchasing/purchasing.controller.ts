@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, Res, UploadedFile, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, Res, UploadedFiles, UseGuards } from '@nestjs/common';
 import { UAuthGuard } from '../auth/auth.guard';
 import { Permission } from 'src/global/permission.decoratior';
 import { PaginationDto } from 'src/global/global.dto';
@@ -27,17 +27,20 @@ export class PurchasingController {
     private readonly service: PurchasingService,
   ) { }
 
+  private getUploadDirs(files: Express.Multer.File[] = []): string[] {
+    return Array.from(new Set(files.map((file) => file.destination).filter(Boolean)));
+  }
+
   async purchasingMutation<T>(
     args: headerArgs,
     cb: () => Promise<T>,
   ): Promise<T> {
     try {
       if (args.files?.length && args.dto) {
-        const uploadPath = (args.req as any).uploadPath;
         const existingAttachments = args.dto.purchasing_attachments?.filter(item => typeof item === 'string') ?? [];
         const newAttachements = args.files.map((file) => {
-          const filePath = `/uploads/${uploadPath}/${file.originalname}`;
-          return `${args.req.protocol}://${args.req.get('host')}${filePath}`;
+          const normalizedDestination = file.destination.replace(/\\/g, '/');
+          return `${args.req.protocol}://${args.req.get('host')}/${normalizedDestination}/${file.filename}`;
         });
         args.dto.purchasing_attachments = [...existingAttachments, ...newAttachements]
       }
@@ -45,10 +48,8 @@ export class PurchasingController {
       return await cb();
     } catch (err) {
       if (args.files?.length) {
-        const uploadPath = (args.req as any).uploadPath;
-        const dirPath = `./uploads/${uploadPath}`;
-
-        fs.rmSync(dirPath, { recursive: true, force: true });
+        const dirs = this.getUploadDirs(args.files);
+        dirs.forEach((dirPath) => fs.rmSync(dirPath, { recursive: true, force: true }));
       }
       return BaseResponse.error({ res: args.res, err });
     }
@@ -58,7 +59,7 @@ export class PurchasingController {
   @Post('')
   @AttachmentsInterceptor('purchasing_attachments', 5)
   async createPurchasing(
-    @UploadedFile() files: Express.Multer.File[],
+    @UploadedFiles() files: Express.Multer.File[],
     @Body() dto: PurchasingDto,
     @Req() req: Request,
     @Res() res: Response,
@@ -91,7 +92,7 @@ export class PurchasingController {
   @AttachmentsInterceptor('purchasing_attachments', 5)
   async editPurchasing(
     @Param('purchasing_id') id: string,
-    @UploadedFile() files: Express.Multer.File[],
+    @UploadedFiles() files: Express.Multer.File[],
     @Req() req: Request,
     @Body() dto: PurchasingDto,
     @Res() res: Response,
@@ -228,7 +229,7 @@ export class PurchasingController {
   @AttachmentsInterceptor('purchasing_attachments', 5)
   async purchasingPayment(
     @Param('purchasing_id') id: string,
-    @UploadedFile() files: Express.Multer.File[],
+    @UploadedFiles() files: Express.Multer.File[],
     @Req() req: Request,
     @Body() dto: PurchaseOrderDto,
     @Res() res: Response,

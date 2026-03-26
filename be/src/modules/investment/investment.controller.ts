@@ -8,7 +8,6 @@ import { InvestmentDto, ListInvestmentDTO } from './investment.dto';
 import { InvestmentService } from './investment.service';
 import * as fs from 'fs';
 import { AttachmentsInterceptor } from 'src/global/attachments-interceptor';
-import { toDecimal, toDecimal128 } from 'src/utils/helper';
 
 interface headerArgs {
   files?: Express.Multer.File[];
