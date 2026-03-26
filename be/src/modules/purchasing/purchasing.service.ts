@@ -384,7 +384,7 @@ export class PurchasingService {
       },
     ]);
 
-    return result[0]?.total ?? Types.Decimal128.fromString("0");
+    return toDecimal128(toDecimal(result[0]?.total??0));
   }
 
   async listPurchasingItems(purchasing_id: Types.ObjectId, pagination?: PaginationDto): Promise<IListRes<PurchasingItem & { price_total: Types.Decimal128 }>> {

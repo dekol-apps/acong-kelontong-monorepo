@@ -4,14 +4,14 @@
 	<div appTableColumn customColumnId="action">
 		<ng-template let-item>
 			<div class="d-flex flex-row gap-1 justify-content-end">
-				<a [routerLink]="['/expenses/detail', item._id]" class="text-white pointer btn btn-secondary">
+				<a [routerLink]="['/expenses/detail', item._id]" class="pointer btn btn-secondary">
 					<i class="fa-solid fa-eye"></i>
 				</a>
-				<button class="text-white pointer btn btn-danger" (click)="rejectExpense(item._id)"
+				<button class="pointer btn btn-danger" (click)="rejectExpense(item._id)"
 					[disabled]="item.status !== ExpenseEn.REQUEST">
 					<i class="fa-solid fa-xmark"></i>
 				</button>
-				<button class="text-white pointer btn btn-success" (click)="approveExpense(item._id)"
+				<button class="pointer btn btn-success" (click)="approveExpense(item._id)"
 					[disabled]="item.status !== ExpenseEn.REQUEST">
 					<i class="fa-solid fa-check"></i>
 				</button>
