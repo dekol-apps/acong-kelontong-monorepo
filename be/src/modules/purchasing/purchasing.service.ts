@@ -129,13 +129,30 @@ export class PurchasingService {
       const allowedFieldsByStatus = {
         [PurchasingEn.EXPIRED]: [''],
         [PurchasingEn.DROP]: [''],
-        [PurchasingEn.COMPLETE]: [''],
+        [PurchasingEn.COMPLETE]: [
+          'status',
+          'invoice_number',
+          'ppn_facture_number',
+          'purchasing_attachments',
+          'payment_realization',
+          'notes',
+          'ppn_type',
+          'ppn_rate',
+          'ppn_amount',
+          'shipping_cost'
+        ],
         [PurchasingEn.RECEIVE]: [
           'status',
-          'notes',
-          'completed_date',
           'invoice_number',
+          'ppn_facture_number',
           'purchasing_attachments',
+          'payment_realization',
+          'notes',
+          'ppn_type',
+          'ppn_rate',
+          'ppn_amount',
+          'shipping_cost',
+          'completed_date',
         ],
         [PurchasingEn.PROCESS]: [
           'status',
@@ -563,7 +580,7 @@ export class PurchasingService {
       if (!existing) throw BaseResponse.notFound({ err: 'purchasingPayment !existing' });
       if (!dto.invoice_number) throw BaseResponse.invalid({ option: { message: 'invoice_number is required' } });
       if (!dto.purchasing_attachments?.length && existing.purchasing_attachments?.length) throw BaseResponse.invalid({ option: { message: 'purchasing_attachments is required' } });
-      const ablePayment = [PurchasingEn.APPROVE, PurchasingEn.PROCESS];
+      const ablePayment = [PurchasingEn.APPROVE, PurchasingEn.PROCESS, PurchasingEn.RECEIVE, PurchasingEn.COMPLETE];
       if (!ablePayment.includes(existing.status)) throw BaseResponse.invalid({ option: { message: 'Only able to execute payment for purchasing with status: ' + ablePayment.join(', ') } });
 
       if (existing.status === PurchasingEn.APPROVE) {
