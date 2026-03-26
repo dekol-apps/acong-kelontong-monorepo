@@ -1,9 +1,10 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { SaleService } from '../services/sale-service/sale.service';
 import { ISale } from '../../../types/interfaces/sales.interface';
 import { ColumnProps, GenericTable } from '../../../shared/components/generic-table/generic-table';
+import { buildSaleReceiptHtml, IReceiptGroupedItem } from '../utils/receipt.helper';
 
 @Component({
   selector: 'app-sales-history-detail',
@@ -28,6 +29,7 @@ export class SalesHistoryDetail implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private saleService: SaleService
   ) { }
 
@@ -53,5 +55,59 @@ export class SalesHistoryDetail implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  editSale() {
+    if (!this.saleDetail?._id) {
+      return;
+    }
+
+    this.router.navigate(['/cashier'], {
+      queryParams: {
+        sale_id: this.saleDetail._id,
+        edit: '1'
+      }
+    });
+  }
+
+  printInvoice() {
+    if (!this.saleDetail) {
+      return;
+    }
+
+    const items = this.groupItemsForReceipt(this.saleDetail.items);
+    const printWindow = window.open('', '_blank', 'width=420,height=720');
+    if (!printWindow) {
+      return;
+    }
+
+    const receiptHtml = buildSaleReceiptHtml(this.saleDetail, items);
+    printWindow.document.write(receiptHtml);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+  }
+
+  private groupItemsForReceipt(items: ISale['items']) {
+    const grouped: Record<string, IReceiptGroupedItem> = {};
+
+    items.forEach((item) => {
+      const key = typeof item.product === 'string' ? item.product : (item.product?._id || item.product_name);
+      const salePrice = Number(item.sale_price || 0);
+
+      if (!grouped[key]) {
+        grouped[key] = {
+          product_name: item.product_name,
+          qty: 0,
+          total: 0
+        };
+      }
+
+      grouped[key].qty += 1;
+      grouped[key].total += Number(item.net_price || salePrice || 0);
+    });
+
+    return Object.values(grouped);
   }
 }

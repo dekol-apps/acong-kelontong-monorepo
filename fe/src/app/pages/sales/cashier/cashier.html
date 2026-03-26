@@ -1,10 +1,22 @@
 <div class="card">
     <div class="card-header mb-4">
         <div class="d-flex flex-row justify-content-between gap-4">
-            <h3 class="card-title">Cashier</h3>
+            <h3 class="card-title">
+                @if (isEditMode) {
+                Edit Sale {{ sourceSaleNumber ? '(' + sourceSaleNumber + ')' : '' }}
+                } @else {
+                Cashier
+                }
+            </h3>
         </div>
     </div>
     <div class="card-body">
+        @if (isEditMode) {
+        <div class="alert alert-warning d-flex align-items-center" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            <div>Only cancellation is allowed in edit mode. Reduce item quantity or remove items from cart.</div>
+        </div>
+        }
         <div class="d-flex flex-row gap-4 flex-wrap w-100">
             <!-- Left: Stock Items Table -->
             <div class="flex-grow-1">
@@ -20,7 +32,7 @@
                             <div appTableColumn customColumnId="action">
                                 <ng-template let-item>
                                     <button class="btn btn-sm btn-primary rounded-pill px-3" (click)="addToCart(item)"
-                                        [disabled]="item?.item_qty <= 0">
+                                        [disabled]="item?.item_qty <= 0 || (isEditMode && !sourceCartQtyByProduct[item.product])">
                                         <i class="bi bi-plus-lg me-1"></i>
                                     </button>
                                 </ng-template>
@@ -106,7 +118,16 @@
                         </div>
                         <button class="btn btn-success btn-lg w-100 py-3 fw-bold rounded-3 shadow-sm border-0"
                             [disabled]="cart.length === 0" (click)="confirmSelling()">
-                            <i class="bi bi-wallet2 me-2"></i> COMPLETE SALE
+                            <i class="bi bi-wallet2 me-2"></i>
+                            @if (isEditMode) {
+                            UPDATE SALE
+                            } @else {
+                            COMPLETE SALE
+                            }
+                        </button>
+                        <button class="btn btn-outline-primary btn-lg w-100 py-2 fw-bold rounded-3 mt-2"
+                            [disabled]="!lastProcessedSale" (click)="printLastReceipt()">
+                            <i class="bi bi-printer me-2"></i> PRINT RECEIPT
                         </button>
                     </div>
                 </div>

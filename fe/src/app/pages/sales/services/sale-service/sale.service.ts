@@ -84,6 +84,18 @@ export class SaleService extends BaseService {
     );
   }
 
+  editSelling(id: string, payload: any): Observable<any> {
+    return this.postRequest({
+      url: Endpoint.SALE_SELLING_ID(id),
+      body: payload
+    }).pipe(
+      map((res) => {
+        this.alert.success("Sale updated successfully!");
+        return res;
+      })
+    );
+  }
+
   listSelling(qParams: ITableQueryData): Observable<IResList<ISale>> {
     return this.getRequest({
       url: Endpoint.SALE_SELLING,
