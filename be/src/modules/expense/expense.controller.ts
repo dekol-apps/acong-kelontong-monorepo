@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, Res, UploadedFile, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, Res, UploadedFiles, UseGuards } from '@nestjs/common';
 import { Permission } from 'src/global/permission.decoratior';
 import { UAuthGuard } from '../auth/auth.guard';
 import type { Request, Response } from 'express';
@@ -56,7 +56,7 @@ export class ExpenseController {
   @Post('')
   @AttachmentsInterceptor('expense_attachments', 5)
   async createExpense(
-    @UploadedFile() files: Express.Multer.File[],
+    @UploadedFiles() files: Express.Multer.File[],
     @Body() dto: ExpenseDto,
     @Req() req: Request,
     @Res() res: Response,
@@ -104,7 +104,7 @@ export class ExpenseController {
   @AttachmentsInterceptor('expense_attachments', 5)
   async editExpense(
     @Param('expense_id') expenseId: Types.ObjectId,
-    @UploadedFile() files: Express.Multer.File[],
+    @UploadedFiles() files: Express.Multer.File[],
     @Req() req: Request,
     @Body() dto: ExpenseDto,
     @Res() res: Response,
@@ -116,7 +116,7 @@ export class ExpenseController {
         try {
           const pathname = new URL(url).pathname;
           fs.rmSync(`.${pathname}`, { force: true });
-        } catch (e) {
+        } catch (_e) {
           console.warn('Failed to remove attachment:', url);
         }
       });
@@ -134,13 +134,15 @@ export class ExpenseController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    return this.expenseMutation({ req, res }, async () => {
+    try {
       const expense = await this.service.expenseRequest(expenseId);
       return BaseResponse.success({
         res,
         option: { message: `Expense on approval`, detail: expense },
       });
-    });
+    } catch (err) {
+      return BaseResponse.error({ res, err });
+    }
   }
 
   @Permission(['expenses.edit'])
@@ -151,13 +153,34 @@ export class ExpenseController {
     @Body() dto: ExpenseApprovalDto,
     @Res() res: Response,
   ) {
-    return this.expenseMutation({ req, res }, async () => {
+    try {
       const expense = await this.service.expenseApproval(expenseId, dto);
       return BaseResponse.success({
         res,
         option: { message: `Expense success ${dto.approval}`, detail: expense },
       });
-    });
+    } catch (err) {
+      return BaseResponse.error({ res, err });
+    }
+  }
+
+  @Permission(['expenses.edit'])
+  @Put(':expense_id/execute')
+  async expenseExecute(
+    @Param('expense_id') expenseId: Types.ObjectId,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    try {
+      const expense = await this.service.expenseExecute(expenseId);
+      return BaseResponse.success({
+        res,
+        option: { message: `Expense executed`, detail: expense },
+      });
+    } catch (err) {
+      return BaseResponse.error({ res, err });
+    }
+
   }
 
 
@@ -174,7 +197,7 @@ export class ExpenseController {
         try {
           const pathname = new URL(url).pathname;
           fs.rmSync(`.${pathname}`, { force: true });
-        } catch (e) {
+        } catch (_e) {
           console.warn('Failed to remove attachment:', url);
         }
       });

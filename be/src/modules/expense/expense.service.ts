@@ -1,11 +1,11 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { InjectModel, InjectConnection } from '@nestjs/mongoose';
-import { Model, Connection, Types, ClientSession } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types, ClientSession } from 'mongoose';
 import { GlobalService } from 'src/global/global.service';
 import { AccountingService } from '../accounting/accounting.service';
 import { Expense, ExpenseStatus } from './expense.schema';
 import { ExpenseApprovalDto, ExpenseDto } from './expense.dto';
-import { ApprovalType, FlowType, IListRes, OrderType, PPhType, PPnType } from 'src/types/interfaces';
+import { ApprovalType, FlowType, IListRes, OrderType, PPhType } from 'src/types/interfaces';
 import { BaseResponse } from 'src/utils/base-response';
 import { PaginationDto } from 'src/global/global.dto';
 import { toDecimal, toDecimal128 } from 'src/utils/helper';
@@ -31,7 +31,7 @@ export class ExpenseService {
       expense_attachments: data.expense_attachments,
       notes: data.notes,
       subject: data.subject,
-      expense_date: new Date(),
+      expense_date: data.expense_date,
       pph_type: data.pph_type,
       pph_rate: data.pph_rate,
     }

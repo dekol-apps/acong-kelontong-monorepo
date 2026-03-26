@@ -1,0 +1,99 @@
+<div class="card">
+  <div class="card-header mb-4">
+    <h3 class="card-title">Expense Detail</h3>
+  </div>
+
+  <div class="card-body">
+    @if (isLoading) {
+    <p>Loading...</p>
+    } @else {
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Field</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="fw-bold p-1 col-3 align-top">Status</td>
+          <td class="align-top">{{ detail?.status || '-' }}</td>
+        </tr>
+        @if (detail?.status === ExpenseEn.REJECT) {
+        <tr>
+          <td class="fw-bold p-1 col-3 align-top">Reject Notes</td>
+          <td class="align-top">{{ detail?.reject_notes || '-' }}</td>
+        </tr>
+        }
+        <tr>
+          <td class="fw-bold p-1 col-3 align-top">Subject</td>
+          <td class="align-top">{{ detail?.subject || '-' }}</td>
+        </tr>
+        <tr>
+          <td class="fw-bold p-1 col-3 align-top">Expense Date</td>
+          <td class="align-top">{{ (detail?.expense_date | date: DATE_FORMAT) || '-' }}</td>
+        </tr>
+        <tr>
+          <td class="fw-bold p-1 col-3 align-top">Transaction Amount</td>
+          <td class="align-top">{{ (detail?.transaction_amount | currency: CURRENCY_FORMAT) || '-' }}</td>
+        </tr>
+        <tr>
+          <td class="fw-bold p-1 col-3 align-top">PPh Type</td>
+          <td class="align-top">{{ detail?.pph_type || '-' }}</td>
+        </tr>
+        <tr>
+          <td class="fw-bold p-1 col-3 align-top">PPh Rate</td>
+          <td class="align-top">{{ detail?.pph_rate ?? 0 }}%</td>
+        </tr>
+        <tr>
+          <td class="fw-bold p-1 col-3 align-top">PPh Amount</td>
+          <td class="align-top">{{ (detail?.pph_amount | currency: CURRENCY_FORMAT) || '-' }}</td>
+        </tr>
+        <tr>
+          <td class="fw-bold p-1 col-3 align-top">Notes</td>
+          <td class="align-top">{{ detail?.notes || '-' }}</td>
+        </tr>
+        <tr>
+          <td class="fw-bold p-1 col-3 align-top">Attachments</td>
+          <td class="align-top">
+            <div class="d-flex gap-2 flex-wrap">
+              @for (item of detail?.expense_attachments; track $index) {
+              <img class="col-5" [src]="item" alt="Attachment" />
+              }
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    }
+  </div>
+
+  <div class="card-footer d-flex gap-2">
+    <button class="btn btn-secondary" type="button" (click)="back()">Back</button>
+
+    @if (detail?.status === ExpenseEn.CREATE || detail?.status === ExpenseEn.REJECT) {
+    <button class="btn btn-warning" type="button" (click)="edit()">Edit</button>
+    <button class="btn btn-danger" type="button" (click)="deleteExpense()">Delete</button>
+    <button class="btn btn-primary" type="button" (click)="requestExpense()">Submit Request</button>
+    }
+
+    @if (detail?.status === ExpenseEn.REQUEST) {
+    <button class="btn btn-danger" type="button" (click)="rejectExpense()">Reject</button>
+    <button class="btn btn-success" type="button" (click)="approveExpense()">Approve</button>
+    }
+
+    @if (detail?.status === ExpenseEn.APPROVE) {
+    <button class="btn btn-primary" type="button" (click)="executeExpense()">Execute Expense</button>
+    }
+  </div>
+</div>
+
+<app-confirm-modal #DeleteModal></app-confirm-modal>
+<app-confirm-modal #RequestModal [type]="'action'"></app-confirm-modal>
+<app-confirm-modal #ExecuteModal [type]="'action'"></app-confirm-modal>
+<app-confirm-modal #RejectModal [type]="'action'">
+  <div class="w-100">
+    <label for="reject_notes" class="form-label">Reject Notes</label>
+    <textarea class="form-control" id="reject_notes" rows="3" [(ngModel)]="rejectNotes"></textarea>
+  </div>
+</app-confirm-modal>

@@ -71,6 +71,12 @@ export const Endpoint = {
     return `${api}purchasing-item/${id}`
   },
 
+  EXPENSE: `${api}expense`,
+  EXPENSE_ID: (id: string) => `${api}expense/${id}`,
+  EXPENSE_REQUEST: (id: string) => `${api}expense/${id}/request`,
+  EXPENSE_APPROVAL: (id: string) => `${api}expense/${id}/approval`,
+  EXPENSE_EXECUTE: (id: string) => `${api}expense/${id}/execute`,
+
   // Inventory Item Endpoint
   INVENTORY_ITEM: `${api}inventory-item`,
   INVENTORY_ITEM_PRODUCT_ID: (id: string) => `${api}inventory-item/product/${id}`,

@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import { IsArray, IsEnum, IsNumber, IsNotEmpty, IsOptional, IsString, MinLength, IsDate } from 'class-validator';
+import { IsArray, IsEnum, IsNumber, IsNotEmpty, IsOptional, IsString, IsDate } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApprovalType, PPhType } from 'src/types/interfaces';
 import { IsMoney } from 'src/global/is-money.decorator';
@@ -30,8 +30,7 @@ export class ExpenseDto {
   @IsMoney()
   transaction_amount: Types.Decimal128;
 
-  @IsNotEmpty()
-  @MinLength(1)
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
   expense_attachments?: string[];
@@ -43,6 +42,7 @@ export class ExpenseDto {
   pph_type?: PPhType;
 
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   pph_rate?: number; // example 2 for 2%
 

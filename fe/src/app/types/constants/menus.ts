@@ -275,6 +275,27 @@ export const EXPENSES: IMenu = {
     labelKey: 'Expenses',
     permissions: ['expenses.view', 'expenses.create', 'expenses.edit', 'expenses.delete'],
 }
+export const EXPENSES_FORM: IMenu = {
+    code: 'form',
+    url: 'form',
+    icon: '',
+    labelKey: 'Expense Form',
+    permissions: ['expenses.create', 'expenses.edit'],
+}
+export const EXPENSES_EDIT: IMenu = {
+    code: 'form',
+    url: 'form/:expense_id',
+    icon: '',
+    labelKey: 'Expense Edit',
+    permissions: ['expenses.edit'],
+}
+export const EXPENSES_DETAIL: IMenu = {
+    code: 'detail',
+    url: 'detail/:expense_id',
+    icon: '',
+    labelKey: 'Expense Detail',
+    permissions: ['expenses.view'],
+}
 
 export const ADMIN: IMenu = {
     code: 'admin',

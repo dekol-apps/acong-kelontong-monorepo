@@ -1,0 +1,67 @@
+<div class="card">
+  <div class="card-header mb-4">
+    <div class="d-flex flex-row justify-content-between gap-4">
+      <h3 class="card-title">{{ isEditMode ? 'Edit Expense' : 'New Expense' }}</h3>
+    </div>
+  </div>
+
+  <form [formGroup]="form" appFormValidation (ngSubmit)="submit()">
+    <div class="card-body">
+      @if (isEditMode && detailStatus && detailStatus !== ExpenseEn.CREATE && detailStatus !== ExpenseEn.REJECT) {
+      <div class="alert alert-warning" role="alert">
+        This expense is no longer editable because status is {{ detailStatus }}.
+      </div>
+      }
+
+      <div class="row g-3">
+        <div class="col-12 col-md-6">
+          <label for="subject" class="form-label required">Subject</label>
+          <input id="subject" type="text" class="form-control" formControlName="subject" />
+        </div>
+
+        <div class="col-12 col-md-3">
+          <label for="expense_date" class="form-label required">Expense Date</label>
+          <input id="expense_date" type="date" class="form-control" formControlName="expense_date" />
+        </div>
+
+        <div class="col-12 col-md-3">
+          <label for="transaction_amount" class="form-label required">Amount</label>
+          <input id="transaction_amount" type="text" class="form-control" formControlName="transaction_amount"
+            inputmode="decimal" />
+        </div>
+
+        <div class="col-12 col-md-4">
+          <label for="pph_type" class="form-label">PPh Type</label>
+          <select id="pph_type" class="form-select" formControlName="pph_type">
+            <option [ngValue]="PPhType.NONE">NONE</option>
+            <option [ngValue]="PPhType.PPh23">PPh23</option>
+            <option [ngValue]="PPhType.PPh22">PPh22</option>
+            <option [ngValue]="PPhType.PPh4_2">PPh4_2</option>
+          </select>
+        </div>
+
+        <div class="col-12 col-md-2">
+          <label for="pph_rate" class="form-label">PPh Rate (%)</label>
+          <input id="pph_rate" type="number" class="form-control" formControlName="pph_rate" min="0" max="100" />
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label for="notes" class="form-label">Notes</label>
+          <textarea id="notes" class="form-control" rows="3" formControlName="notes"></textarea>
+        </div>
+
+        <div class="col-12">
+          <label for="expense_attachments" class="form-label required">Expense Attachments</label>
+          <input id="expense_attachments" type="hidden" formControlName="expense_attachments" />
+          <app-drag-drop-file-multi [patchFileVal]="form.value.expense_attachments" [loading]="isLoading"
+            (fileChanged)="addFile($event)"></app-drag-drop-file-multi>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-footer d-flex gap-2">
+      <button class="btn btn-secondary" type="button" (click)="back()">Back</button>
+      <button class="btn btn-primary" type="submit" [disabled]="isLoading || form.disabled">Submit</button>
+    </div>
+  </form>
+</div>

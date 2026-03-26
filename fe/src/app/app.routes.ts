@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { MainLayout } from './layout/main-layout/main-layout';
-import { BRANDS, CASHIER, EXPENSES, CASHFLOW, CASHFLOW_DETAIL, FINANCE_REPORT, PRODUCT, SUPPLIERS, USER, ROLE, DASHBOARD, ROLE_DETAIL, ROLE_CREATE, ROLE_EDIT, PURCHASE_ORDER, RECEIVE_ORDER, CAPITAL, SALES_HISTORY, INVENTORY, SHOWCASE, PURCHASE_ORDER_NEW, PURCHASE_ORDER_EDIT, APPROVAL, INVESTMENT, PURCHASE_ORDER_DETAIL, PURCHASE_ORDER_RECEIVE, INVENTORY_PRODUCT, INVENTORY_ITEM, INVENTORY_MOVEMENT, INVENTORY_MOVEMENT_DETAIL, INVENTORY_MOVEMENT_ITEM, INVENTORY_MOVEMENT_MANUAL, SALE_STOCK, SALE_STOCK_PRODUCT, SALE_STOCK_ITEM, SALE_STOCK_FORM, SALES_HISTORY_DETAIL, PRODUCTION, PRODUCTION_FORM, PRODUCTION_DETAIL, RECEIVE_ORDER_DETAIL } from './types/constants/menus';
+import { BRANDS, CASHIER, EXPENSES, EXPENSES_DETAIL, EXPENSES_EDIT, EXPENSES_FORM, CASHFLOW, CASHFLOW_DETAIL, CAPITAL, FINANCE_REPORT, PRODUCT, SUPPLIERS, USER, ROLE, DASHBOARD, ROLE_DETAIL, ROLE_CREATE, ROLE_EDIT, PURCHASE_ORDER, RECEIVE_ORDER, SALES_HISTORY, INVENTORY, SHOWCASE, PURCHASE_ORDER_NEW, PURCHASE_ORDER_EDIT, APPROVAL, INVESTMENT, PURCHASE_ORDER_DETAIL, PURCHASE_ORDER_RECEIVE, INVENTORY_PRODUCT, INVENTORY_ITEM, INVENTORY_MOVEMENT, INVENTORY_MOVEMENT_DETAIL, INVENTORY_MOVEMENT_ITEM, INVENTORY_MOVEMENT_MANUAL, SALE_STOCK, SALE_STOCK_PRODUCT, SALE_STOCK_ITEM, SALE_STOCK_FORM, SALES_HISTORY_DETAIL, PRODUCTION, PRODUCTION_FORM, PRODUCTION_DETAIL, RECEIVE_ORDER_DETAIL } from './types/constants/menus';
 import { AuthGuardService } from './services/guards/auth-guard/auth-guard-service';
 import { PageGuardService } from './services/guards/page-guard/page-guard-service';
 
@@ -251,9 +251,32 @@ export const routes: Routes = [
       },
       {
         path: EXPENSES.url,
-        canActivate: [PageGuardService],
         data: { ...EXPENSES },
-        loadComponent: () => import('./pages/forms/general-elements/general-elements').then(c => c.GeneralElements)
+        children: [
+          {
+            path: '',
+            canActivate: [PageGuardService],
+            loadComponent: () => import('./pages/finance/expense/expense').then(c => c.Expense)
+          },
+          {
+            path: EXPENSES_FORM.url,
+            canActivate: [PageGuardService],
+            data: { ...EXPENSES_FORM },
+            loadComponent: () => import('./pages/finance/expense/expense-form/expense-form').then(c => c.ExpenseForm)
+          },
+          {
+            path: EXPENSES_EDIT.url,
+            canActivate: [PageGuardService],
+            data: { ...EXPENSES_EDIT },
+            loadComponent: () => import('./pages/finance/expense/expense-form/expense-form').then(c => c.ExpenseForm)
+          },
+          {
+            path: EXPENSES_DETAIL.url,
+            canActivate: [PageGuardService],
+            data: { ...EXPENSES_DETAIL },
+            loadComponent: () => import('./pages/finance/expense/expense-detail/expense-detail').then(c => c.ExpenseDetail)
+          },
+        ]
       },
       {
         path: CAPITAL.url,

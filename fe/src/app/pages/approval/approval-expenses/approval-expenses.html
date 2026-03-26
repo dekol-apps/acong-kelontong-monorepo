@@ -1,1 +1,28 @@
-<p>approval-expenses works!</p>
+<app-generic-table ngSkipHydration [columns]="columns" [data]="listExpense" [filterSelect]="filterSelect"
+	[usePagination]="true" [useSearch]="true" [total]="pagination.total" (OnDataRefresh)="getList($event)"
+	[isLoading]="isLoading">
+	<div appTableColumn customColumnId="action">
+		<ng-template let-item>
+			<div class="d-flex flex-row gap-1 justify-content-end">
+				<a [routerLink]="['/expenses/detail', item._id]" class="text-white pointer btn btn-secondary">
+					<i class="fa-solid fa-eye"></i>
+				</a>
+				<button class="text-white pointer btn btn-danger" (click)="rejectExpense(item._id)"
+					[disabled]="item.status !== ExpenseEn.REQUEST">
+					<i class="fa-solid fa-xmark"></i>
+				</button>
+				<button class="text-white pointer btn btn-success" (click)="approveExpense(item._id)"
+					[disabled]="item.status !== ExpenseEn.REQUEST">
+					<i class="fa-solid fa-check"></i>
+				</button>
+			</div>
+		</ng-template>
+	</div>
+</app-generic-table>
+
+<app-confirm-modal #RejectModal [type]="'action'">
+	<div class="w-100">
+		<label for="reject_notes" class="form-label">Reject Notes</label>
+		<textarea class="form-control" id="reject_notes" rows="3" [(ngModel)]="rejectNotes"></textarea>
+	</div>
+</app-confirm-modal>
