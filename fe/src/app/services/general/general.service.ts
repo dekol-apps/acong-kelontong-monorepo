@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { BaseService } from '../rest-api/base-service';
-import { IPortofolio } from '../../pages/dashboard-v2/dashboard-v2';
 import { Endpoint } from '../../types/constants/endpoint';
 import { map, Observable } from 'rxjs';
 import { IResDetail } from '../../types/interfaces/http.interface';
+import { IPortofolio } from '../../types/interfaces/finance.interface';
 
 @Injectable({
   providedIn: 'root'

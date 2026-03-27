@@ -1,16 +1,17 @@
 import { Component, ViewChild } from '@angular/core';
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ConfirmModal } from '../../../../shared/components/modals/confirm-modal/confirm-modal';
 import { AlertService } from '../../../../shared/components/alert/alert-service';
-import { CURRENCY_FORMAT, DATE_FORMAT } from '../../../../types/constants/common.constants';
+import { DATE_FORMAT } from '../../../../types/constants/common.constants';
 import { ExpenseEn, IExpense } from '../../../../types/interfaces/expense.interface';
 import { ExpenseService } from '../expense.service';
 import { FormsModule } from '@angular/forms';
+import { RupiahPipe } from '../../../../shared/pipes/rupiah.pipe';
 
 @Component({
   selector: 'app-expense-detail',
-  imports: [CurrencyPipe, DatePipe, ConfirmModal, FormsModule],
+  imports: [DatePipe, ConfirmModal, FormsModule, RupiahPipe],
   templateUrl: './expense-detail.html',
   styleUrl: './expense-detail.scss'
 })
@@ -28,7 +29,6 @@ export class ExpenseDetail {
 
   ExpenseEn = ExpenseEn;
   DATE_FORMAT = DATE_FORMAT;
-  CURRENCY_FORMAT = CURRENCY_FORMAT;
 
   constructor(
     private route: ActivatedRoute,

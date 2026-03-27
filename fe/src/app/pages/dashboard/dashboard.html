@@ -22,25 +22,25 @@
   <div class="metrics-grid">
     <article class="metric-card soft-blue">
       <p class="metric-label">Cash Balance</p>
-      <h3>{{ (portofolio?.balance ?? 0) | currency: CURRENCY_FORMAT }}</h3>
+      <h3>{{ (portofolio?.balance ?? 0) | rupiah }}</h3>
       <p class="metric-foot">Likuiditas kas saat ini</p>
     </article>
 
     <article class="metric-card soft-amber">
       <p class="metric-label">Investment</p>
-      <h3>{{ (portofolio?.investment ?? 0) | currency: CURRENCY_FORMAT }}</h3>
+      <h3>{{ (portofolio?.investment ?? 0) | rupiah }}</h3>
       <p class="metric-foot">Total modal tertanam</p>
     </article>
 
     <article class="metric-card soft-green">
       <p class="metric-label">Inventory Value</p>
-      <h3>{{ (portofolio?.inventoryValue ?? 0) | currency: CURRENCY_FORMAT }}</h3>
+      <h3>{{ (portofolio?.inventoryValue ?? 0) | rupiah }}</h3>
       <p class="metric-foot">Nilai stok barang aktif</p>
     </article>
 
     <article class="metric-card soft-red">
       <p class="metric-label">Net Profit</p>
-      <h3>{{ (portofolio?.profit ?? 0) | currency: CURRENCY_FORMAT }}</h3>
+      <h3>{{ (portofolio?.profit ?? 0) | rupiah }}</h3>
       <p class="metric-foot">Laba bersih berjalan</p>
     </article>
   </div>

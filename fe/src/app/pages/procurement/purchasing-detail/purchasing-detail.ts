@@ -2,16 +2,17 @@ import { Component, EventEmitter, Inject, Input, OnChanges, OnInit, Output, Simp
 import { ColumnProps, GenericTable, ITableQueryData } from '../../../shared/components/generic-table/generic-table';
 import { TableColumn } from '../../../shared/directives/table-column/table-column';
 import { formType, IPaginationInput } from '../../../types/interfaces/common.interface';
-import { CURRENCY_FORMAT, DATE_FORMAT, SORT_DIR } from '../../../types/constants/common.constants';
+import { DATE_FORMAT, SORT_DIR } from '../../../types/constants/common.constants';
 import { NgbActiveModal, NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { IPurchasing, IPurchasingItem, PurchasingEn } from '../../../types/interfaces/procurement.interface';
 import { PurchaseOrderService } from '../services/purchase-order.service';
 import { PurchaseOrderItemForm } from '../purchase-order/purchase-order-item/purchase-order-item-form/purchase-order-item-form';
 import { CommonModule } from '@angular/common';
+import { RupiahPipe } from '../../../shared/pipes/rupiah.pipe';
 
 @Component({
   selector: 'app-purchasing-detail',
-  imports: [GenericTable, TableColumn, CommonModule, PurchaseOrderItemForm],
+  imports: [GenericTable, TableColumn, CommonModule, PurchaseOrderItemForm, RupiahPipe],
   templateUrl: './purchasing-detail.html',
   styleUrl: './purchasing-detail.scss'
 })
@@ -19,7 +20,6 @@ export class PurchasingDetail implements OnChanges {
   @ViewChild('POItemForm') poItemForm?: PurchaseOrderItemForm;
 
   DATE_FORMAT = DATE_FORMAT;
-  CURRENCY_FORMAT = CURRENCY_FORMAT;
   @Input() purchase_id?: string;
   purchase_item_id?: string;
   isLoading: boolean = false;

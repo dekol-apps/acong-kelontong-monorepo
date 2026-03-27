@@ -139,7 +139,7 @@
                             } @else if (column.dataType === 'PERCENTAGE') {
                             {{ ( getRowDataValue(row, column.id) + '%') || "-"}}
                             } @else {
-                            {{ ( getRowDataValue(row, column.id) | currency:CURRENCY_FORMAT) || "-"}}
+                            {{ ( getRowDataValue(row, column.id) | rupiah) || "-"}}
                             }
                             }
                         </div>

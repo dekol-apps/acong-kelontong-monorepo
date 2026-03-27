@@ -26,11 +26,11 @@
           </tr>
           <tr>
             <th scope="row" class="fw-bold p-1 col-3 align-top">Landed Cost</th>
-            <td class="align-top">{{ (detail?.landed_cost | currency: CURRENCY_FORMAT) || '-' }}</td>
+            <td class="align-top">{{ (detail?.landed_cost | rupiah) || '-' }}</td>
           </tr>
           <tr>
             <th scope="row" class="fw-bold p-1 col-3 align-top">Original Price</th>
-            <td class="align-top">{{ (detail?.original_price | currency: CURRENCY_FORMAT) || '-' }}</td>
+            <td class="align-top">{{ (detail?.original_price | rupiah) || '-' }}</td>
           </tr>
           <tr>
             <th scope="row" class="fw-bold p-1 col-3 align-top">Original PPn Rate</th>

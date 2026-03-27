@@ -41,7 +41,7 @@
       </tr>
       <tr>
         <td class="fw-bold p-1 col-3 align-top">PPn Amount</td>
-        <td class="align-top">{{(purchase?.ppn_amount | currency: CURRENCY_FORMAT) || '-'}}</td>
+        <td class="align-top">{{(purchase?.ppn_amount | rupiah) || '-'}}</td>
       </tr>
       <tr>
         <td class="fw-bold p-1 col-3 align-top">PPn Facture Number</td>
@@ -49,20 +49,20 @@
       </tr>
       <tr>
         <td class="fw-bold p-1 col-3 align-top">Shipping Cost</td>
-        <td class="align-top">{{(purchase?.shipping_cost | currency: CURRENCY_FORMAT) || '-'}}</td>
+        <td class="align-top">{{(purchase?.shipping_cost | rupiah) || '-'}}</td>
       </tr>
       <tr>
         <td class="fw-bold p-1 col-3 align-top">Total Price</td>
-        <td class="align-top">{{(purchase?.total_purchase_price | currency: CURRENCY_FORMAT) || '-'}}
+        <td class="align-top">{{(purchase?.total_purchase_price | rupiah) || '-'}}
         </td>
       </tr>
       <tr>
         <td class="fw-bold p-1 col-3 align-top">Additional Cost</td>
-        <td class="align-top">{{(purchase?.cost_difference | currency: CURRENCY_FORMAT) || '-'}}</td>
+        <td class="align-top">{{(purchase?.cost_difference | rupiah) || '-'}}</td>
       </tr>
       <tr>
         <td class="fw-bold p-1 col-3 align-top">Payment Realization</td>
-        <td class="align-top">{{(purchase?.payment_realization | currency: CURRENCY_FORMAT) || '-'}}
+        <td class="align-top">{{(purchase?.payment_realization | rupiah) || '-'}}
         </td>
       </tr>
       <tr>

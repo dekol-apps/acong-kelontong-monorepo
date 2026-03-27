@@ -2,12 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SaleService } from '../services/sale-service/sale.service';
 import { ISaleItem } from '../../../types/interfaces/sales.interface';
-import { CurrencyPipe, DatePipe } from '@angular/common';
-import { DATE_FORMAT, CURRENCY_FORMAT } from '../../../types/constants/common.constants';
+import { DatePipe } from '@angular/common';
+import { DATE_FORMAT } from '../../../types/constants/common.constants';
+import { RupiahPipe } from '../../../shared/pipes/rupiah.pipe';
 
 @Component({
   selector: 'app-sale-stock-item-detail',
-  imports: [CurrencyPipe, DatePipe],
+  imports: [DatePipe, RupiahPipe],
   standalone: true,
   templateUrl: './sale-stock-item-detail.html',
   styleUrl: './sale-stock-item-detail.scss',
@@ -19,7 +20,6 @@ export class SaleStockItemDetail implements OnInit {
   detail?: ISaleItem;
 
   DATE_FORMAT = DATE_FORMAT;
-  CURRENCY_FORMAT = CURRENCY_FORMAT;
 
   constructor(
     private service: SaleService,

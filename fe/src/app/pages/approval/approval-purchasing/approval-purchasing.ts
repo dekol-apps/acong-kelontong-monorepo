@@ -10,11 +10,11 @@ import { PurchaseOrderService } from '../../procurement/services/purchase-order.
 import { AlertService } from '../../../shared/components/alert/alert-service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { CURRENCY_FORMAT } from '../../../types/constants/common.constants';
+import { RupiahPipe } from '../../../shared/pipes/rupiah.pipe';
 
 @Component({
   selector: 'app-approval-purchasing',
-  imports: [CommonModule, GenericTable, TableColumn, RouterLink, ConfirmModal, FormsModule],
+  imports: [CommonModule, GenericTable, TableColumn, RouterLink, ConfirmModal, FormsModule, RupiahPipe],
   standalone: true,
   templateUrl: './approval-purchasing.html',
   styleUrl: './approval-purchasing.scss'
@@ -32,7 +32,6 @@ export class ApprovalPurchasing implements OnInit {
   };
 
   PurchasingEn = PurchasingEn;
-  CURRENCY_FORMAT = CURRENCY_FORMAT;
 
   filterSelect: ISelectFilter = {
     title: 'Filter status',

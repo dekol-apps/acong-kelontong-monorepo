@@ -22,7 +22,7 @@
           </tr>
           <tr>
             <th scope="row" class="fw-bold p-1 col-3 align-top">Sale Price</th>
-            <td class="align-top">{{ (detail?.sale_price | currency) || '-' }}</td>
+            <td class="align-top">{{ (detail?.sale_price | rupiah) || '-' }}</td>
           </tr>
           <tr>
             <th scope="row" class="fw-bold p-1 col-3 align-top">Discount</th>
@@ -30,15 +30,15 @@
           </tr>
           <tr>
             <th scope="row" class="fw-bold p-1 col-3 align-top">Discount Amount</th>
-            <td class="align-top">{{ (detail?.discount_amount | currency) || '-' }}</td>
+            <td class="align-top">{{ (detail?.discount_amount | rupiah) || '-' }}</td>
           </tr>
           <tr>
             <th scope="row" class="fw-bold p-1 col-3 align-top">COGS</th>
-            <td class="align-top">{{ (detail?.cogs | currency) || '-' }}</td>
+            <td class="align-top">{{ (detail?.cogs | rupiah) || '-' }}</td>
           </tr>
           <tr>
             <th scope="row" class="fw-bold p-1 col-3 align-top">Original Price</th>
-            <td class="align-top">{{ (detail?.original_price | currency) || '-' }}</td>
+            <td class="align-top">{{ (detail?.original_price | rupiah) || '-' }}</td>
           </tr>
           <tr>
             <th scope="row" class="fw-bold p-1 col-3 align-top">Original PPn Rate</th>

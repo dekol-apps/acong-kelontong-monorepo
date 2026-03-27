@@ -3,7 +3,7 @@
   [isLoading]="isLoading">
   <div appTableColumn customColumnId="total_purchase_price">
     <ng-template let-item>
-      {{ item.total_purchase_price | currency: CURRENCY_FORMAT }}
+      {{ item.total_purchase_price | rupiah }}
       @if(item.status === PurchasingEn.COMPLETE || item.status === PurchasingEn.PROCESS) {(FINAL)}
     </ng-template>
   </div>

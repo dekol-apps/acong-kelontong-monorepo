@@ -35,7 +35,7 @@
         </tr>
         <tr>
           <td class="fw-bold p-1 col-3 align-top">Transaction Amount</td>
-          <td class="align-top">{{ (detail?.transaction_amount | currency: CURRENCY_FORMAT) || '-' }}</td>
+          <td class="align-top">{{ (detail?.transaction_amount | rupiah) || '-' }}</td>
         </tr>
         <tr>
           <td class="fw-bold p-1 col-3 align-top">PPh Type</td>
@@ -47,7 +47,7 @@
         </tr>
         <tr>
           <td class="fw-bold p-1 col-3 align-top">PPh Amount</td>
-          <td class="align-top">{{ (detail?.pph_amount | currency: CURRENCY_FORMAT) || '-' }}</td>
+          <td class="align-top">{{ (detail?.pph_amount | rupiah) || '-' }}</td>
         </tr>
         <tr>
           <td class="fw-bold p-1 col-3 align-top">Notes</td>

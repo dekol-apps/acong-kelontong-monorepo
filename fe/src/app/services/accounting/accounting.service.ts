@@ -3,8 +3,7 @@ import { BaseService } from '../rest-api/base-service';
 import { Endpoint } from '../../types/constants/endpoint';
 import { map, Observable } from 'rxjs';
 import { IResDetail, IResList } from '../../types/interfaces/http.interface';
-import { IAccounting } from '../../types/interfaces/finance.interface';
-import { IPortofolio } from '../../pages/dashboard-v2/dashboard-v2';
+import { IAccounting, IPortofolio } from '../../types/interfaces/finance.interface';
 import { FlowType } from '../../types/enums/common.enum';
 import { ITableQueryData } from '../../shared/components/generic-table/generic-table';
 

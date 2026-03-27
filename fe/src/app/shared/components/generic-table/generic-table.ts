@@ -14,12 +14,13 @@ import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { TableColumn } from '../../directives/table-column/table-column';
 import { IDateRangeFilter, IPaginationOutput, ISelectFilter, ISelectValue, ISort, TSortDir } from '../../../types/interfaces/common.interface';
 import { getNestedProperty } from '../../../utils/helper';
-import { CURRENCY_FORMAT, DATE_FORMAT, SORT_DIR } from '../../../types/constants/common.constants';
+import { DATE_FORMAT, SORT_DIR } from '../../../types/constants/common.constants';
 import { FormsModule } from '@angular/forms';
 import { SelectFilter } from '../select-filter/select-filter';
 import { DateRangeFilter } from '../date-range-filter/date-range-filter';
 import { Pagination } from '../pagination/pagination';
 import { SortIcon } from './sort-icon/sort-icon';
+import { RupiahPipe } from '../../pipes/rupiah.pipe';
 
 export interface ColumnProps {
   id: string;
@@ -47,13 +48,12 @@ export const defaultComonQueryData = {
 
 @Component({
   selector: 'app-generic-table',
-  imports: [CommonModule, FormsModule, SelectFilter, DateRangeFilter, Pagination, SortIcon],
+  imports: [CommonModule, FormsModule, SelectFilter, DateRangeFilter, Pagination, SortIcon, RupiahPipe],
   templateUrl: './generic-table.html',
   styleUrl: './generic-table.scss'
 })
 export class GenericTable implements OnInit, OnDestroy {
   DATE_FORMAT = DATE_FORMAT;
-  CURRENCY_FORMAT = CURRENCY_FORMAT;
 
   // trackByFn = trackByFn;
   @Input() columns: Array<ColumnProps> = [];
