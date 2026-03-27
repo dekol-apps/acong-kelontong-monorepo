@@ -19,7 +19,7 @@ export const routes: Routes = [
       {
         path: DASHBOARD.url,
         data: { ...DASHBOARD },
-        loadComponent: () => import('./pages/dashboard-v2/dashboard-v2').then(c => c.DashboardV2)
+        loadComponent: () => import('./pages/dashboard/dashboard').then(c => c.Dashboard)
       },
       {
         path: SALE_STOCK.url,

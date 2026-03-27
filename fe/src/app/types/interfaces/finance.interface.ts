@@ -21,3 +21,16 @@ export interface IAccounting {
   createdAt?: Date;
   updatedAt?: Date;
 }
+
+export interface IPortofolio {
+  balance?: number,
+  investment?: number,
+  capValue?: number,
+  totalAsset?: number,
+  totalAssets?: number,
+  inventoryValue?: number,
+  revenue?: number,
+  profit?: number,
+  cogs?: number,
+  equity?: number,
+}

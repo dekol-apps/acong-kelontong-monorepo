@@ -1,0 +1,119 @@
+<section class="dashboard-landing">
+  <div class="hero-card">
+    <div class="hero-content">
+      <p class="eyebrow">Acong Kelontong Management Suite</p>
+      <h1>Business Command Center</h1>
+      <p class="hero-copy">
+        Satu dashboard untuk memantau penjualan, persediaan, pembelian, dan kesehatan keuangan toko secara real-time.
+        Dirancang untuk operasional harian yang rapi, cepat, dan mudah diaudit.
+      </p>
+
+      <div class="hero-tags">
+        <span><i class="bi bi-check2-circle"></i> FIFO Inventory</span>
+        <span><i class="bi bi-check2-circle"></i> 2-Digit Decimal Precision</span>
+        <span><i class="bi bi-check2-circle"></i> Approval Workflow</span>
+        <span><i class="bi bi-check2-circle"></i> Full Activity Trace</span>
+      </div>
+    </div>
+
+    <div class="hero-pattern" aria-hidden="true"></div>
+  </div>
+
+  <div class="metrics-grid">
+    <article class="metric-card soft-blue">
+      <p class="metric-label">Cash Balance</p>
+      <h3>{{ (portofolio?.balance ?? 0) | currency: CURRENCY_FORMAT }}</h3>
+      <p class="metric-foot">Likuiditas kas saat ini</p>
+    </article>
+
+    <article class="metric-card soft-amber">
+      <p class="metric-label">Investment</p>
+      <h3>{{ (portofolio?.investment ?? 0) | currency: CURRENCY_FORMAT }}</h3>
+      <p class="metric-foot">Total modal tertanam</p>
+    </article>
+
+    <article class="metric-card soft-green">
+      <p class="metric-label">Inventory Value</p>
+      <h3>{{ (portofolio?.inventoryValue ?? 0) | currency: CURRENCY_FORMAT }}</h3>
+      <p class="metric-foot">Nilai stok barang aktif</p>
+    </article>
+
+    <article class="metric-card soft-red">
+      <p class="metric-label">Net Profit</p>
+      <h3>{{ (portofolio?.profit ?? 0) | currency: CURRENCY_FORMAT }}</h3>
+      <p class="metric-foot">Laba bersih berjalan</p>
+    </article>
+  </div>
+
+  <div class="content-grid">
+    <article class="panel">
+      <h2>What This Web App Covers</h2>
+      <p>
+        Aplikasi ini mengintegrasikan proses inti bisnis retail kelontong dari hulu ke hilir, mulai dari procurement,
+        pencatatan stok, produksi sederhana, hingga pelaporan finansial.
+      </p>
+      <div class="feature-list">
+        <div>
+          <h4><i class="bi bi-receipt-cutoff"></i> Sales & Cashier</h4>
+          <p>Transaksi cepat, histori penjualan, dan pelacakan per item.</p>
+        </div>
+        <div>
+          <h4><i class="bi bi-box-seam"></i> Inventory Control</h4>
+          <p>Mutasi stok, stok opname, dan jejak lot berbasis FIFO.</p>
+        </div>
+        <div>
+          <h4><i class="bi bi-truck"></i> Purchasing & Receiving</h4>
+          <p>PO, penerimaan barang, dan kontrol supplier dari satu alur.</p>
+        </div>
+        <div>
+          <h4><i class="bi bi-cash-stack"></i> Accounting Snapshot</h4>
+          <p>Pantau balance, asset value, revenue, COGS, dan profitability.</p>
+        </div>
+      </div>
+    </article>
+
+    <article class="panel methods-panel">
+      <h2>Business Methods In Use</h2>
+      <ul class="method-list">
+        <li>
+          <span class="method-title">FIFO (First In, First Out)</span>
+          <span class="method-desc">Pengeluaran stok mengikuti urutan barang masuk untuk menjaga akurasi COGS.</span>
+        </li>
+        <li>
+          <span class="method-title">2-Digit Decimal Handling</span>
+          <span class="method-desc">Semua nilai uang dibulatkan dan ditampilkan hingga 2 angka desimal agar
+            konsisten.</span>
+        </li>
+        <li>
+          <span class="method-title">Role-Based Access</span>
+          <span class="method-desc">Akses fitur disesuaikan hak user sehingga operasional lebih aman.</span>
+        </li>
+        <li>
+          <span class="method-title">Approval Gate</span>
+          <span class="method-desc">Transaksi penting melewati proses persetujuan untuk mengurangi risiko salah
+            input.</span>
+        </li>
+        <li>
+          <span class="method-title">Audit-Friendly Records</span>
+          <span class="method-desc">Setiap pergerakan data memiliki histori yang memudahkan investigasi dan
+            evaluasi.</span>
+        </li>
+      </ul>
+    </article>
+  </div>
+
+  <article class="panel journey-panel">
+    <h2>Operational Journey</h2>
+    <div class="journey-flow">
+      <div><strong>1. Purchase</strong><span>Buat PO dan kelola supplier</span></div>
+      <i class="bi bi-arrow-right"></i>
+      <div><strong>2. Receive</strong><span>Terima barang dan update stok</span></div>
+      <i class="bi bi-arrow-right"></i>
+      <div><strong>3. Store</strong><span>Kelola inventory movement</span></div>
+      <i class="bi bi-arrow-right"></i>
+      <div><strong>4. Sell</strong><span>Kasir, sales history, dan analitik</span></div>
+      <i class="bi bi-arrow-right"></i>
+      <div><strong>5. Review</strong><span>Pantau profit, COGS, dan asset</span></div>
+    </div>
+  </article>
+</section>

@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AccountingService } from '../../../services/accounting/accounting.service';
-import { IPortofolio } from '../../dashboard-v2/dashboard-v2';
+import { IPortofolio } from '../../../types/interfaces/finance.interface';
 
 interface IChartBar {
   label: string;
