@@ -49,6 +49,13 @@ export class PurchaseOrderItem implements OnInit {
       sort: true,
     },
     {
+      label: 'SKU',
+      id: 'product_sku',
+      extraHeaderClass: 'uppercase-text',
+      backendPropName: 'product_sku',
+      sort: true,
+    },
+    {
       label: 'Quantity',
       id: 'purchase_qty',
       extraHeaderClass: 'uppercase-text',

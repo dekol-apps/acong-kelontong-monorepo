@@ -26,6 +26,7 @@ export class SaleService extends BaseService {
             acc[productId] = {
               product: productId,
               product_name: item.product_name,
+              product_sku: item.product_sku,
               brand_name: item.brand_name,
               barcode: item.barcode,
               sale_price: item.sale_price,

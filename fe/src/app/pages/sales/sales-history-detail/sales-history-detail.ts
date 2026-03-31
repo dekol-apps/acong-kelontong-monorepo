@@ -21,6 +21,7 @@ export class SalesHistoryDetail implements OnInit {
   columns: Array<ColumnProps> = [
     { label: 'Barcode', id: 'barcode' },
     { label: 'Product Name', id: 'product_name' },
+    { label: 'SKU', id: 'product_sku' },
     { label: 'Qty', id: 'item_qty' },
     { label: 'Price', id: 'sale_price', dataType: 'CURRENCY' },
     { label: 'Discount', id: 'discount_amount', dataType: 'CURRENCY' },
@@ -99,6 +100,7 @@ export class SalesHistoryDetail implements OnInit {
       if (!grouped[key]) {
         grouped[key] = {
           product_name: item.product_name,
+          product_sku: item.product_sku,
           qty: 0,
           total: 0
         };

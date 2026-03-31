@@ -44,6 +44,13 @@ export class PurchasingDetail implements OnChanges {
       sort: true,
     },
     {
+      label: 'SKU',
+      id: 'product_sku',
+      extraHeaderClass: 'uppercase-text',
+      backendPropName: 'product_sku',
+      sort: true,
+    },
+    {
       label: 'Purchase QTY',
       id: 'purchase_qty',
       extraHeaderClass: 'uppercase-text',

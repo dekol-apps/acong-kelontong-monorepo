@@ -31,6 +31,12 @@ export class Inventory implements OnInit {
       sort: true
     },
     {
+      label: 'SKU',
+      id: 'product_sku',
+      extraHeaderClass: 'uppercase-text',
+      sort: true
+    },
+    {
       label: 'Total Qty',
       id: 'item_qty',
       extraHeaderClass: 'uppercase-text',

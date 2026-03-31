@@ -39,6 +39,7 @@ export class Cashier implements OnInit {
   columns: Array<ColumnProps> = [
     { label: 'Barcode', id: 'barcode', sort: true },
     { label: 'Product Name', id: 'product_name', sort: true },
+    { label: 'SKU', id: 'product_sku', sort: true },
     { label: 'Brand', id: 'brand_name', sort: true },
     { label: 'Stock', id: 'item_qty', sort: true },
     { label: 'Price', id: 'sale_price', dataType: 'CURRENCY' },
@@ -254,6 +255,7 @@ export class Cashier implements OnInit {
             grouped[productId] = {
               product: productId,
               product_name: item.product_name,
+              product_sku: item.product_sku,
               brand_name: item.brand_name,
               barcode: item.barcode,
               sale_price: item.sale_price,
@@ -299,7 +301,12 @@ export class Cashier implements OnInit {
       const net = Number(item.net_price || item.sale_price || 0);
 
       if (!grouped[key]) {
-        grouped[key] = { product_name: item.product_name, qty: 0, total: 0 };
+        grouped[key] = {
+          product_name: item.product_name,
+          product_sku: item.product_sku,
+          qty: 0,
+          total: 0
+        };
       }
 
       grouped[key].qty += 1;

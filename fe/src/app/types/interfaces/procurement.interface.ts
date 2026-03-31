@@ -71,6 +71,7 @@ export interface IPurchasingItem {
   product?: IProduct;
   purchase_order?: IPurchasing;
   product_name?: string;
+  product_sku?: string;
   supplier_name?: string;
   purchase_qty?: number;
   received_qty?: number;

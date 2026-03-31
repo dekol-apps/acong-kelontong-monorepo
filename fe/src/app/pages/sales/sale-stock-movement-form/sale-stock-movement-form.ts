@@ -77,7 +77,7 @@ export class SaleStockMovementForm implements OnInit {
         this.products = res.list || [];
         this.filteredProducts = this.products.map(p => ({
           value: p,
-          label: p.product_name + p.item_qty
+          label: `${p.product_name} (${p.product_sku || '-'}) - Stock: ${p.item_qty}`
         }));
         this.isLoading = false;
       },

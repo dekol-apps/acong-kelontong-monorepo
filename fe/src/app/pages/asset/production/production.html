@@ -10,7 +10,7 @@
             [usePagination]="true" [useSearch]="true" (OnDataRefresh)="getList($event)">
             <div appTableColumn customColumnId="product">
                 <ng-template let-item>
-                    {{ item.product.product_name }}
+                    {{ item.product.product_name }} ({{ item.product.product_sku || '-' }})
                 </ng-template>
             </div>
             <div appTableColumn customColumnId="action">

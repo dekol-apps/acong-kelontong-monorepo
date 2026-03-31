@@ -1,7 +1,7 @@
 <div class="card">
   <div class="card-header mb-4">
     <div class="d-flex flex-row justify-content-between gap-4">
-      <h3 class="card-title">Stock Item Detail ({{detail?.product_name}})</h3>
+      <h3 class="card-title">Stock Item Detail ({{detail?.product_name}} - {{detail?.product_sku || '-'}})</h3>
     </div>
   </div>
   <div class="card-body">
@@ -11,6 +11,10 @@
           <tr>
             <th scope="row" class="fw-bold p-1 col-3 align-top">Brand Name</th>
             <td class="align-top">{{ detail?.brand_name || '-' }}</td>
+          </tr>
+          <tr>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">Product SKU</th>
+            <td class="align-top">{{ detail?.product_sku || '-' }}</td>
           </tr>
           <tr>
             <th scope="row" class="fw-bold p-1 col-3 align-top">Barcode</th>

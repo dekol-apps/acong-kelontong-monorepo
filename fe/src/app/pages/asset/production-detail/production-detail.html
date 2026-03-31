@@ -30,6 +30,10 @@
                                 <td><strong>{{ detail?.product?.product_name }}</strong></td>
                             </tr>
                             <tr>
+                                <th class="text-muted fw-normal ps-3">Product SKU:</th>
+                                <td><strong>{{ detail?.product?.product_sku || '-' }}</strong></td>
+                            </tr>
+                            <tr>
                                 <th class="text-muted fw-normal ps-3">Quantity:</th>
                                 <td>{{ detail?.item_qty }} {{ detail?.product?.unit_of_measure }}</td>
                             </tr>
@@ -77,7 +81,7 @@
                 <app-generic-table [columns]="columns" [data]="detail?.ingredients" [usePagination]="false">
                     <div appTableColumn customColumnId="product">
                         <ng-template let-item>
-                            {{ item.product.product_name }}
+                            {{ item.product.product_name }} ({{ item.product.product_sku || '-' }})
                         </ng-template>
                     </div>
                 </app-generic-table>

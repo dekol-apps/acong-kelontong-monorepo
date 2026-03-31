@@ -19,6 +19,7 @@ export interface ISaleItem {
   _id?: string;
   product: string | IProduct;
   product_name: string;
+  product_sku?: string;
   brand_name: string;
   barcode: string;
   original_price: string;
@@ -40,6 +41,7 @@ export interface ISaleItem {
 export interface ISaleStockSummary {
   product: string;
   product_name: string;
+  product_sku?: string;
   brand_name: string;
   barcode: string;
   sale_price: string;

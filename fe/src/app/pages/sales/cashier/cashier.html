@@ -63,6 +63,7 @@
                                 <div class="d-flex justify-content-between align-items-start mb-2">
                                     <div>
                                         <div class="fw-bold text-dark">{{ item.product_name }}</div>
+                                        <div class="small text-muted font-monospace">SKU: {{ item.product_sku || '-' }}</div>
                                         <div class="small text-muted font-monospace">{{ item.barcode }}</div>
                                     </div>
                                     <button class="btn btn-link text-danger p-0 border-0 shadow-none"

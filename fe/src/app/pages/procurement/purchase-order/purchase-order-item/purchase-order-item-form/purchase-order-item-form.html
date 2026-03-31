@@ -16,7 +16,7 @@
           <select class="form-select" id="product" formControlName="product">
             <option selected disabled value="">Choose...</option>
             @for (product of products; track $index) {
-            <option [value]="product._id">{{product.product_name}}</option>
+            <option [value]="product._id">{{product.product_name}} ({{product.product_sku || '-'}})</option>
             }
           </select>
         </div>

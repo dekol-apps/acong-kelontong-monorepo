@@ -3,6 +3,7 @@ import { IProduct } from './catalogue.interface';
 
 export interface IInventorySummary extends IInventoryItem {
   product_name: string;
+  product_sku?: string;
   inventory: string;
   item_qty: number;
   first_original_price: string;
@@ -18,6 +19,7 @@ export interface IInventoryItem {
   _id?: string;
   product: IProduct;
   product_name: string;
+  product_sku?: string;
   receive_date: Date;
   original_price: number;
   original_ppn_rate: number;
@@ -28,6 +30,7 @@ export interface IInventoryReconcileItem {
   product: string;
   item_qty: number;
   product_name?: string;
+  product_sku?: string;
 }
 
 export interface IInventoryReconcileDto {
@@ -39,6 +42,7 @@ export interface IInventoryMovementItem {
   product: IProduct;
   receive_date: Date;
   product_name: string;
+  product_sku?: string;
   original_price: number;
   original_ppn_rate: number;
   original_ppn_amount: number;

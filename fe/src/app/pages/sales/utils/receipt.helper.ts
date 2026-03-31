@@ -2,6 +2,7 @@ import { ISale } from '../../../types/interfaces/sales.interface';
 
 export interface IReceiptGroupedItem {
   product_name: string;
+  product_sku?: string;
   qty: number;
   total: number;
 }
@@ -13,7 +14,7 @@ export function buildSaleReceiptHtml(sale: ISale, items: IReceiptGroupedItem[]):
 
   const rows = items.map((item) => `
       <tr>
-        <td>${item.product_name}</td>
+        <td>${item.product_name}<br/><small>SKU: ${item.product_sku || '-'}</small></td>
         <td style="text-align:center;">${item.qty}</td>
         <td style="text-align:right;">${formatCurrency(item.total)}</td>
       </tr>

@@ -51,6 +51,11 @@ export class ReceiveOrderForm implements OnInit {
       extraHeaderClass: 'uppercase-text',
     },
     {
+      label: 'SKU',
+      id: 'product_sku',
+      extraHeaderClass: 'uppercase-text',
+    },
+    {
       label: 'Purchase Qty',
       id: 'purchase_qty',
       extraHeaderClass: 'uppercase-text',

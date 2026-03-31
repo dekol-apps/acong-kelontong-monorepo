@@ -31,6 +31,12 @@ export class SaleStock implements OnInit {
       sort: true
     },
     {
+      label: 'SKU',
+      id: 'product_sku',
+      extraHeaderClass: 'uppercase-text',
+      sort: true
+    },
+    {
       label: 'Brand',
       id: 'brand_name',
       extraHeaderClass: 'uppercase-text',

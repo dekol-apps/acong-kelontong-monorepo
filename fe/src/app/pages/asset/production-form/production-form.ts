@@ -92,7 +92,7 @@ export class ProductionForm implements OnInit {
         this.products = res.list || [];
         this.filteredProducts = this.products.map(p => ({
           value: p,
-          label: p.product_name
+          label: `${p.product_name} (${p.product_sku || '-'})`
         }));
         this.isLoading = false;
       },

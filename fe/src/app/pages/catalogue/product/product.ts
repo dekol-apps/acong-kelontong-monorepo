@@ -37,6 +37,13 @@ export class Product implements OnInit {
       sort: true,
     },
     {
+      label: 'SKU',
+      id: 'product_sku',
+      extraHeaderClass: 'uppercase-text',
+      backendPropName: 'product_sku',
+      sort: true,
+    },
+    {
       label: 'Brand',
       id: 'brand.brand_name',
       extraHeaderClass: 'uppercase-text',

@@ -28,6 +28,11 @@ export class InventoryMovementDetail {
       extraHeaderClass: 'uppercase-text',
     },
     {
+      label: 'SKU',
+      id: 'product_sku',
+      extraHeaderClass: 'uppercase-text',
+    },
+    {
       label: 'Unit Of Measure',
       id: 'product.unit_of_measure',
       extraHeaderClass: 'uppercase-text',
