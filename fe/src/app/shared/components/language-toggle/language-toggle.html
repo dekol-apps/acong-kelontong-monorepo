@@ -1,0 +1,18 @@
+<div class="btn-group btn-group-sm" role="group" [attr.aria-label]="'language.ariaLabel' | translate">
+  <button
+    type="button"
+    class="btn btn-outline-secondary"
+    [class.active]="isActiveLanguage('en')"
+    (click)="setLanguage('en')"
+  >
+    {{ 'language.en' | translate }}
+  </button>
+  <button
+    type="button"
+    class="btn btn-outline-secondary"
+    [class.active]="isActiveLanguage('id')"
+    (click)="setLanguage('id')"
+  >
+    {{ 'language.id' | translate }}
+  </button>
+</div>

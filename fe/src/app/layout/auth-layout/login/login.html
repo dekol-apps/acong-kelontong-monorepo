@@ -1,4 +1,7 @@
 <main class="login-page bg-body-secondary">
+    <div class="position-absolute top-0 end-0 p-3">
+        <app-language-toggle></app-language-toggle>
+    </div>
     <div class="login-box">
         <div class="card card-outline card-primary">
             <div class="card-header">
@@ -8,13 +11,13 @@
                 </a>
             </div>
             <div class="card-body login-card-body">
-                <p class="login-box-msg">Sign in to start your session</p>
+                <p class="login-box-msg">{{ 'layout.auth.signInMessage' | translate }}</p>
                 <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
                     <div class="input-group mb-1">
                         <div class="form-floating">
                             <input id="loginEmail" type="email" class="form-control" formControlName="email"
                                 placeholder="" />
-                            <label for="loginEmail">Email</label>
+                            <label for="loginEmail">{{ 'layout.auth.email' | translate }}</label>
                         </div>
                         <div class="input-group-text"><span class="bi bi-envelope"></span></div>
                     </div>
@@ -22,7 +25,7 @@
                         <div class="form-floating">
                             <input id="loginPassword" type="password" class="form-control" formControlName="password"
                                 placeholder="" />
-                            <label for="loginPassword">Password</label>
+                            <label for="loginPassword">{{ 'layout.auth.password' | translate }}</label>
                         </div>
                         <div class="input-group-text"><span class="bi bi-lock-fill"></span></div>
                     </div>
@@ -37,7 +40,7 @@
                         <!-- /.col -->
                         <div class="col-4">
                             <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-primary">Sign In</button>
+                                <button type="submit" class="btn btn-primary">{{ 'layout.auth.signIn' | translate }}</button>
                             </div>
                         </div>
                         <!-- /.col -->
@@ -54,9 +57,9 @@
                     </a>
                 </div> -->
                 <!-- /.social-auth-links -->
-                <p class="mb-1"><a href="forgot-password.html">I forgot my password</a></p>
+                <p class="mb-1"><a href="forgot-password.html">{{ 'layout.auth.forgotPassword' | translate }}</a></p>
                 <p class="mb-0">
-                    <a [routerLink]="['/register']" class="text-center"> Register a new membership </a>
+                    <a [routerLink]="['/register']" class="text-center">{{ 'layout.auth.registerNewMembership' | translate }}</a>
                 </p>
             </div>
             <!-- /.login-card-body -->

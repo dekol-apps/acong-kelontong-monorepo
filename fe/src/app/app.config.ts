@@ -1,8 +1,10 @@
-import { ApplicationConfig, DEFAULT_CURRENCY_CODE, LOCALE_ID, provideBrowserGlobalErrorListeners, provideZoneChangeDetection } from '@angular/core';
+import { ApplicationConfig, DEFAULT_CURRENCY_CODE, LOCALE_ID, importProvidersFrom, provideBrowserGlobalErrorListeners, provideZoneChangeDetection } from '@angular/core';
 import { NoPreloading, provideRouter, withPreloading } from '@angular/router';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { DATE_PIPE_DEFAULT_OPTIONS } from '@angular/common';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
+import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 
 import { routes } from './app.routes';
 import { loaderInterceptor } from './services/interceptors/loader/loader-interceptor';
@@ -19,6 +21,15 @@ export const appConfig: ApplicationConfig = {
     { provide: LOCALE_ID, useValue: 'id' },
     { provide: DEFAULT_CURRENCY_CODE, useValue: 'IDR' },
     { provide: DATE_PIPE_DEFAULT_OPTIONS, useValue: { dateFormat: DATE_FORMAT } },
+    importProvidersFrom(
+      TranslateModule.forRoot({
+        fallbackLang: 'en'
+      })
+    ),
+    ...provideTranslateHttpLoader({
+      prefix: './assets/i18n/',
+      suffix: '.json'
+    }),
 
     provideHttpClient(
       withFetch(),

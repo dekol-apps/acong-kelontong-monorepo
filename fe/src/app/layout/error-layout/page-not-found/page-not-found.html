@@ -1,18 +1,21 @@
 <main class="login-page bg-body-secondary">
+    <div class="position-absolute top-0 end-0 p-3">
+        <app-language-toggle></app-language-toggle>
+    </div>
     <div class="content-wrapper">
         <section class="content-header">
-            <h1>Error Page</h1>
+            <h1>{{ 'layout.error.errorPage' | translate }}</h1>
         </section>
 
         <section class="content">
             <div class="error-page">
                 <h2 class="headline text-warning">404</h2>
                 <div class="error-content">
-                    <h3><i class="fas fa-exclamation-triangle text-warning"></i> Oops! Page not found.</h3>
+                    <h3><i class="fas fa-exclamation-triangle text-warning"></i> {{ 'layout.error.pageNotFoundTitle' | translate }}</h3>
                     <p>
-                        We could not find the page you were looking for.
+                        {{ 'layout.error.pageNotFoundDescription' | translate }}
                     </p>
-                    <a href="/home">Return to dashboard</a>
+                    <a href="/home">{{ 'layout.error.returnToDashboard' | translate }}</a>
                 </div>
             </div>
         </section>

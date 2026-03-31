@@ -6,10 +6,12 @@ import { AuthService } from '../../../services/auth/auth-service';
 import { AlertService } from '../../../shared/components/alert/alert-service';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IAuth } from '../../../types/interfaces/common.interface';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageToggle } from '../../../shared/components/language-toggle/language-toggle';
 
 @Component({
   selector: 'app-login',
-  imports: [RouterLink, Alert, PageSpinner, ReactiveFormsModule],
+  imports: [RouterLink, Alert, PageSpinner, ReactiveFormsModule, TranslateModule, LanguageToggle],
   templateUrl: './login.html',
   styleUrl: './login.scss'
 })
@@ -23,7 +25,7 @@ export class Login implements OnInit {
     this.loginUser = new EventEmitter<{ email: string; password: string }>();
   }
   ngOnInit() {
-    this.loginForm.setValue({ email: 'master@admin.com', password: 'master@admin.123' })
+    this.loginForm.setValue({ email: 'master@admin.com', password: 'master@admin.123' });
   }
   onSubmit() {
     this.authServices.login(this.loginForm.value);

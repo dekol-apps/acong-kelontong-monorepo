@@ -10,9 +10,11 @@ import { AuthService } from '../../services/auth/auth-service';
 import { IUser, TModules } from '../../types/interfaces/user.interface';
 import { Menus } from '../../types/constants/menus';
 import { filter } from 'rxjs';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageToggle } from '../../shared/components/language-toggle/language-toggle';
 @Component({
   selector: 'app-main-layout',
-  imports: [CommonModule, RouterModule, Alert, PageSpinner],
+  imports: [CommonModule, RouterModule, Alert, PageSpinner, TranslateModule, LanguageToggle],
   templateUrl: './main-layout.html',
   styleUrl: './main-layout.scss'
 })

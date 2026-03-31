@@ -17,6 +17,9 @@
             <!--end::Start Navbar Links-->
             <!--begin::End Navbar Links-->
             <ul class="navbar-nav ms-auto">
+                <li class="nav-item d-flex align-items-center me-2">
+                    <app-language-toggle></app-language-toggle>
+                </li>
                 <!--begin::Navbar Search-->
                 <!-- <li class="nav-item">
                     <a class="nav-link" data-widget="navbar-search" href="#" role="button">
@@ -109,24 +112,24 @@
                         <span class="navbar-badge badge text-bg-warning">15</span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
-                        <span class="dropdown-item dropdown-header">15 Notifications</span>
+                        <span class="dropdown-item dropdown-header">{{ 'layout.main.notifications' | translate:{ count: 15 } }}</span>
                         <div class="dropdown-divider"></div>
                         <a href="#" class="dropdown-item">
-                            <i class="bi bi-envelope me-2"></i> 4 new messages
+                            <i class="bi bi-envelope me-2"></i> {{ 'layout.main.newMessages' | translate:{ count: 4 } }}
                             <span class="float-end text-secondary fs-7">3 mins</span>
                         </a>
                         <div class="dropdown-divider"></div>
                         <a href="#" class="dropdown-item">
-                            <i class="bi bi-people-fill me-2"></i> 8 friend requests
+                            <i class="bi bi-people-fill me-2"></i> {{ 'layout.main.friendRequests' | translate:{ count: 8 } }}
                             <span class="float-end text-secondary fs-7">12 hours</span>
                         </a>
                         <div class="dropdown-divider"></div>
                         <a href="#" class="dropdown-item">
-                            <i class="bi bi-file-earmark-fill me-2"></i> 3 new reports
+                            <i class="bi bi-file-earmark-fill me-2"></i> {{ 'layout.main.newReports' | translate:{ count: 3 } }}
                             <span class="float-end text-secondary fs-7">2 days</span>
                         </a>
                         <div class="dropdown-divider"></div>
-                        <a href="#" class="dropdown-item dropdown-footer"> See All Notifications </a>
+                        <a href="#" class="dropdown-item dropdown-footer">{{ 'layout.main.seeAllNotifications' | translate }}</a>
                     </div>
                 </li>
                 <!--end::Notifications Dropdown Menu-->
@@ -160,17 +163,17 @@
                         <li class="user-body">
                             <!--begin::Row-->
                             <div class="row">
-                                <div class="col-4 text-center"><a href="#">Followers</a></div>
-                                <div class="col-4 text-center"><a href="#">Sales</a></div>
-                                <div class="col-4 text-center"><a href="#">Friends</a></div>
+                                <div class="col-4 text-center"><a href="#">{{ 'layout.main.followers' | translate }}</a></div>
+                                <div class="col-4 text-center"><a href="#">{{ 'layout.main.sales' | translate }}</a></div>
+                                <div class="col-4 text-center"><a href="#">{{ 'layout.main.friends' | translate }}</a></div>
                             </div>
                             <!--end::Row-->
                         </li>
                         <!--end::Menu Body-->
                         <!--begin::Menu Footer-->
                         <li class="user-footer">
-                            <a href="#" class="btn btn-default btn-flat">Profile</a>
-                            <a href="#" class="btn btn-default btn-flat float-end" (click)="logout()">Sign out</a>
+                            <a href="#" class="btn btn-default btn-flat">{{ 'layout.main.profile' | translate }}</a>
+                            <a href="#" class="btn btn-default btn-flat float-end" (click)="logout()">{{ 'layout.main.signOut' | translate }}</a>
                         </li>
                         <!--end::Menu Footer-->
                     </ul>
@@ -213,7 +216,7 @@
                             (click)="toggleMenu(menu)">
                             <i [ngClass]="menu.icon"></i>
                             <p>
-                                {{ menu.labelKey }}
+                                {{ menu.labelKey | translate }}
                                 @if (menu.children && menu.children.length > 0) {
                                 <i class="nav-arrow bi bi-chevron-right"></i>
                                 }
@@ -224,7 +227,7 @@
                             <li class="nav-item">
                                 <a [routerLink]="[child.url]" routerLinkActive="active" class="nav-link">
                                     <i class="nav-icon"></i>
-                                    <p>{{ child.labelKey }}</p>
+                                    <p>{{ child.labelKey | translate }}</p>
                                 </a>
                             </li>
                             }
@@ -235,7 +238,7 @@
                         <a [routerLink]="[menu.url]" routerLinkActive="active"
                             class="nav-link bg-transparent menu-color">
                             <i [ngClass]="menu.icon"></i>
-                            <p>{{ menu.labelKey }}</p>
+                            <p>{{ menu.labelKey | translate }}</p>
                         </a>
                     </li>
                     }
@@ -263,11 +266,11 @@
                             @for (item of breadcrumbs; track $index) {
                             @if ($index === breadcrumbs.length - 1) {
                             <li class="breadcrumb-item active" aria-current="page">
-                                <a>{{item.labelKey + ''}}</a>
+                                <a>{{ (item.labelKey + '') | translate }}</a>
                             </li>
                             } @else {
                             <li class="breadcrumb-item" aria-current="page">
-                                <a [routerLink]="[item.url]">{{item.labelKey + ''}}</a>
+                                <a [routerLink]="[item.url]">{{ (item.labelKey + '') | translate }}</a>
                             </li>
                             }
                             }
@@ -290,7 +293,7 @@
     <!--begin::Footer-->
     <footer class="app-footer">
         <!--begin::To the end-->
-        <div class="float-end d-none d-sm-inline">Anything you want</div>
+        <div class="float-end d-none d-sm-inline">{{ 'layout.main.footerTagline' | translate }}</div>
         <!--end::To the end-->
         <!--begin::Copyright-->
         <strong>
