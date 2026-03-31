@@ -5,6 +5,7 @@ import { Product } from '../product/product.schema';
 export class InventoryReconcileItem {
   @Prop({ type: Types.ObjectId, ref: Product.name, required: true }) product: Types.ObjectId;
   @Prop({ required: true }) product_name: string;
+  @Prop({ required: true }) product_sku: string;
   @Prop({ required: true }) item_qty: number;
 }
 @Schema({ timestamps: true })

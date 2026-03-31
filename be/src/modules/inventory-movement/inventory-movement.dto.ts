@@ -107,6 +107,7 @@ export interface MovedInventoryItemData {
   product: Types.ObjectId;
   receive_date: Date;
   product_name: string;
+  product_sku: string;
   original_price: Types.Decimal128;
   original_ppn_rate: number;
   original_ppn_amount: Types.Decimal128;

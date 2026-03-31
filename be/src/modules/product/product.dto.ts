@@ -12,9 +12,9 @@ export class CreateProductDto {
   @IsString()
   product_description?: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsEnum(UnitOfMeasure)
-  unit_of_measure?: UnitOfMeasure;
+  unit_of_measure: UnitOfMeasure;
 
   @IsOptional()
   @IsString()

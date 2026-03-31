@@ -6,6 +6,7 @@ import { Product, ProductDocument } from '../product/product.schema';
 export class InventoryItem {
   @Prop({ type: Types.ObjectId, ref: Product.name, required: true }) product: Types.ObjectId;
   @Prop({ required: true }) product_name: string;
+  @Prop({ required: true }) product_sku: string;
   @Prop({ type: Date, required: true }) receive_date: Date;
   @Prop({ type: Types.Decimal128, required: true }) original_price: Types.Decimal128;
   @Prop({ type: Number, required: true, default: 0 })

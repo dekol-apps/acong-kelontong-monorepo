@@ -16,6 +16,9 @@ export class PurchasingItem {
   product_name: string;
 
   @Prop({ required: true })
+  product_sku: string;
+
+  @Prop({ required: true })
   supplier_name: string;
 
   @Prop({ type: Number, required: true })

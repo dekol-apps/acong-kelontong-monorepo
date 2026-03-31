@@ -6,12 +6,14 @@ import { UnitOfMeasure } from 'src/types/enums';
 @Schema({ timestamps: true })
 export class Product {
 
+  @Prop({ required: true })
+  product_name: string;
   @Prop({ required: true, unique: true })
-  product_name: string; // e.g. "PT Indofood Sukses Tbk"
+  product_sku: string;
   @Prop()
   product_description?: string;
-  @Prop({ type: String, default: UnitOfMeasure.PCS, enum: UnitOfMeasure })
-  unit_of_measure?: UnitOfMeasure;
+  @Prop({ type: String, required: true, enum: UnitOfMeasure })
+  unit_of_measure: UnitOfMeasure;
   @Prop()
   barcode?: string;
   @Prop({ type: Types.ObjectId, ref: Brand.name, required: true })

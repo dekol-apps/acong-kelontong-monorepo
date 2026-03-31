@@ -140,3 +140,15 @@ export function multiplyDecimal(a?: Types.Decimal128, b?: number) {
 export function decimalToNumber(val?: Types.Decimal128 | Decimal) {
   return parseFloat(val?.toString() ?? '0');
 }
+
+export function toSku(input?: string): string {
+  const normalized = (input ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9]+/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .toUpperCase();
+
+  return normalized || 'PRODUCT';
+}

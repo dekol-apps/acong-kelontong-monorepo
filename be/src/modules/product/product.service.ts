@@ -4,7 +4,8 @@ import { Model, Types } from 'mongoose';
 import { PaginationDto } from 'src/global/global.dto';
 import { GlobalService, PopulateParam } from 'src/global/global.service';
 import { IListRes } from 'src/types/interfaces';
-import { BaseResponse } from 'src/utils/base-response';
+import { AppError, BaseResponse } from 'src/utils/base-response';
+import { Brand } from '../brand/brand.schema';
 import { Product } from './product.schema';
 import { CreateProductDto, UpdateProductDto } from './product.dto';
 
@@ -13,6 +14,7 @@ export class ProductService {
 
   constructor(
     @InjectModel(Product.name) private readonly productModel: Model<Product>,
+    @InjectModel(Brand.name) private readonly brandModel: Model<Brand>,
     @Inject(forwardRef(() => GlobalService))
     private global: GlobalService
   ) { }
@@ -24,7 +26,7 @@ export class ProductService {
     sortDir,
     search,
   }: PaginationDto): Promise<IListRes<Product>> {
-    const searchFields: string[] = ['product_name', 'product_description', 'barcode', 'brand.brand_name'];
+    const searchFields: string[] = ['product_name', 'product_sku', 'product_description', 'barcode', 'brand.brand_name'];
     const populate: PopulateParam = { column: 'brand' }
 
     return this.global.getList<Product>(
@@ -43,12 +45,56 @@ export class ProductService {
 
   async createProduct(data: CreateProductDto): Promise<Product> {
     try {
-      const dataToSave = { ...data };
+      const brand = await this.brandModel.findById(data.brand).lean();
+      if (!brand) {
+        throw BaseResponse.notFound({ err: 'createProduct brand not found' });
+      }
+
+      const product_sku = this.generateSku({
+        productName: data.product_name,
+        brandName: brand.brand_name,
+        unitOfMeasure: data.unit_of_measure,
+      });
+
+      const existingSku = await this.productModel.exists({ product_sku });
+      if (existingSku) {
+        throw BaseResponse.invalid({
+          option: { message: `Product with SKU ${product_sku} already exists` },
+          err: 'createProduct duplicate product_sku',
+        });
+      }
+
+      const dataToSave = { ...data, product_sku };
       const newProduct = await this.productModel.create(dataToSave);
       return newProduct;
     } catch (err) {
+      if (err instanceof AppError) throw err;
       throw BaseResponse.unexpected({ err: { text: 'createProduct catch', err } })
     }
+  }
+
+  private generateSku({
+    productName,
+    brandName,
+    unitOfMeasure,
+  }: {
+    productName: string;
+    brandName: string;
+    unitOfMeasure: string;
+  }): string {
+    return this.formatSku(`${productName}_${brandName}_${unitOfMeasure}`);
+  }
+
+  private formatSku(input?: string): string {
+    const normalized = (input ?? '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-zA-Z0-9]+/g, '_')
+      .replace(/_+/g, '_')
+      .replace(/^_+|_+$/g, '')
+      .toUpperCase();
+
+    return normalized || 'PRODUCT';
   }
 
   async editProduct(id: Types.ObjectId, data: UpdateProductDto): Promise<Product | undefined> {

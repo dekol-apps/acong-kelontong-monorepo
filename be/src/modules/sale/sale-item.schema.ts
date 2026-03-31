@@ -8,6 +8,7 @@ export class SaleItem {
   @Prop({ type: Types.ObjectId, ref: Product.name, required: true }) product: Types.ObjectId;
   @Prop({ required: true }) brand_name: string;
   @Prop({ required: true }) product_name: string;
+  @Prop({ required: true }) product_sku: string;
   @Prop({ required: false }) barcode?: string;
   @Prop({ type: Types.Decimal128, required: true, default: 0 })
   original_price: Types.Decimal128;

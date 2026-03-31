@@ -9,6 +9,7 @@ import { InventoryItem } from './inventory-item.schema';
 import { IListRes, TOneOrMany } from 'src/types/interfaces';
 import { FilterDto, PaginationDto } from 'src/global/global.dto';
 import { InventoryReconcile, InventoryReconcileItem } from './inventory-reconcile.schema';
+import { toSku } from 'src/utils/helper';
 
 @Injectable()
 export class InventoryItemService {
@@ -35,7 +36,10 @@ export class InventoryItemService {
     // Build matching stage
     const matchStage: any = {};
     if (search) {
-      matchStage['product_name'] = { $regex: search, $options: 'i' };
+      matchStage['$or'] = [
+        { product_name: { $regex: search, $options: 'i' } },
+        { product_sku: { $regex: search, $options: 'i' } },
+      ];
     }
 
     const sortStage: any = {};
@@ -53,6 +57,7 @@ export class InventoryItemService {
           _id: { $toObjectId: "$product" },
           product: { $first: "$product" },
           product_name: { $first: "$product_name" },
+          product_sku: { $first: "$product_sku" },
           first_original_price: { $first: "$original_price" },
           first_original_ppn_rate: { $first: "$original_ppn_rate" },
           first_original_ppn_amount: { $first: "$original_ppn_amount" },
@@ -127,6 +132,7 @@ export class InventoryItemService {
       const data = {
         product: payload.product,
         product_name: product.product_name,
+        product_sku: product.product_sku || toSku(product.product_name),
         receive_date: payload.receive_date,
         original_price: payload.original_price,
         original_ppn_rate: payload.original_ppn_rate,
@@ -149,6 +155,7 @@ export class InventoryItemService {
       const data = {
         product: dto.product,
         product_name: product.product_name,
+        product_sku: product.product_sku || toSku(product.product_name),
         receive_date: dto.receive_date,
         original_price: dto.original_price,
         original_ppn_rate: dto.original_ppn_rate,
@@ -217,10 +224,12 @@ export class InventoryItemService {
               }
             }
             const productName = existingItem?.product_name;
+            const productSku = existingItem?.product_sku;
             const itemAfterRecon = {
               product: item.product,
               item_qty: item.item_qty,
-              product_name: productName ?? 'Missing Product Name'
+              product_name: productName ?? 'Missing Product Name',
+              product_sku: productSku ?? 'MISSING_PRODUCT_SKU'
             }
             itemsAfterReconcile.push(itemAfterRecon)
           }
@@ -231,6 +240,7 @@ export class InventoryItemService {
         return {
           product: item.product,
           product_name: item.product_name,
+          product_sku: item.product_sku || toSku(item.product_name),
           item_qty: existingItems.filter(i => i.product.toString() === item.product.toString()).length,
         }
       });

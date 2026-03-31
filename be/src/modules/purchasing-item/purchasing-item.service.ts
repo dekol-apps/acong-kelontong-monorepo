@@ -7,7 +7,7 @@ import { Product } from '../product/product.schema';
 import { Purchasing } from '../purchasing/purchasing.schema';
 import { PurchasingItem } from './purchasing-item.schema';
 import { PurchasingItemDto } from './purchasing-item.dto';
-import { toDecimal, toDecimal128 } from 'src/utils/helper';
+import { toDecimal, toDecimal128, toSku } from 'src/utils/helper';
 @Injectable()
 export class PurchasingItemService {
 
@@ -32,6 +32,7 @@ export class PurchasingItemService {
       const data = {
         supplier_name: purchasing.supplier_name,
         product_name: product.product_name,
+        product_sku: product.product_sku || toSku(product.product_name),
         purchase_order: new Types.ObjectId(dto.purchase_order),
         product: new Types.ObjectId(dto.product),
         purchase_qty: dto.purchase_qty,
@@ -58,6 +59,7 @@ export class PurchasingItemService {
       const data = {
         supplier_name: purchasing.supplier_name,
         product_name: product.product_name,
+        product_sku: product.product_sku || toSku(product.product_name),
         purchase_order: new Types.ObjectId(dto.purchase_order),
         product: new Types.ObjectId(dto.product),
         purchase_qty: dto.purchase_qty,

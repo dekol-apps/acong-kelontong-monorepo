@@ -13,7 +13,7 @@ import { FilterDto, PaginationDto } from 'src/global/global.dto';
 import { FlowType, IListRes, OrderType, PPhType, PPnType, TOneOrMany } from 'src/types/interfaces';
 import { Brand } from '../brand/brand.schema';
 import Decimal from 'decimal.js';
-import { toDecimal, toDecimal128 } from 'src/utils/helper';
+import { toDecimal, toDecimal128, toSku } from 'src/utils/helper';
 import { Accounting } from '../accounting/accounting.schema';
 import { defaultPpnRate } from 'src/types/constants';
 import { isArray } from 'class-validator';
@@ -108,6 +108,7 @@ export class SaleService {
         const saleItem: SaleItem = {
           product: movedItem.product,
           product_name: product.product_name,
+          product_sku: product.product_sku || toSku(product.product_name),
           brand_name: brand?.brand_name ?? 'MISSING BRAND NAME',
           barcode: product.barcode,
           original_price: movedItem.original_price,
@@ -263,6 +264,7 @@ export class SaleService {
             product: existItem.product,
             brand_name: existItem.brand_name,
             product_name: existItem.product_name,
+            product_sku: existItem.product_sku || toSku(existItem.product_name),
             barcode: existItem.barcode,
             original_price: existItem.original_price,
             original_ppn_rate: existItem.original_ppn_rate,
@@ -365,6 +367,7 @@ export class SaleService {
           product: item.product,
           brand_name: item.brand_name,
           product_name: item.product_name,
+          product_sku: item.product_sku || toSku(item.product_name),
           barcode: item.barcode,
           original_price: item.original_price,
           original_ppn_rate: item.original_ppn_rate,
@@ -393,6 +396,7 @@ export class SaleService {
             product: existItem.product,
             brand_name: existItem.brand_name,
             product_name: existItem.product_name,
+            product_sku: existItem.product_sku || toSku(existItem.product_name),
             barcode: existItem.barcode,
             original_price: existItem.original_price,
             original_ppn_rate: existItem.original_ppn_rate,

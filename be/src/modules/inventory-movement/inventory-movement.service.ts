@@ -10,7 +10,7 @@ import { InventoryItemService } from '../inventory-item/inventory-item.service';
 import { InventoryMovement } from './inventory-movement.schema';
 import { Product } from '../product/product.schema';
 import { GInventoryItemDto, InventoryItemDto } from '../inventory-item/inventory-item.dto';
-import { toDecimal, toDecimal128 } from 'src/utils/helper';
+import { toDecimal, toDecimal128, toSku } from 'src/utils/helper';
 
 /** Snapshot of an InventoryItem captured just before it is deleted, returned by moveOutByItemIds */
 
@@ -55,6 +55,7 @@ export class InventoryMovementService {
           product: item.product,
           receive_date: item.receive_date,
           product_name: product?.product_name,
+          product_sku: product?.product_sku || toSku(product?.product_name),
           original_price: item.original_price,
           original_ppn_rate: item.original_ppn_rate,
           original_ppn_amount: item.original_ppn_amount || toDecimal128(ppn),
@@ -162,6 +163,7 @@ export class InventoryMovementService {
           product: inventoryItem.product,
           receive_date: inventoryItem.receive_date,
           product_name: inventoryItem.product_name,
+          product_sku: inventoryItem.product_sku || toSku(inventoryItem.product_name),
           original_price: inventoryItem.original_price,
           original_ppn_rate: inventoryItem.original_ppn_rate,
           original_ppn_amount: toDecimal128(ppn),
@@ -261,6 +263,7 @@ export class InventoryMovementService {
             product: candidate.product,
             receive_date: candidate.receive_date,
             product_name: candidate.product_name,
+            product_sku: candidate.product_sku || toSku(candidate.product_name),
             original_price: candidate.original_price,
             original_ppn_rate: candidate.original_ppn_rate,
             original_ppn_amount: toDecimal128(ppn),
