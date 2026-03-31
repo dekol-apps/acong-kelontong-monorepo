@@ -28,7 +28,7 @@ export class ProductForm implements OnInit, AfterViewInit {
     product_name: new FormControl(null, [Validators.required]),
     product_description: new FormControl(null),
     brand: new FormControl(null, [Validators.required]),
-    unit_of_measure: new FormControl(null), // value is string TUOM
+    unit_of_measure: new FormControl(null, [Validators.required]), // value is string TUOM
     barcode: new FormControl(null),
   });
 

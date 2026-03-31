@@ -25,7 +25,7 @@
 
         <div class="w-100">
           <label for="unit_of_measure" class="form-label" appAutoWildcard>Unit Of Measure</label>
-          <select class="form-select" id="unit_of_measure" formControlName="unit_of_measure">
+          <select class="form-select" id="unit_of_measure" formControlName="unit_of_measure" required>
             <option selected disabled value="">Choose...</option>
             @for (uom of uoms; track $index) {
             <option [value]="uom">{{uom}}</option>
