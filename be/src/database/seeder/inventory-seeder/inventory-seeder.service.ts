@@ -35,6 +35,7 @@ export class InventorySeederService {
                 original_ppn_rate: 11,
                 original_ppn_amount: toDecimal128(toDecimal(550)),
                 landed_cost: toDecimal128(toDecimal(5550)),
+                product_sku: product.product_sku,
             });
 
             await this.inventoryMovementModel.create({

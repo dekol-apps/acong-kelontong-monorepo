@@ -44,6 +44,7 @@ export class PurchasingSeederService {
                 purchase_order: purchasing._id,
                 product: product._id,
                 product_name: product.product_name,
+                product_sku: product.product_sku,
                 supplier_name: supplier.supplier_name,
                 purchase_qty: 10,
                 received_qty: 10,

@@ -31,6 +31,7 @@ export class SaleSeederService {
                 product: product._id,
                 brand_name: brand?.brand_name || 'Unknown',
                 product_name: product.product_name,
+                product_sku: product.product_sku,
                 barcode: product.barcode,
                 original_price: toDecimal128(toDecimal(5000)),
                 original_ppn_rate: 11,
