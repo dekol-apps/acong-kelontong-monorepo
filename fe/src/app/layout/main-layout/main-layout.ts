@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router, RouterModule } from '@angular/router';
 import { IMenu } from '../../types/interfaces/menu.interface';
 import { NavigationService } from '../../services/navigation/navigation-service';
 import { IBreadcrumb } from '../../types/interfaces/breadcrumb.interface';
@@ -9,6 +9,7 @@ import { PageSpinner } from '../../shared/components/page-spinner/page-spinner';
 import { AuthService } from '../../services/auth/auth-service';
 import { IUser, TModules } from '../../types/interfaces/user.interface';
 import { Menus } from '../../types/constants/menus';
+import { filter } from 'rxjs';
 @Component({
   selector: 'app-main-layout',
   imports: [CommonModule, RouterModule, Alert, PageSpinner],
@@ -20,6 +21,7 @@ export class MainLayout implements OnInit {
   breadcrumbs: IBreadcrumb[] = [];
   pageTitle: string = '';
   modules: TModules[] = [];
+  openMenuKeys: Record<string, boolean> = {};
 
   profile?: IUser = {} as IUser;
   userName: string = '';
@@ -42,6 +44,13 @@ export class MainLayout implements OnInit {
     // TODO: remove this dummy later
     this.modules = modules.concat('dashboard.view')
     this.updateMenus();
+
+    // Keep parent accordion opened for active child route.
+    this.syncOpenedMenusWithRoute(this.router.url);
+    this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe((event) => {
+      const navigationEvent = event as NavigationEnd;
+      this.syncOpenedMenusWithRoute(navigationEvent.urlAfterRedirects);
+    });
   }
 
   updateMenus() {
@@ -64,5 +73,38 @@ export class MainLayout implements OnInit {
 
   logout() {
     this.auth.logout('current');
+  }
+
+  getMenuKey(menu: IMenu): string {
+    return menu.url || menu.labelKey || '';
+  }
+
+  isMenuOpen(menu: IMenu): boolean {
+    const key = this.getMenuKey(menu);
+    return !!this.openMenuKeys[key];
+  }
+
+  toggleMenu(menu: IMenu): void {
+    const key = this.getMenuKey(menu);
+    this.openMenuKeys[key] = !this.openMenuKeys[key];
+  }
+
+  private syncOpenedMenusWithRoute(url: string): void {
+    const currentPath = url.split('?')[0].split('#')[0];
+
+    this.menuItems.forEach((menu) => {
+      if (!menu.children?.length) {
+        return;
+      }
+
+      const hasActiveChild = menu.children.some((child) => {
+        const childPath = child.url?.startsWith('/') ? child.url : `/${child.url || ''}`;
+        return currentPath === childPath || currentPath.startsWith(`${childPath}/`);
+      });
+
+      if (hasActiveChild) {
+        this.openMenuKeys[this.getMenuKey(menu)] = true;
+      }
+    });
   }
 }

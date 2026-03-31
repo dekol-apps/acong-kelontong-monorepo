@@ -204,12 +204,13 @@
         <div class="sidebar-wrapper">
             <nav class="mt-2">
                 <!--begin::Sidebar Menu-->
-                <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="navigation"
+                <ul class="nav sidebar-menu flex-column" role="navigation"
                     aria-label="Main navigation" data-accordion="false" id="navigation">
                     @for(menu of menuItems; track $index) {
                     @if (menu.children && menu.children.length > 0) {
-                    <li class="nav-item has-treeview">
-                        <a href="#" class="nav-link bg-transparent menu-color">
+                    <li class="nav-item has-treeview" [class.menu-open]="isMenuOpen(menu)">
+                        <button type="button" class="nav-link bg-transparent menu-color w-100 border-0 text-start"
+                            (click)="toggleMenu(menu)">
                             <i [ngClass]="menu.icon"></i>
                             <p>
                                 {{ menu.labelKey }}
@@ -217,7 +218,7 @@
                                 <i class="nav-arrow bi bi-chevron-right"></i>
                                 }
                             </p>
-                        </a>
+                        </button>
                         <ul class="nav nav-treeview">
                             @for(child of menu.children; track $index) {
                             <li class="nav-item">
