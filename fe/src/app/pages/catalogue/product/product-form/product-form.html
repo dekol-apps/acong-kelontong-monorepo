@@ -1,6 +1,6 @@
 <div class="modal-header">
   <h4 class="modal-title" id="modal-title">
-    <div class="card-title text-capitalize">{{type}} Product</div>
+    <div class="card-title text-capitalize">{{ (type==='new' ? 'Create' : type==='edit' ? 'Edit' : 'View') | translate }} {{ 'Product' | translate }}</div>
   </h4>
   <button type="button" class="btn-close" aria-describedby="modal-title" (click)="close.emit()"></button>
 </div>
@@ -9,9 +9,9 @@
     <div class="modal-body">
       <div class="d-flex flex-row flex-wrap justify-content-between gap-2">
         <div class="w-100">
-          <label for="brand" class="form-label" appAutoWildcard>Brand</label>
+          <label for="brand" class="form-label" appAutoWildcard>{{ 'Brand' | translate }}</label>
           <select class="form-select" id="brand" formControlName="brand">
-            <option selected disabled value="">Choose...</option>
+            <option selected disabled value="">{{ 'Choose...' | translate }}</option>
             @for (brand of brands; track $index) {
             <option [value]="brand._id">{{brand.brand_name}}</option>
             }
@@ -19,14 +19,14 @@
         </div>
 
         <div class="w-100">
-          <label for="product_name" class="form-label" appAutoWildcard>Product name</label>
+          <label for="product_name" class="form-label" appAutoWildcard>{{ 'Product Name' | translate }}</label>
           <input type="text" class="form-control" id="product_name" formControlName="product_name" />
         </div>
 
         <div class="w-100">
-          <label for="unit_of_measure" class="form-label" appAutoWildcard>Unit Of Measure</label>
+          <label for="unit_of_measure" class="form-label" appAutoWildcard>{{ 'Unit Of Measure' | translate }}</label>
           <select class="form-select" id="unit_of_measure" formControlName="unit_of_measure" required>
-            <option selected disabled value="">Choose...</option>
+            <option selected disabled value="">{{ 'Choose...' | translate }}</option>
             @for (uom of uoms; track $index) {
             <option [value]="uom">{{uom}}</option>
             }
@@ -34,20 +34,20 @@
         </div>
 
         <div class="w-100">
-          <label for="barcode" class="form-label" appAutoWildcard>Barcode</label>
+          <label for="barcode" class="form-label" appAutoWildcard>{{ 'Barcode' | translate }}</label>
           <input type="text" class="form-control" id="barcode" formControlName="barcode" />
         </div>
 
         <div class="w-100">
-          <label for="product_description" class="form-label" appAutoWildcard>Description</label>
+          <label for="product_description" class="form-label" appAutoWildcard>{{ 'Description' | translate }}</label>
           <input type="text" class="form-control" id="product_description" formControlName="product_description" />
         </div>
       </div>
     </div>
     @if (type!=='view') {
     <div class="modal-footer">
-      <button class="btn btn-secondary" type="button" (click)="close.emit()">Cancel</button>
-      <button class="btn btn-primary" type="submit">Submit</button>
+      <button class="btn btn-secondary" type="button" (click)="close.emit()">{{ 'COMMON_CANCEL' | translate }}</button>
+      <button class="btn btn-primary" type="submit">{{ 'Submit' | translate }}</button>
     </div>
     }
   </form>

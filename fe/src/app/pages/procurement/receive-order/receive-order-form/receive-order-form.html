@@ -2,7 +2,7 @@
     <div class="card">
         <div class="card-header mb-4">
             <div class="d-flex flex-row justify-content-between gap-4">
-                <h3 class="card-title text-capitalize">Receive Purchase Order: {{ purchasingDetail?.supplier_name }}
+                <h3 class="card-title text-capitalize">{{ 'Receive Purchase Order' | translate }}: {{ purchasingDetail?.supplier_name }}
                 </h3>
                 <span class="badge bg-primary align-self-center">{{ purchasingDetail?.status }}</span>
             </div>
@@ -11,15 +11,15 @@
         <div class="card-body">
             <div class="row mb-4">
                 <div class="col-md-6">
-                    <label for="invoice_number" class="form-label" appAutoWildcard>Invoice Number</label>
+                    <label for="invoice_number" class="form-label" appAutoWildcard>{{ 'Invoice Number' | translate }}</label>
                     <input type="text" id="invoice_number" formControlName="invoice_number" class="form-control"
-                        placeholder="Update Invoice Number (Optional)">
+                        [placeholder]="'Update Invoice Number (Optional)' | translate">
                 </div>
             </div>
 
             <div class="d-flex flex-column">
-                <h4 class="card-title mb-0">Order Items</h4>
-                <p class="text-muted small">Enter the quantity received for each item below.</p>
+                <h4 class="card-title mb-0">{{ 'Order Items' | translate }}</h4>
+                <p class="text-muted small">{{ 'Enter the quantity received for each item below.' | translate }}</p>
             </div>
 
             <app-generic-table [columns]="columns" [data]="listPurchasingItem" [usePagination]="true"
@@ -47,7 +47,7 @@
                     <ng-template let-row>
                         <div class="d-flex justify-content-end">
                             <button type="button" class="btn btn-outline-warning btn-sm" [disabled]="!receivedMap[row._id]" (click)="clearItem(row._id)">
-                                Clear
+                                {{ 'Clear' | translate }}
                             </button>
                         </div>
                     </ng-template>
@@ -57,9 +57,9 @@
         </div>
 
         <div class="card-footer d-flex gap-2 rounded-bottom">
-            <button type="button" class="btn btn-secondary" (click)="back()">Cancel</button>
+            <button type="button" class="btn btn-secondary" (click)="back()">{{ 'COMMON_CANCEL' | translate }}</button>
             <button type="submit" class="btn btn-success" [disabled]="isLoading">
-                Submit Receipt
+                {{ 'Submit Receipt' | translate }}
             </button>
         </div>
     </div>

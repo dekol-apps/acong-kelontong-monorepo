@@ -1,7 +1,7 @@
 <div class="card">
   <div class="card-header mb-4">
     <div class="d-flex flex-row justify-content-between gap-4">
-      <h3 class="card-title">Stock Item Detail ({{detail?.product_name}} - {{detail?.product_sku || '-'}})</h3>
+      <h3 class="card-title">{{ 'Stock Item Detail' | translate }} ({{detail?.product_name}} - {{detail?.product_sku || '-'}})</h3>
     </div>
   </div>
   <div class="card-body">
@@ -9,43 +9,43 @@
       <table class="table">
         <tbody>
           <tr>
-            <th scope="row" class="fw-bold p-1 col-3 align-top">Brand Name</th>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">{{ 'Brand Name' | translate }}</th>
             <td class="align-top">{{ detail?.brand_name || '-' }}</td>
           </tr>
           <tr>
-            <th scope="row" class="fw-bold p-1 col-3 align-top">Product SKU</th>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">{{ 'Product SKU' | translate }}</th>
             <td class="align-top">{{ detail?.product_sku || '-' }}</td>
           </tr>
           <tr>
-            <th scope="row" class="fw-bold p-1 col-3 align-top">Barcode</th>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">{{ 'Barcode' | translate }}</th>
             <td class="align-top">{{ detail?.barcode || '-' }}</td>
           </tr>
           <tr>
-            <th scope="row" class="fw-bold p-1 col-3 align-top">Created At</th>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">{{ 'Created At' | translate }}</th>
             <td class="align-top">{{ (detail?.createdAt | date) || '-' }}</td>
           </tr>
           <tr>
-            <th scope="row" class="fw-bold p-1 col-3 align-top">Sale Price</th>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">{{ 'Sale Price' | translate }}</th>
             <td class="align-top">{{ (detail?.sale_price | rupiah) || '-' }}</td>
           </tr>
           <tr>
-            <th scope="row" class="fw-bold p-1 col-3 align-top">Discount</th>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">{{ 'Discount' | translate }}</th>
             <td class="align-top">{{ (detail?.discount_percent ? (detail?.discount_percent+'%') : '-') }}</td>
           </tr>
           <tr>
-            <th scope="row" class="fw-bold p-1 col-3 align-top">Discount Amount</th>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">{{ 'Discount Amount' | translate }}</th>
             <td class="align-top">{{ (detail?.discount_amount | rupiah) || '-' }}</td>
           </tr>
           <tr>
-            <th scope="row" class="fw-bold p-1 col-3 align-top">COGS</th>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">{{ 'COGS' | translate }}</th>
             <td class="align-top">{{ (detail?.cogs | rupiah) || '-' }}</td>
           </tr>
           <tr>
-            <th scope="row" class="fw-bold p-1 col-3 align-top">Original Price</th>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">{{ 'Original Price' | translate }}</th>
             <td class="align-top">{{ (detail?.original_price | rupiah) || '-' }}</td>
           </tr>
           <tr>
-            <th scope="row" class="fw-bold p-1 col-3 align-top">Original PPn Rate</th>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">{{ 'Original PPn Rate' | translate }}</th>
             <td class="align-top">{{ (detail?.original_ppn_rate ? (detail?.original_ppn_rate+'%') : '-') }}</td>
           </tr>
         </tbody>
@@ -53,6 +53,6 @@
     </div>
   </div>
   <div class="card-footer d-flex gap-2">
-    <button class="btn btn-secondary" type="button" (click)="back()">Back</button>
+    <button class="btn btn-secondary" type="button" (click)="back()">{{ 'Back' | translate }}</button>
   </div>
 </div>

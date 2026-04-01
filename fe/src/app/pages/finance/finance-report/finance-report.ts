@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AccountingService } from '../../../services/accounting/accounting.service';
 import { IPortofolio } from '../../../types/interfaces/finance.interface';
+import { TranslateModule } from '@ngx-translate/core';
 
 interface IChartBar {
   label: string;
@@ -13,7 +14,7 @@ interface IChartBar {
 
 @Component({
   selector: 'app-finance-report',
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, TranslateModule],
   templateUrl: './finance-report.html',
   styleUrl: './finance-report.scss'
 })
@@ -44,12 +45,12 @@ export class FinanceReport implements OnInit {
   get summaryCards() {
     const p = this.portfolio;
     return [
-      { label: 'Balance', value: p?.balance ?? 0, icon: 'bi-wallet2', color: 'success', description: 'Current cash balance' },
-      { label: 'Revenue', value: p?.revenue ?? 0, icon: 'bi-graph-up-arrow', color: 'primary', description: 'Total sales revenue' },
-      { label: 'Profit', value: p?.profit ?? 0, icon: 'bi-piggy-bank', color: 'info', description: 'Revenue – COGS – Expenses' },
-      { label: 'Investment', value: p?.investment ?? 0, icon: 'bi-bank', color: 'warning', description: 'Total capital invested' },
-      { label: 'Total Assets', value: p?.totalAssets ?? 0, icon: 'bi-box-seam', color: 'secondary', description: 'Cash + Inventory value' },
-      { label: 'Equity', value: p?.equity ?? 0, icon: 'bi-shield-check', color: 'danger', description: 'Assets – Liabilities' },
+      { label: 'Balance', value: p?.balance ?? 0, icon: 'bi-wallet2', color: 'success', description: 'FINREP_DESC_BALANCE' },
+      { label: 'Revenue', value: p?.revenue ?? 0, icon: 'bi-graph-up-arrow', color: 'primary', description: 'FINREP_DESC_REVENUE' },
+      { label: 'Profit', value: p?.profit ?? 0, icon: 'bi-piggy-bank', color: 'info', description: 'FINREP_DESC_PROFIT' },
+      { label: 'Investment', value: p?.investment ?? 0, icon: 'bi-bank', color: 'warning', description: 'FINREP_DESC_INVESTMENT' },
+      { label: 'Total Assets', value: p?.totalAssets ?? 0, icon: 'bi-box-seam', color: 'secondary', description: 'FINREP_DESC_TOTAL_ASSETS' },
+      { label: 'Equity', value: p?.equity ?? 0, icon: 'bi-shield-check', color: 'danger', description: 'FINREP_DESC_EQUITY' },
     ];
   }
 

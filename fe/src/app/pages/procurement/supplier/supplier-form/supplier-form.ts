@@ -4,10 +4,11 @@ import { FormValidation } from '../../../../shared/directives/form-validation/fo
 import { AlertService } from '../../../../shared/components/alert/alert-service';
 import { formType } from '../../../../types/interfaces/common.interface';
 import { SupplierService } from '../supplier.service';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-supplier-form',
-  imports: [ReactiveFormsModule, FormValidation],
+  imports: [ReactiveFormsModule, FormValidation, TranslateModule],
   templateUrl: './supplier-form.html',
   styleUrl: './supplier-form.scss'
 })

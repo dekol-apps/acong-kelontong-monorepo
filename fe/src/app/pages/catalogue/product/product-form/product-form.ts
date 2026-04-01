@@ -8,10 +8,11 @@ import { IBrand } from '../../../../types/interfaces/catalogue.interface';
 import { BrandService } from '../../brand/brand-service';
 import { TUOM, UnitOfMeasure } from '../../../../types/constants/common.constants';
 import { AutoWildcard } from '../../../../shared/directives/auto-wildcard/auto-wildcard';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-product-form',
-  imports: [ReactiveFormsModule, FormValidation, AutoWildcard],
+  imports: [ReactiveFormsModule, FormValidation, AutoWildcard, TranslateModule],
   templateUrl: './product-form.html',
   styleUrl: './product-form.scss'
 })

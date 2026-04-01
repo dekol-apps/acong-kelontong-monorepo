@@ -5,10 +5,11 @@ import { AccountingService } from '../../../services/accounting/accounting.servi
 import { IAccounting } from '../../../types/interfaces/finance.interface';
 import { FlowType, OrderType } from '../../../types/enums/common.enum';
 import { SalesHistoryDetail } from '../../sales/sales-history-detail/sales-history-detail';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-cashflow-detail',
-  imports: [CommonModule, RouterModule, SalesHistoryDetail],
+  imports: [CommonModule, RouterModule, SalesHistoryDetail, TranslateModule],
   templateUrl: './cashflow-detail.html',
   styleUrl: './cashflow-detail.scss',
 })

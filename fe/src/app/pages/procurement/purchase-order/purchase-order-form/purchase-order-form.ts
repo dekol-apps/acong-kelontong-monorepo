@@ -12,10 +12,11 @@ import { AlertService } from '../../../../shared/components/alert/alert-service'
 import { PurchasingStore } from '../../../../shared/stores/purchasing.store';
 import { nativeToNgbDate } from '../../../../shared/components/date-range-filter/date-range-filter';
 import { defaultPpnRate } from '../../../../types/constants/common.constants';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-purchase-order-form',
-  imports: [NgbNavModule, PurchaseOrderForm1, PurchaseOrderItem, PurchaseOrderFormPayment],
+  imports: [NgbNavModule, PurchaseOrderForm1, PurchaseOrderItem, PurchaseOrderFormPayment, TranslateModule],
   templateUrl: './purchase-order-form.html',
   styleUrl: './purchase-order-form.scss',
 })
@@ -32,7 +33,8 @@ export class PurchaseOrderForm {
     private router: Router,
     private alert: AlertService,
     public store: PurchasingStore,
-    private purchasingService: PurchaseOrderService
+    private purchasingService: PurchaseOrderService,
+    private translate: TranslateService
   ) {
     this.store.purchasing$.subscribe(val => {
       this.purchasingDetail = val;
@@ -170,7 +172,7 @@ export class PurchaseOrderForm {
     }
     subscriber.subscribe({
       next: (res) => {
-        this.alert.success('Success, PO waiting for approval');
+        this.alert.success(this.translate.instant('Success, PO waiting for approval'));
         this.done();
       }
     })

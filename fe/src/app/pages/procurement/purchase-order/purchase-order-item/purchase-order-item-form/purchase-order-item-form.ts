@@ -10,9 +10,10 @@ import { ActivatedRoute } from '@angular/router';
 import { NgbDatepickerModule } from '@ng-bootstrap/ng-bootstrap';
 import { nativeToNgbDate, ngbToNativeDate } from '../../../../../shared/components/date-range-filter/date-range-filter';
 import { MONEY_REGEX, toMoneyString } from '../../../../../utils/helper';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 @Component({
   selector: 'app-purchase-order-item-form',
-  imports: [ReactiveFormsModule, FormValidation, NgbDatepickerModule],
+  imports: [ReactiveFormsModule, FormValidation, NgbDatepickerModule, TranslateModule],
   templateUrl: './purchase-order-item-form.html',
   styleUrl: './purchase-order-item-form.scss'
 })
@@ -32,7 +33,7 @@ export class PurchaseOrderItemForm implements OnInit, AfterViewInit, OnChanges {
     purchase_price: new FormControl(null, [Validators.required, Validators.pattern(MONEY_REGEX)]),
   });
 
-  constructor(private service: PurchaseOrderService, private alert: AlertService, private productSvc: ProductService, private route: ActivatedRoute) {
+  constructor(private service: PurchaseOrderService, private alert: AlertService, private productSvc: ProductService, private route: ActivatedRoute, private translate: TranslateService) {
   }
 
   ngOnInit(): void {
@@ -82,15 +83,15 @@ export class PurchaseOrderItemForm implements OnInit, AfterViewInit, OnChanges {
   }
 
   submit() {
-    if (!this.purchase_id) return this.alert.error('Missing purchase id, please reload page')
-    if (this.form.invalid) return this.alert.error('Please check your inputs');
+    if (!this.purchase_id) return this.alert.error(this.translate.instant('Missing purchase id, please reload page'))
+    if (this.form.invalid) return this.alert.error(this.translate.instant('Please check your inputs'));
     const body = this.form.value;
     body.purchase_price = toMoneyString(body.purchase_price);
     body.exp_date = ngbToNativeDate(body.exp_date);
     let serviceArgs = this.service.createPurchaseItem(body);
     if (this.type === 'edit' && this.purchase_item_id) serviceArgs = this.service.editPurchaseItem(this.purchase_item_id, body);
     serviceArgs.subscribe((res) => {
-      this.alert.success(`Success ${this.type == 'edit' ? 'edit' : 'add'} purchasing item!`);
+      this.alert.success(this.translate.instant(this.type == 'edit' ? 'Success edit purchasing item!' : 'Success add purchasing item!'));
       this.onClose.emit(true);
     })
   }

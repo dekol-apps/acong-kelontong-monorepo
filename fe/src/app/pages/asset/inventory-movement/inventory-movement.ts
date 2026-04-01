@@ -8,11 +8,12 @@ import { IInventoryMovement } from '../../../types/interfaces/inventory.interfac
 import { IPaginationInput } from '../../../types/interfaces/common.interface';
 import { RouterModule } from '@angular/router';
 import { FlowType } from '../../../types/enums/common.enum';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-inventory-movement',
   standalone: true,
-  imports: [CommonModule, NgbNavModule, GenericTable, TableColumn, RouterModule],
+  imports: [CommonModule, NgbNavModule, GenericTable, TableColumn, RouterModule, TranslateModule],
   templateUrl: './inventory-movement.html',
   styleUrl: './inventory-movement.scss'
 })
@@ -21,19 +22,19 @@ export class InventoryMovement implements OnInit {
   FlowType = FlowType;
 
   columnsIn: ColumnProps[] = [
-    { id: 'items', label: 'Products', customElementId: 'items' },
-    { id: 'createdAt', label: 'Movement Date', dataType: 'DATE' },
-    { id: 'order_type', label: 'Source Type' },
-    { id: 'description', label: 'Description', maxWidth: '200px', ellipsis: true },
-    { id: 'action', label: 'Actions', customElementId: 'action' },
+    { id: 'items', label: 'TABLE_PRODUCTS', customElementId: 'items' },
+    { id: 'createdAt', label: 'TABLE_MOVEMENT_DATE', dataType: 'DATE' },
+    { id: 'order_type', label: 'TABLE_SOURCE_TYPE' },
+    { id: 'description', label: 'COMMON_DESCRIPTION', maxWidth: '200px', ellipsis: true },
+    { id: 'action', label: 'COMMON_ACTION', customElementId: 'action' },
   ];
 
   columnsOut: ColumnProps[] = [
-    { id: 'items', label: 'Products', customElementId: 'items' },
-    { id: 'createdAt', label: 'Movement Date', dataType: 'DATE' },
-    { id: 'order_type', label: 'Source Type' },
-    { id: 'description', label: 'Description', maxWidth: '200px', ellipsis: true },
-    { id: 'action', label: 'Actions', customElementId: 'action' },
+    { id: 'items', label: 'TABLE_PRODUCTS', customElementId: 'items' },
+    { id: 'createdAt', label: 'TABLE_MOVEMENT_DATE', dataType: 'DATE' },
+    { id: 'order_type', label: 'TABLE_SOURCE_TYPE' },
+    { id: 'description', label: 'COMMON_DESCRIPTION', maxWidth: '200px', ellipsis: true },
+    { id: 'action', label: 'COMMON_ACTION', customElementId: 'action' },
   ];
 
   listIn: IInventoryMovement[] = [];

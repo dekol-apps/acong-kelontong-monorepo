@@ -11,10 +11,11 @@ import { SORT_DIR } from '../../../../types/constants/common.constants';
 import { IPaginationInput } from '../../../../types/interfaces/common.interface';
 import { IPurchasing, IPurchasingItem } from '../../../../types/interfaces/procurement.interface';
 import { PurchaseOrderService } from '../../services/purchase-order.service';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-receive-order-form',
-  imports: [CommonModule, ReactiveFormsModule, GenericTable, TableColumn, FormValidation, AutoWildcard],
+  imports: [CommonModule, ReactiveFormsModule, GenericTable, TableColumn, FormValidation, AutoWildcard, TranslateModule],
   standalone: true,
   templateUrl: './receive-order-form.html',
   styleUrl: './receive-order-form.scss',
@@ -91,7 +92,8 @@ export class ReceiveOrderForm implements OnInit {
     private router: Router,
     private poService: PurchaseOrderService,
     private alert: AlertService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private translate: TranslateService
   ) {
     this.form = this.fb.group({
       invoice_number: [null]
@@ -104,7 +106,7 @@ export class ReceiveOrderForm implements OnInit {
       this.getDetail();
       this.getList(this.defaultTableParam);
     } else {
-      this.alert.error('Purchase ID not found');
+      this.alert.error(this.translate.instant('Purchase ID not found'));
       this.router.navigate(['/purchase-order']);
     }
   }
@@ -115,7 +117,7 @@ export class ReceiveOrderForm implements OnInit {
         this.purchasingDetail = res;
         this.form.patchValue({ invoice_number: res.invoice_number });
       },
-      error: () => this.alert.error('Failed to fetch PO detail')
+      error: () => this.alert.error(this.translate.instant('Failed to fetch PO detail'))
     });
   }
 
@@ -144,7 +146,7 @@ export class ReceiveOrderForm implements OnInit {
         },
         error: () => {
           this.isLoading = false;
-          this.alert.error('Failed to fetch PO items');
+          this.alert.error(this.translate.instant('Failed to fetch PO items'));
         }
       });
   }
@@ -161,7 +163,7 @@ export class ReceiveOrderForm implements OnInit {
       const maxAllowed = purchaseQty - alreadyReceived;
 
       if (qtyNum > maxAllowed) {
-        this.alert.error(`Max allowed for "${item.product?.product_name || item.product_name}" is ${maxAllowed}`);
+        this.alert.error(this.translate.instant('Max allowed quantity is {{max}}', { max: maxAllowed }));
         this.receivedMap[itemId] = maxAllowed;
       } else {
         this.receivedMap[itemId] = qtyNum;
@@ -191,7 +193,7 @@ export class ReceiveOrderForm implements OnInit {
       }));
 
     if (receivedItems.length === 0) {
-      return this.alert.error('Please input at least one received quantity');
+      return this.alert.error(this.translate.instant('Please input at least one received quantity'));
     }
 
     const payload = {
@@ -202,12 +204,12 @@ export class ReceiveOrderForm implements OnInit {
     this.isLoading = true;
     this.poService.receiveOrder(this.purchasingId, payload).subscribe({
       next: () => {
-        this.alert.success('Purchase Order received successfully');
+        this.alert.success(this.translate.instant('Purchase Order received successfully'));
         this.router.navigate(['/purchase-order/detail', this.purchasingId]);
       },
       error: (err) => {
         this.isLoading = false;
-        const msg = err.error?.option?.message || 'Failed to receive PO';
+        const msg = err.error?.option?.message || this.translate.instant('Failed to receive PO');
         this.alert.error(msg);
       }
     });

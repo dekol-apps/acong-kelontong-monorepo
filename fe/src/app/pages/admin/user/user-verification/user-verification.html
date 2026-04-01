@@ -3,35 +3,35 @@
     <div class="card card-outline card-primary">
       <div class="card-header">
         <a class="link-dark text-center link-offset-2 link-opacity-100 link-opacity-50-hover">
-          <h1 class="mb-0">User Verification</h1>
+          <h1 class="mb-0">{{ 'User Verification' | translate }}</h1>
         </a>
       </div>
       <div class="card-body register-card-body">
-        <p class="register-box-msg">Please input new password</p>
+        <p class="register-box-msg">{{ 'Please input new password' | translate }}</p>
         <form [formGroup]="form" (ngSubmit)="submit()">
           <div class="input-group mb-1" appInputValidation>
             <div class="form-floating">
               <input id="new_password" formControlName="new_password" type="password" class="form-control" />
-              <label for="new_password">Password</label>
+              <label for="new_password">{{ 'Password' | translate }}</label>
             </div>
             <div class="input-group-text"><span class="bi bi-lock-fill"></span></div>
           </div>
           <div class="input-group mb-1" appInputValidation>
             <div class="form-floating">
               <input id="confirm_password" formControlName="confirm_password" type="password" class="form-control" />
-              <label for="confirm_password">Confirm Password</label>
+              <label for="confirm_password">{{ 'Confirm Password' | translate }}</label>
             </div>
             <div class="input-group-text"><span class="bi bi-lock-fill"></span></div>
             @if (!passwordMatch()) {
             <div class="invalid-feedback">
-              Password and Confirm Password not matched!
+              {{ 'Password and Confirm Password not matched!' | translate }}
             </div>
             }
           </div>
           <div class="row">
             <div class="col-4">
               <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-primary">Verify</button>
+                <button type="submit" class="btn btn-primary">{{ 'Verify' | translate }}</button>
               </div>
             </div>
           </div>

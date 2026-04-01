@@ -1,7 +1,7 @@
 <div class="card">
   <div class="card-header mb-4">
     <div class="d-flex flex-row justify-content-between gap-4">
-      <h3 class="card-title">{{ isEditMode ? 'Edit Expense' : 'New Expense' }}</h3>
+      <h3 class="card-title">{{ (isEditMode ? 'Edit Expense' : 'New Expense') | translate }}</h3>
     </div>
   </div>
 
@@ -9,31 +9,31 @@
     <div class="card-body">
       @if (isEditMode && detailStatus && detailStatus !== ExpenseEn.CREATE && detailStatus !== ExpenseEn.REJECT) {
       <div class="alert alert-warning" role="alert">
-        This expense is no longer editable because status is {{ detailStatus }}.
+        {{ 'EXPENSE_FORM_LOCKED_MESSAGE' | translate }} {{ detailStatus }}.
       </div>
       }
 
       <div class="row g-3">
         <div class="col-12 col-md-6">
-          <label for="subject" class="form-label required">Subject</label>
+          <label for="subject" class="form-label required">{{ 'Subject' | translate }}</label>
           <input id="subject" type="text" class="form-control" formControlName="subject" />
         </div>
 
         <div class="col-12 col-md-3">
-          <label for="expense_date" class="form-label required">Expense Date</label>
+          <label for="expense_date" class="form-label required">{{ 'Expense Date' | translate }}</label>
           <input id="expense_date" type="date" class="form-control" formControlName="expense_date" />
         </div>
 
         <div class="col-12 col-md-3">
-          <label for="transaction_amount" class="form-label required">Amount</label>
+          <label for="transaction_amount" class="form-label required">{{ 'Amount' | translate }}</label>
           <input id="transaction_amount" type="text" class="form-control" formControlName="transaction_amount"
             inputmode="decimal" />
         </div>
 
         <div class="col-12 col-md-4">
-          <label for="pph_type" class="form-label">PPh Type</label>
+          <label for="pph_type" class="form-label">{{ 'PPh Type' | translate }}</label>
           <select id="pph_type" class="form-select" formControlName="pph_type">
-            <option [ngValue]="PPhType.NONE">NONE</option>
+            <option [ngValue]="PPhType.NONE">{{ 'NONE' | translate }}</option>
             <option [ngValue]="PPhType.PPh23">PPh23</option>
             <option [ngValue]="PPhType.PPh22">PPh22</option>
             <option [ngValue]="PPhType.PPh4_2">PPh4_2</option>
@@ -41,17 +41,17 @@
         </div>
 
         <div class="col-12 col-md-2">
-          <label for="pph_rate" class="form-label">PPh Rate (%)</label>
+          <label for="pph_rate" class="form-label">{{ 'PPh Rate (%)' | translate }}</label>
           <input id="pph_rate" type="number" class="form-control" formControlName="pph_rate" min="0" max="100" />
         </div>
 
         <div class="col-12 col-md-6">
-          <label for="notes" class="form-label">Notes</label>
+          <label for="notes" class="form-label">{{ 'Notes' | translate }}</label>
           <textarea id="notes" class="form-control" rows="3" formControlName="notes"></textarea>
         </div>
 
         <div class="col-12">
-          <label for="expense_attachments" class="form-label required">Expense Attachments</label>
+          <label for="expense_attachments" class="form-label required">{{ 'Expense Attachments' | translate }}</label>
           <input id="expense_attachments" type="hidden" formControlName="expense_attachments" />
           <app-drag-drop-file-multi [patchFileVal]="form.value.expense_attachments" [loading]="isLoading"
             (fileChanged)="addFile($event)"></app-drag-drop-file-multi>
@@ -60,8 +60,8 @@
     </div>
 
     <div class="card-footer d-flex gap-2">
-      <button class="btn btn-secondary" type="button" (click)="back()">Back</button>
-      <button class="btn btn-primary" type="submit" [disabled]="isLoading || form.disabled">Submit</button>
+      <button class="btn btn-secondary" type="button" (click)="back()">{{ 'Back' | translate }}</button>
+      <button class="btn btn-primary" type="submit" [disabled]="isLoading || form.disabled">{{ 'Submit' | translate }}</button>
     </div>
   </form>
 </div>

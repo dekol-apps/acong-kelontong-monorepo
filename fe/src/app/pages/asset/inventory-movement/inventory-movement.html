@@ -1,14 +1,14 @@
 <div class="card">
   <div class="card-header">
     <div class="d-flex flex-row gap-2 justify-content-between">
-      <h3 class="card-title">Inventory Movement History</h3>
-      <a class="btn btn-primary pointer" [routerLink]="['./form']">+ Manual Inventory Movement</a>
+      <h3 class="card-title">{{ 'INV_MOVEMENT_HISTORY_TITLE' | translate }}</h3>
+      <a class="btn btn-primary pointer" [routerLink]="['./form']">+ {{ 'Manual Inventory Movement' | translate }}</a>
     </div>
   </div>
   <div class="card-body">
     <ul ngbNav #nav="ngbNav" [(activeId)]="activeTab" class="nav-tabs" (navChange)="tabChange($event.nextId)">
       <li [ngbNavItem]="FlowType.IN">
-        <button ngbNavLink>Move IN</button>
+        <button ngbNavLink>{{ 'INV_MOVE_IN' | translate }}</button>
         <ng-template ngbNavContent>
           <div class="mt-4">
             <app-generic-table [columns]="columnsIn" [data]="listIn" [total]="paginationIn.total"
@@ -36,7 +36,7 @@
         </ng-template>
       </li>
       <li [ngbNavItem]="FlowType.OUT">
-        <button ngbNavLink>Move OUT</button>
+        <button ngbNavLink>{{ 'INV_MOVE_OUT' | translate }}</button>
         <ng-template ngbNavContent>
           <div class="mt-4">
             <app-generic-table [columns]="columnsOut" [data]="listOut" [total]="paginationOut.total"

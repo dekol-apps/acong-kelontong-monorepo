@@ -1,18 +1,18 @@
 <section class="dashboard-landing">
   <div class="hero-card">
     <div class="hero-content">
-      <p class="eyebrow">Acong Kelontong Management Suite</p>
-      <h1>Business Command Center</h1>
+      <p class="eyebrow">{{ 'DASHBOARD_SUITE_TITLE' | translate }}</p>
+      <h1>{{ 'DASHBOARD_COMMAND_CENTER' | translate }}</h1>
       <p class="hero-copy">
-        Satu dashboard untuk memantau penjualan, persediaan, pembelian, dan kesehatan keuangan toko secara real-time.
-        Dirancang untuk operasional harian yang rapi, cepat, dan mudah diaudit.
+        {{ 'DASHBOARD_HERO_COPY_1' | translate }}
+        {{ 'DASHBOARD_HERO_COPY_2' | translate }}
       </p>
 
       <div class="hero-tags">
-        <span><i class="bi bi-check2-circle"></i> FIFO Inventory</span>
-        <span><i class="bi bi-check2-circle"></i> 2-Digit Decimal Precision</span>
-        <span><i class="bi bi-check2-circle"></i> Approval Workflow</span>
-        <span><i class="bi bi-check2-circle"></i> Full Activity Trace</span>
+        <span><i class="bi bi-check2-circle"></i> {{ 'DASHBOARD_TAG_FIFO' | translate }}</span>
+        <span><i class="bi bi-check2-circle"></i> {{ 'DASHBOARD_TAG_DECIMAL_PRECISION' | translate }}</span>
+        <span><i class="bi bi-check2-circle"></i> {{ 'DASHBOARD_TAG_APPROVAL' | translate }}</span>
+        <span><i class="bi bi-check2-circle"></i> {{ 'DASHBOARD_TAG_ACTIVITY_TRACE' | translate }}</span>
       </div>
     </div>
 
@@ -21,99 +21,95 @@
 
   <div class="metrics-grid">
     <article class="metric-card soft-blue">
-      <p class="metric-label">Cash Balance</p>
+      <p class="metric-label">{{ 'DASHBOARD_METRIC_CASH_BALANCE' | translate }}</p>
       <h3>{{ (portofolio?.balance ?? 0) | rupiah }}</h3>
-      <p class="metric-foot">Likuiditas kas saat ini</p>
+      <p class="metric-foot">{{ 'DASHBOARD_METRIC_CASH_BALANCE_DESC' | translate }}</p>
     </article>
 
     <article class="metric-card soft-amber">
-      <p class="metric-label">Investment</p>
+      <p class="metric-label">{{ 'Investment' | translate }}</p>
       <h3>{{ (portofolio?.investment ?? 0) | rupiah }}</h3>
-      <p class="metric-foot">Total modal tertanam</p>
+      <p class="metric-foot">{{ 'DASHBOARD_METRIC_INVESTMENT_DESC' | translate }}</p>
     </article>
 
     <article class="metric-card soft-green">
-      <p class="metric-label">Inventory Value</p>
+      <p class="metric-label">{{ 'DASHBOARD_METRIC_INVENTORY_VALUE' | translate }}</p>
       <h3>{{ (portofolio?.inventoryValue ?? 0) | rupiah }}</h3>
-      <p class="metric-foot">Nilai stok barang aktif</p>
+      <p class="metric-foot">{{ 'DASHBOARD_METRIC_INVENTORY_VALUE_DESC' | translate }}</p>
     </article>
 
     <article class="metric-card soft-red">
-      <p class="metric-label">Net Profit</p>
+      <p class="metric-label">{{ 'DASHBOARD_METRIC_NET_PROFIT' | translate }}</p>
       <h3>{{ (portofolio?.profit ?? 0) | rupiah }}</h3>
-      <p class="metric-foot">Laba bersih berjalan</p>
+      <p class="metric-foot">{{ 'DASHBOARD_METRIC_NET_PROFIT_DESC' | translate }}</p>
     </article>
   </div>
 
   <div class="content-grid">
     <article class="panel">
-      <h2>What This Web App Covers</h2>
+      <h2>{{ 'DASHBOARD_COVERAGE_TITLE' | translate }}</h2>
       <p>
-        Aplikasi ini mengintegrasikan proses inti bisnis retail kelontong dari hulu ke hilir, mulai dari procurement,
-        pencatatan stok, produksi sederhana, hingga pelaporan finansial.
+        {{ 'DASHBOARD_COVERAGE_DESC' | translate }}
       </p>
       <div class="feature-list">
         <div>
-          <h4><i class="bi bi-receipt-cutoff"></i> Sales & Cashier</h4>
-          <p>Transaksi cepat, histori penjualan, dan pelacakan per item.</p>
+          <h4><i class="bi bi-receipt-cutoff"></i> {{ 'DASHBOARD_FEATURE_SALES_TITLE' | translate }}</h4>
+          <p>{{ 'DASHBOARD_FEATURE_SALES_DESC' | translate }}</p>
         </div>
         <div>
-          <h4><i class="bi bi-box-seam"></i> Inventory Control</h4>
-          <p>Mutasi stok, stok opname, dan jejak lot berbasis FIFO.</p>
+          <h4><i class="bi bi-box-seam"></i> {{ 'DASHBOARD_FEATURE_INVENTORY_TITLE' | translate }}</h4>
+          <p>{{ 'DASHBOARD_FEATURE_INVENTORY_DESC' | translate }}</p>
         </div>
         <div>
-          <h4><i class="bi bi-truck"></i> Purchasing & Receiving</h4>
-          <p>PO, penerimaan barang, dan kontrol supplier dari satu alur.</p>
+          <h4><i class="bi bi-truck"></i> {{ 'DASHBOARD_FEATURE_PURCHASING_TITLE' | translate }}</h4>
+          <p>{{ 'DASHBOARD_FEATURE_PURCHASING_DESC' | translate }}</p>
         </div>
         <div>
-          <h4><i class="bi bi-cash-stack"></i> Accounting Snapshot</h4>
-          <p>Pantau balance, asset value, revenue, COGS, dan profitability.</p>
+          <h4><i class="bi bi-cash-stack"></i> {{ 'DASHBOARD_FEATURE_ACCOUNTING_TITLE' | translate }}</h4>
+          <p>{{ 'DASHBOARD_FEATURE_ACCOUNTING_DESC' | translate }}</p>
         </div>
       </div>
     </article>
 
     <article class="panel methods-panel">
-      <h2>Business Methods In Use</h2>
+      <h2>{{ 'DASHBOARD_METHODS_TITLE' | translate }}</h2>
       <ul class="method-list">
         <li>
-          <span class="method-title">FIFO (First In, First Out)</span>
-          <span class="method-desc">Pengeluaran stok mengikuti urutan barang masuk untuk menjaga akurasi COGS.</span>
+          <span class="method-title">{{ 'DASHBOARD_METHOD_FIFO_TITLE' | translate }}</span>
+          <span class="method-desc">{{ 'DASHBOARD_METHOD_FIFO_DESC' | translate }}</span>
         </li>
         <li>
-          <span class="method-title">2-Digit Decimal Handling</span>
-          <span class="method-desc">Semua nilai uang dibulatkan dan ditampilkan hingga 2 angka desimal agar
-            konsisten.</span>
+          <span class="method-title">{{ 'DASHBOARD_METHOD_DECIMAL_TITLE' | translate }}</span>
+          <span class="method-desc">{{ 'DASHBOARD_METHOD_DECIMAL_DESC' | translate }}</span>
         </li>
         <li>
-          <span class="method-title">Role-Based Access</span>
-          <span class="method-desc">Akses fitur disesuaikan hak user sehingga operasional lebih aman.</span>
+          <span class="method-title">{{ 'DASHBOARD_METHOD_ROLE_TITLE' | translate }}</span>
+          <span class="method-desc">{{ 'DASHBOARD_METHOD_ROLE_DESC' | translate }}</span>
         </li>
         <li>
-          <span class="method-title">Approval Gate</span>
-          <span class="method-desc">Transaksi penting melewati proses persetujuan untuk mengurangi risiko salah
-            input.</span>
+          <span class="method-title">{{ 'DASHBOARD_METHOD_APPROVAL_TITLE' | translate }}</span>
+          <span class="method-desc">{{ 'DASHBOARD_METHOD_APPROVAL_DESC' | translate }}</span>
         </li>
         <li>
-          <span class="method-title">Audit-Friendly Records</span>
-          <span class="method-desc">Setiap pergerakan data memiliki histori yang memudahkan investigasi dan
-            evaluasi.</span>
+          <span class="method-title">{{ 'DASHBOARD_METHOD_AUDIT_TITLE' | translate }}</span>
+          <span class="method-desc">{{ 'DASHBOARD_METHOD_AUDIT_DESC' | translate }}</span>
         </li>
       </ul>
     </article>
   </div>
 
   <article class="panel journey-panel">
-    <h2>Operational Journey</h2>
+    <h2>{{ 'DASHBOARD_JOURNEY_TITLE' | translate }}</h2>
     <div class="journey-flow">
-      <div><strong>1. Purchase</strong><span>Buat PO dan kelola supplier</span></div>
+      <div><strong>{{ 'DASHBOARD_JOURNEY_STEP_1_TITLE' | translate }}</strong><span>{{ 'DASHBOARD_JOURNEY_STEP_1_DESC' | translate }}</span></div>
       <i class="bi bi-arrow-right"></i>
-      <div><strong>2. Receive</strong><span>Terima barang dan update stok</span></div>
+      <div><strong>{{ 'DASHBOARD_JOURNEY_STEP_2_TITLE' | translate }}</strong><span>{{ 'DASHBOARD_JOURNEY_STEP_2_DESC' | translate }}</span></div>
       <i class="bi bi-arrow-right"></i>
-      <div><strong>3. Store</strong><span>Kelola inventory movement</span></div>
+      <div><strong>{{ 'DASHBOARD_JOURNEY_STEP_3_TITLE' | translate }}</strong><span>{{ 'DASHBOARD_JOURNEY_STEP_3_DESC' | translate }}</span></div>
       <i class="bi bi-arrow-right"></i>
-      <div><strong>4. Sell</strong><span>Kasir, sales history, dan analitik</span></div>
+      <div><strong>{{ 'DASHBOARD_JOURNEY_STEP_4_TITLE' | translate }}</strong><span>{{ 'DASHBOARD_JOURNEY_STEP_4_DESC' | translate }}</span></div>
       <i class="bi bi-arrow-right"></i>
-      <div><strong>5. Review</strong><span>Pantau profit, COGS, dan asset</span></div>
+      <div><strong>{{ 'DASHBOARD_JOURNEY_STEP_5_TITLE' | translate }}</strong><span>{{ 'DASHBOARD_JOURNEY_STEP_5_DESC' | translate }}</span></div>
     </div>
   </article>
 </section>

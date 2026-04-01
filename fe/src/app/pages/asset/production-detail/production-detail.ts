@@ -7,11 +7,12 @@ import { ColumnProps, GenericTable } from '../../../shared/components/generic-ta
 import { TableColumn } from '../../../shared/directives/table-column/table-column';
 import { AlertService } from '../../../shared/components/alert/alert-service';
 import { ConfirmModal } from '../../../shared/components/modals/confirm-modal/confirm-modal';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-production-detail',
   standalone: true,
-  imports: [GenericTable, TableColumn, CommonModule, ConfirmModal],
+  imports: [GenericTable, TableColumn, CommonModule, ConfirmModal, TranslateModule],
   templateUrl: './production-detail.html',
   styleUrl: './production-detail.scss',
 })

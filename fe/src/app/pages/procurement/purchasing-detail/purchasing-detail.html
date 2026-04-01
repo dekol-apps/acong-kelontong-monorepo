@@ -2,75 +2,75 @@
   <table class="table">
     <tbody>
       <tr>
-        <td class="fw-bold p-1 col-3 align-top">Status</td>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'Status' | translate }}</td>
         <td class="align-top">{{purchase?.status || '-'}}</td>
       </tr>
       @if (purchase?.status === PurchasingEn.REJECT) {
       <tr>
-        <td class="fw-bold p-1 col-3 align-top">Reject Notes</td>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'Reject Notes' | translate }}</td>
         <td class="align-top">{{purchase?.reject_notes || '-'}}</td>
       </tr>
       }
       <tr>
-        <td class="fw-bold p-1 col-3 align-top">Invoice Number</td>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'Invoice Number' | translate }}</td>
         <td class="align-top">{{purchase?.invoice_number || '-'}}</td>
       </tr>
       <tr>
-        <td class="fw-bold p-1 col-3 align-top">Supplier</td>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'Supplier' | translate }}</td>
         <td class="align-top">{{purchase?.supplier_name || '-'}}</td>
       </tr>
       <tr>
-        <td class="fw-bold p-1 col-3 align-top">Request Date</td>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'Request Date' | translate }}</td>
         <td class="align-top">{{(purchase?.createdAt | date: DATE_FORMAT) || '-'}}</td>
       </tr>
       <tr>
-        <td class="fw-bold p-1 col-3 align-top">Due Date</td>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'Due Date' | translate }}</td>
         <td class="align-top">{{(purchase?.due_date | date: DATE_FORMAT) || '-'}}</td>
       </tr>
       <tr>
-        <td class="fw-bold p-1 col-3 align-top">Completed Date</td>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'Completed Date' | translate }}</td>
         <td class="align-top">{{(purchase?.completed_date | date: DATE_FORMAT) || '-'}}</td>
       </tr>
       <tr>
-        <td class="fw-bold p-1 col-3 align-top">PPn Type</td>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'PPn Type' | translate }}</td>
         <td class="align-top">{{(purchase?.ppn_type) || '-'}}</td>
       </tr>
       <tr>
-        <td class="fw-bold p-1 col-3 align-top">PPn Rate</td>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'PPn Rate' | translate }}</td>
         <td class="align-top">{{(purchase?.ppn_rate) || '-'}}</td>
       </tr>
       <tr>
-        <td class="fw-bold p-1 col-3 align-top">PPn Amount</td>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'PPn Amount' | translate }}</td>
         <td class="align-top">{{(purchase?.ppn_amount | rupiah) || '-'}}</td>
       </tr>
       <tr>
-        <td class="fw-bold p-1 col-3 align-top">PPn Facture Number</td>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'PPN Facture Number' | translate }}</td>
         <td class="align-top">{{purchase?.ppn_facture_number || '-'}}</td>
       </tr>
       <tr>
-        <td class="fw-bold p-1 col-3 align-top">Shipping Cost</td>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'Shipping Cost' | translate }}</td>
         <td class="align-top">{{(purchase?.shipping_cost | rupiah) || '-'}}</td>
       </tr>
       <tr>
-        <td class="fw-bold p-1 col-3 align-top">Total Price</td>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'Total Price' | translate }}</td>
         <td class="align-top">{{(purchase?.total_purchase_price | rupiah) || '-'}}
         </td>
       </tr>
       <tr>
-        <td class="fw-bold p-1 col-3 align-top">Additional Cost</td>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'Additional Cost' | translate }}</td>
         <td class="align-top">{{(purchase?.cost_difference | rupiah) || '-'}}</td>
       </tr>
       <tr>
-        <td class="fw-bold p-1 col-3 align-top">Payment Realization</td>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'Payment Realization' | translate }}</td>
         <td class="align-top">{{(purchase?.payment_realization | rupiah) || '-'}}
         </td>
       </tr>
       <tr>
-        <td class="fw-bold p-1 col-3 align-top">Notes</td>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'Notes' | translate }}</td>
         <td class="align-top" [innerHTML]="purchase?.invoice_number || '-'"></td>
       </tr>
       <tr>
-        <td class="fw-bold p-1 col-3 align-top">Purchasing Attachments</td>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'Purchasing Attachments' | translate }}</td>
         <td class="align-top">
           <div class="d-flex gap-2 flex-wrap">
             @for (item of purchase?.purchasing_attachments; track $index) {

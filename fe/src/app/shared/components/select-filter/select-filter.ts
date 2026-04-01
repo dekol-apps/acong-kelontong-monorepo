@@ -5,10 +5,11 @@ import {
   ISelectValue,
 } from '../../../types/interfaces/common.interface';
 import { CommonModule } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-select-filter',
-  imports: [NgbDropdownModule, CommonModule],
+  imports: [NgbDropdownModule, CommonModule, TranslateModule],
   templateUrl: './select-filter.html',
 })
 export class SelectFilter {

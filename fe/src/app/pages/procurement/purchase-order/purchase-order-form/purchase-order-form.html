@@ -1,10 +1,10 @@
 <div class="card">
   <div class="card-header">
-    <div class="card-title text-capitalize">Purchase Order</div>
+    <div class="card-title text-capitalize">{{ 'Purchase Order' | translate }}</div>
   </div>
   <ul ngbNav #nav="ngbNav" [(activeId)]="activeStep" [destroyOnHide]="false" class="nav-tabs mt-4">
     <li [ngbNavItem]="1" [destroyOnHide]="true">
-      <button ngbNavLink>Supplier</button>
+      <button ngbNavLink>{{ 'Supplier' | translate }}</button>
       <ng-template ngbNavContent>
         <div class="nav-tabs m-2">
           <app-purchase-order-form1 [form]="form" [type]="type" [purchase_id]="purchase_id" (back)="done()"
@@ -13,7 +13,7 @@
       </ng-template>
     </li>
     <li [ngbNavItem]="2" [destroyOnHide]="true">
-      <button ngbNavLink>Items</button>
+      <button ngbNavLink>{{ 'Items' | translate }}</button>
       <ng-template ngbNavContent>
         <div class="nav-tabs m-2">
           <app-purchase-order-item [type]="type" [purchase_id]="purchase_id" (back)="prevStep()"
@@ -22,7 +22,7 @@
       </ng-template>
     </li>
     <li [ngbNavItem]="3" [destroyOnHide]="true">
-      <button ngbNavLink>Payment</button>
+      <button ngbNavLink>{{ 'Payment' | translate }}</button>
       <ng-template ngbNavContent>
         <div class="nav-tabs m-2">
           <app-purchase-order-form-payment [form]="form" [type]="type" [purchase_id]="purchase_id" (back)="prevStep()"

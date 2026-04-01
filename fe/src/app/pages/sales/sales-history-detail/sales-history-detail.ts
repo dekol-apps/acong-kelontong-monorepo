@@ -5,11 +5,12 @@ import { SaleService } from '../services/sale-service/sale.service';
 import { ISale } from '../../../types/interfaces/sales.interface';
 import { ColumnProps, GenericTable } from '../../../shared/components/generic-table/generic-table';
 import { buildSaleReceiptHtml, IReceiptGroupedItem } from '../utils/receipt.helper';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-sales-history-detail',
   standalone: true,
-  imports: [CommonModule, GenericTable],
+  imports: [CommonModule, GenericTable, TranslateModule],
   templateUrl: './sales-history-detail.html',
   styleUrl: './sales-history-detail.scss',
 })

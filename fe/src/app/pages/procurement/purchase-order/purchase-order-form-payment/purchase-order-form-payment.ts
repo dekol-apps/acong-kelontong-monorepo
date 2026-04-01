@@ -13,10 +13,11 @@ import { PurchasingStore } from '../../../../shared/stores/purchasing.store';
 import { objToFormData, toMoneyString } from '../../../../utils/helper';
 import { AutoWildcard } from '../../../../shared/directives/auto-wildcard/auto-wildcard';
 import { Router } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-purchase-order-form-payment',
-  imports: [ReactiveFormsModule, FormValidation, DragDropFileMulti, NgbDatepickerModule, AutoWildcard],
+  imports: [ReactiveFormsModule, FormValidation, DragDropFileMulti, NgbDatepickerModule, AutoWildcard, TranslateModule],
   templateUrl: './purchase-order-form-payment.html',
   styleUrl: './purchase-order-form-payment.scss'
 })

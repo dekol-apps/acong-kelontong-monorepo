@@ -1,10 +1,11 @@
 import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { DragDropFileComponent, IFielImg } from '../drag-drop-file/drag-drop-file.component';
 import { TenMegaByte } from '../../../types/constants/common.constants';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-drag-drop-file-multi',
-  imports: [DragDropFileComponent],
+  imports: [DragDropFileComponent, TranslateModule],
   templateUrl: './drag-drop-file-multi.html',
   styleUrl: './drag-drop-file-multi.scss'
 })
@@ -22,7 +23,7 @@ export class DragDropFileMulti {
   @Input() componentName: string = '';
   @Input() haveAction?: boolean = true;
   @Input() loading?: boolean;
-  @Input() message: string = 'Click to browse image';
+  @Input() message: string = 'COMMON_ADD_ATTACHMENT_PHOTO';
 
   private _patchFileVal: IFielImg[] = [];
   @Input()

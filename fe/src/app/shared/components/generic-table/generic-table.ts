@@ -21,6 +21,7 @@ import { DateRangeFilter } from '../date-range-filter/date-range-filter';
 import { Pagination } from '../pagination/pagination';
 import { SortIcon } from './sort-icon/sort-icon';
 import { RupiahPipe } from '../../pipes/rupiah.pipe';
+import { TranslateModule } from '@ngx-translate/core';
 
 export interface ColumnProps {
   id: string;
@@ -48,7 +49,7 @@ export const defaultComonQueryData = {
 
 @Component({
   selector: 'app-generic-table',
-  imports: [CommonModule, FormsModule, SelectFilter, DateRangeFilter, Pagination, SortIcon, RupiahPipe],
+  imports: [CommonModule, FormsModule, SelectFilter, DateRangeFilter, Pagination, SortIcon, RupiahPipe, TranslateModule],
   templateUrl: './generic-table.html',
   styleUrl: './generic-table.scss'
 })
@@ -134,7 +135,7 @@ export class GenericTable implements OnInit, OnDestroy {
 
   downloadButtonClicked() {
     this.DownloadButtonClicked.emit();
-  } 1
+  }
   getRowDataValue(rowData: any, nestedPropertyName: string): any {
     return getNestedProperty(rowData, nestedPropertyName);
   }

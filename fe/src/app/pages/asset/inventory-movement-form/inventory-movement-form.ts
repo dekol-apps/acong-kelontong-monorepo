@@ -12,6 +12,7 @@ import { FormValidation } from '../../../shared/directives/form-validation/form-
 import { FlowType, OrderType } from '../../../types/enums/common.enum';
 import { DropdownSearch } from '../../../shared/components/dropdown-search/dropdown-search';
 import { ISelectValue } from '../../../types/interfaces/common.interface';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-inventory-movement-form',
@@ -23,7 +24,8 @@ import { ISelectValue } from '../../../types/interfaces/common.interface';
     GenericTable,
     TableColumn,
     FormValidation,
-    DropdownSearch
+    DropdownSearch,
+    TranslateModule
   ],
   templateUrl: './inventory-movement-form.html',
   styleUrl: './inventory-movement-form.scss'
@@ -39,16 +41,16 @@ export class InventoryMovementForm implements OnInit {
   OrderType = OrderType;
 
   columns: ColumnProps[] = [
-    { id: 'product', label: 'Product', customElementId: 'product' },
-    { id: 'item_qty', label: 'Quantity', customElementId: 'item_qty' },
-    { id: 'action', label: 'Action', customElementId: 'action' },
+    { id: 'product', label: 'COMMON_PRODUCT', customElementId: 'product' },
+    { id: 'item_qty', label: 'COMMON_QUANTITY', customElementId: 'item_qty' },
+    { id: 'action', label: 'COMMON_ACTION', customElementId: 'action' },
   ];
 
   fullColumns: ColumnProps[] = [
-    { id: 'product', label: 'Product', customElementId: 'product' },
-    { id: 'item_qty', label: 'Quantity', customElementId: 'item_qty' },
-    { id: 'original_price', label: 'Price', customElementId: 'original_price' },
-    { id: 'action', label: 'Action', customElementId: 'action' },
+    { id: 'product', label: 'COMMON_PRODUCT', customElementId: 'product' },
+    { id: 'item_qty', label: 'COMMON_QUANTITY', customElementId: 'item_qty' },
+    { id: 'original_price', label: 'COMMON_PRICE', customElementId: 'original_price' },
+    { id: 'action', label: 'COMMON_ACTION', customElementId: 'action' },
   ];
 
   constructor(
@@ -80,9 +82,9 @@ export class InventoryMovementForm implements OnInit {
       this.columns = this.fullColumns;
     } else {
       this.columns = [
-        { id: 'product', label: 'Product', customElementId: 'product' },
-        { id: 'item_qty', label: 'Quantity', customElementId: 'item_qty' },
-        { id: 'action', label: 'Action', customElementId: 'action' }
+        { id: 'product', label: 'COMMON_PRODUCT', customElementId: 'product' },
+        { id: 'item_qty', label: 'COMMON_QUANTITY', customElementId: 'item_qty' },
+        { id: 'action', label: 'COMMON_ACTION', customElementId: 'action' }
       ];
     }
   }

@@ -6,10 +6,11 @@ import { UserService } from '../../user/user-service';
 import { ActivatedRoute } from '@angular/router';
 import { AlertService } from '../../../../shared/components/alert/alert-service';
 import { InputValidation } from '../../../../shared/directives/input-validation/input-validation';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-user-verification',
-  imports: [Alert, PageSpinner, ReactiveFormsModule, InputValidation],
+  imports: [Alert, PageSpinner, ReactiveFormsModule, InputValidation, TranslateModule],
   templateUrl: './user-verification.html',
   styleUrl: './user-verification.scss'
 })
@@ -21,7 +22,7 @@ export class UserVerification {
     confirm_password: new FormControl(null, [Validators.required]),
   });
 
-  constructor(private service: UserService, private route: ActivatedRoute, private alert: AlertService) {
+  constructor(private service: UserService, private route: ActivatedRoute, private alert: AlertService, private translate: TranslateService) {
     const ticket = this.route.snapshot.paramMap.get('ticket') || undefined;
     if (ticket) this.form.controls.ticket.patchValue(ticket);
   }
@@ -42,13 +43,13 @@ export class UserVerification {
     }
     this.service.verifyUser(this.form.value).subscribe({
       next: (res) => {
-        this.alert.success('Verification success');
+        this.alert.success(this.translate.instant('Verification success'));
         setTimeout(() => {
           window.location.href = "/login"
         }, 1000)
       },
       error: (err) => {
-        this.alert.error('Verification failed')
+        this.alert.error(this.translate.instant('Verification failed'))
       }
     })
   }

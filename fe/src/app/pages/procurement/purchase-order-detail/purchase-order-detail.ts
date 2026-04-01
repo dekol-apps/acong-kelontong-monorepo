@@ -6,9 +6,10 @@ import { IPurchasing, PurchasingEn } from '../../../types/interfaces/procurement
 import { ConfirmModal } from '../../../shared/components/modals/confirm-modal/confirm-modal';
 import { PurchaseOrderService } from '../services/purchase-order.service';
 import { FormsModule } from '@angular/forms';
+import { TranslateModule } from '@ngx-translate/core';
 @Component({
   selector: 'app-purchase-order-detail',
-  imports: [PurchasingDetail, ConfirmModal, FormsModule],
+  imports: [PurchasingDetail, ConfirmModal, FormsModule, TranslateModule],
   templateUrl: './purchase-order-detail.html',
   styleUrl: './purchase-order-detail.scss'
 })

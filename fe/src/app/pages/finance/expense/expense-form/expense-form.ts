@@ -10,10 +10,11 @@ import { PPhType } from '../../../../types/enums/common.enum';
 import { ExpenseEn } from '../../../../types/interfaces/expense.interface';
 import { MONEY_REGEX, decimalToNumber, objToFormData, toMoneyString } from '../../../../utils/helper';
 import { ExpenseService } from '../expense.service';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-expense-form',
-  imports: [CommonModule, ReactiveFormsModule, FormValidation, DragDropFileMulti],
+  imports: [CommonModule, ReactiveFormsModule, FormValidation, DragDropFileMulti, TranslateModule],
   templateUrl: './expense-form.html',
   styleUrl: './expense-form.scss'
 })

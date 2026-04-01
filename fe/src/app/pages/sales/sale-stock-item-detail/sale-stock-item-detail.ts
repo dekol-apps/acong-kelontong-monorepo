@@ -5,10 +5,11 @@ import { ISaleItem } from '../../../types/interfaces/sales.interface';
 import { DatePipe } from '@angular/common';
 import { DATE_FORMAT } from '../../../types/constants/common.constants';
 import { RupiahPipe } from '../../../shared/pipes/rupiah.pipe';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-sale-stock-item-detail',
-  imports: [DatePipe, RupiahPipe],
+  imports: [DatePipe, RupiahPipe, TranslateModule],
   standalone: true,
   templateUrl: './sale-stock-item-detail.html',
   styleUrl: './sale-stock-item-detail.scss',

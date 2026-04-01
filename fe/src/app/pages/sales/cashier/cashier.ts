@@ -11,6 +11,7 @@ import { decimalToNumber, roundMoney } from '../../../utils/helper';
 import { defaultPpnRate } from '../../../types/constants/common.constants';
 import { ActivatedRoute, Router } from '@angular/router';
 import { buildSaleReceiptHtml, IReceiptGroupedItem } from '../utils/receipt.helper';
+import { TranslateModule } from '@ngx-translate/core';
 
 interface ICartItem extends ISaleStockSummary {
   qty: number;
@@ -20,7 +21,7 @@ interface ICartItem extends ISaleStockSummary {
 @Component({
   selector: 'app-cashier',
   standalone: true,
-  imports: [CommonModule, FormsModule, GenericTable, TableColumn, ConfirmModal],
+  imports: [CommonModule, FormsModule, GenericTable, TableColumn, ConfirmModal, TranslateModule],
   templateUrl: './cashier.html',
   styleUrl: './cashier.scss'
 })

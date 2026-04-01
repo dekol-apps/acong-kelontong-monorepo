@@ -11,6 +11,7 @@ import { DropdownSearch } from '../../../shared/components/dropdown-search/dropd
 import { ISelectValue } from '../../../types/interfaces/common.interface';
 import { InventoryService } from '../../asset/services/inventory-service/inventory.service';
 import { IInventorySummary } from '../../../types/interfaces/inventory.interface';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-sale-stock-movement-form',
@@ -20,7 +21,8 @@ import { IInventorySummary } from '../../../types/interfaces/inventory.interface
     ReactiveFormsModule,
     RouterModule,
     DropdownSearch,
-    FormValidation
+    FormValidation,
+    TranslateModule
   ],
   templateUrl: './sale-stock-movement-form.html',
   styleUrl: './sale-stock-movement-form.scss',

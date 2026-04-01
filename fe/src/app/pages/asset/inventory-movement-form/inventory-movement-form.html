@@ -1,57 +1,56 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()" appFormValidation>
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">Manual Inventory Movement</h3>
+            <h3 class="card-title">{{ 'Manual Inventory Movement' | translate }}</h3>
         </div>
         <div class="card-body">
             <div class="w-100 mb-3 d-flex gap-3 flex-column">
-                <h4>Movement Information</h4>
+                <h4>{{ 'INV_FORM_SECTION_MOVEMENT_INFO' | translate }}</h4>
                 <div class="w-100">
-                    <label for="movement_type" class="form-label required">Movement Type</label>
+                    <label for="movement_type" class="form-label required">{{ 'INV_FORM_LABEL_MOVEMENT_TYPE' | translate }}</label>
                     <select id="movement_type" class="form-select" formControlName="movement_type">
-                        <option [value]="FlowType.IN">Move IN</option>
-                        <option [value]="FlowType.OUT" selected>Move OUT</option>
+                        <option [value]="FlowType.IN">{{ 'INV_MOVE_IN' | translate }}</option>
+                        <option [value]="FlowType.OUT" selected>{{ 'INV_MOVE_OUT' | translate }}</option>
                     </select>
                 </div>
                 <div class="border border-warning rounded text-warning p-4 w-100" style="white-space: pre-wrap;">
-                    <div><strong>Note:</strong> Becareful when using manual inventory movement!</div>
-                    <div>This is supposed to directly changes data.</div>
-                    <div>It is recommended to use regular flow for purchasing, sale and production to have more
-                        precise and complete data flow history.</div>
+                    <div><strong>{{ 'INV_FORM_NOTE_TITLE' | translate }}</strong> {{ 'INV_FORM_NOTE_MANUAL_LINE_1' | translate }}</div>
+                    <div>{{ 'INV_FORM_NOTE_MANUAL_LINE_2' | translate }}</div>
+                    <div>{{ 'INV_FORM_NOTE_MANUAL_LINE_3' | translate }}</div>
                 </div>
                 <div class="w-100">
-                    <label for="order_type" class="form-label required">Order Type (Source)</label>
+                    <label for="order_type" class="form-label required">{{ 'INV_FORM_LABEL_ORDER_TYPE_SOURCE' | translate }}</label>
                     <select id="order_type" class="form-select" formControlName="order_type">
                         @if (form.get('movement_type')?.value === FlowType.IN) {
-                        <option [value]="OrderType.DEPOSIT">Physical Investment Deposit</option>
-                        <option [value]="OrderType.PURCHASING">Purchasing</option>
+                        <option [value]="OrderType.DEPOSIT">{{ 'INV_FORM_ORDER_PHYSICAL_INVESTMENT_DEPOSIT' | translate }}</option>
+                        <option [value]="OrderType.PURCHASING">{{ 'INV_FORM_ORDER_PURCHASING' | translate }}</option>
                         } @else {
-                        <option [value]="OrderType.WITHDRAWAL" selected>Physical Investment Withdrawal</option>
-                        <option [value]="OrderType.EXPENSE">Operational Expense</option>
-                        <option [value]="OrderType.SALE">Sale</option>
+                        <option [value]="OrderType.WITHDRAWAL" selected>{{ 'INV_FORM_ORDER_PHYSICAL_INVESTMENT_WITHDRAWAL' | translate }}</option>
+                        <option [value]="OrderType.EXPENSE">{{ 'INV_FORM_ORDER_OPERATIONAL_EXPENSE' | translate }}</option>
+                        <option [value]="OrderType.SALE">{{ 'INV_FORM_ORDER_SALE' | translate }}</option>
                         }
-                        <option [value]="OrderType.PRODUCTION">Production</option>
-                        <option [value]="OrderType.ADJUSTMENT">Adjustment (IE. Lost, Expired, etc...)</option>
+                        <option [value]="OrderType.PRODUCTION">{{ 'INV_FORM_ORDER_PRODUCTION' | translate }}</option>
+                        <option [value]="OrderType.ADJUSTMENT">{{ 'INV_FORM_ORDER_ADJUSTMENT' | translate }}</option>
                     </select>
                 </div>
                 <div class="w-100">
-                    <label for="description" class="form-label required">Description</label>
+                    <label for="description" class="form-label required">{{ 'COMMON_DESCRIPTION' | translate }}</label>
                     <textarea id="description" class="form-control" formControlName="description" rows="2"
-                        placeholder="Reason for movement..."></textarea>
+                        [placeholder]="'INV_FORM_PLACEHOLDER_MOVEMENT_REASON' | translate"></textarea>
                 </div>
                 <hr>
                 @if (form.get('movement_type')?.value === FlowType.IN) {
                 <div class="border border-warning rounded text-warning p-4 w-100" style="white-space: pre-wrap;">
-                    <div><strong>Note:</strong> When moving IN, please ensure that the original price are correct.</div>
-                    <div>PPn rate and amount and type will be set to NONE PPn.</div>
-                    <div>Price will be regarded as original price and landed cost</div>
-                    <div>Use Purchasing flow if you want to set PPn rate, amount and type</div>
+                    <div><strong>{{ 'INV_FORM_NOTE_TITLE' | translate }}</strong> {{ 'INV_FORM_NOTE_IN_LINE_1' | translate }}</div>
+                    <div>{{ 'INV_FORM_NOTE_IN_LINE_2' | translate }}</div>
+                    <div>{{ 'INV_FORM_NOTE_IN_LINE_3' | translate }}</div>
+                    <div>{{ 'INV_FORM_NOTE_IN_LINE_4' | translate }}</div>
                 </div>
                 }
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h4 class="mb-0">Movement Items</h4>
+                    <h4 class="mb-0">{{ 'INV_FORM_SECTION_MOVEMENT_ITEMS' | translate }}</h4>
                     <button type="button" class="btn btn-primary btn-sm" (click)="addItem()">
-                        <i class="bi bi-plus-lg me-1"></i> Add Item
+                        <i class="bi bi-plus-lg me-1"></i> {{ 'COMMON_ADD_ITEM' | translate }}
                     </button>
                 </div>
 
@@ -62,14 +61,14 @@
                     <div appTableColumn customColumnId="product">
                         <ng-template let-control let-index="index">
                             <app-dropdown-search [items]="filteredProducts"
-                                [value]="items.at(index).get('product_name')?.value" [placeholder]="'Select Product'"
-                                [searchPlaceholder]="'Search Product'" [isLoading]="isLoading"
+                                [value]="items.at(index).get('product_name')?.value" [placeholder]="'COMMON_SELECT_PRODUCT'"
+                                [searchPlaceholder]="'COMMON_SEARCH_PRODUCT'" [isLoading]="isLoading"
                                 [invalid]="items.at(index).get('product')?.invalid && items.at(index).get('product')?.touched"
                                 [searchLabel]="'product_name'" (onSelect)="selectProduct(index, $event)"
                                 (onSearch)="getProducts($event)"></app-dropdown-search>
                             @if (items.at(index).get('product')?.invalid && items.at(index).get('product')?.touched)
                             {
-                            <small class="text-danger">Product is required</small>
+                            <small class="text-danger">{{ 'INV_FORM_VALIDATION_PRODUCT_REQUIRED' | translate }}</small>
                             }
                         </ng-template>
                     </div>
@@ -105,12 +104,12 @@
             </div>
         </div>
         <div class="card-footer d-flex gap-2">
-            <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
+            <button type="button" class="btn btn-secondary" (click)="cancel()">{{ 'COMMON_CANCEL' | translate }}</button>
             <button type="submit" class="btn btn-primary" [disabled]="form.invalid || isLoading">
                 @if (isLoading) {
-                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
                 }
-                Execute
+                {{ 'COMMON_EXECUTE' | translate }}
             </button>
         </div>
     </div>

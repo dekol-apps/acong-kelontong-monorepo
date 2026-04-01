@@ -2,10 +2,11 @@ import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angu
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 import { ISelectValue } from '../../../types/interfaces/common.interface';
 import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-dropdown-search',
-  imports: [NgbDropdownModule],
+  imports: [NgbDropdownModule, TranslateModule],
   standalone: true,
   templateUrl: './dropdown-search.html',
   styleUrl: './dropdown-search.scss',

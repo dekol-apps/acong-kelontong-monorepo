@@ -1,6 +1,6 @@
 <div class="modal-header">
   <h4 class="modal-title" id="modal-title">
-    <div class="card-title text-capitalize">{{type}} Supplier</div>
+    <div class="card-title text-capitalize">{{ (type==='new' ? 'Create' : type==='edit' ? 'Edit' : 'View') | translate }} {{ 'Supplier' | translate }}</div>
   </h4>
   <button type="button" class="btn-close" aria-describedby="modal-title" (click)="close.emit()"></button>
 </div>
@@ -9,30 +9,30 @@
     <div class="modal-body">
       <div class="d-flex flex-row flex-wrap justify-content-between gap-2">
         <div class="w-100">
-          <label for="supplier_name" class="form-label required">Supplier name</label>
+          <label for="supplier_name" class="form-label required">{{ 'Supplier name' | translate }}</label>
           <input type="text" class="form-control" id="supplier_name" formControlName="supplier_name"/>
         </div>
 
         <div class="w-100">
-          <label for="supplier_phone" class="form-label required">Supplier phone</label>
+          <label for="supplier_phone" class="form-label required">{{ 'Supplier phone' | translate }}</label>
           <input type="text" class="form-control" id="supplier_phone" formControlName="supplier_phone"/>
         </div>
 
         <div class="w-100">
-          <label for="supplier_email" class="form-label required">Supplier email</label>
+          <label for="supplier_email" class="form-label required">{{ 'Supplier email' | translate }}</label>
           <input type="text" class="form-control" id="supplier_email" formControlName="supplier_email"/>
         </div>
 
         <div class="w-100">
-          <label for="supplier_address" class="form-label required">Supplier address</label>
+          <label for="supplier_address" class="form-label required">{{ 'Supplier address' | translate }}</label>
           <input type="text" class="form-control" id="supplier_address" formControlName="supplier_address"/>
         </div>
       </div>
     </div>
     @if (type!=='view') {
     <div class="modal-footer">
-      <button class="btn btn-secondary" type="button" (click)="close.emit()">Cancel</button>
-      <button class="btn btn-primary" type="submit">Submit</button>
+      <button class="btn btn-secondary" type="button" (click)="close.emit()">{{ 'COMMON_CANCEL' | translate }}</button>
+      <button class="btn btn-primary" type="submit">{{ 'Submit' | translate }}</button>
     </div>
     }
   </form>

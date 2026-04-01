@@ -8,10 +8,11 @@ import { ExpenseEn, IExpense } from '../../../../types/interfaces/expense.interf
 import { ExpenseService } from '../expense.service';
 import { FormsModule } from '@angular/forms';
 import { RupiahPipe } from '../../../../shared/pipes/rupiah.pipe';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-expense-detail',
-  imports: [DatePipe, ConfirmModal, FormsModule, RupiahPipe],
+  imports: [DatePipe, ConfirmModal, FormsModule, RupiahPipe, TranslateModule],
   templateUrl: './expense-detail.html',
   styleUrl: './expense-detail.scss'
 })

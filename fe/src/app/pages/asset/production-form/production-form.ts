@@ -12,6 +12,7 @@ import { FormValidation } from '../../../shared/directives/form-validation/form-
 import { ISelectValue } from '../../../types/interfaces/common.interface';
 import { DropdownSearch } from '../../../shared/components/dropdown-search/dropdown-search';
 import { MONEY_REGEX, toMoneyString } from '../../../utils/helper';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-production-form',
@@ -23,7 +24,8 @@ import { MONEY_REGEX, toMoneyString } from '../../../utils/helper';
     GenericTable,
     TableColumn,
     FormValidation,
-    DropdownSearch
+    DropdownSearch,
+    TranslateModule
   ],
   templateUrl: './production-form.html',
   styleUrl: './production-form.scss'
@@ -46,7 +48,8 @@ export class ProductionForm implements OnInit {
     private productService: ProductService,
     private alertService: AlertService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private translate: TranslateService
   ) {
     this.form = new FormGroup({
       product: new FormControl(null, [Validators.required]),
@@ -148,7 +151,7 @@ export class ProductionForm implements OnInit {
 
   onSubmit(): void {
     if (this.form.invalid) {
-      this.alertService.error('Please fill all required fields');
+      this.alertService.error(this.translate.instant('Please fill all required fields'));
       this.form.markAllAsTouched();
       return;
     }
@@ -169,11 +172,11 @@ export class ProductionForm implements OnInit {
 
     obs.subscribe({
       next: () => {
-        this.alertService.success(`Production ${this.productionId ? 'updated' : 'created'} successfully`);
+        this.alertService.success(this.translate.instant(this.productionId ? 'Production updated successfully' : 'Production created successfully'));
         this.router.navigate(['/production']);
       },
       error: (err) => {
-        this.alertService.error(err.message || 'Failed to save production');
+        this.alertService.error(err.message || this.translate.instant('Failed to save production'));
       }
     });
   }

@@ -8,12 +8,13 @@ import { IFielImg } from '../../../shared/components/drag-drop-file/drag-drop-fi
 import { MONEY_REGEX, decimalToNumber, objToFormData, toMoneyString } from '../../../utils/helper';
 import { DragDropFileMulti } from '../../../shared/components/drag-drop-file-multi/drag-drop-file-multi';
 import { InvestmentType } from '../../../types/enums/common.enum';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 export type investmentFormType = 'deposit' | 'withdrawal';
 export type investmentFormPageType = 'new' | 'edit' | 'view';
 @Component({
   selector: 'app-investment-form',
-  imports: [ReactiveFormsModule, FormValidation, DragDropFileMulti],
+  imports: [ReactiveFormsModule, FormValidation, DragDropFileMulti, TranslateModule],
   standalone: true,
   templateUrl: './investment-form.html',
   styleUrl: './investment-form.scss'
@@ -34,7 +35,7 @@ export class InvestmentForm implements AfterViewInit {
     description: new FormControl(null),
   });
 
-  constructor(private service: InvestmentService, private alert: AlertService) { }
+  constructor(private service: InvestmentService, private alert: AlertService, private translate: TranslateService) { }
 
   clickEdit() {
     this.page = 'edit'; window.scroll(0, 0);
@@ -67,7 +68,7 @@ export class InvestmentForm implements AfterViewInit {
   submit() {
     if (this.type === 'deposit') this.form.controls.investment_type.patchValue(InvestmentType.DEPOSIT)
     else this.form.controls.investment_type.patchValue(InvestmentType.WITHDRAWAL);
-    if (this.form.invalid) return this.alert.error('Please check your inputs');
+    if (this.form.invalid) return this.alert.error(this.translate.instant('Please check your inputs'));
     const body = {
       ...this.form.value,
       transaction_amount: toMoneyString(this.form.value.transaction_amount),
@@ -79,7 +80,7 @@ export class InvestmentForm implements AfterViewInit {
       serviceArgs = this.service.editInvestment(this.id, formData);
     }
     serviceArgs.subscribe((res) => {
-      this.alert.success(`Success!`);
+      this.alert.success(this.translate.instant('Success!'));
       this.close.emit(true);
     })
   }

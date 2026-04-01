@@ -9,10 +9,11 @@ import { PurchaseOrderService } from '../services/purchase-order.service';
 import { PurchaseOrderItemForm } from '../purchase-order/purchase-order-item/purchase-order-item-form/purchase-order-item-form';
 import { CommonModule } from '@angular/common';
 import { RupiahPipe } from '../../../shared/pipes/rupiah.pipe';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-purchasing-detail',
-  imports: [GenericTable, TableColumn, CommonModule, PurchaseOrderItemForm, RupiahPipe],
+  imports: [GenericTable, TableColumn, CommonModule, PurchaseOrderItemForm, RupiahPipe, TranslateModule],
   templateUrl: './purchasing-detail.html',
   styleUrl: './purchasing-detail.scss'
 })

@@ -1,8 +1,8 @@
 <div class="d-flex gap-4 flex-wrap">
   @for (val of patchFileVal; track $index; let i = $index) {
   <app-drag-drop-file [patchFileVal]="val" [loading]="loading" (deleteHandler)="deleteFile(i)"
-    (fileChanged)="addFile($event)" message="Tambahkan Foto Sampul Kos"></app-drag-drop-file>
+    (fileChanged)="addFile($event)" [message]="message | translate"></app-drag-drop-file>
   }
   <app-drag-drop-file [loading]="loading" (fileChanged)="addFile($event)"
-    message="Tambahkan Foto Sampul Kos"></app-drag-drop-file>
+    [message]="message | translate"></app-drag-drop-file>
 </div>
