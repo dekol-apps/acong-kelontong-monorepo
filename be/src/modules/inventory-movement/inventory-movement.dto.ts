@@ -1,4 +1,4 @@
-import { ArrayMinSize, IsArray, IsEnum, IsOptional, IsString, ValidateNested, IsNotEmpty, IsInt, Min, IsDate, IsNumber } from 'class-validator';
+import { ArrayMinSize, IsArray, IsEnum, IsOptional, IsString, ValidateNested, IsNotEmpty, IsInt, Min, IsDate } from 'class-validator';
 import { FlowType, OrderType } from '../../types/interfaces';
 import { PaginationDto } from '../../global/global.dto';
 import { Type } from 'class-transformer';
@@ -20,17 +20,9 @@ export class InventoryMovementItemDto {
   @IsOptional()
   receive_date?: Date;
 
-  @IsNumber()
-  @IsOptional()
-  original_ppn_rate?: number;
-
   @IsMoney()
   @IsOptional()
   original_price?: Types.Decimal128;
-
-  @IsMoney()
-  @IsOptional()
-  original_ppn_amount?: Types.Decimal128;
 
   @IsMoney()
   @IsOptional()
@@ -109,7 +101,5 @@ export interface MovedInventoryItemData {
   product_name: string;
   product_sku: string;
   original_price: Types.Decimal128;
-  original_ppn_rate: number;
-  original_ppn_amount: Types.Decimal128;
   landed_cost: Types.Decimal128;
 }

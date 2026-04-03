@@ -7,8 +7,6 @@ export interface IInventorySummary extends IInventoryItem {
   inventory: string;
   item_qty: number;
   first_original_price: string;
-  first_original_ppn_rate: string;
-  first_original_ppn_amount: string;
   first_landed_cost: string;
   receive_date: Date;
   avg_landed_cost: string;
@@ -22,7 +20,6 @@ export interface IInventoryItem {
   product_sku?: string;
   receive_date: Date;
   original_price: number;
-  original_ppn_rate: number;
   landed_cost: number;
 }
 
@@ -44,8 +41,6 @@ export interface IInventoryMovementItem {
   product_name: string;
   product_sku?: string;
   original_price: number;
-  original_ppn_rate: number;
-  original_ppn_amount: number;
   landed_cost: number;
 }
 

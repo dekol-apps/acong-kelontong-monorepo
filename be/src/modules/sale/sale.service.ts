@@ -10,7 +10,7 @@ import { SaleItem } from './sale-item.schema';
 import { Sale } from './sale.schema';
 import { Product } from '../product/product.schema';
 import { FilterDto, PaginationDto } from 'src/global/global.dto';
-import { FlowType, IListRes, OrderType, PPhType, PPnType, TOneOrMany } from 'src/types/interfaces';
+import { FlowType, IListRes, OrderType, PPnType, TOneOrMany } from 'src/types/interfaces';
 import { Brand } from '../brand/brand.schema';
 import Decimal from 'decimal.js';
 import { toDecimal, toDecimal128, toSku } from 'src/utils/helper';
@@ -112,8 +112,6 @@ export class SaleService {
           brand_name: brand?.brand_name ?? 'MISSING BRAND NAME',
           barcode: product.barcode,
           original_price: movedItem.original_price,
-          original_ppn_rate: movedItem.original_ppn_rate,
-          original_ppn_amount: movedItem.original_ppn_amount,
           sale_price: pricing.sale_price,
           discount_percent: pricing.discount_percent ?? 0,
           discount_amount,
@@ -268,8 +266,6 @@ export class SaleService {
             product_sku: existItem.product_sku || toSku(existItem.product_name),
             barcode: existItem.barcode,
             original_price: existItem.original_price,
-            original_ppn_rate: existItem.original_ppn_rate,
-            original_ppn_amount: existItem.original_ppn_amount,
             sale_price: existItem.sale_price,
             discount_percent: existItem.discount_percent,
             discount_amount: existItem.discount_amount,
@@ -371,8 +367,6 @@ export class SaleService {
           product_sku: item.product_sku || toSku(item.product_name),
           barcode: item.barcode,
           original_price: item.original_price,
-          original_ppn_rate: item.original_ppn_rate,
-          original_ppn_amount: item.original_ppn_amount,
           sale_price: item.sale_price,
           discount_percent: item.discount_percent,
           discount_amount: item.discount_amount,
@@ -401,8 +395,6 @@ export class SaleService {
             product_sku: existItem.product_sku || toSku(existItem.product_name),
             barcode: existItem.barcode,
             original_price: existItem.original_price,
-            original_ppn_rate: existItem.original_ppn_rate,
-            original_ppn_amount: existItem.original_ppn_amount,
             sale_price: existItem.sale_price,
             discount_percent: existItem.discount_percent,
             discount_amount: existItem.discount_amount,

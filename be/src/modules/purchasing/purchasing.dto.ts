@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsDate, IsOptional, IsArray, IsEnum } from 'class-validator';
+import { IsNotEmpty, IsString, IsDate, IsOptional, IsArray, IsEnum, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
 import { IsObjectId } from 'src/global/is-object-id.decorator';
 import { Types } from 'mongoose';
@@ -50,7 +50,7 @@ export class PurchaseOrderDto {
 
   @IsOptional()
   @IsMoney()
-  payment_realization: Types.Decimal128;
+  payment_realization?: Types.Decimal128;
 
   @IsOptional()
   @IsString()
@@ -69,6 +69,10 @@ export class PurchaseOrderDto {
   @IsOptional()
   @IsMoney()
   shipping_cost?: Types.Decimal128;
+
+  @IsOptional()
+  @IsNumber()
+  ppn_rate?: number;
 }
 
 export class PurchasingDto extends PurchaseOrderDto {

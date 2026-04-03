@@ -44,12 +44,6 @@ export class InventoryItem {
       dataType: 'CURRENCY'
     },
     {
-      label: 'Original PPn Rate',
-      id: 'original_ppn_rate',
-      extraHeaderClass: 'uppercase-text',
-      dataType: 'PERCENTAGE'
-    },
-    {
       label: 'Action',
       id: 'action',
       extraHeaderClass: 'uppercase-text w-100 d-flex justify-content-end',

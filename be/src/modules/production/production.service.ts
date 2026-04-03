@@ -1,7 +1,7 @@
 import { Injectable, forwardRef, Inject } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, ClientSession, Types } from 'mongoose';
-import { GlobalService, IGetListParam } from 'src/global/global.service';
+import { GlobalService } from 'src/global/global.service';
 import { BaseResponse } from 'src/utils/base-response';
 import { Production, ProductionDocument, ProductionEn } from './production.schema';
 import { ProductionDto } from './production.dto';
@@ -200,8 +200,6 @@ export class ProductionService {
               receive_date: new Date(),
               original_price: unitCostDecimal128,
               landed_cost: unitCostDecimal128,
-              original_ppn_rate: 0,
-              original_ppn_amount: toDecimal128(new Decimal(0)),
             },
           ],
         },

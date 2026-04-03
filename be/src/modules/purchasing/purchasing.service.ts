@@ -13,7 +13,7 @@ import { PurchasingItemService } from '../purchasing-item/purchasing-item.servic
 import { PurchasingItemDto, ReceiveOrderItemDto } from '../purchasing-item/purchasing-item.dto';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { decreaseDays, digitShortDate, multiplyDecimal, subtractDecimal, toDecimal, toDecimal128 } from 'src/utils/helper';
-import { cleanupDays, defaultPpnRate } from 'src/types/constants';
+import { cleanupDays } from 'src/types/constants';
 import { Accounting } from '../accounting/accounting.schema';
 import { AccountingService } from '../accounting/accounting.service';
 import { InventoryMovementService } from '../inventory-movement/inventory-movement.service';
@@ -97,15 +97,15 @@ export class PurchasingService {
       due_date: data.due_date,
       status: PurchasingEn.CREATE,
       payment_status: data.payment_status ?? PaymentStatusEn.UNPAID,
-      // invoice_number: data.invoice_number,
-      // purchasing_attachments: data.purchasing_attachments,
-      // payment_realization: data.payment_realization,
-      // notes: data.notes,
-      // ppn_type: data.ppn_type,
-      // ppn_rate: data.ppn_rate,
-      // ppn_amount: data.ppn_amount,
-      // ppn_facture_number: data.ppn_facture_number,
-      // shipping_cost: data.shipping_cost,
+      invoice_number: data.invoice_number,
+      purchasing_attachments: data.purchasing_attachments,
+      payment_realization: data.payment_realization,
+      notes: data.notes,
+      ppn_type: data.ppn_type,
+      ppn_rate: data.ppn_rate !== undefined ? Number(data.ppn_rate) : undefined,
+      ppn_amount: data.ppn_amount,
+      ppn_facture_number: data.ppn_facture_number,
+      shipping_cost: data.shipping_cost,
     }], { session });
 
     const createdPurchase = purchase[0];
@@ -637,26 +637,27 @@ export class PurchasingService {
         throw BaseResponse.invalid({ option: { message: 'Cannot execute payment for dropped or expired purchasing' } });
       }
 
-      existing.ppn_rate = defaultPpnRate;
+      if (dto.ppn_rate !== undefined) {
+        existing.ppn_rate = Number(dto.ppn_rate);
+      }
       await existing.save({ session });
 
       const edit = await this.editPurchasing(id, dto, session);
       if (!edit || !edit.detail) throw BaseResponse.unexpected({ err: 'purchasingPayment' });
+      const effectivePpnRate = Number(dto.ppn_rate ?? edit.detail.ppn_rate ?? existing.ppn_rate ?? 0);
       const {
         expected_ppn_amount,
         expected_payable,
-        predicted_additional_cost,
         is_ppn_valid,
-        is_payment_match,
       } = this.validatePayment({
         tax_base: edit.detail.total_purchase_price,
-        ppn_rate: defaultPpnRate,
+        ppn_rate: effectivePpnRate,
         ppn_type: dto.ppn_type,
         ppn_amount: dto.ppn_amount ?? Types.Decimal128.fromString('0'),
-        payment_realization: dto.payment_realization,
+        payment_realization: dto.payment_realization ?? Types.Decimal128.fromString('0'),
         shipping_cost: dto.shipping_cost ?? Types.Decimal128.fromString('0'),
       });
-      const message = `PPn calculation result invalid:\n\nppn type: ${dto.ppn_type}\nppn rate: ${dto.ppn_rate}\nppn amount: ${dto.ppn_amount?.toString() ?? ''}\ntax base: ${edit.detail.total_purchase_price.toString()}\nexpected ppn amount (rounded): ${expected_ppn_amount.toString()}\nexpected minimum payment: ${expected_payable.toString()}\n`
+      const message = `PPn calculation result invalid:\n\nppn type: ${dto.ppn_type}\nppn rate: ${effectivePpnRate}\nppn amount: ${dto.ppn_amount?.toString() ?? ''}\ntax base: ${edit.detail.total_purchase_price.toString()}\nexpected ppn amount (rounded): ${expected_ppn_amount.toString()}\nexpected minimum payment: ${expected_payable.toString()}\n`
       if (!is_ppn_valid) throw BaseResponse.invalid({ option: { message } })
 
       const paymentStatus = dto.payment_status ?? this.resolvePaymentStatus(
@@ -678,7 +679,7 @@ export class PurchasingService {
         order_id: id,
         order_data: refreshedDetail,
         order_type: OrderType.PURCHASING,
-        transaction_amount: refreshedDetail.payment_realization,
+        transaction_amount: refreshedDetail.payment_realization ?? Types.Decimal128.fromString('0'),
         tax_base: refreshedDetail.total_purchase_price,
         ppn_type: refreshedDetail.ppn_type,
         ppn_rate: refreshedDetail.ppn_rate,
@@ -691,7 +692,7 @@ export class PurchasingService {
         await this.accounting.editAccountingByOrderId(
           id,
           {
-            transaction_amount: refreshedDetail.payment_realization,
+            transaction_amount: refreshedDetail.payment_realization ?? Types.Decimal128.fromString('0'),
             tax_base: refreshedDetail.total_purchase_price,
             ppn_type: refreshedDetail.ppn_type,
             ppn_rate: refreshedDetail.ppn_rate,
@@ -767,8 +768,8 @@ export class PurchasingService {
       const total_purchase_price_dec = toDecimal(total_purchase_price || 0);
       const expected_payable = this.computeExpectedPayable(
         total_purchase_price_dec,
-        purchase.ppn_type,
-        purchase.ppn_rate,
+        purchase.ppn_type ?? PPnType.NONE,
+        purchase.ppn_rate ?? 0,
         toDecimal(purchase.shipping_cost || 0),
       );
 
@@ -789,18 +790,11 @@ export class PurchasingService {
               // Landed cost = Purchase Price + (Additional Cost / Total Items)
               const landed_cost = original_price.plus(additional_cost_per_item);
 
-              const { ppn: original_ppn_amount } = this.global.getPPnAmount({
-                net_price: toDecimal128(original_price),
-                ppn_rate: purchase.ppn_rate
-              });
-
               return {
                 product: new Types.ObjectId(product),
                 item_qty: qty,
                 receive_date: new Date(),
                 original_price: toDecimal128(original_price),
-                original_ppn_rate: purchase.ppn_rate,
-                original_ppn_amount: toDecimal128(original_ppn_amount),
                 landed_cost: toDecimal128(landed_cost)
               }
             }

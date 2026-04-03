@@ -23,8 +23,6 @@ export interface ISaleItem {
   brand_name: string;
   barcode: string;
   original_price: string;
-  original_ppn_rate: number;
-  original_ppn_amount: string;
   sale_price: string;
   discount_percent: number;
   discount_amount: string;

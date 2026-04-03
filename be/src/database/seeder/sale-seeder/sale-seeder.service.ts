@@ -34,8 +34,6 @@ export class SaleSeederService {
                 product_sku: product.product_sku,
                 barcode: product.barcode,
                 original_price: toDecimal128(toDecimal(5000)),
-                original_ppn_rate: 11,
-                original_ppn_amount: toDecimal128(toDecimal(550)),
                 sale_price: toDecimal128(toDecimal(15000)),
                 discount_percent: 0,
                 discount_amount: toDecimal128(toDecimal(0)),

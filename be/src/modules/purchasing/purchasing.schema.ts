@@ -48,8 +48,8 @@ export class Purchasing {
   @Prop()
   purchasing_attachments?: string[];
 
-  @Prop({ type: Types.Decimal128, required: true, default: 0 })
-  payment_realization: Types.Decimal128;
+  @Prop({ type: Types.Decimal128 })
+  payment_realization?: Types.Decimal128;
 
   @Prop()
   notes?: string; // for example: notes for additional cost
@@ -60,16 +60,16 @@ export class Purchasing {
   @Prop({ type: Date })
   completed_date?: Date; // Receive order step
 
-  @Prop({ type: String, enum: PPnType, default: PPnType.NONE })
-  ppn_type: PPnType;
+  @Prop({ type: String, enum: PPnType })
+  ppn_type?: PPnType;
 
-  @Prop({ type: Number, default: 0 })
-  ppn_rate: number;
+  @Prop({ type: Number })
+  ppn_rate?: number;
 
-  @Prop({ type: Types.Decimal128, default: 0 })
+  @Prop({ type: Types.Decimal128 })
   ppn_amount?: Types.Decimal128;
 
-  @Prop({ type: Types.Decimal128, default: 0 })
+  @Prop({ type: Types.Decimal128 })
   shipping_cost?: Types.Decimal128;
 }
 

@@ -42,14 +42,9 @@ export class InventoryMovementService {
           throw BaseResponse.invalid({ option: { message: 'Product not found' }, err: 'createInventoryMovement !product' });
         }
 
-        if (item.original_price === undefined || item.original_ppn_rate === undefined || !item.receive_date) {
-          throw BaseResponse.invalid({ option: { message: 'original_price, original_ppn_rate, and receive_date are required for createInventoryMovement' }, err: 'createInventoryMovement missing fields' });
+        if (item.original_price === undefined || !item.receive_date) {
+          throw BaseResponse.invalid({ option: { message: 'original_price and receive_date are required for createInventoryMovement' }, err: 'createInventoryMovement missing fields' });
         }
-
-        const { ppn } = this.global.getPPnAmount({
-          net_price: item.original_price,
-          ppn_rate: item.original_ppn_rate
-        });
 
         const movementItem = {
           product: item.product,
@@ -57,8 +52,6 @@ export class InventoryMovementService {
           product_name: product?.product_name,
           product_sku: product?.product_sku || toSku(product?.product_name),
           original_price: item.original_price,
-          original_ppn_rate: item.original_ppn_rate,
-          original_ppn_amount: item.original_ppn_amount || toDecimal128(ppn),
           landed_cost: item.landed_cost || toDecimal128(toDecimal(0)),
           item_qty: item.item_qty,
         }
@@ -77,22 +70,15 @@ export class InventoryMovementService {
         // Ensure required fields have defaults before creating Flow IN records
         for (const item of dto.items) {
           item.original_price = item.original_price || toDecimal128(toDecimal(0));
-          item.original_ppn_rate = item.original_ppn_rate || 0;
           item.receive_date = item.receive_date || new Date();
         }
 
         // BURST: Insert N individual records based on items.length to track landed_cost per item
         await Promise.all(dto.items.map(async item => {
-          const { ppn } = this.global.getPPnAmount({
-            net_price: item.original_price as Types.Decimal128,
-            ppn_rate: item.original_ppn_rate as number
-          });
           const newData: InventoryItemDto = {
             product: item.product,
             receive_date: item.receive_date as Date,
             original_price: item.original_price as Types.Decimal128,
-            original_ppn_rate: item.original_ppn_rate as number,
-            original_ppn_amount: toDecimal128(ppn),
             landed_cost: item.landed_cost as Types.Decimal128,
           };
           // Loop and create N individual items
@@ -152,11 +138,6 @@ export class InventoryMovementService {
           });
         }
 
-        const { ppn } = this.global.getPPnAmount({
-          net_price: inventoryItem.original_price,
-          ppn_rate: inventoryItem.original_ppn_rate
-        });
-
         // Capture the data (including landed_cost for COGS) before removal
         movedItems.push({
           _id: inventoryItem._id,
@@ -165,8 +146,6 @@ export class InventoryMovementService {
           product_name: inventoryItem.product_name,
           product_sku: inventoryItem.product_sku || toSku(inventoryItem.product_name),
           original_price: inventoryItem.original_price,
-          original_ppn_rate: inventoryItem.original_ppn_rate,
-          original_ppn_amount: toDecimal128(ppn),
           landed_cost: inventoryItem.landed_cost,
         });
 
@@ -176,18 +155,12 @@ export class InventoryMovementService {
       // Build a grouped movement summary (one entry per unique product)
       const productMap = new Map<string, GInventoryItemDto>();
       for (const item of movedItems) {
-        const { ppn } = this.global.getPPnAmount({
-          net_price: item.original_price,
-          ppn_rate: item.original_ppn_rate
-        });
         const key = item.product.toString();
         if (!productMap.has(key)) {
           productMap.set(key, {
             product: item.product,
             receive_date: item.receive_date,
             original_price: item.original_price,
-            original_ppn_rate: item.original_ppn_rate,
-            original_ppn_amount: toDecimal128(ppn),
             landed_cost: item.landed_cost,
             item_qty: 1,
           });
@@ -254,10 +227,6 @@ export class InventoryMovementService {
         }
 
         for (const candidate of candidates) {
-          const { ppn } = this.global.getPPnAmount({
-            net_price: candidate.original_price,
-            ppn_rate: candidate.original_ppn_rate
-          });
           movedItems.push({
             _id: candidate._id,
             product: candidate.product,
@@ -265,8 +234,6 @@ export class InventoryMovementService {
             product_name: candidate.product_name,
             product_sku: candidate.product_sku || toSku(candidate.product_name),
             original_price: candidate.original_price,
-            original_ppn_rate: candidate.original_ppn_rate,
-            original_ppn_amount: toDecimal128(ppn),
             landed_cost: candidate.landed_cost,
           });
           await candidate.deleteOne({ session });
@@ -277,17 +244,11 @@ export class InventoryMovementService {
       const productMap = new Map<string, GInventoryItemDto>();
       for (const item of movedItems) {
         const key = item.product.toString();
-        const { ppn } = this.global.getPPnAmount({
-          net_price: item.original_price,
-          ppn_rate: item.original_ppn_rate
-        });
         if (!productMap.has(key)) {
           productMap.set(key, {
             product: item.product,
             receive_date: item.receive_date,
             original_price: item.original_price,
-            original_ppn_rate: item.original_ppn_rate,
-            original_ppn_amount: toDecimal128(ppn),
             landed_cost: item.landed_cost,
             item_qty: 1,
           });

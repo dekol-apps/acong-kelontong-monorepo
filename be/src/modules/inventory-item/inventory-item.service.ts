@@ -59,8 +59,6 @@ export class InventoryItemService {
           product_name: { $first: "$product_name" },
           product_sku: { $first: "$product_sku" },
           first_original_price: { $first: "$original_price" },
-          first_original_ppn_rate: { $first: "$original_ppn_rate" },
-          first_original_ppn_amount: { $first: "$original_ppn_amount" },
           first_landed_cost: { $first: "$landed_cost" },
           first_receive_date: { $first: "$receive_date" },
           item_qty: { $sum: 1 },
@@ -106,7 +104,7 @@ export class InventoryItemService {
     const filterQuery: TOneOrMany<FilterDto> = [
       { column: 'product', value: productId }
     ]
-    const searchFields: string[] = ['landed_cost', 'original_price', 'original_ppn_rate'];
+    const searchFields: string[] = ['landed_cost', 'original_price'];
 
     const list = await this.global.getList<InventoryItem>(
       this.inventoryItemModel,
@@ -135,7 +133,6 @@ export class InventoryItemService {
         product_sku: product.product_sku || toSku(product.product_name),
         receive_date: payload.receive_date,
         original_price: payload.original_price,
-        original_ppn_rate: payload.original_ppn_rate,
         landed_cost: payload.landed_cost,
       }
       const created = (await this.inventoryItemModel.create([data], { session }))[0];
@@ -158,7 +155,6 @@ export class InventoryItemService {
         product_sku: product.product_sku || toSku(product.product_name),
         receive_date: dto.receive_date,
         original_price: dto.original_price,
-        original_ppn_rate: dto.original_ppn_rate,
         landed_cost: dto.landed_cost,
       }
       const updatedItem = await this.inventoryItemModel.findByIdAndUpdate(

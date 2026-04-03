@@ -12,10 +12,6 @@ export class SaleItem {
   @Prop({ required: false }) barcode?: string;
   @Prop({ type: Types.Decimal128, required: true, default: 0 })
   original_price: Types.Decimal128;
-  @Prop({ type: Number, required: true, default: 0 })
-  original_ppn_rate: number;
-  @Prop({ type: Types.Decimal128, required: true, default: 0 })
-  original_ppn_amount: Types.Decimal128;
   @Prop({ type: Types.Decimal128, required: true, default: 0 })
   sale_price: Types.Decimal128;
   @Prop({ type: Number, required: true, default: 0 })
