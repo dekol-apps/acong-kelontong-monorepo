@@ -56,10 +56,6 @@
             <th scope="row" class="fw-bold p-1 col-3 align-top">{{ 'Original Price' | translate }}</th>
             <td class="align-top">{{ (detail?.original_price | rupiah) || '-' }}</td>
           </tr>
-          <tr>
-            <th scope="row" class="fw-bold p-1 col-3 align-top">{{ 'Original PPn Rate' | translate }}</th>
-            <td class="align-top">{{ (detail?.original_ppn_rate ? (detail?.original_ppn_rate+'%') : '-') }}</td>
-          </tr>
         </tbody>
       </table>
     </div>

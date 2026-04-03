@@ -3,6 +3,7 @@ import { DatePipe } from '@angular/common';
 import { DATE_FORMAT } from '../../../types/constants/common.constants';
 import { RupiahPipe } from '../../../shared/pipes/rupiah.pipe';
 import { TranslateModule } from '@ngx-translate/core';
+import { IInventoryItem } from '../../../types/interfaces/inventory.interface';
 
 @Component({
   selector: 'app-shared-inventory-item-detail',
@@ -12,7 +13,7 @@ import { TranslateModule } from '@ngx-translate/core';
   styleUrl: './shared-inventory-item-detail.scss',
 })
 export class SharedInventoryItemDetail {
-  @Input() detail?: any;
+  @Input() detail?: IInventoryItem;
   @Input() titlePrefix: string = 'Inventory Item Detail';
   @Output() onBack = new EventEmitter<void>();
 
