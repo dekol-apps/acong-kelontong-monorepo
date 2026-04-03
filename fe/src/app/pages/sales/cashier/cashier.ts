@@ -152,13 +152,16 @@ export class Cashier implements OnInit {
     this.cart.forEach(item => {
       const price = decimalToNumber(item.sale_price);
       const discountPercent = item.discount_percent || 0;
+      const unitDiscountAmount = roundMoney(price * (discountPercent / 100));
+      const unitNetPrice = roundMoney(price - unitDiscountAmount);
 
-      const itemTotalBeforeDiscount = roundMoney(price * item.qty);
-      const itemDiscountAmount = roundMoney(itemTotalBeforeDiscount * (discountPercent / 100));
-      const itemNetPrice = roundMoney(itemTotalBeforeDiscount - itemDiscountAmount);
+      const itemDiscountAmount = roundMoney(unitDiscountAmount * item.qty);
+      const itemNetPrice = roundMoney(unitNetPrice * item.qty);
 
-      const base = roundMoney(itemNetPrice / (1 + defaultPpnRate / 100));
-      const ppn = roundMoney(itemNetPrice - base);
+      const unitBase = roundMoney(unitNetPrice / (1 + defaultPpnRate / 100));
+      const unitPpn = roundMoney(unitNetPrice - unitBase);
+      const base = roundMoney(unitBase * item.qty);
+      const ppn = roundMoney(unitPpn * item.qty);
 
       item.total = itemNetPrice;
       subTotal = roundMoney(subTotal + base);

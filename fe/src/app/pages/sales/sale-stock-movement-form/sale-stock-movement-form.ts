@@ -62,9 +62,10 @@ export class SaleStockMovementForm implements OnInit {
     const salePrice = Number(item.get('sale_price')?.value ?? 0);
     const discountPercent = Number(item.get('discount_percent')?.value ?? 0);
 
-    const discountedPrice = roundMoney(salePrice * (1 - discountPercent / 100));
-    const base = roundMoney(discountedPrice / (1 + this.defaultPpnRate / 100));
-    const ppn = roundMoney(discountedPrice - base);
+    const discountAmount = roundMoney(salePrice * (discountPercent / 100));
+    const netPrice = roundMoney(salePrice - discountAmount);
+    const base = roundMoney(netPrice / (1 + this.defaultPpnRate / 100));
+    const ppn = roundMoney(netPrice - base);
 
     return roundMoney(base + ppn);
   }
