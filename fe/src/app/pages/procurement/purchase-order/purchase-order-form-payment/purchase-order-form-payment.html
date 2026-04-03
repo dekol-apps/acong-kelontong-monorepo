@@ -9,6 +9,17 @@
             [placeholder]="'PO_PAYMENT_PLACEHOLDER_INVOICE_NUMBER' | translate" />
         </div>
         <div class="w-100">
+          <label for="payment_status" class="form-label" appAutoWildcard>{{ 'Payment Status' | translate }}</label>
+          <select class="form-select" id="payment_status" formControlName="payment_status">
+            @for (paymentStatus of paymentStatuses; track $index) {
+            <option [value]="paymentStatus.value">{{paymentStatus.label}}</option>
+            }
+          </select>
+        </div>
+        <div class="alert alert-info w-100 mb-0">
+          {{ 'Payment fields are locked after the purchase has been changed to PARTIAL or PAID.' | translate }}
+        </div>
+        <div class="w-100">
           <label for="ppn_type" class="form-label" appAutoWildcard>{{ 'PPn Type' | translate }}</label>
           <select class="form-select" id="ppn_type" formControlName="ppn_type">
             <option selected disabled value="">{{ 'Choose...' | translate }}</option>
@@ -40,8 +51,14 @@
             [placeholder]="'PO_PAYMENT_PLACEHOLDER_SHIPPING_COST' | translate" />
         </div>
         <div class="w-100">
-          <label for="payment_realization" class="form-label required" appAutoWildcard>{{ 'Payment Realization (Rp)' | translate }}</label>
+          <label for="payment_realization" class="form-label" appAutoWildcard>{{ 'Payment Realization (Rp)' | translate }}</label>
           <input type="number" class="form-control" id="payment_realization" formControlName="payment_realization"
+            step="0.01"
+            [placeholder]="'PO_PAYMENT_PLACEHOLDER_PAYMENT_REALIZATION' | translate" />
+        </div>
+        <div class="w-100">
+          <label for="paid_total" class="form-label" appAutoWildcard>{{ 'Paid Total (Rp)' | translate }}</label>
+          <input type="number" class="form-control" id="paid_total" formControlName="paid_total"
             step="0.01"
             [placeholder]="'PO_PAYMENT_PLACEHOLDER_PAYMENT_REALIZATION' | translate" />
         </div>
@@ -51,7 +68,7 @@
         </div>
         <div class="w-100">
           <label for="invoice_photo" class="form-label" appAutoWildcard>{{ 'Attachments' | translate }}</label>
-          <app-drag-drop-file-multi [patchFileVal]="form.value.attachments" [loading]="isLoading"
+          <app-drag-drop-file-multi [patchFileVal]="form.value.purchasing_attachments" [loading]="isLoading"
             (fileChanged)="addFile($event)" [message]="'PO_PAYMENT_UPLOAD_MESSAGE' | translate"></app-drag-drop-file-multi>
         </div>
         @if (invalidPPn) {

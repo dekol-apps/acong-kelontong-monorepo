@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core
 import { PurchasingDetail } from '../purchasing-detail/purchasing-detail';
 import { ActivatedRoute, Router } from '@angular/router';
 import { formType } from '../../../types/interfaces/common.interface';
-import { IPurchasing, PurchasingEn } from '../../../types/interfaces/procurement.interface';
+import { IPurchasing, PaymentStatusEn, PurchasingEn } from '../../../types/interfaces/procurement.interface';
 import { ConfirmModal } from '../../../shared/components/modals/confirm-modal/confirm-modal';
 import { PurchaseOrderService } from '../services/purchase-order.service';
 import { FormsModule } from '@angular/forms';
@@ -22,7 +22,7 @@ export class PurchaseOrderDetail {
   purchase_id?: string;
   detail?: IPurchasing;
   PurchasingEn = PurchasingEn;
-
+  PaymentStatusEn = PaymentStatusEn;
   isReceiveOrder?: boolean;
   constructor(private route: ActivatedRoute, private router: Router, private service: PurchaseOrderService) {
     this.purchase_id = this.route.snapshot.paramMap.get('po_id') || undefined;

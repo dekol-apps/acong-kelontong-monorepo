@@ -84,14 +84,6 @@ export class PurchaseOrder implements OnInit {
     ]
   }
 
-  // supplier: ISupplier;
-  // supplier_name: string;
-  // status?: PurchasingEn;
-  // completed_date?: Date;
-  // invoice_number?: string;
-  // invoice_photo?: string;
-  // total_purchase_price: number;
-  // items?: IPurchasingItem[];
   columns: Array<ColumnProps> = [
     {
       label: 'Supplier Name',
@@ -139,8 +131,14 @@ export class PurchaseOrder implements OnInit {
       dataType: 'CURRENCY'
     },
     {
-      label: 'Total Payment',
+      label: 'Payment Realization',
       id: 'payment_realization',
+      extraHeaderClass: 'uppercase-text',
+      dataType: 'CURRENCY'
+    },
+    {
+      label: 'Paid Total',
+      id: 'paid_total',
       extraHeaderClass: 'uppercase-text',
       dataType: 'CURRENCY'
     },

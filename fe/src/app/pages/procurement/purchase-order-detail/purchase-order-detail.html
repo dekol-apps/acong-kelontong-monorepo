@@ -22,10 +22,13 @@
     @if (detail?.status===PurchasingEn.APPROVE && !isReceiveOrder) {
     <button class="btn btn-primary" type="button" (click)="process()">{{ 'Process PO' | translate }}</button>
     }
-    @if ((detail?.status===PurchasingEn.PROCESS || detail?.status===PurchasingEn.RECEIVE || detail?.status===PurchasingEn.COMPLETE) && !isReceiveOrder) {
+    @if ((detail?.status===PurchasingEn.PROCESS || detail?.status===PurchasingEn.RECEIVE ||
+    detail?.status===PurchasingEn.COMPLETE) && !isReceiveOrder) {
     <button class="btn btn-primary" type="button" (click)="payment()">{{ 'Payment' | translate }}</button>
     }
-    @if ((detail?.status===PurchasingEn.PROCESS || detail?.status===PurchasingEn.RECEIVE) && isReceiveOrder) {
+    @if ((detail?.status===PurchasingEn.PROCESS || detail?.status===PurchasingEn.RECEIVE) &&
+    (detail?.payment_status===PaymentStatusEn.PARTIAL || detail?.payment_status===PaymentStatusEn.PAID) &&
+    isReceiveOrder) {
     <button class="btn btn-success" type="button" (click)="receive()">{{ 'Receive PO' | translate }}</button>
     }
   </div>

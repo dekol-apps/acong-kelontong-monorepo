@@ -4,7 +4,7 @@ import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { PurchaseOrderForm1 } from '../purchase-order-form1/purchase-order-form1';
 import { PurchaseOrderItem } from '../purchase-order-item/purchase-order-item';
 import { ActivatedRoute, Router } from '@angular/router';
-import { IPurchasing, IPurchasingItem, PurchasingEn } from '../../../../types/interfaces/procurement.interface';
+import { IPurchasing, IPurchasingItem, PaymentStatusEn, PurchasingEn } from '../../../../types/interfaces/procurement.interface';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { PurchaseOrderFormPayment } from "../purchase-order-form-payment/purchase-order-form-payment";
 import { PurchaseOrderService } from '../../services/purchase-order.service';
@@ -57,11 +57,13 @@ export class PurchaseOrderForm {
     ppn_facture_number: new FormControl(null),
     purchasing_attachments: new FormControl(null),
     notes: new FormControl(null),
+    payment_status: new FormControl(PaymentStatusEn.UNPAID),
     ppn_type: new FormControl(null),
     ppn_rate: new FormControl(defaultPpnRate),
     ppn_amount: new FormControl(null),
     shipping_cost: new FormControl(null),
     payment_realization: new FormControl(null),
+    paid_total: new FormControl(null),
   });
 
   allowedFieldsByStatus = {
@@ -72,28 +74,24 @@ export class PurchaseOrderForm {
       'invoice_number',
       'ppn_facture_number',
       'purchasing_attachments',
-      'payment_realization',
       'notes',
-      'ppn_type',
-      'ppn_rate',
-      'ppn_amount',
-      'shipping_cost'
+      'completed_date',
+      'payment_status',
+      'paid_total'
     ],
     [PurchasingEn.RECEIVE]: [
       'status',
-      'notes',
-      'completed_date',
       'invoice_number',
       'purchasing_attachments',
       'ppn_facture_number',
-      'payment_realization',
-      'ppn_type',
-      'ppn_rate',
-      'ppn_amount',
-      'shipping_cost',
+      'notes',
+      'completed_date',
+      'payment_status',
+      'paid_total',
     ],
     [PurchasingEn.PROCESS]: [
       'status',
+      'payment_status',
       'invoice_number',
       'ppn_facture_number',
       'purchasing_attachments',
@@ -102,14 +100,14 @@ export class PurchaseOrderForm {
       'ppn_type',
       'ppn_rate',
       'ppn_amount',
-      'shipping_cost'
+      'shipping_cost',
+      'paid_total'
     ],
     [PurchasingEn.REJECT]: [
-      'status',
-      'due_date',
-      'notes',
-      'supplier_name',
       'supplier',
+      'due_date',
+      'status',
+      'notes',
       'invoice_number',
       'ppn_facture_number',
       'purchasing_attachments',
@@ -118,10 +116,12 @@ export class PurchaseOrderForm {
       'ppn_rate',
       'ppn_amount',
       'shipping_cost',
+      'paid_total'
     ],
     [PurchasingEn.APPROVE]: [
       'status',
       'due_date',
+      'payment_status',
       'notes',
       'invoice_number',
       'ppn_facture_number',
@@ -131,24 +131,16 @@ export class PurchaseOrderForm {
       'ppn_rate',
       'ppn_amount',
       'shipping_cost',
+      'paid_total'
     ],
     [PurchasingEn.REQUEST]: [
       'status',
       'reject_notes',
-      'invoice_number',
-      'ppn_facture_number',
-      'purchasing_attachments',
-      'payment_realization',
-      'ppn_type',
-      'ppn_rate',
-      'ppn_amount',
-      'shipping_cost',
     ],
     [PurchasingEn.CREATE]: [
       'status',
       'due_date',
       'notes',
-      'supplier_name',
       'supplier',
       'invoice_number',
       'ppn_facture_number',
@@ -158,6 +150,7 @@ export class PurchaseOrderForm {
       'ppn_rate',
       'ppn_amount',
       'shipping_cost',
+      'paid_total'
     ],
   };
 
@@ -174,9 +167,11 @@ export class PurchaseOrderForm {
           purchasing_attachments: res.purchasing_attachments?.map(it => {
             return { src: it, file: null }
           }),
+          payment_status: res.payment_status,
           ppn_amount: res.ppn_amount,
           shipping_cost: res.shipping_cost,
-          payment_realization: res.payment_realization
+          payment_realization: res.payment_realization,
+          paid_total: res.paid_total
         }
         this.form.patchValue(valToPatch)
         console.log({ valToPatch })

@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Inject, Input, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
-import { IPurchasingItem, PurchasingEn } from '../../../../types/interfaces/procurement.interface';
+import { IPurchasing, IPurchasingItem, PurchasingEn } from '../../../../types/interfaces/procurement.interface';
 import { PurchaseOrderService } from '../../services/purchase-order.service';
 import { AlertService } from '../../../../shared/components/alert/alert-service';
-import { NgbActiveModal, NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal, NgbModal, NgbModalOptions, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ColumnProps, GenericTable, ITableQueryData } from '../../../../shared/components/generic-table/generic-table';
 import { ConfirmModal } from '../../../../shared/components/modals/confirm-modal/confirm-modal';
 import { TableColumn } from '../../../../shared/directives/table-column/table-column';
@@ -93,25 +93,30 @@ export class PurchaseOrderItem implements OnInit {
 
   activeModal = Inject(NgbActiveModal);
 
-  status?: PurchasingEn;
+  purchasing?: IPurchasing;
 
-  ableToTouch: string[] = [PurchasingEn.CREATE, PurchasingEn.REJECT, PurchasingEn.REQUEST] as string[];
+  ableToTouch: string[] = [PurchasingEn.CREATE, PurchasingEn.REJECT, PurchasingEn.REQUEST, PurchasingEn.APPROVE, PurchasingEn.PROCESS] as string[];
 
   constructor(private service: PurchaseOrderService, private modalService: NgbModal, private alert: AlertService, private store: PurchasingStore) {
     this.store.purchasing$.subscribe(val => {
-      this.status = val?.status
+      this.purchasing = val;
     })
   }
 
   canTouch() {
-    return this.type === 'new' || (this.type === 'edit' && this.status && this.ableToTouch.includes(this.status))
+    const status = this.purchasing?.status;
+    const paymentStatus = this.purchasing?.payment_status;
+    if (paymentStatus && paymentStatus !== 'UNPAID') {
+      return false;
+    }
+    return this.type === 'new' || (this.type === 'edit' && status && this.ableToTouch.includes(status))
   }
 
   modalOptions: NgbModalOptions = {
     size: 'xl'
   }
 
-  modalRef
+  modalRef?: NgbModalRef;
   showForm(type: formType, id?: string) {
     this.modalRef = this.modalService.open(this.poItemForm, this.modalOptions);
     this.form_type = type;
@@ -122,7 +127,7 @@ export class PurchaseOrderItem implements OnInit {
   close(save: boolean) {
     console.log('save', save)
     if (save) this.getList(this.defaultTableParam);
-    this.modalRef.dismiss();
+    this.modalRef?.dismiss();
   }
 
   getList(evt: ITableQueryData) {

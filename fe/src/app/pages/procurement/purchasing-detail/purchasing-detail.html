@@ -1,9 +1,19 @@
 <div class="d-flex flex-row flex-wrap justify-content-between gap-2 mb-5">
   <table class="table">
+    <thead>
+      <tr>
+        <th class="fw-bold p-1 col-3 align-top">{{ 'Field' | translate }}</th>
+        <th class="fw-bold p-1 align-top">{{ 'Value' | translate }}</th>
+      </tr>
+    </thead>
     <tbody>
       <tr>
         <td class="fw-bold p-1 col-3 align-top">{{ 'Status' | translate }}</td>
         <td class="align-top">{{purchase?.status || '-'}}</td>
+      </tr>
+      <tr>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'Payment Status' | translate }}</td>
+        <td class="align-top">{{purchase?.payment_status || '-'}}</td>
       </tr>
       @if (purchase?.status === PurchasingEn.REJECT) {
       <tr>
@@ -57,13 +67,17 @@
         </td>
       </tr>
       <tr>
-        <td class="fw-bold p-1 col-3 align-top">{{ 'Additional Cost' | translate }}</td>
-        <td class="align-top">{{(purchase?.cost_difference | rupiah) || '-'}}</td>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'Predicted Additional Cost' | translate }}</td>
+        <td class="align-top">{{(purchase?.predicted_additional_cost | rupiah) || '-'}}</td>
       </tr>
       <tr>
         <td class="fw-bold p-1 col-3 align-top">{{ 'Payment Realization' | translate }}</td>
         <td class="align-top">{{(purchase?.payment_realization | rupiah) || '-'}}
         </td>
+      </tr>
+      <tr>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'Paid Total' | translate }}</td>
+        <td class="align-top">{{(purchase?.paid_total | rupiah) || '-'}}</td>
       </tr>
       <tr>
         <td class="fw-bold p-1 col-3 align-top">{{ 'Notes' | translate }}</td>
