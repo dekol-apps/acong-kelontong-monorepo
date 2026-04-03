@@ -6,8 +6,11 @@
     </div>
     <div class="card-body">
         <app-generic-table ngSkipHydration [columns]="columns" [data]="listPurchasing" [filterSelect]="filterSelect"
-            [useFilterByDate]="true" [usePagination]="true" [useSearch]="true" [total]="pagination.total" (OnDataRefresh)="getList($event)"
+            [useFilterByDate]="true" [usePagination]="true" [useSearch]="true" [useCustomToolbar]="true" [total]="pagination.total" (OnDataRefresh)="getList($event)"
             [isLoading]="isLoading">
+            <div CustomToolbar class="d-flex flex-wrap gap-2 align-items-start">
+                <app-select-filter [filterSelect]="paymentStatusFilter" (OnChangeFilter)="onPaymentStatusFilterChange($event)"></app-select-filter>
+            </div>
             <div appTableColumn customColumnId="action">
                 <ng-template let-item>
                     <div class="d-flex flex-row gap-1 justify-content-end">

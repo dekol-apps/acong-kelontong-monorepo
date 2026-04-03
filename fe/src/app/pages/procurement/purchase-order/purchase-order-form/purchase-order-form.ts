@@ -67,13 +67,30 @@ export class PurchaseOrderForm {
   allowedFieldsByStatus = {
     [PurchasingEn.EXPIRED]: [''],
     [PurchasingEn.DROP]: [''],
-    [PurchasingEn.COMPLETE]: [''],
+    [PurchasingEn.COMPLETE]: [
+      'status',
+      'invoice_number',
+      'ppn_facture_number',
+      'purchasing_attachments',
+      'payment_realization',
+      'notes',
+      'ppn_type',
+      'ppn_rate',
+      'ppn_amount',
+      'shipping_cost'
+    ],
     [PurchasingEn.RECEIVE]: [
       'status',
       'notes',
       'completed_date',
       'invoice_number',
       'purchasing_attachments',
+      'ppn_facture_number',
+      'payment_realization',
+      'ppn_type',
+      'ppn_rate',
+      'ppn_amount',
+      'shipping_cost',
     ],
     [PurchasingEn.PROCESS]: [
       'status',
@@ -93,15 +110,39 @@ export class PurchaseOrderForm {
       'notes',
       'supplier_name',
       'supplier',
+      'invoice_number',
+      'ppn_facture_number',
+      'purchasing_attachments',
+      'payment_realization',
+      'ppn_type',
+      'ppn_rate',
+      'ppn_amount',
+      'shipping_cost',
     ],
     [PurchasingEn.APPROVE]: [
       'status',
       'due_date',
       'notes',
+      'invoice_number',
+      'ppn_facture_number',
+      'purchasing_attachments',
+      'payment_realization',
+      'ppn_type',
+      'ppn_rate',
+      'ppn_amount',
+      'shipping_cost',
     ],
     [PurchasingEn.REQUEST]: [
       'status',
-      'reject_notes'
+      'reject_notes',
+      'invoice_number',
+      'ppn_facture_number',
+      'purchasing_attachments',
+      'payment_realization',
+      'ppn_type',
+      'ppn_rate',
+      'ppn_amount',
+      'shipping_cost',
     ],
     [PurchasingEn.CREATE]: [
       'status',
@@ -109,6 +150,14 @@ export class PurchaseOrderForm {
       'notes',
       'supplier_name',
       'supplier',
+      'invoice_number',
+      'ppn_facture_number',
+      'purchasing_attachments',
+      'payment_realization',
+      'ppn_type',
+      'ppn_rate',
+      'ppn_amount',
+      'shipping_cost',
     ],
   };
 
@@ -140,10 +189,10 @@ export class PurchaseOrderForm {
         Object.keys(this.form.controls).forEach(element => {
           if (!allowed.includes(element)) this.form.controls[element].disable();
         });
-        if (res.status === PurchasingEn.PROCESS) {
+        if (res.status !== PurchasingEn.DROP && res.status !== PurchasingEn.EXPIRED) {
           this.form.controls.invoice_number.addValidators([Validators.required]);
           this.form.controls.invoice_number.updateValueAndValidity();
-          this.form.controls.payment_realization.addValidators([Validators.required, Validators.min(1)]);
+          this.form.controls.payment_realization.addValidators([Validators.min(0)]);
           this.form.controls.payment_realization.updateValueAndValidity();
           this.cdr.detectChanges();
         }

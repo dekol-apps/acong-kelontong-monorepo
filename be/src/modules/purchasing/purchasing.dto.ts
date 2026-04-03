@@ -3,7 +3,7 @@ import { Type } from 'class-transformer';
 import { IsObjectId } from 'src/global/is-object-id.decorator';
 import { Types } from 'mongoose';
 import { ApprovalType, PPnType } from 'src/types/interfaces';
-import { Purchasing, PurchasingEn } from './purchasing.schema';
+import { PaymentStatusEn, Purchasing, PurchasingEn } from './purchasing.schema';
 import { PaginationDto } from 'src/global/global.dto';
 import { IsMoney } from 'src/global/is-money.decorator';
 
@@ -11,6 +11,10 @@ export class ListPurchasingDto extends PaginationDto {
   @IsOptional()
   @IsEnum(PurchasingEn)
   status?: PurchasingEn;
+
+  @IsOptional()
+  @IsEnum(PaymentStatusEn)
+  payment_status?: PaymentStatusEn;
 }
 
 export class PurchaseOrderApprovalDto {
@@ -25,6 +29,12 @@ export class PurchaseOrderApprovalDto {
 }
 
 export class PurchaseOrderDto {
+  @IsOptional()
+  @IsEnum(PaymentStatusEn, {
+    message: 'payment_status must be either UNPAID, PARTIAL, or PAID',
+  })
+  payment_status?: PaymentStatusEn;
+
   @IsOptional()
   @IsString()
   ppn_facture_number?: string;

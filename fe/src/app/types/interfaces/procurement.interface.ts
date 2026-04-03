@@ -21,6 +21,12 @@ export enum PurchasingEn {
   DROP = 'DROP',
   EXPIRED = 'EXPIRED',
 }
+
+export enum PaymentStatusEn {
+  UNPAID = 'UNPAID',
+  PARTIAL = 'PARTIAL',
+  PAID = 'PAID',
+}
 export interface IPurchasingDto {
   supplier?: string;
   due_date?: Date;
@@ -51,6 +57,7 @@ export interface IPurchasing {
   supplier_name?: string;
   due_date?: Date;
   status?: PurchasingEn;
+  payment_status?: PaymentStatusEn;
   ppn_facture_number?: string;
   invoice_number?: string;
   purchasing_attachments?: string[];

@@ -15,6 +15,12 @@ export enum PurchasingEn {
   EXPIRED = 'EXPIRED',
 }
 
+export enum PaymentStatusEn {
+  UNPAID = 'UNPAID',
+  PARTIAL = 'PARTIAL',
+  PAID = 'PAID',
+}
+
 // PURCHASING as HEADER
 @Schema({ timestamps: true })
 export class Purchasing {
@@ -29,6 +35,9 @@ export class Purchasing {
 
   @Prop({ type: String, enum: PurchasingEn, required: true })
   status: PurchasingEn;
+
+  @Prop({ type: String, enum: PaymentStatusEn, default: PaymentStatusEn.UNPAID })
+  payment_status: PaymentStatusEn;
 
   @Prop()
   ppn_facture_number?: string;

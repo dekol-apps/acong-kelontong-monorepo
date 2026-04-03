@@ -77,9 +77,10 @@ export class PurchasingController {
     @Res() res: Response,
   ) {
     try {
-      const filter = query.status
-        ? { column: 'status', value: query.status }
-        : undefined;
+      const filter = [
+        ...(query.status ? [{ column: 'status', value: query.status }] : []),
+        ...(query.payment_status ? [{ column: 'payment_status', value: query.payment_status }] : []),
+      ];
       const { data, meta } = await this.service.listPurchasing({ ...query, filter });
       return BaseResponse.success({ res, option: { message: 'Success get list purchasing', list: data, meta } });
     } catch (err) {

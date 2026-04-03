@@ -4,12 +4,13 @@ import { TableColumn } from '../../../shared/directives/table-column/table-colum
 import { IPaginationInput, ISelectFilter } from '../../../types/interfaces/common.interface';
 import { NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { RouterLink } from '@angular/router';
-import { IPurchasing, PurchasingEn } from '../../../types/interfaces/procurement.interface';
+import { IPurchasing, PaymentStatusEn, PurchasingEn } from '../../../types/interfaces/procurement.interface';
 import { PurchaseOrderService } from '../services/purchase-order.service';
+import { SelectFilter } from '../../../shared/components/select-filter/select-filter';
 
 @Component({
   selector: 'app-receive-order',
-  imports: [GenericTable, TableColumn, RouterLink],
+  imports: [GenericTable, TableColumn, RouterLink, SelectFilter],
   templateUrl: './receive-order.html',
   styleUrl: './receive-order.scss'
 })
@@ -41,6 +42,24 @@ export class ReceiveOrder implements OnInit {
     ]
   }
 
+  paymentStatusFilter: ISelectFilter = {
+    title: 'Filter payment status',
+    selectOptions: [
+      {
+        label: PaymentStatusEn.UNPAID,
+        value: PaymentStatusEn.UNPAID
+      },
+      {
+        label: PaymentStatusEn.PARTIAL,
+        value: PaymentStatusEn.PARTIAL
+      },
+      {
+        label: PaymentStatusEn.PAID,
+        value: PaymentStatusEn.PAID
+      },
+    ]
+  }
+
   columns: Array<ColumnProps> = [
     {
       label: 'Supplier Name',
@@ -51,6 +70,12 @@ export class ReceiveOrder implements OnInit {
     {
       label: 'Status',
       id: 'status',
+      extraHeaderClass: 'uppercase-text',
+      sort: true
+    },
+    {
+      label: 'Payment Status',
+      id: 'payment_status',
       extraHeaderClass: 'uppercase-text',
       sort: true
     },
@@ -100,6 +125,8 @@ export class ReceiveOrder implements OnInit {
     search: '',
   }
 
+  lastQuery: ITableQueryData = this.defaultQuery;
+
   constructor(private service: PurchaseOrderService) { }
 
   modalOptions: NgbModalOptions = {
@@ -107,6 +134,7 @@ export class ReceiveOrder implements OnInit {
   }
 
   getList(evt: ITableQueryData) {
+    this.lastQuery = evt;
     this.isLoading = true;
     const qParams: any = {
       page: evt.page,
@@ -121,6 +149,9 @@ export class ReceiveOrder implements OnInit {
     }
     if (evt.filterSelectVal?.value) {
       qParams.status = evt.filterSelectVal.value;
+    }
+    if (this.paymentStatusFilter.value?.value) {
+      qParams.payment_status = this.paymentStatusFilter.value.value;
     }
 
     this.service.getPurchasingReceives(qParams).subscribe({
@@ -142,6 +173,11 @@ export class ReceiveOrder implements OnInit {
 
   ngOnInit(): void {
     this.getList(this.defaultQuery)
+  }
+
+  onPaymentStatusFilterChange(value: any) {
+    this.paymentStatusFilter.value = value;
+    this.getList({ ...this.lastQuery, page: 1 });
   }
 
 }

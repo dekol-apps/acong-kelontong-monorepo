@@ -44,10 +44,7 @@ export class PurchaseOrderFormPayment implements OnInit {
   }
 
   submit() {
-    let value = this.form?.value;
-    if (this.purchasingDetail?.status === PurchasingEn.PROCESS) {
-      value = this.form?.getRawValue();
-    }
+    const value = this.form?.getRawValue();
     if (this.form?.invalid) return this.alert.error('Please check your inputs');
     const body = {
       ...value,
@@ -60,10 +57,7 @@ export class PurchaseOrderFormPayment implements OnInit {
     };
     console.log({ body });
     const formData = objToFormData(body, { fileFields: ['purchasing_attachments'] });
-    let subscriber = this.store.update(formData);
-    if (this.purchasingDetail?.status === PurchasingEn.PROCESS) {
-      subscriber = this.store.payment(formData)
-    }
+    const subscriber = this.store.payment(formData)
     subscriber.subscribe({
       next: (res) => {
         this.alert.success(`Success ${this.purchase_id ? 'edit' : 'create'} purchasing!`);

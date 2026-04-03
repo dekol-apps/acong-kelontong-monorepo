@@ -5,7 +5,7 @@ import { PaginationDto } from 'src/global/global.dto';
 import { GlobalService } from 'src/global/global.service';
 import { ApprovalType, FlowType, IListRes, OrderType, PPnType } from 'src/types/interfaces';
 import { BaseResponse } from 'src/utils/base-response';
-import { Purchasing, PurchasingEn, ValidatePaymentInput, ValidatePaymentResult } from './purchasing.schema';
+import { PaymentStatusEn, Purchasing, PurchasingEn, ValidatePaymentInput, ValidatePaymentResult } from './purchasing.schema';
 import { PurchaseOrderApprovalDto, PurchaseOrderDto, PurchasingDetail, PurchasingDto } from './purchasing.dto';
 import { Supplier } from '../supplier/supplier.schema';
 import { PurchasingItem } from '../purchasing-item/purchasing-item.schema';
@@ -96,6 +96,7 @@ export class PurchasingService {
       supplier_name: supplier.supplier_name,
       due_date: data.due_date,
       status: PurchasingEn.CREATE,
+      payment_status: data.payment_status ?? PaymentStatusEn.UNPAID,
       // invoice_number: data.invoice_number,
       // purchasing_attachments: data.purchasing_attachments,
       // payment_realization: data.payment_realization,
@@ -139,7 +140,8 @@ export class PurchasingService {
           'ppn_type',
           'ppn_rate',
           'ppn_amount',
-          'shipping_cost'
+          'shipping_cost',
+          'payment_status'
         ],
         [PurchasingEn.RECEIVE]: [
           'status',
@@ -153,6 +155,7 @@ export class PurchasingService {
           'ppn_amount',
           'shipping_cost',
           'completed_date',
+          'payment_status',
         ],
         [PurchasingEn.PROCESS]: [
           'status',
@@ -164,7 +167,8 @@ export class PurchasingService {
           'ppn_type',
           'ppn_rate',
           'ppn_amount',
-          'shipping_cost'
+          'shipping_cost',
+          'payment_status'
         ],
         [PurchasingEn.REJECT]: [
           'status',
@@ -172,15 +176,42 @@ export class PurchasingService {
           'notes',
           'supplier_name',
           'supplier',
+          'payment_status',
+          'invoice_number',
+          'ppn_facture_number',
+          'purchasing_attachments',
+          'payment_realization',
+          'ppn_type',
+          'ppn_rate',
+          'ppn_amount',
+          'shipping_cost',
         ],
         [PurchasingEn.APPROVE]: [
           'status',
           'due_date',
           'notes',
+          'payment_status',
+          'invoice_number',
+          'ppn_facture_number',
+          'purchasing_attachments',
+          'payment_realization',
+          'ppn_type',
+          'ppn_rate',
+          'ppn_amount',
+          'shipping_cost',
         ],
         [PurchasingEn.REQUEST]: [
           'status',
-          'reject_notes'
+          'reject_notes',
+          'payment_status',
+          'invoice_number',
+          'ppn_facture_number',
+          'purchasing_attachments',
+          'payment_realization',
+          'ppn_type',
+          'ppn_rate',
+          'ppn_amount',
+          'shipping_cost',
         ],
         [PurchasingEn.CREATE]: [
           'status',
@@ -188,6 +219,15 @@ export class PurchasingService {
           'notes',
           'supplier_name',
           'supplier',
+          'payment_status',
+          'invoice_number',
+          'ppn_facture_number',
+          'purchasing_attachments',
+          'payment_realization',
+          'ppn_type',
+          'ppn_rate',
+          'ppn_amount',
+          'shipping_cost',
         ],
       };
       // get allowed fields for this status
@@ -267,6 +307,7 @@ export class PurchasingService {
       if (data.ppn_type !== undefined && fields.includes('ppn_type')) purchase.ppn_type = data.ppn_type;
       if (data.ppn_amount !== undefined && fields.includes('ppn_amount')) purchase.ppn_amount = toDecimal128(toDecimal(data.ppn_amount));
       if (data.shipping_cost !== undefined && fields.includes('shipping_cost')) purchase.shipping_cost = toDecimal128(toDecimal(data.shipping_cost));
+      if (data.payment_status !== undefined && fields.includes('payment_status')) purchase.payment_status = data.payment_status;
       if (data.notes !== undefined && fields.includes('notes')) purchase.notes = data.notes;
       if ((data as any).completed_date !== undefined && fields.includes('completed_date')) purchase.completed_date = (data as any).completed_date;
       if ((data as any).reject_notes !== undefined && fields.includes('reject_notes')) purchase.reject_notes = (data as any).reject_notes;
@@ -275,24 +316,22 @@ export class PurchasingService {
       const detail = await this.detailPurchasing(purchase._id);
 
       // ─── Sync with Accounting ─────────────────────────────────────────────
-      if (purchase.status === PurchasingEn.PROCESS || purchase.status === PurchasingEn.RECEIVE || purchase.status === PurchasingEn.COMPLETE) {
-        const hasAccounting = await this.accounting.existsByOrderId(purchase._id);
-        if (hasAccounting) {
-          await this.accounting.editAccountingByOrderId(
-            purchase._id as any,
-            {
-              transaction_amount: detail.payment_realization,
-              tax_base: detail.total_purchase_price,
-              ppn_type: detail.ppn_type as any,
-              ppn_rate: detail.ppn_rate,
-              ppn_amount: detail.ppn_amount,
-              tax_facture_number: detail.ppn_facture_number,
-              order_data: detail,
-              record_date: new Date(),
-            },
-            session
-          );
-        }
+      const hasAccounting = await this.accounting.existsByOrderId(purchase._id);
+      if (hasAccounting) {
+        await this.accounting.editAccountingByOrderId(
+          purchase._id as any,
+          {
+            transaction_amount: detail.payment_realization,
+            tax_base: detail.total_purchase_price,
+            ppn_type: detail.ppn_type as any,
+            ppn_rate: detail.ppn_rate,
+            ppn_amount: detail.ppn_amount,
+            tax_facture_number: detail.ppn_facture_number,
+            order_data: detail,
+            record_date: new Date(),
+          },
+          session
+        );
       }
 
       return {
@@ -529,9 +568,6 @@ export class PurchasingService {
     const total = toDecimal(input.tax_base);
     const shipping = toDecimal(input.shipping_cost);
     const ppnRate = new Decimal(input.ppn_rate).div(100);
-    // =====================
-    // 1️⃣ Expected PPN
-    // =====================
     let expectedPpn = new Decimal(0);
     if (input.ppn_type === PPnType.EXCLUSIVE) {
       expectedPpn = total.mul(ppnRate);
@@ -541,12 +577,7 @@ export class PurchasingService {
       expectedPpn = total.minus(base);
     }
     expectedPpn = expectedPpn.toDP(2);
-    // =====================
-    // 2️⃣ Expected Payable
-    // =====================
-    const expectedPayable = (input.ppn_type === PPnType.INCLUSIVE
-      ? total.plus(shipping)
-      : total.plus(shipping).plus(expectedPpn)).toDP(2);
+    const expectedPayable = this.computeExpectedPayable(total, input.ppn_type, input.ppn_rate, shipping);
     // =====================
     // 3️⃣ Predicted Additional Cost
     // =====================
@@ -570,22 +601,42 @@ export class PurchasingService {
       is_payment_match: isPaymentMatch,
     };
   }
-  async purchasingPayment(id: Types.ObjectId, dto: PurchaseOrderDto & { ppn_rate?: number, status?: PurchasingEn }, sessionIn?: ClientSession): Promise<{ detail: Purchasing | undefined; removedAttachments: string[] }> {
+
+  private computeExpectedPayable(
+    taxBase: Decimal,
+    ppnType: PPnType,
+    ppnRateRaw: number,
+    shipping: Decimal,
+  ): Decimal {
+    const ppnRate = new Decimal(ppnRateRaw || 0).div(100);
+    const expectedPpn = ppnType === PPnType.EXCLUSIVE
+      ? taxBase.mul(ppnRate)
+      : ppnType === PPnType.INCLUSIVE
+        ? taxBase.minus(taxBase.div(new Decimal(1).plus(ppnRate)))
+        : new Decimal(0);
+
+    return (ppnType === PPnType.INCLUSIVE
+      ? taxBase.plus(shipping)
+      : taxBase.plus(shipping).plus(expectedPpn)).toDP(2);
+  }
+
+  private resolvePaymentStatus(payment: Decimal, expectedPayable: Decimal): PaymentStatusEn {
+    if (payment.lte(0)) return PaymentStatusEn.UNPAID;
+    if (payment.greaterThanOrEqualTo(expectedPayable)) return PaymentStatusEn.PAID;
+    return PaymentStatusEn.PARTIAL;
+  }
+
+  async purchasingPayment(id: Types.ObjectId, dto: PurchaseOrderDto, sessionIn?: ClientSession): Promise<{ detail: Purchasing | undefined; removedAttachments: string[] }> {
     return this.global.withTransaction(async (session) => {
       if (!dto.ppn_type) throw BaseResponse.invalid({ option: { message: "ppn_type is required" } });
-      // if (!dto.ppn_rate) throw BaseResponse.invalid({ option: { message: "ppn_rate is required" } });
-      // if (!dto.ppn_amount) throw BaseResponse.invalid({ option: { message: "ppn_amount is required" } });
-      if (!dto.payment_realization) throw BaseResponse.invalid({ option: { message: "payment_realization is required" } });
       const existing = await this.purchasingModel.findById(id).session(session);
       if (!existing) throw BaseResponse.notFound({ err: 'purchasingPayment !existing' });
       if (!dto.invoice_number) throw BaseResponse.invalid({ option: { message: 'invoice_number is required' } });
       if (!dto.purchasing_attachments?.length && existing.purchasing_attachments?.length) throw BaseResponse.invalid({ option: { message: 'purchasing_attachments is required' } });
-      const ablePayment = [PurchasingEn.APPROVE, PurchasingEn.PROCESS, PurchasingEn.RECEIVE, PurchasingEn.COMPLETE];
-      if (!ablePayment.includes(existing.status)) throw BaseResponse.invalid({ option: { message: 'Only able to execute payment for purchasing with status: ' + ablePayment.join(', ') } });
-
-      if (existing.status === PurchasingEn.APPROVE) {
-        existing.status = PurchasingEn.PROCESS;
+      if ([PurchasingEn.DROP, PurchasingEn.EXPIRED].includes(existing.status)) {
+        throw BaseResponse.invalid({ option: { message: 'Cannot execute payment for dropped or expired purchasing' } });
       }
+
       existing.ppn_rate = defaultPpnRate;
       await existing.save({ session });
 
@@ -607,23 +658,58 @@ export class PurchasingService {
       });
       const message = `PPn calculation result invalid:\n\nppn type: ${dto.ppn_type}\nppn rate: ${dto.ppn_rate}\nppn amount: ${dto.ppn_amount?.toString() ?? ''}\ntax base: ${edit.detail.total_purchase_price.toString()}\nexpected ppn amount (rounded): ${expected_ppn_amount.toString()}\nexpected minimum payment: ${expected_payable.toString()}\n`
       if (!is_ppn_valid) throw BaseResponse.invalid({ option: { message } })
-      if (!is_payment_match) throw BaseResponse.invalid({ option: { message: 'Payment amount could not be less than payable amount' } })
+
+      const paymentStatus = dto.payment_status ?? this.resolvePaymentStatus(
+        toDecimal(edit.detail.payment_realization),
+        toDecimal(expected_payable),
+      );
+
+      const updatedPurchase = await this.purchasingModel.findByIdAndUpdate(
+        id,
+        { payment_status: paymentStatus },
+        { session, new: true },
+      );
+      if (!updatedPurchase) throw BaseResponse.unexpected({ err: 'purchasingPayment !updatedPurchase' });
+
+      const refreshedDetail = await this.detailPurchasing(id);
+      const hasAccounting = await this.accounting.existsByOrderId(id);
       const accountingPayload: Accounting = {
         flow_type: FlowType.OUT,
         order_id: id,
-        order_data: edit.detail,
+        order_data: refreshedDetail,
         order_type: OrderType.PURCHASING,
-        transaction_amount: edit.detail.payment_realization,
-        tax_base: edit.detail.total_purchase_price,
-        ppn_type: edit.detail.ppn_type,
-        ppn_rate: edit.detail.ppn_rate,
-        ppn_amount: edit.detail.ppn_amount,
-        tax_facture_number: edit.detail.ppn_facture_number,
+        transaction_amount: refreshedDetail.payment_realization,
+        tax_base: refreshedDetail.total_purchase_price,
+        ppn_type: refreshedDetail.ppn_type,
+        ppn_rate: refreshedDetail.ppn_rate,
+        ppn_amount: refreshedDetail.ppn_amount,
+        tax_facture_number: refreshedDetail.ppn_facture_number,
         record_date: new Date(),
       }
-      await this.accounting.createAccountingItem(accountingPayload, session)
 
-      return edit;
+      if (hasAccounting) {
+        await this.accounting.editAccountingByOrderId(
+          id,
+          {
+            transaction_amount: refreshedDetail.payment_realization,
+            tax_base: refreshedDetail.total_purchase_price,
+            ppn_type: refreshedDetail.ppn_type,
+            ppn_rate: refreshedDetail.ppn_rate,
+            ppn_amount: refreshedDetail.ppn_amount,
+            tax_facture_number: refreshedDetail.ppn_facture_number,
+            order_data: refreshedDetail,
+            record_date: new Date(),
+          },
+          session,
+        );
+      } else {
+        await this.accounting.createAccountingItem(accountingPayload, session)
+      }
+
+      return {
+        detail: refreshedDetail,
+        removedAttachments: edit.removedAttachments,
+      };
     }, sessionIn)
   }
 
@@ -678,10 +764,15 @@ export class PurchasingService {
       // Calculate Landed Cost components
       const total_purchase_price = await this.countTotalPurchasePrice(id);
       const total_items = existingItems.reduce((sum, item) => sum + item.purchase_qty, 0);
-      const payment_realization = toDecimal(purchase.payment_realization || 0);
       const total_purchase_price_dec = toDecimal(total_purchase_price || 0);
+      const expected_payable = this.computeExpectedPayable(
+        total_purchase_price_dec,
+        purchase.ppn_type,
+        purchase.ppn_rate,
+        toDecimal(purchase.shipping_cost || 0),
+      );
 
-      const additional_cost = payment_realization.minus(total_purchase_price_dec);
+      const additional_cost = expected_payable.minus(total_purchase_price_dec);
       const additional_cost_per_item = total_items > 0 ? additional_cost.div(total_items) : new Decimal(0);
 
       const inventoryMovement: (InventoryMovementDto & { source_id: Types.ObjectId })[] = [];
