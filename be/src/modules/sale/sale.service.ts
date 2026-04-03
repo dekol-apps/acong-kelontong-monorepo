@@ -249,6 +249,7 @@ export class SaleService {
         // Fetch exactly item_qty individual SaleItem records for this product (FIFO)
         const toConsume = await this.saleItemModel
           .find({ product: item.product })
+          .sort({ createdAt: 1, _id: 1 })
           .limit(item.item_qty)
           .session(session);
 
@@ -384,6 +385,7 @@ export class SaleService {
       for (const item of dto.items) {
         const toConsume = await this.saleItemModel
           .find({ product: item.product })
+          .sort({ createdAt: 1, _id: 1 })
           .limit(item.item_qty)
           .session(session);
 

@@ -402,7 +402,7 @@ export class AccountingService {
         sortDir: sortDir || 'desc',
         search,
         searchFields: ['order_type'],
-        filter: dbFilter
+        customConditions: dbFilter
       }
     );
 
