@@ -51,6 +51,9 @@ export class Purchasing {
   @Prop({ type: Types.Decimal128 })
   payment_realization?: Types.Decimal128;
 
+  @Prop({ type: Types.Decimal128 })
+  paid_total?: Types.Decimal128;
+
   @Prop()
   notes?: string; // for example: notes for additional cost
 
@@ -77,7 +80,7 @@ export type PurchasingDocument = Purchasing & Document & { supplier: SupplierDoc
 export const PurchasingSchema = SchemaFactory.createForClass(Purchasing);
 
 export interface ValidatePaymentInput {
-  tax_base: Types.Decimal128;
+  total_price: Types.Decimal128;
   ppn_rate: number; // example 11 for 11%
   ppn_type: PPnType;
   ppn_amount: Types.Decimal128;

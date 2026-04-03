@@ -4,7 +4,7 @@ import { ClientSession, Model, Types } from 'mongoose';
 import { GlobalService } from 'src/global/global.service';
 import { BaseResponse } from 'src/utils/base-response';
 import { Product } from '../product/product.schema';
-import { Purchasing } from '../purchasing/purchasing.schema';
+import { PaymentStatusEn, Purchasing, PurchasingEn } from '../purchasing/purchasing.schema';
 import { PurchasingItem } from './purchasing-item.schema';
 import { PurchasingItemDto } from './purchasing-item.dto';
 import { toDecimal, toDecimal128, toSku } from 'src/utils/helper';
@@ -53,6 +53,9 @@ export class PurchasingItemService {
       const purchasing = await this.purchasingModel.findById(dto.purchase_order).session(session);
       if (!purchasing) {
         throw BaseResponse.notFound({ err: `editPurchasingItem Purchasing not found` });
+      }
+      if (purchasing.payment_status !== PaymentStatusEn.UNPAID || purchasing.status === PurchasingEn.RECEIVE || purchasing.status === PurchasingEn.COMPLETE || purchasing.status === PurchasingEn.DROP || purchasing.status === PurchasingEn.EXPIRED) {
+        throw BaseResponse.invalid({ err: 'editPurchasingItem invalid status', option: { message: `Cannot edit purchasing item in current status` } });
       }
       const product = await this.productModel.findById(dto.product).session(session);
       if (!product) throw BaseResponse.notFound({ err: `editPurchasingItem Product not found` });

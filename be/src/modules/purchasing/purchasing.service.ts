@@ -12,7 +12,7 @@ import { PurchasingItem } from '../purchasing-item/purchasing-item.schema';
 import { PurchasingItemService } from '../purchasing-item/purchasing-item.service';
 import { PurchasingItemDto, ReceiveOrderItemDto } from '../purchasing-item/purchasing-item.dto';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { decreaseDays, digitShortDate, multiplyDecimal, subtractDecimal, toDecimal, toDecimal128 } from 'src/utils/helper';
+import { decreaseDays, digitShortDate, multiplyDecimal, toDecimal, toDecimal128 } from 'src/utils/helper';
 import { cleanupDays } from 'src/types/constants';
 import { Accounting } from '../accounting/accounting.schema';
 import { AccountingService } from '../accounting/accounting.service';
@@ -115,17 +115,10 @@ export class PurchasingService {
     return await this.detailPurchasing(createdPurchase._id);
   }
 
-  async editPurchasing(id: Types.ObjectId, data: PurchasingDto, sessionIn?: ClientSession): Promise<{ detail: PurchasingDetail; removedAttachments: string[] }> {
+  async editPurchasing(id: Types.ObjectId, data: PurchasingDto & { reject_notes?: string, completed_date?: Date }, sessionIn?: ClientSession): Promise<{ detail: PurchasingDetail; removedAttachments: string[] }> {
     return this.global.withTransaction(async (session) => {
       const purchase = await this.purchasingModel.findById(id).session(session);
       if (!purchase) throw BaseResponse.notFound({ err: 'Purchasing not found' });
-
-      let supplier = purchase.supplier as any;
-      if (data.supplier) {
-        const found = await this.supplierModel.findById(data.supplier).session(session);
-        if (!found) throw BaseResponse.notFound({ err: 'Supplier not found' });
-        supplier = found;
-      }
 
       const allowedFieldsByStatus = {
         [PurchasingEn.EXPIRED]: [''],
@@ -135,48 +128,40 @@ export class PurchasingService {
           'invoice_number',
           'ppn_facture_number',
           'purchasing_attachments',
-          'payment_realization',
           'notes',
-          'ppn_type',
-          'ppn_rate',
-          'ppn_amount',
-          'shipping_cost',
-          'payment_status'
+          'completed_date',
+          'payment_status',
+          'paid_total'
         ],
         [PurchasingEn.RECEIVE]: [
           'status',
           'invoice_number',
           'ppn_facture_number',
           'purchasing_attachments',
-          'payment_realization',
           'notes',
-          'ppn_type',
-          'ppn_rate',
-          'ppn_amount',
-          'shipping_cost',
           'completed_date',
           'payment_status',
+          'paid_total'
         ],
         [PurchasingEn.PROCESS]: [
           'status',
+          'payment_status',
+          'notes',
           'invoice_number',
           'ppn_facture_number',
           'purchasing_attachments',
           'payment_realization',
-          'notes',
           'ppn_type',
           'ppn_rate',
           'ppn_amount',
           'shipping_cost',
-          'payment_status'
+          'paid_total'
         ],
         [PurchasingEn.REJECT]: [
-          'status',
-          'due_date',
-          'notes',
-          'supplier_name',
           'supplier',
-          'payment_status',
+          'due_date',
+          'status',
+          'notes',
           'invoice_number',
           'ppn_facture_number',
           'purchasing_attachments',
@@ -185,12 +170,13 @@ export class PurchasingService {
           'ppn_rate',
           'ppn_amount',
           'shipping_cost',
+          'paid_total'
         ],
         [PurchasingEn.APPROVE]: [
-          'status',
           'due_date',
-          'notes',
+          'status',
           'payment_status',
+          'notes',
           'invoice_number',
           'ppn_facture_number',
           'purchasing_attachments',
@@ -199,27 +185,17 @@ export class PurchasingService {
           'ppn_rate',
           'ppn_amount',
           'shipping_cost',
+          'paid_total'
         ],
         [PurchasingEn.REQUEST]: [
           'status',
           'reject_notes',
-          'payment_status',
-          'invoice_number',
-          'ppn_facture_number',
-          'purchasing_attachments',
-          'payment_realization',
-          'ppn_type',
-          'ppn_rate',
-          'ppn_amount',
-          'shipping_cost',
         ],
         [PurchasingEn.CREATE]: [
-          'status',
-          'due_date',
-          'notes',
-          'supplier_name',
           'supplier',
-          'payment_status',
+          'due_date',
+          'status',
+          'notes',
           'invoice_number',
           'ppn_facture_number',
           'purchasing_attachments',
@@ -228,6 +204,7 @@ export class PurchasingService {
           'ppn_rate',
           'ppn_amount',
           'shipping_cost',
+          'paid_total'
         ],
       };
       // get allowed fields for this status
@@ -251,53 +228,26 @@ export class PurchasingService {
         (url) => !newAttachments.includes(url),
       );
 
-      // ─── Enforce Constraints on Restricted Fields ─────────────────────────
-      const restrictedFields = [
+      const paymentDataFields: Array<keyof PurchaseOrderDto> = [
         'payment_realization',
-        'shipping_cost',
         'ppn_type',
         'ppn_rate',
         'ppn_amount',
-        'ppn_facture_number'
+        'shipping_cost',
       ];
-
-      const changingRestricted = restrictedFields.some(field => {
-        const newVal = (data as any)[field];
-        if (newVal === undefined) return false;
-
-        if (['payment_realization', 'shipping_cost', 'ppn_rate', 'ppn_amount'].includes(field)) {
-          const oldVal = (purchase as any)[field] || 0;
-          return !toDecimal(newVal).equals(toDecimal(oldVal));
-        }
-
-        return newVal?.toString() !== (purchase as any)[field]?.toString();
-      });
-
-      if (changingRestricted) {
-        // 1. 6-hour window check
-        const now = new Date();
-        const createdAt = (purchase as any).createdAt as Date;
-        const hoursDiff = (now.getTime() - createdAt.getTime()) / (1000 * 3600);
-        if (hoursDiff > 6) {
-          throw BaseResponse.invalid({
-            err: 'editPurchasing restricted fields > 6 hours',
-            option: { message: 'Cannot edit payment or tax related fields after 6 hours from creation' }
-          });
-        }
-
-        // 2. Accounting Snapshot check
-        const isLockedBySnapshot = await this.accounting.checkSnapshot(createdAt);
-        if (isLockedBySnapshot) {
-          throw BaseResponse.invalid({
-            err: 'editPurchasing restricted fields snapshot locked',
-            option: { message: 'Cannot edit payment or tax related fields after accounting snapshot has been taken' }
-          });
-        }
+      const attemptingPaymentDataUpdate = paymentDataFields.some((field) => (data as any)[field] !== undefined);
+      if (purchase.payment_status !== PaymentStatusEn.UNPAID && attemptingPaymentDataUpdate) {
+        throw BaseResponse.invalid({
+          option: { message: 'Payment data is locked once payment status is PARTIAL or PAID' }
+        });
       }
 
-      if (data.supplier !== undefined && fields.includes('supplier')) {
-        purchase.supplier = supplier._id;
-        purchase.supplier_name = supplier.supplier_name;
+
+      if (data.supplier) {
+        const found = await this.supplierModel.findById(data.supplier).session(session);
+        if (!found) throw BaseResponse.notFound({ err: 'Supplier not found' });
+        purchase.supplier = data.supplier;
+        purchase.supplier_name = found.supplier_name;
       }
       if (data.due_date !== undefined && fields.includes('due_date')) purchase.due_date = data.due_date;
       if (data.invoice_number !== undefined && fields.includes('invoice_number')) purchase.invoice_number = data.invoice_number;
@@ -309,8 +259,9 @@ export class PurchasingService {
       if (data.shipping_cost !== undefined && fields.includes('shipping_cost')) purchase.shipping_cost = toDecimal128(toDecimal(data.shipping_cost));
       if (data.payment_status !== undefined && fields.includes('payment_status')) purchase.payment_status = data.payment_status;
       if (data.notes !== undefined && fields.includes('notes')) purchase.notes = data.notes;
-      if ((data as any).completed_date !== undefined && fields.includes('completed_date')) purchase.completed_date = (data as any).completed_date;
-      if ((data as any).reject_notes !== undefined && fields.includes('reject_notes')) purchase.reject_notes = (data as any).reject_notes;
+      if (data.paid_total !== undefined && fields.includes('paid_total')) purchase.paid_total = toDecimal128(toDecimal(data.paid_total));
+      if (data.completed_date !== undefined && fields.includes('completed_date')) purchase.completed_date = data.completed_date;
+      if (data.reject_notes !== undefined && fields.includes('reject_notes')) purchase.reject_notes = data.reject_notes;
 
       await purchase.save({ session });
       const detail = await this.detailPurchasing(purchase._id);
@@ -394,12 +345,20 @@ export class PurchasingService {
 
     if (!detailPurchasing) throw BaseResponse.notFound();
     const total_purchase_price = await this.countTotalPurchasePrice(purchasing_id);
-    const cost_difference = subtractDecimal(detailPurchasing.payment_realization, total_purchase_price) ?? Types.Decimal128.fromString('0');
+    const validation = this.validatePayment({
+      total_price: total_purchase_price,
+      ppn_type: detailPurchasing.ppn_type ?? PPnType.NONE,
+      ppn_rate: detailPurchasing.ppn_rate ?? 0,
+      ppn_amount: detailPurchasing.ppn_amount ?? toDecimal128(toDecimal(0)),
+      payment_realization: detailPurchasing.payment_realization ?? toDecimal128(toDecimal(0)),
+      shipping_cost: detailPurchasing.shipping_cost ?? toDecimal128(toDecimal(0)),
+    });
 
     return {
       ...detailPurchasing,
       total_purchase_price,
-      cost_difference
+      validation,
+      predicted_additional_cost: validation.predicted_additional_cost,
     };
   }
 
@@ -423,7 +382,7 @@ export class PurchasingService {
       },
     ]);
 
-    return toDecimal128(toDecimal(result[0]?.total??0));
+    return toDecimal128(toDecimal(result[0]?.total ?? 0));
   }
 
   async listPurchasingItems(purchasing_id: Types.ObjectId, pagination?: PaginationDto): Promise<IListRes<PurchasingItem & { price_total: Types.Decimal128 }>> {
@@ -565,19 +524,19 @@ export class PurchasingService {
   validatePayment(
     input: ValidatePaymentInput,
   ): ValidatePaymentResult {
-    const total = toDecimal(input.tax_base);
+    const totalPrice = toDecimal(input.total_price);
     const shipping = toDecimal(input.shipping_cost);
     const ppnRate = new Decimal(input.ppn_rate).div(100);
     let expectedPpn = new Decimal(0);
     if (input.ppn_type === PPnType.EXCLUSIVE) {
-      expectedPpn = total.mul(ppnRate);
+      expectedPpn = totalPrice.mul(ppnRate);
     }
     if (input.ppn_type === PPnType.INCLUSIVE) {
-      const base = total.div(new Decimal(1).plus(ppnRate));
-      expectedPpn = total.minus(base);
+      const base = totalPrice.div(new Decimal(1).plus(ppnRate));
+      expectedPpn = totalPrice.minus(base);
     }
     expectedPpn = expectedPpn.toDP(2);
-    const expectedPayable = this.computeExpectedPayable(total, input.ppn_type, input.ppn_rate, shipping);
+    const expectedPayable = this.computeExpectedPayable(totalPrice, input.ppn_type, input.ppn_rate, shipping);
     // =====================
     // 3️⃣ Predicted Additional Cost
     // =====================
@@ -620,95 +579,124 @@ export class PurchasingService {
       : taxBase.plus(shipping).plus(expectedPpn)).toDP(2);
   }
 
-  private resolvePaymentStatus(payment: Decimal, expectedPayable: Decimal): PaymentStatusEn {
-    if (payment.lte(0)) return PaymentStatusEn.UNPAID;
-    if (payment.greaterThanOrEqualTo(expectedPayable)) return PaymentStatusEn.PAID;
-    return PaymentStatusEn.PARTIAL;
-  }
-
   async purchasingPayment(id: Types.ObjectId, dto: PurchaseOrderDto, sessionIn?: ClientSession): Promise<{ detail: Purchasing | undefined; removedAttachments: string[] }> {
     return this.global.withTransaction(async (session) => {
-      if (!dto.ppn_type) throw BaseResponse.invalid({ option: { message: "ppn_type is required" } });
       const existing = await this.purchasingModel.findById(id).session(session);
       if (!existing) throw BaseResponse.notFound({ err: 'purchasingPayment !existing' });
-      if (!dto.invoice_number) throw BaseResponse.invalid({ option: { message: 'invoice_number is required' } });
-      if (!dto.purchasing_attachments?.length && existing.purchasing_attachments?.length) throw BaseResponse.invalid({ option: { message: 'purchasing_attachments is required' } });
       if ([PurchasingEn.DROP, PurchasingEn.EXPIRED].includes(existing.status)) {
         throw BaseResponse.invalid({ option: { message: 'Cannot execute payment for dropped or expired purchasing' } });
       }
 
-      if (dto.ppn_rate !== undefined) {
-        existing.ppn_rate = Number(dto.ppn_rate);
+      const totalPurchasePrice = await this.countTotalPurchasePrice(id);
+      const nextStatus = dto.payment_status ?? existing.payment_status;
+      const effectivePpnType = dto.ppn_type ?? existing.ppn_type;
+      const effectivePpnRate = dto.ppn_rate ?? existing.ppn_rate;
+      const effectivePpnAmount = dto.ppn_amount ?? existing.ppn_amount;
+      const effectivePaymentRealization = dto.payment_realization ?? existing.payment_realization;
+      const effectiveShippingCost = dto.shipping_cost ?? existing.shipping_cost;
+
+      const hasCompletePaymentData =
+        effectivePpnType !== undefined &&
+        effectivePpnRate !== undefined &&
+        effectivePpnAmount !== undefined &&
+        effectivePaymentRealization !== undefined &&
+        effectiveShippingCost !== undefined;
+
+      let payload: Partial<PurchaseOrderDto> = {};
+
+      if (existing.payment_status === PaymentStatusEn.UNPAID) {
+        if (nextStatus !== PaymentStatusEn.UNPAID && !hasCompletePaymentData) {
+          throw BaseResponse.invalid({ option: { message: 'Payment and tax fields must be completed before changing status to PARTIAL or PAID' } });
+        }
+
+        payload = {
+          invoice_number: dto.invoice_number,
+          purchasing_attachments: dto.purchasing_attachments,
+          ppn_facture_number: dto.ppn_facture_number,
+          ppn_type: dto.ppn_type,
+          ppn_rate: dto.ppn_rate,
+          ppn_amount: dto.ppn_amount,
+          shipping_cost: dto.shipping_cost,
+          payment_realization: dto.payment_realization,
+          paid_total: dto.paid_total,
+          notes: dto.notes,
+          payment_status: nextStatus,
+        }
+      } else {
+        const hasLockedPaymentDataInput =
+          dto.payment_realization !== undefined ||
+          dto.ppn_type !== undefined ||
+          dto.ppn_rate !== undefined ||
+          dto.ppn_amount !== undefined ||
+          dto.shipping_cost !== undefined;
+        if (hasLockedPaymentDataInput) {
+          throw BaseResponse.invalid({ option: { message: 'Cannot change payment_realization, ppn_type, ppn_rate, ppn_amount, shipping_cost, only able to edit those when payment status is UNPAID' } });
+        }
+        const nextStatus = dto.payment_status ?? PaymentStatusEn.PAID;
+        if (nextStatus !== PaymentStatusEn.PAID) {
+          throw BaseResponse.invalid({ option: { message: 'When current payment status is PARTIAL, status can only be changed to PAID' } });
+        }
+        payload = {
+          invoice_number: dto.invoice_number,
+          purchasing_attachments: dto.purchasing_attachments,
+          ppn_facture_number: dto.ppn_facture_number,
+          paid_total: dto.paid_total,
+          payment_status: PaymentStatusEn.PAID,
+        }
       }
-      await existing.save({ session });
 
-      const edit = await this.editPurchasing(id, dto, session);
+      const edit = await this.editPurchasing(id, payload, session);
       if (!edit || !edit.detail) throw BaseResponse.unexpected({ err: 'purchasingPayment' });
-      const effectivePpnRate = Number(dto.ppn_rate ?? edit.detail.ppn_rate ?? existing.ppn_rate ?? 0);
-      const {
-        expected_ppn_amount,
-        expected_payable,
-        is_ppn_valid,
-      } = this.validatePayment({
-        tax_base: edit.detail.total_purchase_price,
-        ppn_rate: effectivePpnRate,
-        ppn_type: dto.ppn_type,
-        ppn_amount: dto.ppn_amount ?? Types.Decimal128.fromString('0'),
-        payment_realization: dto.payment_realization ?? Types.Decimal128.fromString('0'),
-        shipping_cost: dto.shipping_cost ?? Types.Decimal128.fromString('0'),
-      });
-      const message = `PPn calculation result invalid:\n\nppn type: ${dto.ppn_type}\nppn rate: ${effectivePpnRate}\nppn amount: ${dto.ppn_amount?.toString() ?? ''}\ntax base: ${edit.detail.total_purchase_price.toString()}\nexpected ppn amount (rounded): ${expected_ppn_amount.toString()}\nexpected minimum payment: ${expected_payable.toString()}\n`
-      if (!is_ppn_valid) throw BaseResponse.invalid({ option: { message } })
+      const validation = edit.detail.validation;
+      if (!validation.is_ppn_valid) {
+        const message = `PPn calculation result invalid:\n\nppn type: ${effectivePpnType}\nppn rate: ${effectivePpnRate}\nppn amount: ${effectivePpnAmount?.toString() ?? ''}\ntax base: ${totalPurchasePrice.toString()}\nexpected ppn amount (rounded): ${validation.expected_ppn_amount.toString()}\nexpected minimum payment: ${validation.expected_payable.toString()}\n`;
+        throw BaseResponse.invalid({ option: { message } });
+      }
 
-      const paymentStatus = dto.payment_status ?? this.resolvePaymentStatus(
-        toDecimal(edit.detail.payment_realization),
-        toDecimal(expected_payable),
-      );
+      if (edit.detail.payment_status === PaymentStatusEn.UNPAID || !edit.detail.payment_realization) {
+        return {
+          detail: edit.detail,
+          removedAttachments: edit.removedAttachments,
+        };
+      }
 
-      const updatedPurchase = await this.purchasingModel.findByIdAndUpdate(
-        id,
-        { payment_status: paymentStatus },
-        { session, new: true },
-      );
-      if (!updatedPurchase) throw BaseResponse.unexpected({ err: 'purchasingPayment !updatedPurchase' });
-
-      const refreshedDetail = await this.detailPurchasing(id);
       const hasAccounting = await this.accounting.existsByOrderId(id);
+
       const accountingPayload: Accounting = {
         flow_type: FlowType.OUT,
         order_id: id,
-        order_data: refreshedDetail,
+        order_data: edit.detail,
         order_type: OrderType.PURCHASING,
-        transaction_amount: refreshedDetail.payment_realization ?? Types.Decimal128.fromString('0'),
-        tax_base: refreshedDetail.total_purchase_price,
-        ppn_type: refreshedDetail.ppn_type,
-        ppn_rate: refreshedDetail.ppn_rate,
-        ppn_amount: refreshedDetail.ppn_amount,
-        tax_facture_number: refreshedDetail.ppn_facture_number,
+        transaction_amount: edit.detail.payment_realization,
+        tax_base: edit.detail.total_purchase_price,
+        ppn_type: edit.detail.ppn_type,
+        ppn_rate: edit.detail.ppn_rate,
+        ppn_amount: edit.detail.ppn_amount,
+        tax_facture_number: edit.detail.ppn_facture_number,
         record_date: new Date(),
       }
 
-      if (hasAccounting) {
+      if (!hasAccounting) {
+        await this.accounting.createAccountingItem(accountingPayload, session)
+      } else {
         await this.accounting.editAccountingByOrderId(
           id,
           {
-            transaction_amount: refreshedDetail.payment_realization ?? Types.Decimal128.fromString('0'),
-            tax_base: refreshedDetail.total_purchase_price,
-            ppn_type: refreshedDetail.ppn_type,
-            ppn_rate: refreshedDetail.ppn_rate,
-            ppn_amount: refreshedDetail.ppn_amount,
-            tax_facture_number: refreshedDetail.ppn_facture_number,
-            order_data: refreshedDetail,
+            transaction_amount: edit.detail.payment_realization,
+            tax_base: edit.detail.total_purchase_price,
+            ppn_type: edit.detail.ppn_type,
+            ppn_rate: edit.detail.ppn_rate,
+            ppn_amount: edit.detail.ppn_amount,
+            tax_facture_number: edit.detail.ppn_facture_number,
+            order_data: edit.detail,
             record_date: new Date(),
           },
           session,
         );
-      } else {
-        await this.accounting.createAccountingItem(accountingPayload, session)
       }
 
       return {
-        detail: refreshedDetail,
+        detail: edit.detail,
         removedAttachments: edit.removedAttachments,
       };
     }, sessionIn)
@@ -725,6 +713,18 @@ export class PurchasingService {
         throw BaseResponse.notFound({ err: 'receiveOrder purchase not found' });
       if (purchase.status !== PurchasingEn.PROCESS && purchase.status !== PurchasingEn.RECEIVE)
         throw BaseResponse.forbidden({ err: 'receiveOrder invalid status' });
+      if (purchase.payment_status === PaymentStatusEn.UNPAID) {
+        throw BaseResponse.invalid({ option: { message: 'Payment must be at least PARTIAL before receiving goods' } });
+      }
+      if (
+        purchase.ppn_type === undefined ||
+        purchase.ppn_rate === undefined ||
+        purchase.ppn_amount === undefined ||
+        purchase.payment_realization === undefined ||
+        purchase.shipping_cost === undefined
+      ) {
+        throw BaseResponse.invalid({ option: { message: 'Payment fields must be completed before receiving goods' } });
+      }
 
       // Update value received_qty for each item and manage inventory movement
       const existingItems = await this.purchasingItemModel.find({
@@ -762,19 +762,15 @@ export class PurchasingService {
         const currentQty = inventoryEntry.get(prodKey) ?? 0;
         inventoryEntry.set(prodKey, currentQty + delta);
       }
-      // Calculate Landed Cost components
-      const total_purchase_price = await this.countTotalPurchasePrice(id);
-      const total_items = existingItems.reduce((sum, item) => sum + item.purchase_qty, 0);
-      const total_purchase_price_dec = toDecimal(total_purchase_price || 0);
-      const expected_payable = this.computeExpectedPayable(
-        total_purchase_price_dec,
-        purchase.ppn_type ?? PPnType.NONE,
-        purchase.ppn_rate ?? 0,
-        toDecimal(purchase.shipping_cost || 0),
-      );
+      const totalPurchasePrice = await this.countTotalPurchasePrice(id);
+      const cost_difference = toDecimal(purchase.payment_realization).minus(toDecimal(totalPurchasePrice));
+      const total_items = await this.purchasingItemModel.aggregate([
+        { $match: { purchase_order: id } },
+        { $group: { _id: null, total: { $sum: "$purchase_qty" } } }
+      ]).session(session);
 
-      const additional_cost = expected_payable.minus(total_purchase_price_dec);
-      const additional_cost_per_item = total_items > 0 ? additional_cost.div(total_items) : new Decimal(0);
+      const totalItemQty = Number(total_items[0]?.total ?? 0);
+      const additional_cost_per_item = totalItemQty > 0 ? cost_difference.div(totalItemQty) : new Decimal(0);
 
       const inventoryMovement: (InventoryMovementDto & { source_id: Types.ObjectId })[] = [];
       // Create loops for inventory movement if there are items received
@@ -785,7 +781,8 @@ export class PurchasingService {
             ([product, qty]) => {
               // Retrieve the original purchase price from the existing items list
               const originalItem = existingItems.find(i => i.product.toString() === product);
-              const original_price = originalItem ? toDecimal(originalItem.purchase_price) : new Decimal(0);
+              if (!originalItem) throw BaseResponse.notFound({ err: 'receiveOrder originalItem not found', option: { message: "Purchasing item for inventory movement not found, please check your purchasing list" } });
+              const original_price = toDecimal(originalItem.purchase_price);
 
               // Landed cost = Purchase Price + (Additional Cost / Total Items)
               const landed_cost = original_price.plus(additional_cost_per_item);
