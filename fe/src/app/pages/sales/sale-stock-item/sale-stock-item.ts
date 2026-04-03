@@ -50,6 +50,24 @@ export class SaleStockItem {
       dataType: 'PERCENTAGE'
     },
     {
+      label: 'Net Price',
+      id: 'net_price',
+      extraHeaderClass: 'uppercase-text',
+      dataType: 'CURRENCY'
+    },
+    {
+      label: 'PPn Rate',
+      id: 'ppn_rate',
+      extraHeaderClass: 'uppercase-text',
+      dataType: 'PERCENTAGE'
+    },
+    {
+      label: 'PPn Amount',
+      id: 'ppn_amount',
+      extraHeaderClass: 'uppercase-text',
+      dataType: 'CURRENCY'
+    },
+    {
       label: 'COGS',
       id: 'cogs',
       extraHeaderClass: 'uppercase-text',

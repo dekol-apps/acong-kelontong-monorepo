@@ -34,14 +34,29 @@
                   }
                 </div>
 
-                <!-- Quantity -->
+                <!-- Original Price -->
                 <div class="col-md-6">
-                  <label [attr.for]="'qty-' + i"
-                    class="form-label small fw-bold text-muted text-uppercase mb-1 required">{{ 'Quantity' | translate }}</label>
+                  <label [attr.for]="'orig-price-' + i"
+                    class="form-label small fw-bold text-muted text-uppercase mb-1">{{ 'Asset Value (Average)' | translate }}</label>
                   <div class="input-group">
-                    <span class="input-group-text bg-light border-light-subtle"><i class="bi bi-box-seam"></i></span>
-                    <input type="number" [attr.id]="'qty-' + i" class="form-control bg-white border-light-subtle"
-                      formControlName="item_qty" min="1" [placeholder]="'0'">
+                    <span class="input-group-text bg-light border-light-subtle">Rp</span>
+                    <div class="form-control-plaintext border border-light-subtle rounded-end bg-white text-end fw-semibold px-3 py-2 mb-0">
+                      {{ items.at(i).get('avg_landed_cost')?.value | currency:'IDR':'symbol':'1.2-2' }}
+                    </div>
+                  </div>
+                  <small class="text-muted d-block mt-1">Inventory value from the selected product.</small>
+                </div>
+
+                <!-- Sale Price -->
+                <div class="col-md-6">
+                  <label [attr.for]="'sale-price-' + i"
+                    class="form-label small fw-bold text-muted text-uppercase mb-1 required">{{ 'Sale Price' | translate }}</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-primary-subtle border-primary-subtle text-primary">Rp</span>
+                    <input type="number" [attr.id]="'sale-price-' + i"
+                      class="form-control bg-white border-primary-subtle" formControlName="sale_price" min="0"
+                      step="0.01"
+                      [placeholder]="'0'">
                   </div>
                 </div>
 
@@ -56,29 +71,28 @@
                   </div>
                 </div>
 
-                <!-- Original Price -->
+                <!-- Net Price -->
                 <div class="col-md-6">
-                  <label [attr.for]="'orig-price-' + i"
-                    class="form-label small fw-bold text-muted text-uppercase mb-1 required">{{ 'Asset Value (Average)' | translate }}</label>
+                  <label [attr.for]="'net-price-' + i"
+                    class="form-label small fw-bold text-muted text-uppercase mb-1">{{ 'Net Price' | translate }}</label>
                   <div class="input-group">
-                    <span class="input-group-text bg-light border-light-subtle">Rp</span>
-                    <input readonly type="number" [attr.id]="'orig-price-' + i"
-                      class="form-control bg-white border-light-subtle" formControlName="avg_landed_cost" min="0"
-                      step="0.01"
+                    <span class="input-group-text bg-success-subtle border-success-subtle text-success">Rp</span>
+                    <input readonly type="text" [attr.id]="'net-price-' + i"
+                      class="form-control bg-white border-success-subtle fw-semibold text-success"
+                      [value]="getNetPricePreview(i) | currency:'IDR':'symbol':'1.2-2'"
                       [placeholder]="'0'">
                   </div>
+                  <small class="text-muted d-block mt-1">Preview after discount and PPn {{ defaultPpnRate }}%.</small>
                 </div>
 
-                <!-- Sale Price -->
+                <!-- Quantity -->
                 <div class="col-md-6">
-                  <label [attr.for]="'sale-price-' + i"
-                    class="form-label small fw-bold text-muted text-uppercase mb-1 required">{{ 'Sale Price (After Discount)' | translate }}</label>
+                  <label [attr.for]="'qty-' + i"
+                    class="form-label small fw-bold text-muted text-uppercase mb-1 required">{{ 'Quantity' | translate }}</label>
                   <div class="input-group">
-                    <span class="input-group-text bg-primary-subtle border-primary-subtle text-primary">Rp</span>
-                    <input type="number" [attr.id]="'sale-price-' + i"
-                      class="form-control bg-white border-primary-subtle" formControlName="sale_price" min="0"
-                      step="0.01"
-                      [placeholder]="'0'">
+                    <span class="input-group-text bg-light border-light-subtle"><i class="bi bi-box-seam"></i></span>
+                    <input type="number" [attr.id]="'qty-' + i" class="form-control bg-white border-light-subtle"
+                      formControlName="item_qty" min="1" [placeholder]="'0'">
                   </div>
                 </div>
               </div>

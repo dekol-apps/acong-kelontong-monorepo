@@ -31,6 +31,9 @@ export class SaleService extends BaseService {
               barcode: item.barcode,
               sale_price: item.sale_price,
               discount_percent: item.discount_percent,
+              ppn_rate: item.ppn_rate,
+              ppn_amount: item.ppn_amount,
+              net_price: item.net_price,
               item_qty: 0,
               total_qty: 0
             };

@@ -184,7 +184,7 @@ export class SaleService {
     if (!stockDetail) {
       throw BaseResponse.notFound({ option: { message: 'Stock detail not found' }, err: 'getStockDetail !stockDetail' });
     }
-    return stockDetail
+    return this.mapSaleItemData(stockDetail);
   }
 
   /**

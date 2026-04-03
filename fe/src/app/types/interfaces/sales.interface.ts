@@ -46,6 +46,9 @@ export interface ISaleStockSummary {
   barcode: string;
   sale_price: string;
   discount_percent: number;
+  ppn_rate?: number;
+  ppn_amount?: string;
+  net_price?: string;
   item_qty: number;
   total_qty: number;
 }

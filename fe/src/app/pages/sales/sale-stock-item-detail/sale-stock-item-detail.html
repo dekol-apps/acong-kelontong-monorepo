@@ -30,11 +30,23 @@
           </tr>
           <tr>
             <th scope="row" class="fw-bold p-1 col-3 align-top">{{ 'Discount' | translate }}</th>
-            <td class="align-top">{{ (detail?.discount_percent ? (detail?.discount_percent+'%') : '-') }}</td>
+            <td class="align-top">{{ ((detail?.discount_percent ?? 0) + '%') }}</td>
           </tr>
           <tr>
             <th scope="row" class="fw-bold p-1 col-3 align-top">{{ 'Discount Amount' | translate }}</th>
             <td class="align-top">{{ (detail?.discount_amount | rupiah) || '-' }}</td>
+          </tr>
+          <tr>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">{{ 'Net Price' | translate }}</th>
+            <td class="align-top">{{ (detail?.net_price | rupiah) || '-' }}</td>
+          </tr>
+          <tr>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">{{ 'PPn Rate' | translate }}</th>
+            <td class="align-top">{{ ((detail?.ppn_rate ?? 0) + '%') }}</td>
+          </tr>
+          <tr>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">{{ 'PPn Amount' | translate }}</th>
+            <td class="align-top">{{ (detail?.ppn_amount | rupiah) || '-' }}</td>
           </tr>
           <tr>
             <th scope="row" class="fw-bold p-1 col-3 align-top">{{ 'COGS' | translate }}</th>
@@ -50,6 +62,9 @@
           </tr>
         </tbody>
       </table>
+    </div>
+    <div class="alert alert-info mb-0">
+      {{ 'Net Price = Sale Price - Discount. PPn is calculated separately using the current PPn rate.' | translate }}
     </div>
   </div>
   <div class="card-footer d-flex gap-2">

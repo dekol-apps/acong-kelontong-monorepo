@@ -12,6 +12,8 @@ import { ISelectValue } from '../../../types/interfaces/common.interface';
 import { InventoryService } from '../../asset/services/inventory-service/inventory.service';
 import { IInventorySummary } from '../../../types/interfaces/inventory.interface';
 import { TranslateModule } from '@ngx-translate/core';
+import { defaultPpnRate } from '../../../types/constants/common.constants';
+import { roundMoney } from '../../../utils/helper';
 
 @Component({
   selector: 'app-sale-stock-movement-form',
@@ -28,6 +30,7 @@ import { TranslateModule } from '@ngx-translate/core';
   styleUrl: './sale-stock-movement-form.scss',
 })
 export class SaleStockMovementForm implements OnInit {
+  readonly defaultPpnRate = defaultPpnRate;
   form: FormGroup;
   products: IInventorySummary[] = [];
   filteredProducts: ISelectValue[] = [];
@@ -52,6 +55,18 @@ export class SaleStockMovementForm implements OnInit {
 
   get items(): FormArray {
     return this.form.get('items') as FormArray;
+  }
+
+  getNetPricePreview(index: number): number {
+    const item = this.items.at(index);
+    const salePrice = Number(item.get('sale_price')?.value ?? 0);
+    const discountPercent = Number(item.get('discount_percent')?.value ?? 0);
+
+    const discountedPrice = roundMoney(salePrice * (1 - discountPercent / 100));
+    const base = roundMoney(discountedPrice / (1 + this.defaultPpnRate / 100));
+    const ppn = roundMoney(discountedPrice - base);
+
+    return roundMoney(base + ppn);
   }
 
   addItem(): void {
