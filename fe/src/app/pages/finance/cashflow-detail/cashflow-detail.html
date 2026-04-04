@@ -160,8 +160,22 @@
 
     <!-- Order Data (if exists) -->
     @if (detail?.order_data) {
-    @if (detail?.flow_type === FlowType.IN && detail?.order_type === OrderType.SALE) {
-    <app-sales-history-detail [custom]="true" [saleDetail]="detail?.order_data"></app-sales-history-detail>
+    @if (getOrderDetailPath(); as orderDetailPath) {
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white border-0">
+        <h5 class="card-title fw-bold mb-0">
+          <i class="bi bi-box-arrow-up-right me-2 text-primary"></i>{{ getOrderDetailTitle() | translate }}
+        </h5>
+      </div>
+      <div class="card-body bg-light m-4">
+        <p class="mb-3 text-muted">
+          {{ 'Open the original module detail for complete transaction information.' | translate }}
+        </p>
+        <a [routerLink]="orderDetailPath" class="btn btn-primary">
+          <i class="bi bi-arrow-right-circle me-1"></i>{{ 'Open Detail' | translate }}
+        </a>
+      </div>
+    </div>
     } @else {
     <div class="card border-0 shadow-sm mb-4">
       <div class="card-header bg-white border-0">

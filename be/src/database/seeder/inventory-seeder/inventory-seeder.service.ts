@@ -38,7 +38,7 @@ export class InventorySeederService {
 
             await this.inventoryMovementModel.create({
                 movement_type: FlowType.IN,
-                order_type: OrderType.ADJUSTMENT,
+                order_type: OrderType.DEPOSIT,
                 items: [{
                     ...inventoryItem.toObject(),
                     _id: inventoryItem._id,

@@ -4,12 +4,11 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { AccountingService } from '../../../services/accounting/accounting.service';
 import { IAccounting } from '../../../types/interfaces/finance.interface';
 import { FlowType, OrderType } from '../../../types/enums/common.enum';
-import { SalesHistoryDetail } from '../../sales/sales-history-detail/sales-history-detail';
 import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-cashflow-detail',
-  imports: [CommonModule, RouterModule, SalesHistoryDetail, TranslateModule],
+  imports: [CommonModule, RouterModule, TranslateModule],
   templateUrl: './cashflow-detail.html',
   styleUrl: './cashflow-detail.scss',
 })
@@ -67,6 +66,33 @@ export class CashflowDetail implements OnInit {
       PRODUCTION: 'dark',
     };
     return orderType ? (map[orderType] || 'light') : 'light';
+  }
+
+  getOrderDetailPath(): string | null {
+    if (!this.detail?.order_id) {
+      return null;
+    }
+
+    switch (this.detail.order_type) {
+      case OrderType.SALE:
+        return `/sales-history/${this.detail.order_id}`;
+      case OrderType.PURCHASING:
+        return `/purchase-order/detail/${this.detail.order_id}`;
+      case OrderType.EXPENSE:
+        return `/expenses/detail/${this.detail.order_id}`;
+      case OrderType.PRODUCTION:
+        return `/production/detail/${this.detail.order_id}`;
+      case OrderType.DEPOSIT:
+      case OrderType.WITHDRAWAL:
+        return `/inventory-movement/${this.detail.order_id}`;
+      default:
+        return null;
+    }
+  }
+
+  getOrderDetailTitle(): string {
+    const orderType = this.detail?.order_type || 'Order';
+    return `${orderType} Detail`;
   }
 
   goBack() {

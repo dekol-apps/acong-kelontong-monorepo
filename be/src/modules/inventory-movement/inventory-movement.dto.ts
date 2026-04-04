@@ -77,7 +77,7 @@ export class ManualInventoryMovementDTO {
   movement_type: FlowType;
 
   @IsEnum(OrderType, {
-    message: 'order_type invalid enum',
+    message: 'invalid enum, order_type must be one of: ' + Object.values(OrderType).join(', '),
   })
   order_type: OrderType;
 
