@@ -1,10 +1,14 @@
-import { Controller, Post, Body, Res, Put, Param, Get, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Res, Put, Param, Get, Delete, UseGuards } from '@nestjs/common';
+import { Permission } from 'src/global/permission.decoratior';
+import { UAuthGuard } from '../auth/auth.guard';
 import { Types } from 'mongoose';
 import { BaseResponse } from 'src/utils/base-response';
 import { PurchasingItemService } from './purchasing-item.service';
 import type { Response } from 'express';
 import { PurchasingItemDto } from './purchasing-item.dto';
+import { toDecimal, toDecimal128 } from 'src/utils/helper';
 
+@UseGuards(UAuthGuard)
 @Controller('purchasing-item')
 export class PurchasingItemController {
 
@@ -12,6 +16,7 @@ export class PurchasingItemController {
     private readonly service: PurchasingItemService,
   ) { }
 
+  @Permission(['purchasing.create'])
   @Post('')
   async createPurchaseItem(
     @Body() body: PurchasingItemDto,
@@ -25,6 +30,7 @@ export class PurchasingItemController {
     }
   }
 
+  @Permission(['purchasing.edit'])
   @Put(':purchase_item_id')
   async editPurchaseItem(
     @Param('purchase_item_id') purchaseItemId: Types.ObjectId,
@@ -39,6 +45,7 @@ export class PurchasingItemController {
     }
   }
 
+  @Permission(['purchasing.view'])
   @Get(':purchase_item_id')
   async detailPurchaseItem(
     @Param('purchase_item_id') purchaseItemId: Types.ObjectId,
@@ -52,7 +59,7 @@ export class PurchasingItemController {
     }
   }
 
-
+  @Permission(['purchasing.delete'])
   @Delete(':purchase_item_id')
   async deletePurchaseItem(
     @Param('purchase_item_id') purchaseItemId: Types.ObjectId,
@@ -60,7 +67,7 @@ export class PurchasingItemController {
   ) {
     try {
       const purchaseItem = await this.service.deletePurchasingItem(purchaseItemId);
-      return BaseResponse.success({ res, option: { message: "Success get detail purchaseItem", detail: purchaseItem } });
+      return BaseResponse.success({ res, option: { message: "Success delete purchaseItem", detail: purchaseItem } });
     } catch (err) {
       return BaseResponse.error({ res, err });
     }

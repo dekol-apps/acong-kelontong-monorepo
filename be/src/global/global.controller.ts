@@ -2,7 +2,7 @@ import { Controller, Get, Res, UseGuards } from '@nestjs/common';
 import { GlobalService } from './global.service';
 import { BaseResponse } from 'src/utils/base-response';
 import type { Response } from 'express';
-import { AuthGuard } from 'src/modules/auth/auth.guard';
+import { UAuthGuard } from 'src/modules/auth/auth.guard';
 
 @Controller('global')
 export class GlobalController {
@@ -11,7 +11,7 @@ export class GlobalController {
     private readonly service: GlobalService,
   ) { }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(UAuthGuard)
   @Get('permissions')
   listPermission(
     @Res() res: Response,

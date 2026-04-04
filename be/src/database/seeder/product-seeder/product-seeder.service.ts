@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Brand, BrandDocument } from 'src/modules/brand/brand.schema';
 import { Product, ProductDocument } from 'src/modules/product/product.schema';
+import { toSku } from 'src/utils/helper';
 
 @Injectable()
 export class ProductSeederService {
@@ -68,12 +69,14 @@ export class ProductSeederService {
 
       for (const product of item.products) {
         let productVal;
-        const existingProduct = await this.productModel.findOne({ product_name: product.product_name });
+        const product_sku = toSku(`${product.product_name}_${brandVal.brand_name}_${product.unit_of_measure}`);
+        const existingProduct = await this.productModel.findOne({ product_sku });
         if (existingProduct) {
           productVal = existingProduct
         } else {
           const newProduct = await this.productModel.create({
             ...product,
+            product_sku,
             barcode: new Date().getTime().toString(),
             brand: brandVal._id
           })

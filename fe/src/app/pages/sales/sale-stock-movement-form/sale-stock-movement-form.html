@@ -1,0 +1,123 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" appFormValidation>
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">{{ 'Add Sale Stock' | translate }}</h3>
+    </div>
+    <div class="card-body">
+      <div formArrayName="items" class="row g-4">
+        @for (item of items.controls; track $index; let i = $index) {
+        <div class="col-12 col-xl-6">
+          <div class="card h-100 shadow-sm border border-light-subtle position-relative overflow-hidden">
+            <div class="card-header border-bottom-0">
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="badge bg-primary-subtle text-primary rounded-pill px-3">{{ 'Item' | translate }} #{{ i + 1 }}</span>
+                <button type="button" class="btn btn-outline-danger border-0" (click)="removeItem(i)"
+                  [disabled]="items.length <= 1" [title]="'Remove item' | translate">
+                  <i class="bi bi-trash3-fill fs-5"></i>
+                </button>
+              </div>
+            </div>
+            <div class="card-body" [formGroupName]="i">
+              <div class="row g-3">
+                <!-- Product Selection -->
+                <div class="col-12">
+                  <label [attr.for]="'productDropdown-' + i"
+                    class="form-label small fw-bold text-muted text-uppercase mb-1 required">{{ 'Product' | translate }}</label>
+                  <app-dropdown-search [items]="filteredProducts" [value]="items.at(i).get('product_name')?.value"
+                    [placeholder]="'COMMON_SELECT_PRODUCT' | translate" [searchPlaceholder]="'COMMON_SEARCH_PRODUCT' | translate" [isLoading]="isLoading"
+                    [invalid]="items.at(i).get('product')?.invalid && items.at(i).get('product')?.touched"
+                    [searchLabel]="'product_name'" (onSelect)="selectProduct(i, $event)"
+                    (onSearch)="getProducts($event)"></app-dropdown-search>
+                  @if (items.at(i).get('product')?.invalid && items.at(i).get('product')?.touched)
+                  {
+                  <small class="text-danger">{{ 'Product is required' | translate }}</small>
+                  }
+                </div>
+
+                <!-- Original Price -->
+                <div class="col-md-6">
+                  <label [attr.for]="'orig-price-' + i"
+                    class="form-label small fw-bold text-muted text-uppercase mb-1">{{ 'Asset Value (Average)' | translate }}</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-light border-light-subtle">Rp</span>
+                    <div class="form-control-plaintext border border-light-subtle rounded-end bg-white text-end fw-semibold px-3 py-2 mb-0">
+                      {{ items.at(i).get('avg_landed_cost')?.value | currency:'IDR':'symbol':'1.2-2' }}
+                    </div>
+                  </div>
+                  <small class="text-muted d-block mt-1">Inventory value from the selected product.</small>
+                </div>
+
+                <!-- Sale Price -->
+                <div class="col-md-6">
+                  <label [attr.for]="'sale-price-' + i"
+                    class="form-label small fw-bold text-muted text-uppercase mb-1 required">{{ 'Sale Price' | translate }}</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-primary-subtle border-primary-subtle text-primary">Rp</span>
+                    <input type="number" [attr.id]="'sale-price-' + i"
+                      class="form-control bg-white border-primary-subtle" formControlName="sale_price" min="0"
+                      step="0.01"
+                      [placeholder]="'0'">
+                  </div>
+                </div>
+
+                <!-- Discount -->
+                <div class="col-md-6">
+                  <label [attr.for]="'discount-' + i"
+                    class="form-label small fw-bold text-muted text-uppercase mb-1">{{ 'Discount (%)' | translate }}</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-light border-light-subtle"><i class="bi bi-percent"></i></span>
+                    <input type="number" [attr.id]="'discount-' + i" class="form-control bg-white border-light-subtle"
+                      formControlName="discount_percent" min="0" max="100" [placeholder]="'0'">
+                  </div>
+                </div>
+
+                <!-- Net Price -->
+                <div class="col-md-6">
+                  <label [attr.for]="'net-price-' + i"
+                    class="form-label small fw-bold text-muted text-uppercase mb-1">{{ 'Net Price' | translate }}</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-success-subtle border-success-subtle text-success">Rp</span>
+                    <input readonly type="text" [attr.id]="'net-price-' + i"
+                      class="form-control bg-white border-success-subtle fw-semibold text-success"
+                      [value]="getNetPricePreview(i) | currency:'IDR':'symbol':'1.2-2'"
+                      [placeholder]="'0'">
+                  </div>
+                  <small class="text-muted d-block mt-1">Preview after discount and PPn {{ defaultPpnRate }}%.</small>
+                </div>
+
+                <!-- Quantity -->
+                <div class="col-md-6">
+                  <label [attr.for]="'qty-' + i"
+                    class="form-label small fw-bold text-muted text-uppercase mb-1 required">{{ 'Quantity' | translate }}</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-light border-light-subtle"><i class="bi bi-box-seam"></i></span>
+                    <input type="number" [attr.id]="'qty-' + i" class="form-control bg-white border-light-subtle"
+                      formControlName="item_qty" min="1" [placeholder]="'0'">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        }
+        <div class="col-12 col-xl-6">
+          <div
+            class="card h-100 shadow-sm border border-light-subtle d-flex align-items-center justify-content-center p-5"
+            style="min-height: 300px;">
+            <button type="button" class="btn btn-outline-primary btn-xl rounded-pill px-3" (click)="addItem()">
+              <i class="bi bi-plus-lg"></i> {{ 'COMMON_ADD_ITEM' | translate }}
+            </button>
+          </div>
+        </div>
+      </div>
+      @if (errorReq) {
+      <div class="border border-danger rounded text-danger p-4 w-100 mt-5" style="white-space: pre-wrap;"
+        [innerHTML]="errorReq"></div>
+      }
+    </div>
+    <div class="card-footer d-flex gap-2">
+      <button type="button" class="btn btn-secondary" (click)="cancel()">{{ 'COMMON_CANCEL' | translate }}</button>
+      <button type="submit" class="btn btn-primary" [disabled]="form.invalid || isLoading">{{ 'Update Sale Stock' | translate }}</button>
+    </div>
+  </div>
+</form>

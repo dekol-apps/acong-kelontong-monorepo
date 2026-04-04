@@ -1,0 +1,26 @@
+<div class="card-header mb-4">
+  <div class="d-flex flex-row justify-content-between gap-4">
+    <h3 class="card-title">History Cash In</h3>
+  </div>
+</div>
+<app-generic-table ngSkipHydration [columns]="columns" [data]="listAccounting" [usePagination]="true" [useSearch]="true"
+  [total]="pagination.total" (OnDataRefresh)="getList($event)" [isLoading]="isLoading">
+
+  <!-- amount column -->
+  <div appTableColumn customColumnId="amount">
+    <ng-template let-item>
+      <span class="text-success fw-semibold">
+        {{ getAmount(item) | currency:'IDR':'symbol':'1.2-2' }}
+      </span>
+    </ng-template>
+  </div>
+
+  <!-- action column -->
+  <div appTableColumn customColumnId="action">
+    <ng-template let-item>
+      <a [routerLink]="['/cashflow', item._id]" class="pointer btn btn-secondary">
+        <i class="fa-solid fa-eye"></i>
+      </a>
+    </ng-template>
+  </div>
+</app-generic-table>

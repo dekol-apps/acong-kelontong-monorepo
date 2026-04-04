@@ -1,0 +1,50 @@
+<div class="card">
+  <div class="card-header mb-4">
+    <div class="d-flex flex-row justify-content-between gap-4">
+      <h3 class="card-title">{{ titlePrefix }} ({{detail?.product_name}} - {{detail?.product_sku || '-'}})</h3>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="d-flex flex-row flex-wrap justify-content-between gap-2 mb-5">
+      <table class="table">
+        <tbody>
+          <tr>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">{{ 'Brand Name' | translate }}</th>
+            <td class="align-top">{{ detail?.product?.brand?.brand_name || '-' }}</td>
+          </tr>
+          <tr>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">{{ 'Product SKU' | translate }}</th>
+            <td class="align-top">{{ detail?.product_sku || '-' }}</td>
+          </tr>
+          <tr>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">{{ 'Unit Of Measure' | translate }}</th>
+            <td class="align-top">{{ detail?.product?.unit_of_measure || '-' }}</td>
+          </tr>
+          <tr>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">{{ 'Barcode' | translate }}</th>
+            <td class="align-top">{{ detail?.product?.barcode || '-' }}</td>
+          </tr>
+          <tr>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">{{ 'Receive Date' | translate }}</th>
+            <td class="align-top">{{ (detail?.receive_date | date: DATE_FORMAT) || '-' }}</td>
+          </tr>
+          <tr>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">{{ 'Landed Cost' | translate }}</th>
+            <td class="align-top">{{ (detail?.landed_cost | rupiah) || '-' }}</td>
+          </tr>
+          <tr>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">{{ 'Original Price' | translate }}</th>
+            <td class="align-top">{{ (detail?.original_price | rupiah) || '-' }}</td>
+          </tr>
+          <tr>
+            <th scope="row" class="fw-bold p-1 col-3 align-top">{{ 'Description' | translate }}</th>
+            <td class="align-top">{{ detail?.product?.product_description || '-' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card-footer d-flex gap-2">
+    <button class="btn btn-secondary" type="button" (click)="back()">{{ 'Back' | translate }}</button>
+  </div>
+</div>

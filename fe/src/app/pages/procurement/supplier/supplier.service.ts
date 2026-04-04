@@ -26,13 +26,8 @@ export class SupplierService extends BaseService {
           list: res?.list
         };
         return val;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot get list supplier');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
   createSupplier(
@@ -41,13 +36,8 @@ export class SupplierService extends BaseService {
     return this.postRequest({ url: Endpoint.SUPPLIER, body }).pipe(
       map((res: IResDetail<ISupplier>) => {
         return res.detail;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot create supplier');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
   editSupplier(
@@ -57,39 +47,24 @@ export class SupplierService extends BaseService {
     return this.putRequest({ url: Endpoint.SUPPLIER_ID(supplier_id), body }).pipe(
       map((res: IResDetail<ISupplier>) => {
         return res.detail;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot edit supplier');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
   getSupplierDetail(supplier_id: string): Observable<ISupplier> {
     return this.getRequest({ url: Endpoint.SUPPLIER_ID(supplier_id) }).pipe(
       map((res: IResDetail<ISupplier>) => {
         return res.detail;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot get supplier detail');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
   deleteSupplier(supplier_id: string): Observable<ISupplier> {
     return this.deleteRequest({ url: Endpoint.SUPPLIER_ID(supplier_id) }).pipe(
       map((res: IResDetail<ISupplier>) => {
         return res.detail;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot delete supplier');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
 }

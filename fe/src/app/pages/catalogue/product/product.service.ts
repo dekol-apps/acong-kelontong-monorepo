@@ -26,70 +26,45 @@ export class ProductService extends BaseService {
           list: res?.list
         };
         return val;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot get list product');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
   createProduct(
     body: IProduct
-  ): Observable<IProduct> {
+  ): Observable<IResDetail<IProduct>> {
     return this.postRequest({ url: Endpoint.PRODUCT, body }).pipe(
       map((res: IResDetail<IProduct>) => {
-        return res.detail;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot invite product');
-        throw new Error(err);
+        return res;
       })
-    ) as any;
+    );
   }
 
   editProduct(
     product_id: string,
     body: { role: string }
-  ): Observable<IProduct> {
+  ): Observable<IResDetail<IProduct>> {
     return this.putRequest({ url: Endpoint.PRODUCT_ID(product_id), body }).pipe(
       map((res: IResDetail<IProduct>) => {
-        return res.detail;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot edit product');
-        throw new Error(err);
+        return res;
       })
-    ) as any;
+    );
   }
 
-  getProductDetail(product_id: string): Observable<IProduct> {
+  getProductDetail(product_id: string): Observable<IResDetail<IProduct>> {
     return this.getRequest({ url: Endpoint.PRODUCT_ID(product_id) }).pipe(
       map((res: IResDetail<IProduct>) => {
-        return res.detail;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot get product detail');
-        throw new Error(err);
+        return res;
       })
-    ) as any;
+    );
   }
 
   deleteProduct(product_id: string): Observable<IProduct> {
     return this.deleteRequest({ url: Endpoint.PRODUCT_ID(product_id) }).pipe(
       map((res: IResDetail<IProduct>) => {
         return res.detail;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot delete product');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
 }

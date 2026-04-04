@@ -1,9 +1,10 @@
 import { Component, TemplateRef, ViewChild, AfterViewInit, Output, EventEmitter, Input } from '@angular/core';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-confirm-modal',
-  imports: [],
+  imports: [TranslateModule],
   templateUrl: './confirm-modal.html',
   styleUrl: './confirm-modal.scss'
 })

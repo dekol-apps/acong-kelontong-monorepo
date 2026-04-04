@@ -7,10 +7,12 @@ import { ProductService } from '../product.service';
 import { IBrand } from '../../../../types/interfaces/catalogue.interface';
 import { BrandService } from '../../brand/brand-service';
 import { TUOM, UnitOfMeasure } from '../../../../types/constants/common.constants';
+import { AutoWildcard } from '../../../../shared/directives/auto-wildcard/auto-wildcard';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-product-form',
-  imports: [ReactiveFormsModule, FormValidation],
+  imports: [ReactiveFormsModule, FormValidation, AutoWildcard, TranslateModule],
   templateUrl: './product-form.html',
   styleUrl: './product-form.scss'
 })
@@ -20,14 +22,14 @@ export class ProductForm implements OnInit, AfterViewInit {
   @Output() close: EventEmitter<boolean> = new EventEmitter<boolean>()
 
   brands: IBrand[] = [];
-  uoms = UnitOfMeasure;
+  uoms: TUOM[] = Object.values(UnitOfMeasure);
   isLoading: boolean = false;
 
   form: FormGroup = new FormGroup({
     product_name: new FormControl(null, [Validators.required]),
     product_description: new FormControl(null),
     brand: new FormControl(null, [Validators.required]),
-    unit_of_measure: new FormControl(null), // value is string TUOM
+    unit_of_measure: new FormControl(null, [Validators.required]), // value is string TUOM
     barcode: new FormControl(null),
   });
 
@@ -52,7 +54,7 @@ export class ProductForm implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     if (this.id) {
       this.productService.getProductDetail(this.id).subscribe((res) => {
-        const { product_name, product_description, unit_of_measure, barcode, brand } = res
+        const { product_name, product_description, unit_of_measure, barcode, brand } = res.detail
         this.form.patchValue({
           product_name,
           product_description,
@@ -68,10 +70,11 @@ export class ProductForm implements OnInit, AfterViewInit {
   submit() {
     if (this.form.invalid) return this.alert.error('Please check your inputs');
     const body = this.form.value;
+    console.log({ body })
     let serviceArgs = this.productService.createProduct(body);
     if (this.type === 'edit' && this.id) serviceArgs = this.productService.editProduct(this.id, body);
     serviceArgs.subscribe((res) => {
-      this.alert.success(`Success ${this.type == 'edit' ? 'edit' : 'invite'} product!`);
+      this.alert.success(res.message ?? `Success ${this.type == 'edit' ? 'edit' : 'create'} product!`);
       this.close.emit(true);
     })
   }

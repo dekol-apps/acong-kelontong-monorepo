@@ -47,13 +47,8 @@ export class UserService extends BaseService {
           }) as IUser[],
         };
         return val;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot get list user');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
   inviteUser(
@@ -62,26 +57,16 @@ export class UserService extends BaseService {
     return this.postRequest({ url: Endpoint.USER, body }).pipe(
       map((res: IResDetail<IUser>) => {
         return res.detail;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot invite user');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
   resendInvitationEmail(user_id: string): Observable<IUser> {
     return this.postRequest({ url: Endpoint.USER_ID_REINVITE(user_id) }).pipe(
       map((res: IResDetail<IUser>) => {
         return res.detail;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot invite user');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
   editUserRole(
@@ -91,39 +76,24 @@ export class UserService extends BaseService {
     return this.putRequest({ url: Endpoint.USER_ID_ROLE(user_id), body }).pipe(
       map((res: IResDetail<IUser>) => {
         return res.detail;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot edit user');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
   getUserDetail(user_id: string): Observable<IUser> {
     return this.getRequest({ url: Endpoint.USER_ID(user_id) }).pipe(
       map((res: IResDetail<IUser>) => {
         return res.detail;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot get user detail');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
   deleteUser(user_id: string): Observable<IUser> {
     return this.deleteRequest({ url: Endpoint.USER_ID(user_id) }).pipe(
       map((res: IResDetail<IUser>) => {
         return res.detail;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot delete user');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
   verifyUser(body: { ticket: string, new_password }): Observable<IUser> {

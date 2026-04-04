@@ -2,7 +2,7 @@
     @for(alert of alerts; track alert.alertId) {
     <ngb-alert class="ngb-alert-item" [animation]="isBrowser" [type]="alert.type" (close)="closeAlert(alert)">
         <div class="d-flex flex-row align-items-center justify-content-start gap-15px">
-            <div [innerHTML]="alert.message"></div>
+            <div style="white-space: pre-wrap;" [innerHTML]="alert.message"></div>
         </div>
     </ngb-alert>
     }

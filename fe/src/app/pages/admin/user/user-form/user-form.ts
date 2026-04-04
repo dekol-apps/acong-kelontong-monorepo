@@ -4,12 +4,14 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { IRole } from '../../../../types/interfaces/user.interface';
 import { FormValidation } from '../../../../shared/directives/form-validation/form-validation';
 import { AlertService } from '../../../../shared/components/alert/alert-service';
+import { TranslateModule } from '@ngx-translate/core';
 
 type formType = 'new' | 'edit' | 'view';
 
 @Component({
   selector: 'app-user-form',
-  imports: [ReactiveFormsModule, FormValidation],
+  imports: [ReactiveFormsModule, FormValidation, TranslateModule],
+  standalone: true,
   templateUrl: './user-form.html',
   styleUrl: './user-form.scss',
 })

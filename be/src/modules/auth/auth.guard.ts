@@ -2,10 +2,10 @@ import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { GlobalVar, ITokenPayload } from 'src/types/interfaces';
 import { BaseResponse } from 'src/utils/base-response';
-import { errCodes, modules } from 'src/types/constants';
+import { errCodes } from 'src/types/constants';
 
 @Injectable()
-export class AuthGuard implements CanActivate {
+export class UAuthGuard implements CanActivate {
   constructor(private readonly authService: AuthService) { }
 
   canActivate(context: ExecutionContext): boolean {

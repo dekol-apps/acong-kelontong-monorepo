@@ -1,4 +1,7 @@
 <main class="register-page bg-body-secondary">
+    <div class="position-absolute top-0 end-0 p-3">
+        <app-language-toggle></app-language-toggle>
+    </div>
     <div class="register-box">
         <!-- /.register-logo -->
         <div class="card card-outline card-primary">
@@ -9,26 +12,26 @@
                 </a>
             </div>
             <div class="card-body register-card-body">
-                <p class="register-box-msg">Register a new membership</p>
+                <p class="register-box-msg">{{ 'layout.auth.registerNewMembership' | translate }}</p>
                 <form action="../index3.html" method="post">
                     <div class="input-group mb-1">
                         <div class="form-floating">
                             <input id="registerFullName" type="text" class="form-control" placeholder="" />
-                            <label for="registerFullName">Full Name</label>
+                            <label for="registerFullName">{{ 'layout.auth.fullName' | translate }}</label>
                         </div>
                         <div class="input-group-text"><span class="bi bi-person"></span></div>
                     </div>
                     <div class="input-group mb-1">
                         <div class="form-floating">
                             <input id="registerEmail" type="email" class="form-control" placeholder="" />
-                            <label for="registerEmail">Email</label>
+                            <label for="registerEmail">{{ 'layout.auth.email' | translate }}</label>
                         </div>
                         <div class="input-group-text"><span class="bi bi-envelope"></span></div>
                     </div>
                     <div class="input-group mb-1">
                         <div class="form-floating">
                             <input id="registerPassword" type="password" class="form-control" placeholder="" />
-                            <label for="registerPassword">Password</label>
+                            <label for="registerPassword">{{ 'layout.auth.password' | translate }}</label>
                         </div>
                         <div class="input-group-text"><span class="bi bi-lock-fill"></span></div>
                     </div>
@@ -45,7 +48,7 @@
                         <!-- /.col -->
                         <div class="col-4">
                             <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-primary">Register</button>
+                                <button type="submit" class="btn btn-primary">{{ 'layout.auth.register' | translate }}</button>
                             </div>
                         </div>
                         <!-- /.col -->
@@ -63,7 +66,7 @@
                 </div> -->
                 <!-- /.social-auth-links -->
                 <p class="mb-0">
-                    <a href="/login" class="link-primary text-center"> I already have a membership </a>
+                    <a href="/login" class="link-primary text-center">{{ 'layout.auth.haveMembership' | translate }}</a>
                 </p>
             </div>
             <!-- /.register-card-body -->

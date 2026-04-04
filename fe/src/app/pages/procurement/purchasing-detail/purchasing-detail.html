@@ -1,34 +1,96 @@
 <div class="d-flex flex-row flex-wrap justify-content-between gap-2 mb-5">
-  <table>
+  <table class="table">
+    <thead>
+      <tr>
+        <th class="fw-bold p-1 col-3 align-top">{{ 'Field' | translate }}</th>
+        <th class="fw-bold p-1 align-top">{{ 'Value' | translate }}</th>
+      </tr>
+    </thead>
     <tbody>
       <tr>
-        <td class="fw-bold p-1 col-3 align-top">Supplier</td>
-        <td class="align-top">{{purchase?.supplier_name || '-'}}</td>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'Status' | translate }}</td>
+        <td class="align-top">{{purchase?.status || '-'}}</td>
       </tr>
       <tr>
-        <td class="fw-bold p-1 col-3 align-top">Request Date</td>
-        <td class="align-top">{{(purchase?.createdAt | date: DATE_FORMAT) || '-'}}</td>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'Payment Status' | translate }}</td>
+        <td class="align-top">{{purchase?.payment_status || '-'}}</td>
       </tr>
+      @if (purchase?.status === PurchasingEn.REJECT) {
       <tr>
-        <td class="fw-bold p-1 col-3 align-top">Due Date</td>
-        <td class="align-top">{{(purchase?.due_date | date: DATE_FORMAT) || '-'}}</td>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'Reject Notes' | translate }}</td>
+        <td class="align-top">{{purchase?.reject_notes || '-'}}</td>
       </tr>
+      }
       <tr>
-        <td class="fw-bold p-1 col-3 align-top">Received Date</td>
-        <td class="align-top">{{(purchase?.received_at | date: DATE_FORMAT) || '-'}}</td>
-      </tr>
-      <tr>
-        <td class="fw-bold p-1 col-3 align-top">Total Price</td>
-        <td class="align-top">{{(purchase?.total_purchase_price | currency: CURRENCY_FORMAT) || '-'}}</td>
-      </tr>
-      <tr>
-        <td class="fw-bold p-1 col-3 align-top">Invoice Number</td>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'Invoice Number' | translate }}</td>
         <td class="align-top">{{purchase?.invoice_number || '-'}}</td>
       </tr>
       <tr>
-        <td class="fw-bold p-1 col-3 align-top">Invoice Photo</td>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'Supplier' | translate }}</td>
+        <td class="align-top">{{purchase?.supplier_name || '-'}}</td>
+      </tr>
+      <tr>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'Request Date' | translate }}</td>
+        <td class="align-top">{{(purchase?.createdAt | date: DATE_FORMAT) || '-'}}</td>
+      </tr>
+      <tr>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'Due Date' | translate }}</td>
+        <td class="align-top">{{(purchase?.due_date | date: DATE_FORMAT) || '-'}}</td>
+      </tr>
+      <tr>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'Completed Date' | translate }}</td>
+        <td class="align-top">{{(purchase?.completed_date | date: DATE_FORMAT) || '-'}}</td>
+      </tr>
+      <tr>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'PPn Type' | translate }}</td>
+        <td class="align-top">{{(purchase?.ppn_type) || '-'}}</td>
+      </tr>
+      <tr>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'PPn Rate' | translate }}</td>
+        <td class="align-top">{{(purchase?.ppn_rate) || '-'}}</td>
+      </tr>
+      <tr>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'PPn Amount' | translate }}</td>
+        <td class="align-top">{{(purchase?.ppn_amount | rupiah) || '-'}}</td>
+      </tr>
+      <tr>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'PPN Facture Number' | translate }}</td>
+        <td class="align-top">{{purchase?.ppn_facture_number || '-'}}</td>
+      </tr>
+      <tr>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'Shipping Cost' | translate }}</td>
+        <td class="align-top">{{(purchase?.shipping_cost | rupiah) || '-'}}</td>
+      </tr>
+      <tr>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'Total Price' | translate }}</td>
+        <td class="align-top">{{(purchase?.total_purchase_price | rupiah) || '-'}}
+        </td>
+      </tr>
+      <tr>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'Predicted Additional Cost' | translate }}</td>
+        <td class="align-top">{{(purchase?.predicted_additional_cost | rupiah) || '-'}}</td>
+      </tr>
+      <tr>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'Payment Realization' | translate }}</td>
+        <td class="align-top">{{(purchase?.payment_realization | rupiah) || '-'}}
+        </td>
+      </tr>
+      <tr>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'Paid Total' | translate }}</td>
+        <td class="align-top">{{(purchase?.paid_total | rupiah) || '-'}}</td>
+      </tr>
+      <tr>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'Notes' | translate }}</td>
+        <td class="align-top" [innerHTML]="purchase?.invoice_number || '-'"></td>
+      </tr>
+      <tr>
+        <td class="fw-bold p-1 col-3 align-top">{{ 'Purchasing Attachments' | translate }}</td>
         <td class="align-top">
-          <img class="col-5" [src]="purchase?.invoice_photo" alt="Invoice">
+          <div class="d-flex gap-2 flex-wrap">
+            @for (item of purchase?.purchasing_attachments; track $index) {
+            <img class="col-5" [src]="item" alt="Attachment">
+            }
+          </div>
         </td>
       </tr>
     </tbody>
@@ -49,6 +111,6 @@
 </app-generic-table>
 
 <ng-template #POItemForm>
-  <app-purchase-order-item-form [type]="'view'" [purchase_id]="purchase_id"
-    [purchase_item_id]="purchase_item_id" (onClose)="modalRef.dismiss()"></app-purchase-order-item-form>
+  <app-purchase-order-item-form [type]="'view'" [purchase_id]="purchase_id" [purchase_item_id]="purchase_item_id"
+    (onClose)="modalRef.dismiss(); tableRefresh(defaultTableParam)"></app-purchase-order-item-form>
 </ng-template>

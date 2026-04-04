@@ -1,9 +1,0 @@
-<div class="card-body">
-  <app-purchasing-detail [purchase_id]="purchase_id"></app-purchasing-detail>
-</div>
-<div class="card-footer d-flex gap-2">
-  @if (type !== 'view') {
-  <button class="btn btn-secondary" type="button" (click)="back.emit()">Back</button>
-  }
-  <button class="btn btn-primary" type="button" (click)="nextStep.emit()">Exit</button>
-</div>

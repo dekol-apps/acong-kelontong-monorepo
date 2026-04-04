@@ -1,22 +1,24 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Res, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '../auth/auth.guard';
-import { Brand } from './brand.schema';
+import { UAuthGuard } from '../auth/auth.guard';
+import { CreateBrandDto, UpdateBrandDto } from './brand.dto';
 import { BrandService } from './brand.service';
 import type { Response } from 'express';
 import { BaseResponse } from 'src/utils/base-response';
 import { PaginationDto } from 'src/global/global.dto';
 import { Types } from 'mongoose';
+import { Permission } from 'src/global/permission.decoratior';
 
-@UseGuards(AuthGuard)
+@UseGuards(UAuthGuard)
 @Controller('brand')
 export class BrandController {
     constructor(
         private readonly service: BrandService,
     ) { }
 
+    @Permission(['brand.create'])
     @Post('')
     async createBrand(
-        @Body() body: Brand,
+        @Body() body: CreateBrandDto,
         @Res() res: Response,
     ) {
         try {
@@ -27,6 +29,7 @@ export class BrandController {
         }
     }
 
+    @Permission(['brand.view'])
     @Get('')
     async listBrand(
         @Query() query: PaginationDto,
@@ -40,10 +43,11 @@ export class BrandController {
         }
     }
 
+    @Permission(['brand.edit'])
     @Put(':brand_id')
     async editBrand(
         @Param('brand_id') brandId: Types.ObjectId,
-        @Body() body: Brand,
+        @Body() body: UpdateBrandDto,
         @Res() res: Response,
     ) {
         try {
@@ -54,6 +58,7 @@ export class BrandController {
         }
     }
 
+    @Permission(['brand.view'])
     @Get(':brand_id')
     async detailBrand(
         @Param('brand_id') brandId: Types.ObjectId,
@@ -68,6 +73,7 @@ export class BrandController {
     }
 
 
+    @Permission(['brand.delete'])
     @Delete(':brand_id')
     async deleteBrand(
         @Param('brand_id') brandId: Types.ObjectId,

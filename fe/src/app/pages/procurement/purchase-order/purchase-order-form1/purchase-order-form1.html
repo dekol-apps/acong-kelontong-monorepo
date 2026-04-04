@@ -1,9 +1,10 @@
-<form [formGroup]="form" appFormValidation (ngSubmit)="next()">
+@if (form) {
+<form [formGroup]="form" appFormValidation (ngSubmit)="submit()">
   <fieldset [disabled]="type==='view'">
     <div class="card-body">
       <div class="d-flex flex-row flex-wrap justify-content-between gap-2">
         <div class="w-100">
-          <label for="supplier" class="form-label required">Supplier</label>
+          <label for="supplier" class="form-label" appAutoWildcard>Supplier</label>
           <select class="form-select" id="supplier" formControlName="supplier">
             <option selected disabled value="">Choose...</option>
             @for (supplier of suppliers; track $index) {
@@ -12,22 +13,12 @@
           </select>
         </div>
         <div class="w-100">
-          <label for="due_date" class="form-label required">Due Date</label>
+          <label for="due_date" class="form-label" appAutoWildcard>Due Date</label>
           <div class="input-group">
-            <input class="form-control" placeholder="yyyy-mm-dd" name="dp" formControlName="due_date" ngbDatepicker
-              #d="ngbDatepicker" />
+            <input class="form-control" placeholder="yyyy-mm-dd" name="due_date" formControlName="due_date"
+              ngbDatepicker #d="ngbDatepicker" />
             <button class="btn btn-outline-secondary bi bi-calendar3" (click)="d.toggle()" type="button"></button>
           </div>
-        </div>
-        <div class="w-100">
-          <label for="invoice_number" class="form-label">Invoice Number</label>
-          <input type="text" class="form-control" id="invoice_number" formControlName="invoice_number" />
-        </div>
-        <div class="w-100">
-          <label for="invoice_photo" class="form-label">Invoice Photo</label>
-          <app-drag-drop-file #invoicePhoto [patchFileName]="form.controls.invoice_photo.value"
-            [loading]="loading" (deleteHandler)="deleteFile()" (previewHandler)="previewFile()"
-            [disabled]="type==='view'" (fileChanged)="addFile($event)"></app-drag-drop-file>
         </div>
       </div>
     </div>
@@ -37,3 +28,4 @@
     <button class="btn btn-primary" type="submit">Next</button>
   </div>
 </form>
+}

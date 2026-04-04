@@ -1,0 +1,32 @@
+<div ngbDropdown container="body" class="d-inline-block w-100">
+    <button type="button"
+        class="btn btn-outline-secondary border-secondary w-100 text-start d-flex justify-content-between align-items-center"
+        [class.is-invalid]="invalid" id="searchItemDropdown" ngbDropdownToggle>
+        <span class="text-truncate w-100">
+            @if (value) {
+            <span class="text-black w-100">{{ value }}</span>
+            } @else {
+            <span class="text-muted w-100">{{ placeholder | translate }}</span>
+            }
+        </span>
+    </button>
+    <div ngbDropdownMenu aria-labelledby="searchItemDropdown" class="shadow" style="width: max-content;">
+        <div class="px-2 py-1 border-bottom">
+            <input type="text" class="form-control form-control-sm" [placeholder]="searchPlaceholder | translate"
+                (input)="filterItems($event)">
+        </div>
+        <div class="dropdown-items-scroll" style="max-height: 200px; overflow-y: auto; width: max-content;">
+            @for (item of items; track item.value) {
+            <button type="button" ngbDropdownItem (click)="selectItem(item.value)" style="width: max-content;">
+                {{ item.label }}
+            </button>
+            }
+            @if (items.length === 0 && !isLoading) {
+            <div class="dropdown-item disabled">{{ 'COMMON_NO_ITEMS_FOUND' | translate }}</div>
+            }
+            @if (isLoading) {
+            <div class="dropdown-item disabled">{{ 'COMMON_LOADING' | translate }}</div>
+            }
+        </div>
+    </div>
+</div>

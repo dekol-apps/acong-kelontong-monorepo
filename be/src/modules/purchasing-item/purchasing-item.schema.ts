@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { Product, ProductDocument } from '../product/product.schema';
-import { Purchasing } from '../purchasing/purchasing.schema';
+import { Purchasing, PurchasingDocument } from '../purchasing/purchasing.schema';
 
 // PURCHASING ITEM as BODY
 @Schema({ timestamps: true })
@@ -16,23 +16,20 @@ export class PurchasingItem {
   product_name: string;
 
   @Prop({ required: true })
+  product_sku: string;
+
+  @Prop({ required: true })
   supplier_name: string;
 
   @Prop({ type: Number, required: true })
   purchase_qty: number;
 
   @Prop({ type: Number, default: 0 })
-  recieved_qty: number;
+  received_qty: number;
 
-  @Prop({ type: Number, required: true })
-  purchase_price: number;
-
-  @Prop({ type: Number, required: true })
-  sell_price: number;
-
-  @Prop({ type: Date })
-  exp_date?: Date;
+  @Prop({ type: Types.Decimal128, required: true })
+  purchase_price: Types.Decimal128;
 }
 
-export type PurchasingItemDocument = PurchasingItem & Document & { product: ProductDocument };
+export type PurchasingItemDocument = PurchasingItem & Document & { product: ProductDocument } & { purchase_order: PurchasingDocument };
 export const PurchasingItemSchema = SchemaFactory.createForClass(PurchasingItem);

@@ -1,5 +1,6 @@
 import { TModules } from './interfaces';
 
+export const cleanupDays = 30;
 export const sessionDays = 7;
 export const sessionMinutes = 15;
 export const salts = 10
@@ -8,17 +9,19 @@ export const errCodes = {
 }
 
 export const modules: TModules[] = [
+  'investment.view', 'investment.create', 'investment.edit', 'investment.delete',
+  'approval.view', 'approval.create',
   'inventory.view', 'inventory.create', 'inventory.edit', 'inventory.delete',
-  'showcase.view', 'showcase.create', 'showcase.edit', 'showcase.delete',
   'purchasing.view', 'purchasing.create', 'purchasing.edit', 'purchasing.delete',
-  'cashier.view', 'cashier.create', 'cashier.edit', 'cashier.delete',
   'product.view', 'product.create', 'product.edit', 'product.delete',
   'brand.view', 'brand.create', 'brand.edit', 'brand.delete',
   'supplier.view', 'supplier.create', 'supplier.edit', 'supplier.delete',
-  'capital.view', 'capital.create', 'capital.edit', 'capital.delete',
-  'cashflow.view', 'cashflow.create', 'cashflow.edit', 'cashflow.delete',
+  'cashflow.view',
   'expenses.view', 'expenses.create', 'expenses.edit', 'expenses.delete',
   'user.view', 'user.create', 'user.edit', 'user.delete',
-  'role.view', 'role.create', 'role.edit', 'role.delete'
+  'role.view', 'role.create', 'role.edit', 'role.delete',
+  'production.view', 'production.create', 'production.edit', 'production.delete',
+  'sale.view', 'sale.create', 'sale.edit', 'sale.delete'
 ];
 
+export const defaultPpnRate = 11;

@@ -1,0 +1,202 @@
+<!-- Header Card -->
+<div class="card">
+  <div class="card-header mb-4">
+    <div class="d-flex justify-content-between align-items-start">
+      <div>
+        <h3 class="fw-bold mb-1">{{ 'Cashflow Detail' | translate }}</h3>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <span class="badge text-bg-{{ getOrderTypeBadge(detail?.order_type) }} px-3 py-2">
+            {{ detail?.order_type }}
+          </span>
+          @if (detail?.flow_type === FlowType.IN) {
+          <span class="badge text-bg-success px-3 py-2">
+            <i class="bi bi-arrow-down-circle me-1"></i>{{ 'Cash In' | translate }}
+          </span>
+          } @else {
+          <span class="badge text-bg-danger px-3 py-2">
+            <i class="bi bi-arrow-up-circle me-1"></i>{{ 'Cash Out' | translate }}
+          </span>
+          }
+        </div>
+      </div>
+      <div class="text-end">
+        <div class="small text-muted mb-1">
+          <i class="bi bi-calendar3 me-1"></i>
+          {{ detail?.record_date | date:'dd MMM yyyy, HH:mm' }}
+        </div>
+        <div class="small text-muted">
+          <i class="bi bi-hash"></i>
+          <span class="text-monospace">{{ detail?._id }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Main Amount -->
+  <div class="card-body mb-4">
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <div class="card text-center p-4"
+          [class.cash-in]="detail?.flow_type === FlowType.IN" [class.cash-out]="detail?.flow_type !== FlowType.IN">
+          <div class="small text-uppercase fw-semibold mb-2 text-muted">{{ 'Transaction Amount' | translate }}</div>
+          <div class="fw-bold fs-5" [class.text-success]="detail?.flow_type === FlowType.IN"
+            [class.text-danger]="detail?.flow_type !== FlowType.IN">
+            @if (detail?.flow_type === FlowType.IN) { + } @else { - }
+            {{ getAmount(detail) | currency:'IDR':'symbol':'1.2-2' }}
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card text-center p-4">
+          <div class="small text-uppercase fw-semibold mb-2 text-muted">{{ 'Tax Base' | translate }}</div>
+          <div class="fw-bold fs-5">
+            {{ getDecimalValue(detail?.tax_base) | currency:'IDR':'symbol':'1.2-2' }}
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card text-center p-4">
+          <div class="small text-uppercase fw-semibold mb-2 text-muted">{{ 'PPN Amount' | translate }}</div>
+          <div class="fw-bold fs-5">
+            {{ getDecimalValue(detail?.ppn_amount) | currency:'IDR':'symbol':'1.2-2' }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Details -->
+    <div class="row mb-4">
+      <div class="col pr-2">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="card-title fw-bold mb-0">
+              <i class="bi bi-info-circle me-2 text-primary"></i>{{ 'Transaction Info' | translate }}
+            </h5>
+          </div>
+          <div class="card-body">
+            <table class="table table-borderless detail-table mb-0">
+              <tbody>
+                <tr>
+                  <td class="text-muted fw-semibold" style="width: 40%">{{ 'Order Type' | translate }}</td>
+                  <td>
+                    <span class="badge text-bg-{{ getOrderTypeBadge(detail?.order_type) }}">
+                      {{ detail?.order_type }}
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-semibold">{{ 'Flow' | translate }}</td>
+                  <td>
+                    @if (detail?.flow_type === FlowType.IN) {
+                    <span class="text-success fw-semibold"><i class="bi bi-arrow-down-circle me-1"></i>{{ 'IN' | translate }}</span>
+                    } @else {
+                    <span class="text-danger fw-semibold"><i class="bi bi-arrow-up-circle me-1"></i>{{ 'OUT' | translate }}</span>
+                    }
+                  </td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-semibold">{{ 'Order ID' | translate }}</td>
+                  <td class="text-monospace small">{{ detail?.order_id }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-semibold">{{ 'Record Date' | translate }}</td>
+                  <td>{{ detail?.record_date | date:'dd MMM yyyy, HH:mm' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-semibold">{{ 'Created At' | translate }}</td>
+                  <td>{{ detail?.createdAt | date:'dd MMM yyyy, HH:mm' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col ps-2">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="card-title fw-bold mb-0">
+              <i class="bi bi-receipt me-2 text-warning"></i>{{ 'Tax Information' | translate }}
+            </h5>
+          </div>
+          <div class="card-body">
+            <table class="table table-borderless detail-table mb-0">
+              <tbody>
+                <tr>
+                  <td class="text-muted fw-semibold" style="width: 40%">{{ 'PPN Type' | translate }}</td>
+                  <td>{{ (detail?.ppn_type || 'NONE') | translate }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-semibold">{{ 'PPN Rate' | translate }}</td>
+                  <td>{{ detail?.ppn_rate || 0 }}%</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-semibold">{{ 'PPN Amount' | translate }}</td>
+                  <td>{{ getDecimalValue(detail?.ppn_amount) | currency:'IDR':'symbol':'1.2-2' }}</td>
+                </tr>
+                @if (detail?.flow_type === FlowType.OUT && detail?.order_type === OrderType.EXPENSE) {
+                <tr>
+                  <td class="text-muted fw-semibold">{{ 'PPh Type' | translate }}</td>
+                  <td>{{ (detail?.pph_type || 'NONE') | translate }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-semibold">{{ 'PPh Rate' | translate }}</td>
+                  <td>{{ detail?.pph_rate || 0 }}%</td>
+                </tr>
+                }
+                <tr>
+                  <td class="text-muted fw-semibold">{{ 'Facture No.' | translate }}</td>
+                  <td>{{ detail?.tax_facture_number || '-' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Data (if exists) -->
+    @if (detail?.order_data) {
+    @if (getOrderDetailPath(); as orderDetailPath) {
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white border-0">
+        <h5 class="card-title fw-bold mb-0">
+          <i class="bi bi-box-arrow-up-right me-2 text-primary"></i>{{ getOrderDetailTitle() | translate }}
+        </h5>
+      </div>
+      <div class="card-body bg-light m-4">
+        <p class="mb-3 text-muted">
+          {{ 'Open the original module detail for complete transaction information.' | translate }}
+        </p>
+        <a [routerLink]="orderDetailPath" class="btn btn-primary">
+          <i class="bi bi-arrow-right-circle me-1"></i>{{ 'Open Detail' | translate }}
+        </a>
+      </div>
+    </div>
+    } @else {
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white border-0">
+        <h5 class="card-title fw-bold mb-0">
+          <i class="bi bi-database me-2 text-info"></i>{{ 'Order Data' | translate }}
+        </h5>
+      </div>
+      <div class="card-body bg-light m-4 overflow-auto" style="max-height: 25vh;">
+        <pre class="order-data-pre">{{ detail?.order_data | json }}</pre>
+      </div>
+    </div>
+    }
+    }
+  </div>
+  <!-- Footer Actions -->
+  <div class="card-footer d-flex gap-2">
+    <button class="btn btn-secondary" (click)="goBack()">
+      {{ 'Back' | translate }}
+    </button>
+    <a routerLink="/cashflow" class="btn btn-primary">
+      <i class="bi bi-list-ul me-1"></i>{{ 'All Cashflow' | translate }}
+    </a>
+  </div>
+</div>

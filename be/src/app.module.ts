@@ -10,7 +10,7 @@ import { toNumber } from './utils/helper';
 import { Auth, AuthSchema } from './modules/auth/auth.schema';
 import { AuthController } from './modules/auth/auth.controller';
 import { AuthService } from './modules/auth/auth.service';
-import { AuthGuard } from './modules/auth/auth.guard';
+import { UAuthGuard } from './modules/auth/auth.guard';
 import { UserController } from './modules/user/user.controller';
 import { UserService } from './modules/user/user.service';
 import { User, UserSchema } from './modules/user/user.schema';
@@ -32,12 +32,40 @@ import { PurchasingService } from './modules/purchasing/purchasing.service';
 import { PurchasingController } from './modules/purchasing/purchasing.controller';
 import { Purchasing, PurchasingSchema } from './modules/purchasing/purchasing.schema';
 import { GlobalController } from './global/global.controller';
-import { InventoryController } from './modules/inventory/inventory.controller';
-import { InventoryService } from './modules/inventory/inventory.service';
-import { Inventory, InventorySchema } from './modules/inventory/inventory.schema';
 import { PurchasingItemController } from './modules/purchasing-item/purchasing-item.controller';
 import { PurchasingItemService } from './modules/purchasing-item/purchasing-item.service';
 import { PurchasingItem, PurchasingItemSchema } from './modules/purchasing-item/purchasing-item.schema';
+import { Trash, TrashSchema } from './global/global.schema';
+import { ApprovalController } from './modules/approval/approval.controller';
+import { InventoryItemController } from './modules/inventory-item/inventory-item.controller';
+import { InventoryItemService } from './modules/inventory-item/inventory-item.service';
+import { InventoryItem, InventoryItemSchema } from './modules/inventory-item/inventory-item.schema';
+import { InventoryMovementController } from './modules/inventory-movement/inventory-movement.controller';
+import { InventoryMovementService } from './modules/inventory-movement/inventory-movement.service';
+import { InventoryMovement, InventoryMovementSchema } from './modules/inventory-movement/inventory-movement.schema';
+import { AccountingService } from './modules/accounting/accounting.service';
+import { InvestmentService } from './modules/investment/investment.service';
+import { InvestmentController } from './modules/investment/investment.controller';
+import { Investment, InvestmentSchema } from './modules/investment/investment.schema';
+import { Accounting, AccountingSchema } from './modules/accounting/accounting.schema';
+import { AccountingBalance, AccountingBalanceSchema } from './modules/accounting/accounting-balance.schema';
+import { AccountingSnapshot, AccountingSnapshotSchema } from './modules/accounting/accounting-snapshot.schema';
+import { ExpenseService } from './modules/expense/expense.service';
+import { ExpenseController } from './modules/expense/expense.controller';
+import { Expense, ExpenseSchema } from './modules/expense/expense.schema';
+import { InventoryMovementItem, InventoryMovementItemSchema } from './modules/inventory-movement/inventory-movement-item.schema';
+import { InventoryReconcile, InventoryReconcileSchema } from './modules/inventory-item/inventory-reconcile.schema';
+import { SaleController } from './modules/sale/sale.controller';
+import { SaleService } from './modules/sale/sale.service';
+import { Sale, SaleSchema } from './modules/sale/sale.schema';
+import { SaleItem, SaleItemSchema } from './modules/sale/sale-item.schema';
+import { AccountingController } from './modules/accounting/accounting.controller';
+import { ProductionController } from './modules/production/production.controller';
+import { ProductionService } from './modules/production/production.service';
+import { Production, ProductionSchema } from './modules/production/production.schema';
+import { ProductionIngredient, ProductionIngredientSchema } from './modules/production/production-ingerdient.schema';
+import { decimal128MoneyPlugin } from './database/plugins/decimal128-money.plugin';
+import { PurchasingReceiveController } from './modules/purchasing-receive/purchasing-receive.controller';
 
 @Module({
   imports: [
@@ -48,6 +76,10 @@ import { PurchasingItem, PurchasingItemSchema } from './modules/purchasing-item/
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         uri: config.get<string>('MONGO_URI'),
+        connectionFactory: (connection) => {
+          connection.plugin(decimal128MoneyPlugin);
+          return connection;
+        },
       }),
     }),
     MailerModule.forRootAsync({
@@ -84,18 +116,72 @@ import { PurchasingItem, PurchasingItemSchema } from './modules/purchasing-item/
       },
     }),
     MongooseModule.forFeature([
+      { name: Trash.name, schema: TrashSchema },
       { name: Auth.name, schema: AuthSchema },
       { name: Role.name, schema: RoleSchema },
       { name: User.name, schema: UserSchema },
       { name: Brand.name, schema: BrandSchema },
       { name: Purchasing.name, schema: PurchasingSchema },
       { name: PurchasingItem.name, schema: PurchasingItemSchema },
-      { name: Inventory.name, schema: InventorySchema },
+      { name: InventoryItem.name, schema: InventoryItemSchema },
+      { name: InventoryMovement.name, schema: InventoryMovementSchema },
+      { name: InventoryMovementItem.name, schema: InventoryMovementItemSchema },
+      { name: InventoryReconcile.name, schema: InventoryReconcileSchema },
+      { name: Investment.name, schema: InvestmentSchema },
+      { name: Accounting.name, schema: AccountingSchema },
+      { name: AccountingBalance.name, schema: AccountingBalanceSchema },
+      { name: AccountingSnapshot.name, schema: AccountingSnapshotSchema },
+      { name: Expense.name, schema: ExpenseSchema },
+      { name: Sale.name, schema: SaleSchema },
+      { name: SaleItem.name, schema: SaleItemSchema },
+      { name: Production.name, schema: ProductionSchema },
+      { name: ProductionIngredient.name, schema: ProductionIngredientSchema },
     ]),
     SeederModule,
   ],
-  controllers: [AppController, AuthController, UserController, BrandController, RoleController, SupplierController, ProductController, PurchasingController, PurchasingItemController, GlobalController, InventoryController],
-  providers: [AppService, AuthService, AuthGuard, ModuleGuard, UserService, BrandService, BaseResponse, GlobalService, RoleService, SupplierService, ProductService, PurchasingService, InventoryService, PurchasingItemService]
+  controllers: [
+    AppController,
+    AuthController,
+    UserController,
+    BrandController,
+    RoleController,
+    SupplierController,
+    ProductController,
+    PurchasingController,
+    PurchasingItemController,
+    GlobalController,
+    ApprovalController,
+    InventoryItemController,
+    InventoryMovementController,
+    InvestmentController,
+    ExpenseController,
+    SaleController,
+    AccountingController,
+    ProductionController,
+    PurchasingReceiveController
+  ],
+  providers: [
+    AppService,
+    AuthService,
+    UAuthGuard,
+    ModuleGuard,
+    UserService,
+    BrandService,
+    BaseResponse,
+    GlobalService,
+    RoleService,
+    SupplierService,
+    ProductService,
+    PurchasingService,
+    PurchasingItemService,
+    InventoryItemService,
+    InventoryMovementService,
+    AccountingService,
+    InvestmentService,
+    ExpenseService,
+    SaleService,
+    ProductionService,
+  ]
 })
 export class AppModule implements OnModuleInit {
   constructor(private readonly seederService: SeederService) { }

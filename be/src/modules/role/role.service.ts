@@ -1,15 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Role } from './role.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { GlobalService } from 'src/global/global.service';
-import { IPaginationRes } from 'src/types/interfaces';
+import { IListRes } from 'src/types/interfaces';
 import { BaseResponse } from 'src/utils/base-response';
 
 @Injectable()
 export class RoleService {
   constructor(
     @InjectModel(Role.name) private roleModel: Model<Role>,
+    @Inject(forwardRef(() => GlobalService))
     private global: GlobalService
   ) { }
 
@@ -20,7 +21,7 @@ export class RoleService {
     sortDir: 'asc' | 'desc' = 'asc',
     search?: string,
     active?: boolean
-  ): Promise<{ data: Role[]; meta: IPaginationRes }> {
+  ): Promise<IListRes<Role>> {
     const searchFields: string[] = ['role_name'];
     let filter;
     if (active) {
@@ -88,11 +89,11 @@ export class RoleService {
     }
   }
 
-  async deleteRole(role_id: Types.ObjectId): Promise<boolean> {
+  async deleteRole(role_id: Types.ObjectId): Promise<Role | undefined> {
     const role = await this.roleModel.findById(role_id);
     if (!role) throw BaseResponse.notFound({ option: { message: 'Role not found' } })
     if (role.active) throw BaseResponse.forbidden({ option: { message: 'Cannot delete active role' } })
-    await this.roleModel.findByIdAndDelete(role_id).exec();
-    return true;
+    await this.global.deleteData(role);
+    return role || undefined;
   }
 }

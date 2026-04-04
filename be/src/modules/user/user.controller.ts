@@ -1,13 +1,15 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, Res, UploadedFile, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
-import { AuthGuard } from '../auth/auth.guard';
+import { UAuthGuard } from '../auth/auth.guard';
 import { BaseResponse } from 'src/utils/base-response';
-import type { Response } from 'express';
-import { GetUserListDto, InviteUserDto } from './user.dto';
-import { encodeBase64 } from 'src/utils/helper';
+import type { Request, Response } from 'express';
+import { ChangeEmailDto, ChangePasswordDto, GetUserListDto, IEditUser, InviteUserDto } from './user.dto';
+import { decodeBase64, encodeBase64 } from 'src/utils/helper';
 import { MailerService } from '@nestjs-modules/mailer';
 import { Permission } from 'src/global/permission.decoratior';
 import { Types } from 'mongoose';
+import { UploadUserPhotoInterceptor } from './user-photo.interceptor';
+import * as fs from 'fs';
 
 @Controller('user')
 export class UserController {
@@ -16,7 +18,7 @@ export class UserController {
     private readonly mailerService: MailerService
   ) { }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(UAuthGuard)
   @Permission(['user.view'])
   @Get('')
   async list(
@@ -34,7 +36,7 @@ export class UserController {
     }
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(UAuthGuard)
   @Permission(['user.create'])
   @Post('')
   async inviteUser(
@@ -46,7 +48,7 @@ export class UserController {
       if (!invite) throw BaseResponse.forbidden({ option: { message: 'User Exist' } })
       const ticket = { pass1: invite.tmpUser._id, pass2: invite.tmpPassword }
       const base64 = encodeBase64(JSON.stringify(ticket))
-      const linkChangePassword = `${process.env.FE_DOMAIN}/${process.env.URL_CHANGE_PASSWORD as string}/${base64}`;
+      const linkChangePassword = `${process.env.FE_DOMAIN}/${process.env.URL_CHANGE_PASSWORD as string}/${base64}?type=password`;
       const mailOptions = {
         from: `"Acong Kelontong" <${process.env.SMTP_USER as string}>`,
         to: invite.tmpUser.email,
@@ -70,7 +72,8 @@ export class UserController {
     }
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(UAuthGuard)
+  @Permission(['user.view'])
   @Get('detail/:user_id')
   async detail(
     @Param('user_id') user_id: Types.ObjectId,
@@ -87,28 +90,44 @@ export class UserController {
     }
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(UAuthGuard)
+  @Permission(['user.edit'])
   @Put('detail/:user_id')
+  @UploadUserPhotoInterceptor()
   async editProfile(
     @Param('user_id') user_id: Types.ObjectId,
-    @Body()
-    body: {
-      first_name: string;
-      last_name: string;
-      email: string;
-      password: string;
-    },
+    @UploadedFile() file: Express.Multer.File,
+    @Body() body: IEditUser,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
     try {
-      const detail = await this.userService.editUser(user_id, body);
-      return BaseResponse.success({ res, option: { message: 'Success edit user', detail } })
+      if (file && body) {
+        const folder = (req as any).uuidFolder;
+        const filePath = `/uploads/users/photo/${folder}/${file.filename}`;
+        const fullUrl = `${req.protocol}://${req.get('host')}${filePath}`;
+        body.user_photo = fullUrl;
+      }
+      const { user, photoToRemove } = await this.userService.editUser(user_id, body);
+      if (photoToRemove) {
+        try {
+          fs.rmSync(`.${photoToRemove}`, { recursive: true, force: true }); // delete the UUID folder
+        } catch (err) {
+          console.warn('Failed to delete old user photo:', err.message);
+        }
+      }
+      return BaseResponse.success({ res, option: { message: 'Success edit user', detail: user } })
     } catch (err) {
+      if (file) {
+        const folder = (req as any).uuidFolder;
+        const filePath = `/uploads/users/photo/${folder}/`;
+        fs.rmSync(`.${filePath}`, { recursive: true, force: true });
+      }
       return BaseResponse.error({ res, err });
     }
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(UAuthGuard)
   @Permission(['user.delete'])
   @Delete('detail/:user_id')
   async deleteUser(
@@ -123,7 +142,7 @@ export class UserController {
     }
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(UAuthGuard)
   @Permission(['user.create', 'user.edit'])
   @Post('detail/:user_id/re-invite')
   async resendVerification(
@@ -134,7 +153,7 @@ export class UserController {
       const invite = await this.userService.resendVerification(user_id)
       const ticket = { pass1: invite.tmpUser._id, pass2: invite.tmpPassword }
       const base64 = encodeBase64(JSON.stringify(ticket))
-      const linkChangePassword = `${process.env.FE_DOMAIN}/${process.env.URL_CHANGE_PASSWORD as string}/${base64}`;
+      const linkChangePassword = `${process.env.FE_DOMAIN}/${process.env.URL_CHANGE_PASSWORD as string}/${base64}?type=password`;
       const mailOptions = {
         from: `"Acong Kelontong <No Reply>" <${process.env.SMTP_USER as string}>`,
         to: invite.tmpUser.email,
@@ -158,7 +177,7 @@ export class UserController {
     }
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(UAuthGuard)
   @Permission(['user.create', 'user.edit'])
   @Put('detail/:user_id/role')
   async editRole(
@@ -169,8 +188,74 @@ export class UserController {
     @Res() res: Response,
   ) {
     try {
-      const detail = await this.userService.editUser(user_id, body);
-      return BaseResponse.success({ res, option: { message: 'Success edit user', detail } })
+      const { user } = await this.userService.editUser(user_id, body);
+      return BaseResponse.success({ res, option: { message: 'Success edit user', detail: user } })
+    } catch (err) {
+      return BaseResponse.error({ res, err });
+    }
+  }
+
+  @UseGuards(UAuthGuard)
+  @Permission(['user.edit'])
+  @Put('detail/:user_id/change-password')
+  async changePassword(
+    @Param('user_id') user_id: Types.ObjectId,
+    @Body() body: ChangePasswordDto,
+    @Res() res: Response,
+  ) {
+    try {
+      const detail = await this.userService.editUsrPasswd(user_id, body);
+      return BaseResponse.success({ res, option: { message: 'Success change password', detail } })
+    } catch (err) {
+      return BaseResponse.error({ res, err });
+    }
+  }
+
+
+  @UseGuards(UAuthGuard)
+  @Permission(['user.edit'])
+  @Put('detail/:user_id/change-email-request')
+  async changeEmail(
+    @Param('user_id') user_id: Types.ObjectId,
+    @Body() body: ChangeEmailDto,
+    @Res() res: Response,
+  ) {
+    try {
+      const detail = await this.userService.editUsrEmailReq(user_id, body);
+      if (!detail.req_change_email) throw BaseResponse.unexpected({ err: 'changeEmail !detail.req_change_email' });
+      const base64 = encodeBase64(detail.req_change_email)
+      const linkChangePassword = `${process.env.FE_DOMAIN}/${process.env.URL_CHANGE_PASSWORD as string}/${base64}?type=email`;
+      const mailOptions = {
+        from: `"Acong Kelontong <No Reply>" <${process.env.SMTP_USER as string}>`,
+        to: detail.req_change_email,
+        subject: "Verify New Email",
+        html: `Hello <b>${detail.first_name}</b>! \nPlease click the link below to verify your new email: \n${linkChangePassword}`,
+      };
+      this.mailerService
+        .sendMail({
+          ...mailOptions,
+        })
+        .then((res) => {
+          console.info("Email sent: " + JSON.stringify(res))
+        })
+        .catch((err) => {
+          console.error(err)
+        });
+      return BaseResponse.success({ res, option: { message: 'Verification email sent', detail } })
+    } catch (err) {
+      return BaseResponse.error({ res, err });
+    }
+  }
+
+  @Put('confirm-new-email')
+  async confirmNewEmail(
+    @Body() body: { ticket: string },
+    @Res() res: Response,
+  ) {
+    try {
+      const base64 = decodeBase64(body.ticket);
+      const detail = await this.userService.editUsrEmailConfirm(base64);
+      return BaseResponse.success({ res, option: { message: "Success update user email", detail } });
     } catch (err) {
       return BaseResponse.error({ res, err });
     }
@@ -183,7 +268,6 @@ export class UserController {
   ) {
     const { ticket, new_password } = body;
     try {
-      console.log('masuk verify')
       const isVerified = await this.userService.verifyUser(ticket, new_password);
       if (isVerified) {
         return BaseResponse.success({ res, option: { message: "User verified successfully" } });

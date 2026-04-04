@@ -1,17 +1,19 @@
-import { Component, Inject, Input, OnChanges, OnInit, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Inject, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { ColumnProps, GenericTable, ITableQueryData } from '../../../shared/components/generic-table/generic-table';
 import { TableColumn } from '../../../shared/directives/table-column/table-column';
 import { formType, IPaginationInput } from '../../../types/interfaces/common.interface';
-import { CURRENCY_FORMAT, DATE_FORMAT, SORT_DIR } from '../../../types/constants/common.constants';
+import { DATE_FORMAT, SORT_DIR } from '../../../types/constants/common.constants';
 import { NgbActiveModal, NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
-import { IPurchasing, IPurchasingItem } from '../../../types/interfaces/procurement.interface';
-import { PurchaseOrderService } from '../purchase-order/purchase-order.service';
+import { IPurchasing, IPurchasingItem, PurchasingEn } from '../../../types/interfaces/procurement.interface';
+import { PurchaseOrderService } from '../services/purchase-order.service';
 import { PurchaseOrderItemForm } from '../purchase-order/purchase-order-item/purchase-order-item-form/purchase-order-item-form';
 import { CommonModule } from '@angular/common';
+import { RupiahPipe } from '../../../shared/pipes/rupiah.pipe';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-purchasing-detail',
-  imports: [GenericTable, TableColumn, CommonModule, PurchaseOrderItemForm],
+  imports: [GenericTable, TableColumn, CommonModule, PurchaseOrderItemForm, RupiahPipe, TranslateModule],
   templateUrl: './purchasing-detail.html',
   styleUrl: './purchasing-detail.scss'
 })
@@ -19,12 +21,14 @@ export class PurchasingDetail implements OnChanges {
   @ViewChild('POItemForm') poItemForm?: PurchaseOrderItemForm;
 
   DATE_FORMAT = DATE_FORMAT;
-  CURRENCY_FORMAT = CURRENCY_FORMAT;
   @Input() purchase_id?: string;
   purchase_item_id?: string;
   isLoading: boolean = false;
   listPurchasingItem: IPurchasingItem[] = [];
   purchase?: IPurchasing;
+  PurchasingEn = PurchasingEn;
+
+  @Output() onQueryDetail: EventEmitter<IPurchasing> = new EventEmitter<IPurchasing>();
 
   pagination: IPaginationInput = {
     page: 1,
@@ -41,10 +45,10 @@ export class PurchasingDetail implements OnChanges {
       sort: true,
     },
     {
-      label: 'Supplier',
-      id: 'supplier_name',
+      label: 'SKU',
+      id: 'product_sku',
       extraHeaderClass: 'uppercase-text',
-      backendPropName: 'supplier_name',
+      backendPropName: 'product_sku',
       sort: true,
     },
     {
@@ -61,18 +65,11 @@ export class PurchasingDetail implements OnChanges {
       dataType: 'CURRENCY'
     },
     {
-      label: 'Sale Price',
-      id: 'sell_price',
+      label: 'Total',
+      id: 'price_total',
       extraHeaderClass: 'uppercase-text',
-      backendPropName: 'sell_price',
+      backendPropName: 'price_total',
       dataType: 'CURRENCY'
-    },
-    {
-      label: 'Expired Date',
-      id: 'exp_date',
-      extraHeaderClass: 'uppercase-text',
-      backendPropName: 'exp_date',
-      dataType: 'DATE'
     },
     {
       label: 'Action',
@@ -109,6 +106,7 @@ export class PurchasingDetail implements OnChanges {
     this.service.getPurchasingDetail(purchase_id).subscribe((res) => {
       console.log({ getDetail: res })
       this.purchase = res;
+      this.onQueryDetail.emit(res);
     });
   }
 

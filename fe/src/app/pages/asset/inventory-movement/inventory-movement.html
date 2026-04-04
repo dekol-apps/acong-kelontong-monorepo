@@ -1,0 +1,70 @@
+<div class="card">
+  <div class="card-header">
+    <div class="d-flex flex-row gap-2 justify-content-between">
+      <h3 class="card-title">{{ 'INV_MOVEMENT_HISTORY_TITLE' | translate }}</h3>
+      <a class="btn btn-primary pointer" [routerLink]="['./form']">+ {{ 'Manual Inventory Movement' | translate }}</a>
+    </div>
+  </div>
+  <div class="card-body">
+    <ul ngbNav #nav="ngbNav" [(activeId)]="activeTab" class="nav-tabs" (navChange)="tabChange($event.nextId)">
+      <li [ngbNavItem]="FlowType.IN">
+        <button ngbNavLink>{{ 'INV_MOVE_IN' | translate }}</button>
+        <ng-template ngbNavContent>
+          <div class="mt-4">
+            <app-generic-table [columns]="columnsIn" [data]="listIn" [total]="paginationIn.total"
+              [isLoading]="isLoadingIn" [usePagination]="true" [useSearch]="true" (OnDataRefresh)="getListIn($event)">
+              <div appTableColumn customColumnId="action">
+                <ng-template let-item>
+                  <div class="d-flex flex-row gap-1 justify-content-end">
+                    <a [routerLink]="['./', item._id]" class="text-white pointer btn btn-secondary">
+                      <i class="fa-solid fa-eye"></i>
+                    </a>
+                  </div>
+                </ng-template>
+              </div>
+              <div appTableColumn customColumnId="items">
+                <ng-template let-item>
+                  <ul class="m-0">
+                    @for (product of item.items; track $index) {
+                    <li>{{ product.product_name }} ({{ product.product_sku || '-' }})</li>
+                    }
+                  </ul>
+                </ng-template>
+              </div>
+            </app-generic-table>
+          </div>
+        </ng-template>
+      </li>
+      <li [ngbNavItem]="FlowType.OUT">
+        <button ngbNavLink>{{ 'INV_MOVE_OUT' | translate }}</button>
+        <ng-template ngbNavContent>
+          <div class="mt-4">
+            <app-generic-table [columns]="columnsOut" [data]="listOut" [total]="paginationOut.total"
+              [isLoading]="isLoadingOut" [usePagination]="true" [useSearch]="true" (OnDataRefresh)="getListOut($event)">
+              <div appTableColumn customColumnId="action">
+                <ng-template let-item>
+                  <div class="d-flex flex-row gap-1 justify-content-end">
+                    <a [routerLink]="['./', item._id]" class="text-white pointer btn btn-secondary">
+                      <i class="fa-solid fa-eye"></i>
+                    </a>
+                  </div>
+                </ng-template>
+              </div>
+              <div appTableColumn customColumnId="items">
+                <ng-template let-item>
+                  <ul class="m-0">
+                    @for (product of item.items; track $index) {
+                    <li>{{ product.product_name }} ({{ product.product_sku || '-' }})</li>
+                    }
+                  </ul>
+                </ng-template>
+              </div>
+            </app-generic-table>
+          </div>
+        </ng-template>
+      </li>
+    </ul>
+
+    <div [ngbNavOutlet]="nav" class="mt-2"></div>
+  </div>
+</div>

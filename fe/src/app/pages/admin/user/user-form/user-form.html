@@ -1,6 +1,6 @@
 <div class="modal-header">
   <h4 class="modal-title" id="modal-title">
-    <div class="card-title text-capitalize">{{type}} User</div>
+    <div class="card-title text-capitalize">{{ (type==='new' ? 'Create' : type==='edit' ? 'Edit' : 'View') | translate }} {{ 'User' | translate }}</div>
   </h4>
   <button type="button" class="btn-close" aria-describedby="modal-title" (click)="close.emit()"></button>
 </div>
@@ -9,26 +9,26 @@
     <div class="modal-body">
       <div class="d-flex flex-row flex-wrap justify-content-between gap-2">
         <div class="w-100">
-          <label for="first_name" class="form-label required">First name</label>
+          <label for="first_name" class="form-label required">{{ 'First name' | translate }}</label>
           <input type="text" class="form-control" id="first_name" formControlName="first_name"
             [readOnly]="type==='edit'" />
         </div>
 
         <div class="w-100">
-          <label for="last_name" class="form-label required">Last name</label>
+          <label for="last_name" class="form-label required">{{ 'Last name' | translate }}</label>
           <input type="text" class="form-control" id="last_name" formControlName="last_name"
             [readOnly]="type==='edit'" />
         </div>
 
         <div class="w-100">
-          <label for="email" class="form-label required">Email</label>
+          <label for="email" class="form-label required">{{ 'Email' | translate }}</label>
           <input type="text" class="form-control" id="email" formControlName="email" [readOnly]="type==='edit'" />
         </div>
 
         <div class="w-100">
-          <label for="role" class="form-label required">Role</label>
+          <label for="role" class="form-label required">{{ 'Role' | translate }}</label>
           <select class="form-select" id="role" formControlName="role">
-            <option selected disabled value="">Choose...</option>
+            <option selected disabled value="">{{ 'Choose...' | translate }}</option>
             @for (role of roles; track $index) {
             <option [value]="role._id" [disabled]="!role.active">{{role.role_name}}</option>
             }
@@ -38,8 +38,8 @@
     </div>
     @if (type!=='view') {
     <div class="modal-footer">
-      <button class="btn btn-secondary" type="button" (click)="close.emit()">Cancel</button>
-      <button class="btn btn-primary" type="submit">Submit</button>
+      <button class="btn btn-secondary" type="button" (click)="close.emit()">{{ 'COMMON_CANCEL' | translate }}</button>
+      <button class="btn btn-primary" type="submit">{{ 'Submit' | translate }}</button>
     </div>
     }
   </form>

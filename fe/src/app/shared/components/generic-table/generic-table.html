@@ -1,4 +1,4 @@
-<div class="mb-4 p-4 border rounded">
+<div class="p-4 border rounded">
     @if(useSearch || useDownloadButton || filterSelect || useFilterByDate || useCustomToolbar) {
     <div class="d-flex flex-row justify-content-between flex-wrap gap-2 mb-4">
         <div [ngClass]="useSearch ? 'col-md-7' : 'col-md-12'">
@@ -21,7 +21,7 @@
                 <div class="flex-1">
                     <button type="button" (click)="downloadButtonClicked()"
                         class="btn btn btn-outline btn-outline-solid text-primary d-flex flex-row align-items-center justify-content-center gap-2 px-2 py-1">
-                        Download
+                        {{ 'COMMON_DOWNLOAD' | translate }}
                         <i class="fa-solid fa-download text-primary"></i>
                     </button>
                 </div>
@@ -38,7 +38,7 @@
         @if (useSearch) {
         <div class="col-md-4">
             <div class="input-group col-4">
-                <input type="text" class="form-control" placeholder="{{ (searchPlaceholder || 'Search') }}"
+                <input type="text" class="form-control" [placeholder]="(searchPlaceholder || 'COMMON_SEARCH') | translate"
                     [(ngModel)]="search" (input)="onSearch()" />
                 <span class="input-group-text py-1 px-2" id="basic-addon2">
                     <i class="fa-solid fa-magnifying-glass text-white fa-3xs"></i>
@@ -49,7 +49,7 @@
     </div>
     }
 
-    <div class="table-responsive scrollShadow py-2">
+    <div class="table-responsive scrollShadow border-top border-start border-end rounded-top">
         <table class="table table-row-bordered mb-0" aria-describedby="Generic Table">
             <thead>
                 <tr class="fw-bold fs-6 text-gray-800 text-uppercase">
@@ -60,8 +60,8 @@
                         <th>
                             <div class="d-flex flex-row ailgn-items center">
                                 <input class="form-check-input pointer" type="checkbox"
-                                    [disabled]="!data || !data.length"
-                                    [checked]="(!data || !data.length) ? false : isCheckedAll()"
+                                    [disabled]="!data || !data?.length"
+                                    [checked]="(!data || !data?.length) ? false : isCheckedAll()"
                                     (click)="onCheckedAll($event)">
                             </div>
                         </th>
@@ -70,12 +70,14 @@
                         @for (column of columns; track $index) {
                         <th [class.pointer]="column.sort"
                             (click)="column.sort && total > 0 ? sortChanged(column.id) : $event.stopPropagation()"
-                            [ngClass]="'whitespace-nowrap'">
-                            <div class="d-flex gap-1">
+                            [style]="column.customStyleHead" [style.max-width]="column.maxWidth">
+                            <div class="d-flex flex-row gap-1 flex-nowrap whitespace-nowrap"
+                                [ngClass]="{'w-100 justify-content-end': column.customElementId === 'action'}">
                                 @if(column.sort) {
                                 <app-sort-icon [sortId]="column.id" [sortVal]="{sortBy, sortDir}"></app-sort-icon>
                                 }
-                                <div [ngClass]="'whitespace-nowrap ' + ' ' + column.extraHeaderClass">{{ column.label }}
+                                <div class="whitespace-nowrap" [class]="column.extraHeaderClass??''">
+                                    {{ column.label | translate }}
                                 </div>
                             </div>
                         </th>
@@ -88,7 +90,7 @@
                 <!-- Show loading state -->
                 @for (_ of [].constructor(size); track $index) {
                 <tr>
-                    @for (_ of [].constructor(columns.length+1); let i = $index; track $index) {
+                    @for (_ of [].constructor(columns?.length??0+1); let i = $index; track $index) {
                     <td>
                         <div class="badge-loading"></div>
                     </td>
@@ -97,7 +99,7 @@
                 }
                 } @else {
                 <!-- Check if there is or no data -->
-                @if (!!data.length) {
+                @if (!!data?.length) {
                 @for (row of data; let index = $index; track $index) {
                 <tr>
                     <td style="width: 3ch;">{{index+1}}</td>
@@ -113,24 +115,34 @@
 
                     @for (column of columns; track $index) {
                     <td [ngClass]="{
-                      'whitespace-nowrap': column.customElementId === 'action'
-                    }">
-                        @if (column.customElementId) {
-                        <ng-container [ngTemplateOutlet]="columnTemplates[column.customElementId]"
-                            [ngTemplateOutletContext]="{
-                          $implicit: row,
-                          value: getRowDataValue(row, column.id)
-                        }">
-                        </ng-container>
-                        } @else {
-                        @if (!column.dataType) {
-                        {{ ( getRowDataValue(row, column.id)) || "-"}}
-                        } @else if (column.dataType === 'DATE') {
-                        {{ ( getRowDataValue(row, column.id) | date: DATE_FORMAT) || "-"}}
-                        } @else {
-                        {{ ( getRowDataValue(row, column.id) | currency:CURRENCY_FORMAT) || "-"}}
-                        }
-                        }
+                      'whitespace-nowrap w-100 d-flex justify-content-end': column.customElementId === 'action'
+                    }" [style]="column.customStyleBody" [style.max-width]="column.maxWidth"
+                        [attr.title]="column.ellipsis ? getRowDataValue(row, column.id) : null">
+                        <div [style.display]="column.ellipsis ? 'block' : null"
+                            [style.overflow]="column.ellipsis ? 'hidden' : null"
+                            [style.text-overflow]="column.ellipsis ? 'ellipsis' : null"
+                            [style.white-space]="column.ellipsis ? 'nowrap' : null"
+                            [style.max-width]="column.ellipsis ? '100%' : null">
+                            @if (column.customElementId) {
+                            <ng-container [ngTemplateOutlet]="columnTemplates[column.customElementId]"
+                                [ngTemplateOutletContext]="{
+                              $implicit: row,
+                              index: index,
+                              value: getRowDataValue(row, column.id)
+                            }">
+                            </ng-container>
+                            } @else {
+                            @if (!column.dataType) {
+                            {{ ( getRowDataValue(row, column.id)) || "-"}}
+                            } @else if (column.dataType === 'DATE') {
+                            {{ ( getRowDataValue(row, column.id) | date: DATE_FORMAT) || "-"}}
+                            } @else if (column.dataType === 'PERCENTAGE') {
+                            {{ ( getRowDataValue(row, column.id) + '%') || "-"}}
+                            } @else {
+                            {{ ( getRowDataValue(row, column.id) | rupiah) || "-"}}
+                            }
+                            }
+                        </div>
                     </td>
                     }
                 </tr>
@@ -138,8 +150,8 @@
                 <ng-content></ng-content>
                 } @else {
                 <tr>
-                    <td [attr.colspan]="columns.length+1">
-                        <div class="w-100 py-5 my-5 text-center">No Data</div>
+                    <td [attr.colspan]="columns?.length??0+1">
+                        <div class="w-100 py-5 my-5 text-center">{{ 'COMMON_NO_DATA' | translate }}</div>
                     </td>
                 </tr>
                 }
@@ -150,8 +162,8 @@
 
     <!-- Add TableFooter component here -->
     @if (usePagination) {
-    <div class="card-footer px-4 py-2">
-        <app-pagination [size]="size" [page]="page" [totalData]="total"
+    <div class="card-footer px-4 py-2 border-bottom border-start border-end rounded-bottom">
+        <app-pagination [size]="size" [page]="page-1" [totalData]="total"
             (paginationChanged)="changePage($event)"></app-pagination>
     </div>
     }

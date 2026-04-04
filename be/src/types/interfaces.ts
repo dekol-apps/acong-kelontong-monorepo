@@ -1,4 +1,3 @@
-import { UserDocument } from "src/modules/user/user.schema";
 import type { Response } from 'express';
 import { RoleDocument } from 'src/modules/role/role.schema';
 import { Types } from 'mongoose';
@@ -16,33 +15,28 @@ export interface GlobalVar extends ITokenPayload {
   userAgent: string;
   accesToken: string;
 }
-export interface TmpUser extends UserDocument {
-  tmpPassword: string;
-}
-export interface IEditUser {
-  first_name?: string;
-  last_name?: string;
-  email?: string;
-  password?: string;
-  role?: Types.ObjectId;
-}
 
 export type TModules =  //This is a list of API Endpoint permission
+  'investment.view' | 'investment.create' | 'investment.edit' | 'investment.delete' |
+  'approval.view' | 'approval.create' |
   'inventory.view' | 'inventory.create' | 'inventory.edit' | 'inventory.delete' |
-  'showcase.view' | 'showcase.create' | 'showcase.edit' | 'showcase.delete' |
   'purchasing.view' | 'purchasing.create' | 'purchasing.edit' | 'purchasing.delete' |
-  'cashier.view' | 'cashier.create' | 'cashier.edit' | 'cashier.delete' |
   'product.view' | 'product.create' | 'product.edit' | 'product.delete' |
   'brand.view' | 'brand.create' | 'brand.edit' | 'brand.delete' |
   'supplier.view' | 'supplier.create' | 'supplier.edit' | 'supplier.delete' |
-  'capital.view' | 'capital.create' | 'capital.edit' | 'capital.delete' |
-  'cashflow.view' | 'cashflow.create' | 'cashflow.edit' | 'cashflow.delete' |
+  'cashflow.view' |
   'expenses.view' | 'expenses.create' | 'expenses.edit' | 'expenses.delete' |
   'user.view' | 'user.create' | 'user.edit' | 'user.delete' |
-  'role.view' | 'role.create' | 'role.edit' | 'role.delete';
+  'role.view' | 'role.create' | 'role.edit' | 'role.delete' |
+  'production.view' | 'production.create' | 'production.edit' | 'production.delete' |
+  'sale.view' | 'sale.create' | 'sale.edit' | 'sale.delete';
 
 export type TLogoutOption = 'all' | 'other' | 'current';
 
+export interface IListRes<T> {
+  data: T[];
+  meta?: IPaginationRes
+}
 export interface IPaginationRes {
   total: number;
   totalPages: number;
@@ -64,3 +58,44 @@ export interface IBaseResponse {
 }
 
 export type TOneOrMany<T> = T | T[];
+
+export enum FlowType {
+  IN = 'IN',
+  OUT = 'OUT',
+}
+
+export enum InvestmentType {
+  DEPOSIT = 'DEPOSIT',
+  WITHDRAWAL = 'WITHDRAWAL',
+}
+
+export enum ApprovalType {
+  APPROVE = 'APPROVE',
+  REJECT = 'REJECT',
+}
+
+export enum OrderType {
+  PURCHASING = 'PURCHASING',
+  SALE = 'SALE',
+  EXPENSE = 'EXPENSE',
+  ADJUSTMENT = 'ADJUSTMENT',
+  DEPOSIT = 'DEPOSIT',
+  WITHDRAWAL = 'WITHDRAWAL',
+  PRODUCTION = 'PRODUCTION',
+}
+
+export enum CurrencyEn {
+  IDR = 'IDR',
+  USD = 'USD',
+}
+
+export enum PPnType {
+  EXCLUSIVE = 'EXCLUSIVE', INCLUSIVE = 'INCLUSIVE', NONE = 'NONE'
+}
+
+export enum PPhType {
+  PPh23 = 'PPh23',  // Services, rental, consulting
+  PPh22 = 'PPh22',  // Goods purchase, imports, pengadaaan
+  PPh4_2 = 'PPh4_2', // Construction, land/building rental
+  NONE = 'NONE'
+}

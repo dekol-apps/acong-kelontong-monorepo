@@ -15,15 +15,50 @@ export const CASHIER: IMenu = {
     url: 'cashier',
     icon: '',
     labelKey: 'Cashier',
-    permissions: ['cashier.view', 'cashier.create', 'cashier.edit', 'cashier.delete'],
+    permissions: ['sale.view', 'sale.create', 'sale.edit', 'sale.delete'],
 };
 export const SALES_HISTORY: IMenu = {
     code: 'sales-history',
     url: 'sales-history',
     icon: '',
     labelKey: 'Sales History',
-    permissions: ['cashier.view', 'cashier.create', 'cashier.edit', 'cashier.delete'],
+    permissions: ['sale.view', 'sale.create', 'sale.edit', 'sale.delete'],
 };
+export const SALES_HISTORY_DETAIL: IMenu = {
+    code: 'sales-history-detail',
+    url: 'sales-history/:sale_id',
+    icon: '',
+    labelKey: 'Sales History Detail',
+    permissions: ['sale.view'],
+}
+export const SALE_STOCK: IMenu = {
+    code: 'sale-stock',
+    url: 'sale-stock',
+    icon: '',
+    labelKey: 'Sale Stock',
+    permissions: ['sale.view'],
+}
+export const SALE_STOCK_PRODUCT: IMenu = {
+    code: 'sale-stock-product',
+    url: 'sale-stock/data/:product_id',
+    icon: '',
+    labelKey: 'Sale Stock Product',
+    permissions: ['sale.view'],
+}
+export const SALE_STOCK_ITEM: IMenu = {
+    code: 'sale-stock-item',
+    url: 'sale-stock/data/:product_id/:sale_item_id',
+    icon: '',
+    labelKey: 'Sale Stock Item',
+    permissions: ['sale.view'],
+}
+export const SALE_STOCK_FORM: IMenu = {
+    code: 'form',
+    url: 'sale-stock/form',
+    icon: '',
+    labelKey: 'Sale Stock Form',
+    permissions: ['sale.create'],
+}
 
 export const SUPPLIES: IMenu = {
     code: 'supplies',
@@ -38,14 +73,55 @@ export const INVENTORY: IMenu = {
     labelKey: 'Inventory',
     permissions: ['inventory.view', 'inventory.create', 'inventory.edit', 'inventory.delete'],
 }
-export const SHOWCASE: IMenu = {
-    code: 'showcase',
-    url: 'showcase',
+export const INVENTORY_PRODUCT: IMenu = {
+    code: 'inventory-product',
+    url: 'inventory/:product_id',
     icon: '',
-    labelKey: 'Showcase',
-    permissions: ['showcase.view', 'showcase.create', 'showcase.edit', 'showcase.delete'],
+    labelKey: 'Inventory Product',
+    permissions: ['inventory.view', 'inventory.create', 'inventory.edit', 'inventory.delete'],
 }
-
+export const INVENTORY_ITEM: IMenu = {
+    code: 'inventory-item',
+    url: 'inventory/:product_id/:inventory_item_id',
+    icon: '',
+    labelKey: 'Inventory Item',
+    permissions: ['inventory.view', 'inventory.create', 'inventory.edit', 'inventory.delete'],
+}
+export const INVENTORY_MOVEMENT: IMenu = {
+    code: 'inventory-movement',
+    url: 'inventory-movement',
+    icon: '',
+    labelKey: 'Inventory Movement',
+    permissions: ['inventory.view'],
+}
+export const INVENTORY_MOVEMENT_MANUAL: IMenu = {
+    code: 'form',
+    url: 'form',
+    icon: '',
+    labelKey: 'Manual Inventory Movement',
+    permissions: ['inventory.create'],
+}
+export const INVENTORY_MOVEMENT_FORM: IMenu = {
+    code: 'form',
+    url: 'inventory-movement/form',
+    icon: '',
+    labelKey: 'Inventory Movement Form',
+    permissions: ['inventory.create'],
+}
+export const INVENTORY_MOVEMENT_DETAIL: IMenu = {
+    code: 'inventory-movement-detail',
+    url: 'inventory-movement/:inventory_movement_id',
+    icon: '',
+    labelKey: 'Inventory Movement Detail',
+    permissions: ['inventory.view'],
+}
+export const INVENTORY_MOVEMENT_ITEM: IMenu = {
+    code: 'inventory-movement-item',
+    url: 'inventory-movement/:inventory_movement_id/:inventory_item_id',
+    icon: '',
+    labelKey: 'Inventory Movement Item',
+    permissions: ['inventory.view'],
+}
 export const CATALOGUE: IMenu = {
     code: 'catalogue',
     url: 'catalogue',
@@ -70,7 +146,7 @@ export const BRANDS: IMenu = {
 export const PROCUREMENT: IMenu = {
     code: 'procurement',
     url: 'procurement',
-    icon: 'nav-icon bi bi-clipboard-check',
+    icon: 'nav-icon bi bi-clipboard-plus',
     labelKey: 'Procurement',
 }
 export const PURCHASE_ORDER: IMenu = {
@@ -82,17 +158,24 @@ export const PURCHASE_ORDER: IMenu = {
 }
 export const PURCHASE_ORDER_NEW: IMenu = {
     code: 'form',
-    url: 'form',
+    url: 'form/:step',
     icon: '',
     labelKey: 'New Purchase Order',
     permissions: ['purchasing.create', 'purchasing.edit'],
 }
 export const PURCHASE_ORDER_EDIT: IMenu = {
     code: 'form',
-    url: 'form/:po_id',
+    url: 'form/:step/:po_id',
     icon: '',
     labelKey: 'Edit Purchase Order',
     permissions: ['purchasing.create', 'purchasing.edit'],
+}
+export const PURCHASE_ORDER_DETAIL: IMenu = {
+    code: 'detail',
+    url: 'detail/:po_id',
+    icon: '',
+    labelKey: 'Purchase Order Detail',
+    permissions: ['purchasing.view'],
 }
 export const RECEIVE_ORDER: IMenu = {
     code: 'receive-order',
@@ -101,12 +184,47 @@ export const RECEIVE_ORDER: IMenu = {
     labelKey: 'Receive Order',
     permissions: ['purchasing.view', 'inventory.create', 'purchasing.edit'],
 }
+export const RECEIVE_ORDER_DETAIL: IMenu = {
+    code: 'detail',
+    url: 'detail/:po_id',
+    icon: '',
+    labelKey: 'Purchase Order Detail',
+    permissions: ['purchasing.view'],
+}
+export const PURCHASE_ORDER_RECEIVE: IMenu = {
+    code: 'receive',
+    url: 'detail/:po_id/receive',
+    icon: '',
+    labelKey: 'Receive Purchase Order',
+    permissions: ['purchasing.edit', 'inventory.create'],
+}
 export const SUPPLIERS: IMenu = {
     code: 'supplier',
     url: 'supplier',
     icon: '',
     labelKey: 'Suppliers',
     permissions: ['supplier.view', 'supplier.create', 'supplier.edit', 'supplier.delete'],
+}
+export const PRODUCTION: IMenu = {
+    code: 'production',
+    url: 'production',
+    icon: '',
+    labelKey: 'Production',
+    permissions: ['production.view', 'production.create', 'production.edit', 'production.delete'],
+}
+export const PRODUCTION_FORM: IMenu = {
+    code: 'form',
+    url: 'production/form',
+    icon: '',
+    labelKey: 'Production Form',
+    permissions: ['production.create', 'production.edit'],
+}
+export const PRODUCTION_DETAIL: IMenu = {
+    code: 'production-detail',
+    url: 'production/detail/:id',
+    icon: '',
+    labelKey: 'Production Detail',
+    permissions: ['production.view'],
 }
 
 export const FINANCE: IMenu = {
@@ -120,7 +238,28 @@ export const CASHFLOW: IMenu = {
     url: 'cashflow',
     icon: '',
     labelKey: 'Cashflow',
-    permissions: ['cashflow.view', 'cashflow.create', 'cashflow.edit', 'cashflow.delete'],
+    permissions: ['cashflow.view'],
+}
+export const CASHFLOW_DETAIL: IMenu = {
+    code: 'cashflow-detail',
+    url: 'cashflow/:accounting_id',
+    icon: '',
+    labelKey: 'Cashflow Detail',
+    permissions: ['cashflow.view'],
+}
+export const FINANCE_REPORT: IMenu = {
+    code: 'finance-report',
+    url: 'finance-report',
+    icon: '',
+    labelKey: 'Finance Report',
+    permissions: ['cashflow.view'],
+}
+export const SHOWCASE: IMenu = {
+    code: 'showcase',
+    url: 'showcase',
+    icon: '',
+    labelKey: 'Showcase',
+    permissions: ['product.view'],
 }
 export const EXPENSES: IMenu = {
     code: 'expenses',
@@ -129,12 +268,26 @@ export const EXPENSES: IMenu = {
     labelKey: 'Expenses',
     permissions: ['expenses.view', 'expenses.create', 'expenses.edit', 'expenses.delete'],
 }
-export const CAPITAL: IMenu = {
-    code: 'capital',
-    url: 'capital',
+export const EXPENSES_FORM: IMenu = {
+    code: 'form',
+    url: 'form',
     icon: '',
-    labelKey: 'Capital Account',
-    permissions: ['capital.view', 'capital.create', 'capital.edit', 'capital.delete'],
+    labelKey: 'Expense Form',
+    permissions: ['expenses.create', 'expenses.edit'],
+}
+export const EXPENSES_EDIT: IMenu = {
+    code: 'form',
+    url: 'form/:expense_id',
+    icon: '',
+    labelKey: 'Expense Edit',
+    permissions: ['expenses.edit'],
+}
+export const EXPENSES_DETAIL: IMenu = {
+    code: 'detail',
+    url: 'detail/:expense_id',
+    icon: '',
+    labelKey: 'Expense Detail',
+    permissions: ['expenses.view'],
 }
 
 export const ADMIN: IMenu = {
@@ -188,22 +341,47 @@ export const DASHBOARD: IMenu = {
     permissions: ['dashboard.view']
 }
 
+export const APPROVAL: IMenu = {
+    code: 'approval',
+    url: 'approval',
+    icon: 'nav-icon bi bi-clipboard-check',
+    labelKey: 'Approval',
+    permissions: ['approval.view']
+}
+
+export const INVESTMENT: IMenu = {
+    code: 'investment',
+    url: 'investment',
+    icon: 'nav-icon bi bi-bank',
+    labelKey: 'Investment',
+    permissions: ['investment.view']
+}
+
 // This is to manage menu UI, please make sure routers are matched
 export const Menus: IMenu[] = [
     // TODO: remove this dummy later
     DASHBOARD,
+    APPROVAL,
+    INVESTMENT,
     {
         ...SALES,
         children: [
             CASHIER,
-            SALES_HISTORY
+            SALES_HISTORY,
+            SALE_STOCK
         ]
     },
     {
         ...SUPPLIES,
         children: [
             INVENTORY,
-            SHOWCASE
+            {
+                ...INVENTORY_MOVEMENT,
+                children: [
+                    INVENTORY_MOVEMENT_MANUAL
+                ]
+            },
+            PRODUCTION
         ]
     },
     {
@@ -224,9 +402,9 @@ export const Menus: IMenu[] = [
     {
         ...FINANCE,
         children: [
+            FINANCE_REPORT,
             CASHFLOW,
             EXPENSES,
-            CAPITAL
         ]
     },
     {

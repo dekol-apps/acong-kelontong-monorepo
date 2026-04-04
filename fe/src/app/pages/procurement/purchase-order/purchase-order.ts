@@ -4,18 +4,17 @@ import { TableColumn } from '../../../shared/directives/table-column/table-colum
 import { IPaginationInput, ISelectFilter } from '../../../types/interfaces/common.interface';
 import { NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { RouterLink } from '@angular/router';
-import { ConfirmModal } from '../../../shared/components/modals/confirm-modal/confirm-modal';
-import { IPurchasing } from '../../../types/interfaces/procurement.interface';
-import { PurchaseOrderService } from './purchase-order.service';
+import { IPurchasing, PaymentStatusEn, PurchasingEn } from '../../../types/interfaces/procurement.interface';
+import { PurchaseOrderService } from '../services/purchase-order.service';
+import { SelectFilter } from '../../../shared/components/select-filter/select-filter';
 
 @Component({
   selector: 'app-purchase-order',
-  imports: [GenericTable, TableColumn, RouterLink, ConfirmModal],
+  imports: [GenericTable, TableColumn, RouterLink, SelectFilter],
   templateUrl: './purchase-order.html',
   styleUrl: './purchase-order.scss'
 })
 export class PurchaseOrder implements OnInit {
-  @ViewChild('DeleteModal') confrimDelete?: ConfirmModal;
   isLoading: boolean = false;
   listPurchasing: IPurchasing[] = [];
   pagination: IPaginationInput = {
@@ -29,37 +28,86 @@ export class PurchaseOrder implements OnInit {
     title: 'Filter status',
     selectOptions: [
       {
-        label: 'Requested',
-        value: 'REQUEST'
+        label: PurchasingEn.CREATE,
+        value: PurchasingEn.CREATE
       },
       {
-        label: 'On Process',
-        value: 'PROCESS'
+        label: PurchasingEn.REQUEST,
+        value: PurchasingEn.REQUEST
       },
       {
-        label: 'Received',
-        value: 'RECEIVE'
+        label: PurchasingEn.REJECT,
+        value: PurchasingEn.REJECT
       },
       {
-        label: 'Dropped',
-        value: 'DROP'
+        label: PurchasingEn.APPROVE,
+        value: PurchasingEn.APPROVE
+      },
+      {
+        label: PurchasingEn.PROCESS,
+        value: PurchasingEn.PROCESS
+      },
+      {
+        label: PurchasingEn.RECEIVE,
+        value: PurchasingEn.RECEIVE
+      },
+      {
+        label: PurchasingEn.COMPLETE,
+        value: PurchasingEn.COMPLETE
+      },
+      {
+        label: PurchasingEn.DROP,
+        value: PurchasingEn.DROP
+      },
+      {
+        label: PurchasingEn.EXPIRED,
+        value: PurchasingEn.EXPIRED
       },
     ]
   }
 
-  // supplier: ISupplier;
-  // supplier_name: string;
-  // status?: PurchasingEn;
-  // received_at?: Date;
-  // invoice_number?: string;
-  // invoice_photo?: string;
-  // total_purchase_price: number;
-  // items?: IPurchasingItem[];
+  paymentStatusFilter: ISelectFilter = {
+    title: 'Filter payment status',
+    selectOptions: [
+      {
+        label: PaymentStatusEn.UNPAID,
+        value: PaymentStatusEn.UNPAID
+      },
+      {
+        label: PaymentStatusEn.PARTIAL,
+        value: PaymentStatusEn.PARTIAL
+      },
+      {
+        label: PaymentStatusEn.PAID,
+        value: PaymentStatusEn.PAID
+      },
+    ]
+  }
+
   columns: Array<ColumnProps> = [
     {
       label: 'Supplier Name',
       id: 'supplier_name',
       extraHeaderClass: 'uppercase-text',
+      sort: true
+    },
+    {
+      label: 'Status',
+      id: 'status',
+      extraHeaderClass: 'uppercase-text',
+      sort: true
+    },
+    {
+      label: 'Payment Status',
+      id: 'payment_status',
+      extraHeaderClass: 'uppercase-text',
+      sort: true
+    },
+    {
+      label: 'Created Date',
+      id: 'createdAt',
+      extraHeaderClass: 'uppercase-text',
+      dataType: 'DATE',
       sort: true
     },
     {
@@ -70,14 +118,27 @@ export class PurchaseOrder implements OnInit {
       sort: true
     },
     {
-      label: 'Status',
-      id: 'status',
+      label: 'Completed Date',
+      id: 'completed_date',
       extraHeaderClass: 'uppercase-text',
+      dataType: 'DATE',
       sort: true
     },
     {
-      label: 'Total Purchase Price',
+      label: 'Total Price',
       id: 'total_purchase_price',
+      extraHeaderClass: 'uppercase-text',
+      dataType: 'CURRENCY'
+    },
+    {
+      label: 'Payment Realization',
+      id: 'payment_realization',
+      extraHeaderClass: 'uppercase-text',
+      dataType: 'CURRENCY'
+    },
+    {
+      label: 'Paid Total',
+      id: 'paid_total',
       extraHeaderClass: 'uppercase-text',
       dataType: 'CURRENCY'
     },
@@ -94,6 +155,8 @@ export class PurchaseOrder implements OnInit {
     search: '',
   }
 
+  lastQuery: ITableQueryData = this.defaultQuery;
+
   constructor(private service: PurchaseOrderService) { }
 
   modalOptions: NgbModalOptions = {
@@ -101,14 +164,27 @@ export class PurchaseOrder implements OnInit {
   }
 
   getList(evt: ITableQueryData) {
+    this.lastQuery = evt;
     this.isLoading = true;
-    this.service.getPurchasings({
+    const qParams: any = {
       page: evt.page,
       size: evt.size,
       sortBy: evt.sortBy,
       sortDir: evt.sortDir,
       search: evt.search,
-    }).subscribe({
+    };
+    if (evt.filterByDateVal?.start_date && evt.filterByDateVal?.end_date) {
+      qParams.start_date = evt.filterByDateVal.start_date.toISOString();
+      qParams.end_date = evt.filterByDateVal.end_date.toISOString();
+    }
+    if (evt.filterSelectVal?.value) {
+      qParams.status = evt.filterSelectVal.value;
+    }
+    if (this.paymentStatusFilter.value?.value) {
+      qParams.payment_status = this.paymentStatusFilter.value.value;
+    }
+
+    this.service.getPurchasings(qParams).subscribe({
       next: (res) => {
         console.log({ res })
         this.listPurchasing = res.list ?? [];
@@ -129,17 +205,9 @@ export class PurchaseOrder implements OnInit {
     this.getList(this.defaultQuery)
   }
 
-  deletePurchasing(purchasing_id: string) {
-    this.confrimDelete?.show().then((res: any) => {
-      if (res) {
-        this.execDeleteion(purchasing_id);
-      }
-    })
+  onPaymentStatusFilterChange(value: any) {
+    this.paymentStatusFilter.value = value;
+    this.getList({ ...this.lastQuery, page: 1 });
   }
 
-  execDeleteion(purchasing_id: string) {
-    this.service.deletePurchasing(purchasing_id).subscribe(() => {
-      this.getList(this.defaultQuery);
-    });
-  }
 }

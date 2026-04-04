@@ -3,6 +3,15 @@ import { environment } from '../../../environments/environment';
 const api = `${environment.apiUrl}/`;
 
 export const Endpoint = {
+  ACCOUNTING: `${api}accounting`,
+  ACCOUNTING_HISTORY: `${api}accounting/history`,
+  ACCOUNTING_HISTORY_ID: (id: string) => `${api}accounting/history/${id}`,
+
+  INVESTMENT: `${api}investment`,
+  INVESTMENT_ID: (id: string) => {
+    return `${api}investment/${id}`
+  },
+
   /* Auth endpoints */
   LOGIN: `${api}auth/login`,
   LOGOUT: `${api}auth/logout`,
@@ -46,15 +55,35 @@ export const Endpoint = {
     return `${api}supplier/${id}`
   },
 
-  // Purchasing Endpoint
   PURCHASING: `${api}purchasing`,
   PURCHASING_ID: (id: string) => {
     return `${api}purchasing/${id}`
   },
+  PURCHASING_REQUEST: (id: string) => `${api}purchasing/${id}/request`,
+  PURCHASING_APPROVAL: (id: string) => `${api}purchasing/${id}/approval`,
+  PURCHASING_PROCESS: (id: string) => `${api}purchasing/${id}/process`,
+  PURCHASING_DROP: (id: string) => `${api}purchasing/${id}/drop`,
+  PURCHASING_PAYMENT: (id: string) => `${api}purchasing/${id}/payment`,
+  PURCHASING_RECEIVE: (id: string) => `${api}purchasing/${id}/receive`,
+  PURCHASING_RECEIVE_LIST: `${api}purchasing-receive`,
   PURCHASING_ITEM: `${api}purchasing-item`,
   PURCHASING_ITEM_ID: (id: string) => {
     return `${api}purchasing-item/${id}`
   },
+
+  EXPENSE: `${api}expense`,
+  EXPENSE_ID: (id: string) => `${api}expense/${id}`,
+  EXPENSE_REQUEST: (id: string) => `${api}expense/${id}/request`,
+  EXPENSE_APPROVAL: (id: string) => `${api}expense/${id}/approval`,
+  EXPENSE_EXECUTE: (id: string) => `${api}expense/${id}/execute`,
+
+  // Inventory Item Endpoint
+  INVENTORY_ITEM: `${api}inventory-item`,
+  INVENTORY_ITEM_PRODUCT_ID: (id: string) => `${api}inventory-item/product/${id}`,
+  INVENTORY_ITEM_ID: (id: string) => `${api}inventory-item/item/${id}`,
+  INVENTORY_RECONCILE: `${api}inventory-item/reconcile`,
+  INVENTORY_MOVEMENT: `${api}inventory-movement`,
+  INVENTORY_MOVEMENT_ID: (id: string) => `${api}inventory-movement/${id}`,
 
   // /* Account endpoints */
   // ACCOUNT_SETUP: `${api}account/setup`,
@@ -68,4 +97,16 @@ export const Endpoint = {
   // RESEND_VERIF: `${api}auth/signup/resend-verification`,
   // RESEND_VERIF_CHANGE_EMAIL: `${api}auth/signup/resend-verification`,
   // SIGN_UP: `${api}auth/signup`,
+  // Sale Stock Endpoint
+  SALE_STOCK: `${api}sale/stock`,
+  SALE_STOCK_PRODUCT_ID: (product_id: string) => `${api}sale/stock/product/${product_id}`,
+  SALE_STOCK_ITEM_ID: (item_id: string) => `${api}sale/stock/item/${item_id}`,
+  SALE_SELLING: `${api}sale/selling`,
+  SALE_SELLING_ID: (id: string) => `${api}sale/selling/${id}`,
+
+  // Production Endpoint
+  PRODUCTION: `${api}production`,
+  PRODUCTION_ID: (id: string) => `${api}production/${id}`,
+  PRODUCTION_ID_START: (id: string) => `${api}production/${id}/start`,
+  PRODUCTION_ID_FINISH: (id: string) => `${api}production/${id}/finish`,
 }

@@ -15,7 +15,7 @@ export class ModuleGuard implements CanActivate {
       context.getHandler(),
     );
     const request = context.switchToHttp().getRequest();
-    const user = request.user; // from AuthGuard
+    const user = request.user; // from UAuthGuard
 
     const havePermission = requiredPermission.some(permission => user.role.modules.includes(permission));
 

@@ -6,26 +6,33 @@ span.entry-info,
   font-weight: 400;
   line-height: normal;
 }
+
 .form-select.size-selector {
   padding: 12px !important;
   width: 66px;
 }
+
 .arrow-down-icon {
   position: absolute;
   top: 50%;
-  right: 10px; /* Adjust this value based on the position you want */
+  right: 10px;
+  /* Adjust this value based on the position you want */
   transform: translateY(-50%);
 }
+
 .size-selector {
   width: 75px !important;
 }
+
 .flex-sm-row {
   justify-content: start;
 }
+
 .page-item {
   .page-link {
     border-radius: 0 !important;
   }
+
   &.previous,
   &.next {
     &:not(.disabled) {
@@ -33,15 +40,23 @@ span.entry-info,
         background-color: #0c69b0 !important;
       }
     }
+
     &.disabled {
       .page-link {
         border-color: transparent !important;
       }
     }
   }
+
   &:not(.active) {
     .page-link {
       color: #0c69b0 !important;
     }
+  }
+}
+
+:host ::ng-deep ngb-pagination {
+  .pagination {
+    margin: 0 !important;
   }
 }

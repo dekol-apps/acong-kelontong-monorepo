@@ -1,0 +1,125 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" appFormValidation>
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">{{ 'Manual Inventory Movement' | translate }}</h3>
+        </div>
+        <div class="card-body">
+            <div class="w-100 mb-3 d-flex gap-3 flex-column">
+                <h4>{{ 'INV_FORM_SECTION_MOVEMENT_INFO' | translate }}</h4>
+                <div class="w-100">
+                    <label for="movement_type" class="form-label required">{{ 'INV_FORM_LABEL_MOVEMENT_TYPE' | translate }}</label>
+                    <select id="movement_type" class="form-select" formControlName="movement_type">
+                        <option [value]="FlowType.IN">{{ 'INV_MOVE_IN' | translate }}</option>
+                        <option [value]="FlowType.OUT" selected>{{ 'INV_MOVE_OUT' | translate }}</option>
+                    </select>
+                </div>
+                <div class="border border-warning rounded text-warning p-4 w-100" style="white-space: pre-wrap;">
+                    <div><strong>{{ 'INV_FORM_NOTE_TITLE' | translate }}</strong> {{ 'INV_FORM_NOTE_MANUAL_LINE_1' | translate }}</div>
+                    <div>{{ 'INV_FORM_NOTE_MANUAL_LINE_2' | translate }}</div>
+                    <div>{{ 'INV_FORM_NOTE_MANUAL_LINE_3' | translate }}</div>
+                </div>
+                <div class="w-100">
+                    <label for="order_type" class="form-label required">{{ 'INV_FORM_LABEL_ORDER_TYPE_SOURCE' | translate }}</label>
+                    <select id="order_type" class="form-select" formControlName="order_type">
+                        @if (form.get('movement_type')?.value === FlowType.IN) {
+                        <option [value]="OrderType.DEPOSIT">{{ 'INV_FORM_ORDER_PHYSICAL_INVESTMENT_DEPOSIT' | translate }}</option>
+                        <option [value]="OrderType.PURCHASING">{{ 'INV_FORM_ORDER_PURCHASING' | translate }}</option>
+                        } @else {
+                        <option [value]="OrderType.WITHDRAWAL" selected>{{ 'INV_FORM_ORDER_PHYSICAL_INVESTMENT_WITHDRAWAL' | translate }}</option>
+                        <option [value]="OrderType.EXPENSE">{{ 'INV_FORM_ORDER_OPERATIONAL_EXPENSE' | translate }}</option>
+                        <option [value]="OrderType.SALE">{{ 'INV_FORM_ORDER_SALE' | translate }}</option>
+                        }
+                        <option [value]="OrderType.PRODUCTION">{{ 'INV_FORM_ORDER_PRODUCTION' | translate }}</option>
+                        <option [value]="OrderType.ADJUSTMENT">{{ 'INV_FORM_ORDER_ADJUSTMENT' | translate }}</option>
+                    </select>
+                </div>
+                <div class="w-100">
+                    <label for="description" class="form-label required">{{ 'COMMON_DESCRIPTION' | translate }}</label>
+                    <textarea id="description" class="form-control" formControlName="description" rows="2"
+                        [placeholder]="'INV_FORM_PLACEHOLDER_MOVEMENT_REASON' | translate"></textarea>
+                </div>
+                <hr>
+                @if (form.get('movement_type')?.value === FlowType.IN) {
+                <div class="border border-warning rounded text-warning p-4 w-100" style="white-space: pre-wrap;">
+                    <div><strong>{{ 'INV_FORM_NOTE_TITLE' | translate }}</strong> {{ 'INV_FORM_NOTE_IN_LINE_1' | translate }}</div>
+                    <div>{{ 'INV_FORM_NOTE_IN_LINE_2' | translate }}</div>
+                    <div>{{ 'INV_FORM_NOTE_IN_LINE_3' | translate }}</div>
+                    <div>{{ 'INV_FORM_NOTE_IN_LINE_4' | translate }}</div>
+                </div>
+                }
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h4 class="mb-0">{{ 'INV_FORM_SECTION_MOVEMENT_ITEMS' | translate }}</h4>
+                    <button type="button" class="btn btn-primary btn-sm" (click)="addItem()">
+                        <i class="bi bi-plus-lg me-1"></i> {{ 'COMMON_ADD_ITEM' | translate }}
+                    </button>
+                </div>
+
+                <app-generic-table [columns]="columns" [data]="items.controls" [usePagination]="false"
+                    [isLoading]="isLoading">
+
+                    <!-- Product Selection Column -->
+                    <div appTableColumn customColumnId="product">
+                        <ng-template let-control let-index="index">
+                            <app-dropdown-search [items]="filteredProducts"
+                                [value]="items.at(index).get('product_name')?.value" [placeholder]="'COMMON_SELECT_PRODUCT'"
+                                [searchPlaceholder]="'COMMON_SEARCH_PRODUCT'" [isLoading]="isLoading"
+                                [invalid]="items.at(index).get('product')?.invalid && items.at(index).get('product')?.touched"
+                                [searchLabel]="'product_name'" (onSelect)="selectProduct(index, $event)"
+                                (onSearch)="getProducts($event)"></app-dropdown-search>
+                            @if (items.at(index).get('product')?.invalid && items.at(index).get('product')?.touched)
+                            {
+                            <small class="text-danger">{{ 'INV_FORM_VALIDATION_PRODUCT_REQUIRED' | translate }}</small>
+                            }
+                        </ng-template>
+                    </div>
+
+                    <!-- Quantity Column -->
+                    <div appTableColumn customColumnId="item_qty">
+                        <ng-template let-control let-index="index">
+                            <div [formGroup]="$any(items.at(index))">
+                                <input type="number" class="form-control" formControlName="item_qty" min="1">
+                            </div>
+                        </ng-template>
+                    </div>
+
+                    <!-- Original Price Column -->
+                    <div appTableColumn customColumnId="original_price">
+                        <ng-template let-control let-index="index">
+                            <div [formGroup]="$any(items.at(index))">
+                                <input type="number" class="form-control" formControlName="original_price" min="0">
+                            </div>
+                        </ng-template>
+                    </div>
+
+                    <!-- Landed Cost Column -->
+                    <div appTableColumn customColumnId="landed_cost">
+                        <ng-template let-control let-index="index">
+                            <div [formGroup]="$any(items.at(index))">
+                                <input type="number" class="form-control" formControlName="landed_cost" min="0">
+                            </div>
+                        </ng-template>
+                    </div>
+
+                    <!-- Action Column -->
+                    <div appTableColumn customColumnId="action">
+                        <ng-template let-control let-index="index">
+                            <button type="button" class="btn btn-danger btn-sm" (click)="removeItem(index)"
+                                [disabled]="items.length <= 1">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </ng-template>
+                    </div>
+                </app-generic-table>
+            </div>
+        </div>
+        <div class="card-footer d-flex gap-2">
+            <button type="button" class="btn btn-secondary" (click)="cancel()">{{ 'COMMON_CANCEL' | translate }}</button>
+            <button type="submit" class="btn btn-primary" [disabled]="form.invalid || isLoading">
+                @if (isLoading) {
+                <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
+                }
+                {{ 'COMMON_EXECUTE' | translate }}
+            </button>
+        </div>
+    </div>
+</form>

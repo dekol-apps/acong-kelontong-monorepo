@@ -26,13 +26,8 @@ export class BrandService extends BaseService {
           list: res?.list
         };
         return val;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot get list brand');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
   createBrand(
@@ -41,13 +36,8 @@ export class BrandService extends BaseService {
     return this.postRequest({ url: Endpoint.BRAND, body }).pipe(
       map((res: IResDetail<IBrand>) => {
         return res.detail;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot create brand');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
   editBrand(
@@ -57,39 +47,24 @@ export class BrandService extends BaseService {
     return this.putRequest({ url: Endpoint.BRAND_ID(brand_id), body }).pipe(
       map((res: IResDetail<IBrand>) => {
         return res.detail;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot edit brand');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
   getBrandDetail(brand_id: string): Observable<IBrand> {
     return this.getRequest({ url: Endpoint.BRAND_ID(brand_id) }).pipe(
       map((res: IResDetail<IBrand>) => {
         return res.detail;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot get brand detail');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
   deleteBrand(brand_id: string): Observable<IBrand> {
     return this.deleteRequest({ url: Endpoint.BRAND_ID(brand_id) }).pipe(
       map((res: IResDetail<IBrand>) => {
         return res.detail;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot delete brand');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
 }

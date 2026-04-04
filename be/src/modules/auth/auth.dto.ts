@@ -1,5 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength , IsOptional, IsIn} from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsEmail, IsNotEmpty, IsString, MinLength, IsOptional, IsEnum } from 'class-validator';
 import { logoutOption } from 'src/types/enums';
 import type { TLogoutOption } from 'src/types/interfaces';
 
@@ -22,7 +21,6 @@ export class RefreshTokenDto {
 
 export class LogoutDto {
   @IsOptional() // allow missing query param
-  @IsIn([Object.values(logoutOption)])
-  @Type(() => String) // ensure it's treated as string
+  @IsEnum(logoutOption)
   option?: TLogoutOption;
 }

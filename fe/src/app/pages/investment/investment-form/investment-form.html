@@ -1,0 +1,37 @@
+<div class="modal-header">
+  <h4 class="modal-title" id="modal-title">
+    <div class="card-title text-capitalize">{{ type | translate }}</div>
+  </h4>
+  <button type="button" class="btn-close" aria-describedby="modal-title" (click)="close.emit()"></button>
+</div>
+<form [formGroup]="form" appFormValidation (ngSubmit)="submit()">
+  <fieldset [disabled]="page==='view'">
+    <div class="modal-body">
+      <div class="d-flex flex-row flex-wrap justify-content-between gap-2">
+        <div class="w-100">
+          <label for="transaction_amount" class="form-label required">{{ 'Amount' | translate }}</label>
+          <input type="text" class="form-control" id="transaction_amount" formControlName="transaction_amount"
+            inputmode="decimal"
+            [readOnly]="page==='view'" />
+        </div>
+        <div class="w-100">
+          <label for="invoice_photo" class="form-label">{{ 'Invoice Photo' | translate }}</label>
+          <app-drag-drop-file-multi [patchFileVal]="form.value.attachments" [loading]="isLoading"
+            (fileChanged)="addFile($event)" [message]="'COMMON_ADD_ATTACHMENT_PHOTO'"></app-drag-drop-file-multi>
+        </div>
+        <div class="w-100">
+          <label for="description" class="form-label">{{ 'Description' | translate }}</label>
+          <textarea class="form-control" id="description" rows="3" formControlName="description"></textarea>
+        </div>
+      </div>
+    </div>
+  </fieldset>
+  <div class="modal-footer">
+    @if (page!=='view') {
+    <button class="btn btn-secondary" type="button" (click)="close.emit()">{{ 'COMMON_CANCEL' | translate }}</button>
+    <button class="btn btn-primary" type="submit">{{ 'Submit' | translate }}</button>
+    } @else {
+    <button class="btn btn-warning" (click)="clickEdit()" type="button">{{ 'Edit' | translate }}</button>
+    }
+  </div>
+</form>

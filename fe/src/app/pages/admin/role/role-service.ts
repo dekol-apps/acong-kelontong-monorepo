@@ -22,25 +22,15 @@ export class RoleService extends BaseService {
       map((res: IResList<IRole>) => {
         return res;
       }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot get list role');
-        throw new Error(err);
-      })
-    ) as any;
+    );
   }
 
   getRole(id: string): Observable<IRole> {
     return this.getRequest({ url: Endpoint.ROLE_ID(id) }).pipe(
       map((res: IResDetail<IRole>) => {
         return res.detail;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot get role');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
   createRole(
@@ -49,13 +39,8 @@ export class RoleService extends BaseService {
     return this.postRequest({ url: Endpoint.ROLE, body }).pipe(
       map((res: IResDetail<IRole>) => {
         return res.detail;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot create role');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
   editRole(
@@ -65,40 +50,25 @@ export class RoleService extends BaseService {
     return this.putRequest({ url: Endpoint.ROLE_ID(id), body }).pipe(
       map((res: IResDetail<IRole>) => {
         return res.detail;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot create role');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
   deleteRole(
     role_id: string
-  ): Observable<IRole> {
+  ): Observable<void> {
     return this.deleteRequest({ url: Endpoint.ROLE_ID(role_id) }).pipe(
       map((res: IResDetail<unknown>) => {
         this.alert.success('Success delete role');
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot create role');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 
   getModules(): Observable<TModules[]> {
     return this.getRequest({ url: Endpoint.PERMISSIONS }).pipe(
       map((res: IResDetail<TModules[]>) => {
         return res.detail;
-      }),
-      catchError((err) => {
-        console.error(err);
-        this.alert.error('Cannot get list permission');
-        throw new Error(err);
       })
-    ) as any;
+    );
   }
 }

@@ -1,27 +1,28 @@
 <ng-template #modalTemplateRef>
   <div class="modal-header">
-    <h4 class="modal-title" id="modal-title">Confirm {{type==='delete'?'deletion':'Action'}}</h4>
+    <h4 class="modal-title" id="modal-title">{{ 'CONFIRM_TITLE' | translate }} {{ (type==='delete'?'CONFIRM_DELETION':'Action') | translate }}</h4>
     <button type="button" class="btn-close" aria-describedby="modal-title" (click)="modalRef.dismiss()"></button>
   </div>
   <div class="modal-body">
     @if (type==='delete') {
     <p>
-      <strong>Are you sure you want to delete <span class="text-primary">{{itemName}}</span> ?</strong>
+      <strong>{{ 'CONFIRM_DELETE_PROMPT_PREFIX' | translate }} <span class="text-primary">{{itemName}}</span>?</strong>
     </p>
     <p>
-      <span class="text-danger">This operation can not be undone.</span>
+      <span class="text-danger">{{ 'CONFIRM_DELETE_WARNING' | translate }}</span>
     </p>
     } @else {
     @if(customText) {
     <strong [innerHTML]="customText"></strong>
     } @else {
-    <strong>Are you sure you want to do this operation ?</strong>
+    <strong>{{ 'CONFIRM_ACTION_PROMPT' | translate }}</strong>
     }
     }
+    <ng-content></ng-content>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-outline-secondary" (click)="modalRef.dismiss()">Cancel</button>
+    <button type="button" class="btn btn-outline-secondary" (click)="modalRef.dismiss()">{{ 'COMMON_CANCEL' | translate }}</button>
     <button type="button" class="btn" [class.btn-danger]="type==='delete'" [class.btn-primary]="type!=='delete'"
-      (click)="ok()">Ok</button>
+      (click)="ok()">{{ 'COMMON_OK' | translate }}</button>
   </div>
 </ng-template>

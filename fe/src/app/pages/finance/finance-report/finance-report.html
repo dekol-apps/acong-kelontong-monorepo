@@ -1,1 +1,183 @@
-<p>finance-report works!</p>
+<!-- Finance Report Page -->
+<div class="finance-report-page">
+  <!-- Header -->
+  <div class="page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h2 class="page-title mb-1">{{ 'Finance Report' | translate }}</h2>
+        <p class="text-muted mb-0">{{ 'FINREP_SUBTITLE' | translate }}</p>
+      </div>
+      <div class="text-muted small">
+        <i class="bi bi-calendar3 me-1"></i>
+        {{ 'As of' | translate }} {{ today | date:'dd MMM yyyy, HH:mm' }}
+      </div>
+    </div>
+  </div>
+
+  @if (isLoading) {
+  <div class="text-center py-5">
+    <div class="spinner-border text-primary">
+      <span class="visually-hidden">{{ 'COMMON_LOADING' | translate }}</span>
+    </div>
+    <p class="text-muted mt-2">{{ 'FINREP_LOADING_DATA' | translate }}</p>
+  </div>
+  } @else {
+
+  <!-- Summary Cards -->
+  <div class="row g-3 mb-4">
+    @for (card of summaryCards; track card.label) {
+    <div class="col-md-4 col-sm-6">
+      <div class="summary-card card h-100 border-0 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="card-label text-muted small text-uppercase fw-semibold">{{ card.label | translate }}</span>
+            <div class="icon-wrap text-bg-{{ card.color }} rounded-circle">
+              <i class="bi {{ card.icon }}"></i>
+            </div>
+          </div>
+          <div class="card-value fw-bold">
+            {{ card.value | currency:'IDR':'symbol':'1.2-2' }}
+          </div>
+          <div class="card-desc text-muted small mt-1">{{ card.description | translate }}</div>
+        </div>
+      </div>
+    </div>
+    }
+  </div>
+
+  <!-- Chart + Balance Section -->
+  <div class="row g-3 mb-4">
+    <!-- Bar Chart -->
+    <div class="col-md-8">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-white border-0 pb-0">
+          <h5 class="card-title fw-bold mb-0">
+            <i class="bi bi-bar-chart-line me-2 text-primary"></i>{{ 'FINREP_FINANCIAL_OVERVIEW' | translate }}
+          </h5>
+          <p class="text-muted small mb-0">{{ 'FINREP_KEY_METRICS' | translate }}</p>
+        </div>
+        <div class="card-body pt-3">
+          <div class="chart-container">
+            @for (bar of chartBars; track bar.label) {
+            <div class="chart-row mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="bar-label small fw-semibold">{{ bar.label | translate }}</span>
+                <span class="bar-value small text-muted">
+                  {{ bar.value | currency:'IDR':'symbol':'1.2-2' }}
+                </span>
+              </div>
+              <div class="progress" style="height: 22px; border-radius: 8px;">
+                <div class="progress-bar"
+                  [style.width.%]="bar.percentage > 0 ? bar.percentage : 2"
+                  [style.background-color]="bar.color"
+                  [attr.aria-valuenow]="bar.percentage"
+                  aria-valuemin="0"
+                  aria-valuemax="100">
+                  @if (bar.percentage > 15) {
+                  <span class="px-2">{{ bar.percentage }}%</span>
+                  }
+                </div>
+              </div>
+            </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Balance & Ratios -->
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-white border-0 pb-0">
+          <h5 class="card-title fw-bold mb-0">
+            <i class="bi bi-pie-chart me-2 text-success"></i>{{ 'FINREP_KEY_RATIOS' | translate }}
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="ratio-item border-bottom pb-3 mb-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="small text-muted">{{ 'Gross Margin' | translate }}</div>
+                <div class="fw-bold">
+                  @if ((portfolio?.revenue ?? 0) > 0) {
+                  {{ (((portfolio?.revenue ?? 0) - (portfolio?.cogs ?? 0)) / (portfolio?.revenue ?? 1) * 100) | number:'1.1-1' }}%
+                  } @else {
+                  {{ 'N/A' | translate }}
+                  }
+                </div>
+              </div>
+              <i class="bi bi-graph-up text-success fs-4"></i>
+            </div>
+          </div>
+
+          <div class="ratio-item border-bottom pb-3 mb-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="small text-muted">{{ 'Net Margin' | translate }}</div>
+                <div class="fw-bold">
+                  @if ((portfolio?.revenue ?? 0) > 0) {
+                  {{ ((portfolio?.profit ?? 0) / (portfolio?.revenue ?? 1) * 100) | number:'1.1-1' }}%
+                  } @else {
+                  {{ 'N/A' | translate }}
+                  }
+                </div>
+              </div>
+              <i class="bi bi-percent text-primary fs-4"></i>
+            </div>
+          </div>
+
+          <div class="ratio-item border-bottom pb-3 mb-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="small text-muted">{{ 'COGS' | translate }}</div>
+                <div class="fw-bold">{{ portfolio?.cogs ?? 0 | currency:'IDR':'symbol':'1.2-2' }}</div>
+              </div>
+              <i class="bi bi-box text-warning fs-4"></i>
+            </div>
+          </div>
+
+          <div class="ratio-item">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="small text-muted">{{ 'Inventory Value' | translate }}</div>
+                <div class="fw-bold">{{ portfolio?.inventoryValue ?? 0 | currency:'IDR':'symbol':'1.2-2' }}</div>
+              </div>
+              <i class="bi bi-archive text-info fs-4"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Links -->
+  <div class="row g-3">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0">
+          <h5 class="card-title fw-bold mb-0">
+            <i class="bi bi-lightning-charge me-2 text-warning"></i>{{ 'FINREP_QUICK_ACCESS' | translate }}
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="d-flex flex-wrap gap-2">
+            <a routerLink="/cashflow" class="btn btn-outline-success">
+              <i class="bi bi-arrow-down-circle me-1"></i>{{ 'Cash In' | translate }}
+            </a>
+            <a routerLink="/cashflow" [queryParams]="{ flow_type: 'OUT' }" class="btn btn-outline-danger">
+              <i class="bi bi-arrow-up-circle me-1"></i>{{ 'Cash Out' | translate }}
+            </a>
+            <a routerLink="/expenses" class="btn btn-outline-warning">
+              <i class="bi bi-receipt me-1"></i>{{ 'Expenses' | translate }}
+            </a>
+            <a routerLink="/investment" class="btn btn-outline-primary">
+              <i class="bi bi-bank me-1"></i>{{ 'Investment' | translate }}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  }
+</div>

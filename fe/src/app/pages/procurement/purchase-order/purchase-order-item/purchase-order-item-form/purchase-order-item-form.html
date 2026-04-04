@@ -1,6 +1,6 @@
 <div class="modal-header">
   <h4 class="modal-title" id="modal-title">
-    <div class="card-title text-capitalize">{{type}} Purchase Item</div>
+    <div class="card-title text-capitalize">{{ (type === 'edit' ? 'Edit' : type === 'view' ? 'View' : 'Create') | translate }} {{ 'Purchase Item' | translate }}</div>
   </h4>
   <button type="button" class="btn-close" aria-describedby="modal-title" (click)="onClose.emit()"></button>
 </div>
@@ -12,44 +12,31 @@
           <label for="product" class="form-label">{{form.value.pruchase_order}}</label>
         </div>
         <div class="w-100">
-          <label for="product" class="form-label required">Product</label>
+          <label for="product" class="form-label required">{{ 'Product' | translate }}</label>
           <select class="form-select" id="product" formControlName="product">
-            <option selected disabled value="">Choose...</option>
+            <option selected disabled value="">{{ 'Choose...' | translate }}</option>
             @for (product of products; track $index) {
-            <option [value]="product._id">{{product.product_name}}</option>
+            <option [value]="product._id">{{product.product_name}} ({{product.product_sku || '-'}})</option>
             }
           </select>
         </div>
 
         <div class="w-100">
-          <label for="purchase_qty" class="form-label required">Item Quantity</label>
+          <label for="purchase_qty" class="form-label required">{{ 'Item Quantity' | translate }}</label>
           <input type="number" class="form-control" id="purchase_qty" formControlName="purchase_qty" />
         </div>
 
         <div class="w-100">
-          <label for="purchase_price" class="form-label required">Purchase Price</label>
-          <input type="number" class="form-control" id="purchase_price" formControlName="purchase_price" />
+          <label for="purchase_price" class="form-label required">{{ 'Purchase Item Price' | translate }}</label>
+          <input type="number" class="form-control" id="purchase_price" formControlName="purchase_price" step="0.01" />
         </div>
 
-        <div class="w-100">
-          <label for="sell_price" class="form-label">Sale Price</label>
-          <input type="number" class="form-control" id="sell_price" formControlName="sell_price" />
-        </div>
-
-        <div class="w-100">
-          <label for="exp_date" class="form-label">Expired Date</label>
-          <div class="input-group">
-            <input class="form-control" placeholder="yyyy-mm-dd" name="dp" formControlName="exp_date" ngbDatepicker
-              #d="ngbDatepicker" />
-            <button class="btn btn-outline-secondary bi bi-calendar3" (click)="d.toggle()" type="button"></button>
-          </div>
-        </div>
       </div>
     </div>
     @if (type!=='view') {
     <div class="modal-footer">
-      <button class="btn btn-secondary" type="button" (click)="onClose.emit()">Cancel</button>
-      <button class="btn btn-primary" type="submit">Submit</button>
+      <button class="btn btn-secondary" type="button" (click)="onClose.emit()">{{ 'COMMON_CANCEL' | translate }}</button>
+      <button class="btn btn-primary" type="submit">{{ 'Submit' | translate }}</button>
     </div>
     }
   </form>

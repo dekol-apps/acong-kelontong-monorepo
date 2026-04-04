@@ -1,1 +1,26 @@
-<p>cashflow works!</p>
+<div class="card p-4">
+  <div class="card-header mb-4">
+    <div class="d-flex flex-row justify-content-between gap-4">
+      <h3 class="card-title">Cashflow History</h3>
+      <a routerLink="/finance-report" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-bar-chart-line me-1"></i>Finance Report
+      </a>
+    </div>
+  </div>
+  <ul ngbNav #nav="ngbNav" [(activeId)]="tab" class="nav-tabs">
+    <li [ngbNavItem]="1">
+      <button ngbNavLink>In</button>
+      <ng-template ngbNavContent>
+        <app-cashflow-in></app-cashflow-in>
+      </ng-template>
+    </li>
+    <li [ngbNavItem]="2">
+      <button ngbNavLink>Out</button>
+      <ng-template ngbNavContent>
+        <app-cashflow-out></app-cashflow-out>
+      </ng-template>
+    </li>
+  </ul>
+  
+  <div [ngbNavOutlet]="nav" class="mt-2"></div>
+</div>

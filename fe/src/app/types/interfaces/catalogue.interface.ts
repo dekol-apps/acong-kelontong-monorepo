@@ -7,8 +7,9 @@ export interface IBrand {
 export interface IProduct {
   _id?: string;
   product_name: string;
+  product_sku?: string;
   product_description?: string;
-  unit_of_measure?: string, 
+  unit_of_measure: string,
   barcode?: string, 
   brand: IBrand
 } 

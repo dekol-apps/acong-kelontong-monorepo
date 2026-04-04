@@ -1,0 +1,35 @@
+<app-generic-table ngSkipHydration [columns]="columns" [data]="listPurchasing" [filterSelect]="filterSelect"
+  [usePagination]="true" [useSearch]="true" [total]="pagination.total" (OnDataRefresh)="getList($event)"
+  [isLoading]="isLoading">
+  <div appTableColumn customColumnId="total_purchase_price">
+    <ng-template let-item>
+      {{ item.total_purchase_price | rupiah }}
+      @if(item.status === PurchasingEn.COMPLETE || item.status === PurchasingEn.PROCESS) {(FINAL)}
+    </ng-template>
+  </div>
+
+  <div appTableColumn customColumnId="action">
+    <ng-template let-item>
+      <div class="d-flex flex-row gap-1 justify-content-end">
+        <a [routerLink]="['./form', item._id]" [queryParams]="{type: 'view'}" class="pointer btn btn-secondary">
+          <i class="fa-solid fa-eye"></i>
+        </a>
+        <button class="pointer btn btn-danger" (click)="rejectPurchasing(item._id)"
+          [disabled]="item.status !== 'REQUEST'">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <button class="pointer btn btn-success" (click)="approvePurchasing(item._id)"
+          [disabled]="item.status !== 'REQUEST'">
+          <i class="fa-solid fa-check"></i>
+        </button>
+      </div>
+    </ng-template>
+  </div>
+</app-generic-table>
+
+<app-confirm-modal #RejectModal [type]="'action'">
+  <div class="w-100">
+    <label for="reject_notes" class="form-label">Reject Notes</label>
+    <textarea class="form-control" id="reject_notes" rows="3" [(ngModel)]="rejectNotes"></textarea>
+  </div>
+</app-confirm-modal>

@@ -1,0 +1,115 @@
+<section class="dashboard-landing">
+  <div class="hero-card">
+    <div class="hero-content">
+      <p class="eyebrow">{{ 'DASHBOARD_SUITE_TITLE' | translate }}</p>
+      <h1>{{ 'DASHBOARD_COMMAND_CENTER' | translate }}</h1>
+      <p class="hero-copy">
+        {{ 'DASHBOARD_HERO_COPY_1' | translate }}
+        {{ 'DASHBOARD_HERO_COPY_2' | translate }}
+      </p>
+
+      <div class="hero-tags">
+        <span><i class="bi bi-check2-circle"></i> {{ 'DASHBOARD_TAG_FIFO' | translate }}</span>
+        <span><i class="bi bi-check2-circle"></i> {{ 'DASHBOARD_TAG_DECIMAL_PRECISION' | translate }}</span>
+        <span><i class="bi bi-check2-circle"></i> {{ 'DASHBOARD_TAG_APPROVAL' | translate }}</span>
+        <span><i class="bi bi-check2-circle"></i> {{ 'DASHBOARD_TAG_ACTIVITY_TRACE' | translate }}</span>
+      </div>
+    </div>
+
+    <div class="hero-pattern" aria-hidden="true"></div>
+  </div>
+
+  <div class="metrics-grid">
+    <article class="metric-card soft-blue">
+      <p class="metric-label">{{ 'DASHBOARD_METRIC_CASH_BALANCE' | translate }}</p>
+      <h3>{{ (portofolio?.balance ?? 0) | rupiah }}</h3>
+      <p class="metric-foot">{{ 'DASHBOARD_METRIC_CASH_BALANCE_DESC' | translate }}</p>
+    </article>
+
+    <article class="metric-card soft-amber">
+      <p class="metric-label">{{ 'Investment' | translate }}</p>
+      <h3>{{ (portofolio?.investment ?? 0) | rupiah }}</h3>
+      <p class="metric-foot">{{ 'DASHBOARD_METRIC_INVESTMENT_DESC' | translate }}</p>
+    </article>
+
+    <article class="metric-card soft-green">
+      <p class="metric-label">{{ 'DASHBOARD_METRIC_INVENTORY_VALUE' | translate }}</p>
+      <h3>{{ (portofolio?.inventoryValue ?? 0) | rupiah }}</h3>
+      <p class="metric-foot">{{ 'DASHBOARD_METRIC_INVENTORY_VALUE_DESC' | translate }}</p>
+    </article>
+
+    <article class="metric-card soft-red">
+      <p class="metric-label">{{ 'DASHBOARD_METRIC_NET_PROFIT' | translate }}</p>
+      <h3>{{ (portofolio?.profit ?? 0) | rupiah }}</h3>
+      <p class="metric-foot">{{ 'DASHBOARD_METRIC_NET_PROFIT_DESC' | translate }}</p>
+    </article>
+  </div>
+
+  <div class="content-grid">
+    <article class="panel">
+      <h2>{{ 'DASHBOARD_COVERAGE_TITLE' | translate }}</h2>
+      <p>
+        {{ 'DASHBOARD_COVERAGE_DESC' | translate }}
+      </p>
+      <div class="feature-list">
+        <div>
+          <h4><i class="bi bi-receipt-cutoff"></i> {{ 'DASHBOARD_FEATURE_SALES_TITLE' | translate }}</h4>
+          <p>{{ 'DASHBOARD_FEATURE_SALES_DESC' | translate }}</p>
+        </div>
+        <div>
+          <h4><i class="bi bi-box-seam"></i> {{ 'DASHBOARD_FEATURE_INVENTORY_TITLE' | translate }}</h4>
+          <p>{{ 'DASHBOARD_FEATURE_INVENTORY_DESC' | translate }}</p>
+        </div>
+        <div>
+          <h4><i class="bi bi-truck"></i> {{ 'DASHBOARD_FEATURE_PURCHASING_TITLE' | translate }}</h4>
+          <p>{{ 'DASHBOARD_FEATURE_PURCHASING_DESC' | translate }}</p>
+        </div>
+        <div>
+          <h4><i class="bi bi-cash-stack"></i> {{ 'DASHBOARD_FEATURE_ACCOUNTING_TITLE' | translate }}</h4>
+          <p>{{ 'DASHBOARD_FEATURE_ACCOUNTING_DESC' | translate }}</p>
+        </div>
+      </div>
+    </article>
+
+    <article class="panel methods-panel">
+      <h2>{{ 'DASHBOARD_METHODS_TITLE' | translate }}</h2>
+      <ul class="method-list">
+        <li>
+          <span class="method-title">{{ 'DASHBOARD_METHOD_FIFO_TITLE' | translate }}</span>
+          <span class="method-desc">{{ 'DASHBOARD_METHOD_FIFO_DESC' | translate }}</span>
+        </li>
+        <li>
+          <span class="method-title">{{ 'DASHBOARD_METHOD_DECIMAL_TITLE' | translate }}</span>
+          <span class="method-desc">{{ 'DASHBOARD_METHOD_DECIMAL_DESC' | translate }}</span>
+        </li>
+        <li>
+          <span class="method-title">{{ 'DASHBOARD_METHOD_ROLE_TITLE' | translate }}</span>
+          <span class="method-desc">{{ 'DASHBOARD_METHOD_ROLE_DESC' | translate }}</span>
+        </li>
+        <li>
+          <span class="method-title">{{ 'DASHBOARD_METHOD_APPROVAL_TITLE' | translate }}</span>
+          <span class="method-desc">{{ 'DASHBOARD_METHOD_APPROVAL_DESC' | translate }}</span>
+        </li>
+        <li>
+          <span class="method-title">{{ 'DASHBOARD_METHOD_AUDIT_TITLE' | translate }}</span>
+          <span class="method-desc">{{ 'DASHBOARD_METHOD_AUDIT_DESC' | translate }}</span>
+        </li>
+      </ul>
+    </article>
+  </div>
+
+  <article class="panel journey-panel">
+    <h2>{{ 'DASHBOARD_JOURNEY_TITLE' | translate }}</h2>
+    <div class="journey-flow">
+      <div><strong>{{ 'DASHBOARD_JOURNEY_STEP_1_TITLE' | translate }}</strong><span>{{ 'DASHBOARD_JOURNEY_STEP_1_DESC' | translate }}</span></div>
+      <i class="bi bi-arrow-right"></i>
+      <div><strong>{{ 'DASHBOARD_JOURNEY_STEP_2_TITLE' | translate }}</strong><span>{{ 'DASHBOARD_JOURNEY_STEP_2_DESC' | translate }}</span></div>
+      <i class="bi bi-arrow-right"></i>
+      <div><strong>{{ 'DASHBOARD_JOURNEY_STEP_3_TITLE' | translate }}</strong><span>{{ 'DASHBOARD_JOURNEY_STEP_3_DESC' | translate }}</span></div>
+      <i class="bi bi-arrow-right"></i>
+      <div><strong>{{ 'DASHBOARD_JOURNEY_STEP_4_TITLE' | translate }}</strong><span>{{ 'DASHBOARD_JOURNEY_STEP_4_DESC' | translate }}</span></div>
+      <i class="bi bi-arrow-right"></i>
+      <div><strong>{{ 'DASHBOARD_JOURNEY_STEP_5_TITLE' | translate }}</strong><span>{{ 'DASHBOARD_JOURNEY_STEP_5_DESC' | translate }}</span></div>
+    </div>
+  </article>
+</section>

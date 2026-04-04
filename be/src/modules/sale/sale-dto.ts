@@ -1,0 +1,86 @@
+import { Type } from 'class-transformer';
+import { IsObjectId } from 'src/global/is-object-id.decorator';
+import {
+  IsNotEmpty,
+  IsOptional,
+  IsNumber,
+  IsInt,
+  Min,
+  ArrayMinSize,
+  IsArray,
+  ValidateNested,
+} from 'class-validator';
+import { Types } from 'mongoose';
+import { IsMoney } from 'src/global/is-money.decorator';
+
+export class SaleItemDto {
+  /**
+   * The product to pull from inventory.
+   */
+  @IsObjectId()
+  @IsNotEmpty()
+  product: Types.ObjectId;
+
+  /**
+   * Number of physical units to pull from inventory via FIFO.
+   */
+  @IsInt()
+  @Min(1)
+  item_qty: number;
+
+  /**
+   * Sale price per unit.
+   * (JS number in DTO; converted to Decimal128 in service)
+   */
+  @IsNotEmpty()
+  @IsMoney()
+  sale_price: Types.Decimal128;
+
+  /**
+   * Original price of the item. comes from data collection from inventory item as Decimal128
+   */
+  @IsOptional()
+  @IsMoney()
+  original_price: Types.Decimal128;
+
+  @IsOptional()
+  @IsNumber()
+  discount_percent?: number;
+
+}
+
+export class SaleDto {
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => SaleItemDto)
+  items: SaleItemDto[];
+}
+
+export class SellingSaleItemDto {
+  @IsObjectId()
+  @IsNotEmpty()
+  product: Types.ObjectId;
+
+  @IsInt()
+  @Min(1)
+  item_qty: number;
+}
+
+export class SellingSaleDto {
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => SellingSaleItemDto)
+  items: SellingSaleItemDto[];
+}
+
+export interface CalculateSaleResult {
+  ppn_rate: number;
+  total_before_tax: Types.Decimal128;
+  total_ppn: Types.Decimal128;
+  grand_total: Types.Decimal128;
+  total_discount: Types.Decimal128;
+  /** Sum of landed_cost (COGS) for all items sold in this transaction */
+  total_cogs: Types.Decimal128;
+}

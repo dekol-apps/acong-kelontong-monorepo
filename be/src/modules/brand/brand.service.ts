@@ -1,16 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Brand } from './brand.schema';
+import { CreateBrandDto, UpdateBrandDto } from './brand.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { BaseResponse } from 'src/utils/base-response';
 import { GlobalService } from 'src/global/global.service';
-import { IPaginationRes } from 'src/types/interfaces';
+import { IListRes } from 'src/types/interfaces';
 import { PaginationDto } from 'src/global/global.dto';
 
 @Injectable()
 export class BrandService {
     constructor(
         @InjectModel(Brand.name) private readonly brandModel: Model<Brand>,
+        @Inject(forwardRef(() => GlobalService))
         private global: GlobalService
     ) { }
 
@@ -20,7 +22,7 @@ export class BrandService {
         sortBy,
         sortDir,
         search,
-    }: PaginationDto): Promise<{ data: Brand[]; meta: IPaginationRes }> {
+    }: PaginationDto): Promise<IListRes<Brand>> {
         const searchFields: string[] = ['brand_name', 'brand_description'];
 
         return this.global.getList<Brand>(
@@ -36,7 +38,7 @@ export class BrandService {
         )
     }
 
-    async createBrand(data: Brand): Promise<Brand> {
+    async createBrand(data: CreateBrandDto): Promise<Brand> {
         try {
             const newBrand = await this.brandModel.create(data);
             return newBrand;
@@ -45,7 +47,7 @@ export class BrandService {
         }
     }
 
-    async editBrand(id: Types.ObjectId, data: Brand): Promise<Brand | undefined> {
+    async editBrand(id: Types.ObjectId, data: UpdateBrandDto): Promise<Brand | undefined> {
         try {
             const updatedBrand = await this.brandModel.findByIdAndUpdate(
                 id,
@@ -72,7 +74,9 @@ export class BrandService {
 
     async deleteBrand(id: Types.ObjectId): Promise<Brand | undefined> {
         try {
-            const detailBrand = await this.brandModel.findByIdAndDelete(id).exec();
+            const detailBrand = await this.brandModel.findById(id);
+            if (!detailBrand) throw BaseResponse.notFound()
+            await this.global.deleteData(detailBrand);
             return detailBrand || undefined;
         } catch (err) {
             throw BaseResponse.unexpected({ err: { text: 'detailBrand catch', err } })

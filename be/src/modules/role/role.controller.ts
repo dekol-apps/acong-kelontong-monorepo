@@ -3,12 +3,12 @@ import { RoleService } from './role.service';
 import { BaseResponse } from 'src/utils/base-response';
 import type { Response } from 'express';
 import type { RoleDocument } from './role.schema';
-import { AuthGuard } from '../auth/auth.guard';
+import { UAuthGuard } from '../auth/auth.guard';
 import { GetRolesDTO } from './role.dto';
 import { Permission } from 'src/global/permission.decoratior';
 import { Types } from 'mongoose';
 
-@UseGuards(AuthGuard)
+@UseGuards(UAuthGuard)
 @Controller('role')
 export class RoleController {
   constructor(

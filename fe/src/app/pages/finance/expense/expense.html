@@ -1,1 +1,27 @@
-<p>expense works!</p>
+<div class="card">
+	<div class="card-header mb-4">
+		<div class="d-flex flex-row justify-content-between gap-4">
+			<h3 class="card-title">Expense List</h3>
+			<a class="btn btn-primary pointer" routerLink="./form">New Expense</a>
+		</div>
+	</div>
+	<div class="card-body">
+		<app-generic-table ngSkipHydration [columns]="columns" [data]="listExpense" [filterSelect]="filterSelect"
+			[useFilterByDate]="true" [usePagination]="true" [useSearch]="true" [total]="pagination.total"
+			(OnDataRefresh)="getList($event)" [isLoading]="isLoading">
+			<div appTableColumn customColumnId="action">
+				<ng-template let-item>
+					<div class="d-flex flex-row gap-1 justify-content-end">
+						<a [routerLink]="['./detail', item._id]" class="text-white pointer btn btn-secondary">
+							<i class="fa-solid fa-eye"></i>
+						</a>
+						<a [routerLink]="['./form', item._id]" class="text-white pointer btn btn-warning"
+							[class.disabled]="item.status !== ExpenseEn.CREATE && item.status !== ExpenseEn.REJECT">
+							<i class="fa-solid fa-pencil"></i>
+						</a>
+					</div>
+				</ng-template>
+			</div>
+		</app-generic-table>
+	</div>
+</div>

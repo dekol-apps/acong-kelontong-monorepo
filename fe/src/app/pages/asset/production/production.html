@@ -1,0 +1,27 @@
+<div class="card">
+    <div class="card-header">
+        <div class="d-flex flex-row gap-2 justify-content-between">
+            <h3 class="card-title">Production</h3>
+            <a class="btn btn-primary pointer" [routerLink]="['./form']">+ New Production</a>
+        </div>
+    </div>
+    <div class="card-body">
+        <app-generic-table [columns]="columns" [data]="list" [total]="pagination.total" [isLoading]="isLoading"
+            [usePagination]="true" [useSearch]="true" (OnDataRefresh)="getList($event)">
+            <div appTableColumn customColumnId="product">
+                <ng-template let-item>
+                    {{ item.product.product_name }} ({{ item.product.product_sku || '-' }})
+                </ng-template>
+            </div>
+            <div appTableColumn customColumnId="action">
+                <ng-template let-item>
+                    <div class="d-flex flex-row gap-1 justify-content-end">
+                        <a [routerLink]="['detail', item._id]" class="text-white pointer btn btn-secondary">
+                            <i class="fa-solid fa-eye"></i>
+                        </a>
+                    </div>
+                </ng-template>
+            </div>
+        </app-generic-table>
+    </div>
+</div>

@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Inject, Input, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
-import { IPurchasingItem } from '../../../../types/interfaces/procurement.interface';
-import { PurchaseOrderService } from '../purchase-order.service';
+import { IPurchasing, IPurchasingItem, PurchasingEn } from '../../../../types/interfaces/procurement.interface';
+import { PurchaseOrderService } from '../../services/purchase-order.service';
 import { AlertService } from '../../../../shared/components/alert/alert-service';
-import { NgbActiveModal, NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal, NgbModal, NgbModalOptions, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ColumnProps, GenericTable, ITableQueryData } from '../../../../shared/components/generic-table/generic-table';
 import { ConfirmModal } from '../../../../shared/components/modals/confirm-modal/confirm-modal';
 import { TableColumn } from '../../../../shared/directives/table-column/table-column';
@@ -10,6 +10,7 @@ import { SORT_DIR } from '../../../../types/constants/common.constants';
 import { IPaginationInput, formType } from '../../../../types/interfaces/common.interface';
 import { PurchaseOrderItemForm } from './purchase-order-item-form/purchase-order-item-form';
 import { ActivatedRoute } from '@angular/router';
+import { PurchasingStore } from '../../../../shared/stores/purchasing.store';
 
 @Component({
   selector: 'app-purchase-order-item',
@@ -19,17 +20,17 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class PurchaseOrderItem implements OnInit {
 
-  @Output() nextStep: EventEmitter<unknown> = new EventEmitter<unknown>()
+  @Output() next: EventEmitter<unknown> = new EventEmitter<unknown>()
   @Output() back: EventEmitter<unknown> = new EventEmitter<unknown>()
 
   @ViewChild('ConfirmModal') confrimModal?: ConfirmModal;
   @ViewChild('POItemForm', { static: false }) poItemForm?: TemplateRef<PurchaseOrderItemForm>;
 
   @Input() type: formType = 'view';
+  @Input() purchase_id?: string;
 
   isLoading: boolean = false;
   listPurchasingItem: IPurchasingItem[] = [];
-  purchase_id?: string;
   purchase_item_id?: string;
   form_type?: formType;
 
@@ -48,38 +49,31 @@ export class PurchaseOrderItem implements OnInit {
       sort: true,
     },
     {
-      label: 'Supplier',
-      id: 'supplier_name',
+      label: 'SKU',
+      id: 'product_sku',
       extraHeaderClass: 'uppercase-text',
-      backendPropName: 'supplier_name',
+      backendPropName: 'product_sku',
       sort: true,
     },
     {
-      label: 'Purchase QTY',
+      label: 'Quantity',
       id: 'purchase_qty',
       extraHeaderClass: 'uppercase-text',
       backendPropName: 'purchase_qty',
     },
     {
-      label: 'Purchase Price',
+      label: 'Price',
       id: 'purchase_price',
       extraHeaderClass: 'uppercase-text',
       backendPropName: 'purchase_price',
       dataType: 'CURRENCY'
     },
     {
-      label: 'Sale Price',
-      id: 'sell_price',
+      label: 'Total',
+      id: 'price_total',
       extraHeaderClass: 'uppercase-text',
-      backendPropName: 'sell_price',
+      backendPropName: 'price_total',
       dataType: 'CURRENCY'
-    },
-    {
-      label: 'Expired Date',
-      id: 'exp_date',
-      extraHeaderClass: 'uppercase-text',
-      backendPropName: 'exp_date',
-      dataType: 'DATE'
     },
     {
       label: 'Action',
@@ -99,15 +93,30 @@ export class PurchaseOrderItem implements OnInit {
 
   activeModal = Inject(NgbActiveModal);
 
-  constructor(private service: PurchaseOrderService, private modalService: NgbModal, private alert: AlertService, private route: ActivatedRoute) {
-    this.purchase_id = this.route.snapshot.paramMap.get('po_id') || undefined;
+  purchasing?: IPurchasing;
+
+  ableToTouch: string[] = [PurchasingEn.CREATE, PurchasingEn.REJECT, PurchasingEn.REQUEST, PurchasingEn.APPROVE, PurchasingEn.PROCESS] as string[];
+
+  constructor(private service: PurchaseOrderService, private modalService: NgbModal, private alert: AlertService, private store: PurchasingStore) {
+    this.store.purchasing$.subscribe(val => {
+      this.purchasing = val;
+    })
+  }
+
+  canTouch() {
+    const status = this.purchasing?.status;
+    const paymentStatus = this.purchasing?.payment_status;
+    if (paymentStatus && paymentStatus !== 'UNPAID') {
+      return false;
+    }
+    return this.type === 'new' || (this.type === 'edit' && status && this.ableToTouch.includes(status))
   }
 
   modalOptions: NgbModalOptions = {
     size: 'xl'
   }
 
-  modalRef
+  modalRef?: NgbModalRef;
   showForm(type: formType, id?: string) {
     this.modalRef = this.modalService.open(this.poItemForm, this.modalOptions);
     this.form_type = type;
@@ -118,7 +127,7 @@ export class PurchaseOrderItem implements OnInit {
   close(save: boolean) {
     console.log('save', save)
     if (save) this.getList(this.defaultTableParam);
-    this.modalRef.dismiss();
+    this.modalRef?.dismiss();
   }
 
   getList(evt: ITableQueryData) {
@@ -135,10 +144,10 @@ export class PurchaseOrderItem implements OnInit {
         next: (res) => {
           this.listPurchasingItem = res.list ?? [];
           this.pagination = {
-            page: res.meta?.page ?? 0,
+            page: res.meta?.page ?? this.defaultTableParam.page,
             total: res.meta?.total ?? 0,
-            size: res.meta?.size ?? 0,
-            totalPages: res.meta?.totalPages ?? 0
+            size: res.meta?.size ?? this.defaultTableParam.size,
+            totalPages: res.meta?.totalPages ?? this.defaultTableParam.page
           }
           console.log({ listPurchasingItem: this.listPurchasingItem })
           this.isLoading = false;

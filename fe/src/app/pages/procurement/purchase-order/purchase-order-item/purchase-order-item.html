@@ -2,7 +2,7 @@
   <div class="card-header mb-4">
     <div class="d-flex flex-row justify-content-between gap-4">
       <h3 class="card-title">Purchase Item List</h3>
-      @if (type !== 'view') {
+      @if (canTouch()) {
       <button class="btn btn-primary" (click)="showForm('new')">Add Item</button>
       }
     </div>
@@ -15,7 +15,7 @@
           <a (click)="showForm('view', item._id)" class="text-white pointer btn btn-secondary">
             <i class="fa-solid fa-eye"></i>
           </a>
-          @if (type !== 'view') {
+          @if (canTouch()) {
           <button (click)="showForm('edit', item._id)" class="text-white pointer btn btn-warning">
             <i class="fa-solid fa-pencil"></i>
           </button>
@@ -30,7 +30,7 @@
 </div>
 <div class="card-footer d-flex gap-2">
   <button class="btn btn-secondary" type="button" (click)="back.emit()">Back</button>
-  <button class="btn btn-primary" type="button" (click)="nextStep.emit()">Next</button>
+  <button class="btn btn-primary" type="button" (click)="next.emit()">Next</button>
 </div>
 
 <app-confirm-modal #ConfirmModal></app-confirm-modal>

@@ -1,8 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { InjectConnection } from '@nestjs/mongoose';
-import { Model, FilterQuery, ClientSession, Connection } from 'mongoose';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import { Model, FilterQuery, ClientSession, Connection, HydratedDocument, Types } from 'mongoose';
 import { modules } from 'src/types/constants';
-import { IPaginationRes, TOneOrMany } from 'src/types/interfaces';
+import { IListRes, TOneOrMany } from 'src/types/interfaces';
+import { Trash } from './global.schema';
+import { Document } from 'mongoose';
+import { FilterDto } from './global.dto';
+import { BaseResponse } from 'src/utils/base-response';
+import Decimal from 'decimal.js';
+import { toDecimal, toDecimal128, toTaxReportingDecimal128 } from 'src/utils/helper';
 
 export type PopulateParam = { column: string; select?: any; match?: any; options?: any };
 export class IGetListParam {
@@ -11,10 +17,11 @@ export class IGetListParam {
   sortBy?: string = '';
   sortDir?: 'asc' | 'desc' = 'asc';
   search?: string = '';
-  searchFields: string[] = [];
-  filter?: TOneOrMany<{ column: string; value: any }>;
+  searchFields?: string[] = [];
+  filter?: TOneOrMany<FilterDto>;
   // allow single or multiple populate options
   populate?: TOneOrMany<PopulateParam>;
+  customConditions?: Record<string, any>;
 }
 
 @Injectable()
@@ -22,37 +29,55 @@ export class GlobalService {
 
   constructor(
     @InjectConnection() private readonly connection: Connection,
+    @InjectModel(Trash.name) private trashModel: Model<Trash>,
   ) { }
 
 
-  async getList<M>(model: Model<M>, params: IGetListParam): Promise<{ data: M[]; meta: IPaginationRes }> {
-    const pageNum = Math.max(1, Number(params.page) || 1);
-    const pageSize = Math.max(1, Number(params.size) || 1000);
-    const skip = (pageNum - 1) * pageSize;
+  async getList<M>(
+    model: Model<M>,
+    params: IGetListParam
+  ): Promise<IListRes<HydratedDocument<M>>> {
+    const pageNum = params.page !== undefined ? Math.max(1, params.page) : undefined;
+    const pageSize = params.size !== undefined ? Math.max(1, params.size) : undefined;
+    const isPaginated = pageNum !== undefined && pageSize !== undefined;
+    const skip = isPaginated ? (pageNum - 1) * pageSize : 0;
 
-    // ✅ Start with empty filter object
-    const conditions: FilterQuery<M> = {};
+    // ✅ Start with customConditions or empty filter object
+    const conditions: FilterQuery<M> = (params.customConditions ? { ...params.customConditions } : {}) as FilterQuery<M>;
 
     // 🔎 Search
-    if (params.search && params.searchFields.length > 0) {
-      const conditionList = params.searchFields.map((field: any) => ({
+    if (params.search && params.searchFields && params.searchFields?.length > 0) {
+      const conditionList = params.searchFields?.map((field: string) => ({
         [field]: { $regex: params.search, $options: 'i' },
-      }));
+      } as FilterQuery<M>));
       conditions['$or'] = conditionList;
     }
 
-    // 🎯 Custom filter
-    const addFilter = (filter) => {
-      if (filter?.column && filter.value !== undefined) {
-        if (Array.isArray((conditions as any)[filter.column])) {
-          (conditions as any)[filter.column].push(filter.value);
-        } else if ((conditions as any)[filter.column] !== undefined) {
-          (conditions as any)[filter.column] = { $in: [(conditions as any)[filter.column], filter.value] }; // This way we can filter a column with multiple value as keys
-        } else {
-          (conditions as any)[filter.column] = filter.value;
-        }
+    // Flexible filter
+    const addFilter = (filter: FilterDto) => {
+      if (!filter?.column || filter.value === undefined) return;
+
+      const incomingValues = Array.isArray(filter.value)
+        ? filter.value
+        : [filter.value];
+
+      if ((conditions as any)[filter.column] !== undefined) {
+        const existing = (conditions as any)[filter.column];
+
+        const existingValues =
+          existing?.$in ? existing.$in : [existing];
+
+        (conditions as any)[filter.column] = {
+          $in: [...existingValues, ...incomingValues],
+        };
+      } else {
+        (conditions as any)[filter.column] =
+          incomingValues.length === 1
+            ? incomingValues[0]
+            : { $in: incomingValues };
       }
     };
+
 
     if (params.filter) {
       if (Array.isArray(params.filter)) {
@@ -71,7 +96,11 @@ export class GlobalService {
       sort[params.sortBy] = params.sortDir === 'desc' ? -1 : 1;
     }
 
-    const query = model.find(conditions).sort(sort).skip(skip).limit(pageSize);
+    let query = model.find(conditions).sort(sort);
+
+    if (isPaginated) {
+      query = query.skip(skip).limit(pageSize);
+    }
 
     // ✅ Handle populate (single or array)
     if (params.populate) {
@@ -84,19 +113,22 @@ export class GlobalService {
       }
     }
 
-    const [data, total] = await Promise.all([
-      query.exec(),
-      model.countDocuments(conditions).exec(),
-    ]);
+    const total = await model.countDocuments(conditions).exec();
+
+    if (!isPaginated && total > 500) {
+      throw BaseResponse.unexpected({ option: { message: 'Pagination is required for large datasets' } });
+    }
+
+    const data = await query.exec();
 
     return {
       data,
-      meta: {
+      meta: isPaginated ? {
         total,
         page: pageNum,
         size: pageSize,
         totalPages: Math.ceil(total / pageSize),
-      },
+      } : undefined,
     };
   }
 
@@ -117,11 +149,62 @@ export class GlobalService {
       return result;
     } catch (err) {
       if (isNew) await session.abortTransaction();
-      await session.endSession();
       throw err;
     } finally {
       if (isNew) await session.endSession();
     }
   }
 
+  async deleteData<T extends Document>(data: T, sessionIn?: ClientSession): Promise<T | undefined> {
+    return this.withTransaction(async (session) => {
+      await this.trashModel.updateOne(
+        { target_id: data._id },
+        { $set: { target_data: data.toObject() } },
+        { upsert: true },
+      ).session(session);
+      return await data.deleteOne({ session }); // delete original
+    }, sessionIn);
+  }
+
+  priceAfterDiscount(price: Types.Decimal128, discountPercent?: number) {
+    const priceDecimal = toDecimal(price);
+    const discountPercentDecimal = new Decimal(discountPercent || 0);
+    const discountAmount = priceDecimal.mul(discountPercentDecimal.div(100)).toDP(2);
+    const net = priceDecimal.minus(discountAmount).toDP(2);
+    return { net, discountAmount };
+  }
+
+  /**
+   * Calculate PPN (VAT-inclusive) for a SINGLE physical unit.
+   *
+   * Given:
+   *   - net_price       = sale price of one unit
+   *   - ppn_rate        = VAT % (e.g. 11 for 11%)
+   *
+   * Steps:
+   *   1. base = net_price / (1 + ppn_rate/100)   [extract base from VAT-inclusive price]
+   *   2. ppn  = net_price - base
+   */
+  getPPnAmount(item: { net_price: Types.Decimal128; ppn_rate: number }) {
+    const price = toDecimal(item.net_price);
+    const ppnRate = new Decimal(item.ppn_rate || 0).div(100);
+
+    const base = price.div(new Decimal(1).plus(ppnRate)).toDP(2);
+    const ppn = price.minus(base).toDP(2);
+
+    return { base, ppn };
+  }
+
+  //get pph amount
+  getPphAmount(item: { transaction_amount: Types.Decimal128; pph_rate: number }) {
+    const price = toDecimal(item.transaction_amount);
+    const pphRate = new Decimal(item.pph_rate || 0).div(100);
+    const pph = price.times(pphRate);
+    return toDecimal128(pph);
+  }
+
+  // NOTES: Use this when preparing statutory outputs that require whole-rupiah representation.
+  toTaxReportingMoney(value: Types.Decimal128 | Decimal | number | string | undefined) {
+    return toTaxReportingDecimal128(value);
+  }
 }

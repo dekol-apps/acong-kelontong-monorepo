@@ -1,31 +1,26 @@
-import { IsNotEmpty, IsDate, IsNumber, IsOptional, IsMongoId } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, Min, IsInt } from 'class-validator';
+import { IsObjectId } from 'src/global/is-object-id.decorator';
 import { Types } from 'mongoose';
-import { InventoryEn } from '../inventory/inventory.schema';
-
-export class PurchasingItemDto {
-  @IsMongoId() // ✅ checks it's a valid ObjectId string
+import { IsMoney } from 'src/global/is-money.decorator';
+export class ReceiveOrderItemDto {
+  @IsObjectId() // checks it's a valid ObjectId string
   @IsNotEmpty()
-  purchase_order: Types.ObjectId;
-  @IsMongoId() // ✅ checks it's a valid ObjectId string
-  @IsNotEmpty()
-  product: Types.ObjectId;
-  @IsDate()
-  exp_date: string;
-  @IsNumber()
-  purchase_qty: number;
+  _id: string;
   @IsOptional()
   @IsNumber()
-  recieved_qty?: number;
-  @IsNumber()
-  purchase_price: number;
-  @IsNumber()
-  sell_price: number;
+  received_qty?: number;
 }
-
-export class ReceiveOrderItemDto {
-  @IsMongoId() // ✅ checks it's a valid ObjectId string
+export class PurchasingItemDto {
+  @IsObjectId() // checks it's a valid ObjectId string
   @IsNotEmpty()
-  purchase_item: Types.ObjectId;
-  @IsNumber()
-  status?: InventoryEn;
+  purchase_order: string;
+  @IsObjectId() // checks it's a valid ObjectId string
+  @IsNotEmpty()
+  product: string;
+  @IsInt()
+  @Min(1)
+  purchase_qty: number;
+  @IsMoney()
+  @IsNotEmpty()
+  purchase_price: Types.Decimal128;
 }

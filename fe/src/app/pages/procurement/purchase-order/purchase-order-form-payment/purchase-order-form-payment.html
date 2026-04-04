@@ -1,0 +1,89 @@
+@if (form) {
+<form [formGroup]="form" appFormValidation (ngSubmit)="submit()">
+  <div class="card-body">
+    <fieldset [disabled]="type==='view'">
+      <div class="d-flex flex-row flex-wrap justify-content-between gap-2">
+        <div class="w-100">
+          <label for="invoice_number" class="form-label" appAutoWildcard>{{ 'Invoice Number' | translate }}</label>
+          <input type="text" class="form-control" id="invoice_number" formControlName="invoice_number"
+            [placeholder]="'PO_PAYMENT_PLACEHOLDER_INVOICE_NUMBER' | translate" />
+        </div>
+        <div class="w-100">
+          <label for="payment_status" class="form-label" appAutoWildcard>{{ 'Payment Status' | translate }}</label>
+          <select class="form-select" id="payment_status" formControlName="payment_status">
+            @for (paymentStatus of paymentStatuses; track $index) {
+            <option [value]="paymentStatus.value">{{paymentStatus.label}}</option>
+            }
+          </select>
+        </div>
+        <div class="alert alert-info w-100 mb-0">
+          {{ 'Payment fields are locked after the purchase has been changed to PARTIAL or PAID.' | translate }}
+        </div>
+        <div class="w-100">
+          <label for="ppn_type" class="form-label" appAutoWildcard>{{ 'PPn Type' | translate }}</label>
+          <select class="form-select" id="ppn_type" formControlName="ppn_type">
+            <option selected disabled value="">{{ 'Choose...' | translate }}</option>
+            @for (ppnType of ppnTypes; track $index) {
+            <option [value]="ppnType.value">{{ppnType.label}}</option>
+            }
+          </select>
+        </div>
+        <div class="w-100">
+          <label for="ppn_facture_number" class="form-label" appAutoWildcard>{{ 'PPN Facture Number' | translate }}</label>
+          <input type="text" class="form-control" id="ppn_facture_number" formControlName="ppn_facture_number"
+            [placeholder]="'PO_PAYMENT_PLACEHOLDER_PPN_FACTURE' | translate" />
+        </div>
+        <div class="w-100">
+          <label for="ppn_rate" class="form-label" appAutoWildcard>{{ 'PPn Rate (%)' | translate }}</label>
+          <input type="number" class="form-control" id="ppn_rate" formControlName="ppn_rate"
+            [placeholder]="'PO_PAYMENT_PLACEHOLDER_PPN_RATE' | translate" />
+        </div>
+        <div class="w-100">
+          <label for="ppn_amount" class="form-label" appAutoWildcard>{{ 'PPn Amount (Rp)' | translate }}</label>
+          <input type="number" class="form-control" id="ppn_amount" formControlName="ppn_amount"
+            step="0.01"
+            [placeholder]="'PO_PAYMENT_PLACEHOLDER_PPN_AMOUNT' | translate" />
+        </div>
+        <div class="w-100">
+          <label for="shipping_cost" class="form-label" appAutoWildcard>{{ 'Shipping Cost (Rp)' | translate }}</label>
+          <input type="number" class="form-control" id="shipping_cost" formControlName="shipping_cost"
+            step="0.01"
+            [placeholder]="'PO_PAYMENT_PLACEHOLDER_SHIPPING_COST' | translate" />
+        </div>
+        <div class="w-100">
+          <label for="payment_realization" class="form-label" appAutoWildcard>{{ 'Payment Realization (Rp)' | translate }}</label>
+          <input type="number" class="form-control" id="payment_realization" formControlName="payment_realization"
+            step="0.01"
+            [placeholder]="'PO_PAYMENT_PLACEHOLDER_PAYMENT_REALIZATION' | translate" />
+        </div>
+        <div class="w-100">
+          <label for="paid_total" class="form-label" appAutoWildcard>{{ 'Paid Total (Rp)' | translate }}</label>
+          <input type="number" class="form-control" id="paid_total" formControlName="paid_total"
+            step="0.01"
+            [placeholder]="'PO_PAYMENT_PLACEHOLDER_PAYMENT_REALIZATION' | translate" />
+        </div>
+        <div class="w-100">
+          <label for="notes" class="form-label" appAutoWildcard>{{ 'Description' | translate }}</label>
+          <textarea class="form-control" id="notes" rows="3" formControlName="notes"></textarea>
+        </div>
+        <div class="w-100">
+          <label for="invoice_photo" class="form-label" appAutoWildcard>{{ 'Attachments' | translate }}</label>
+          <app-drag-drop-file-multi [patchFileVal]="form.value.purchasing_attachments" [loading]="isLoading"
+            (fileChanged)="addFile($event)" [message]="'PO_PAYMENT_UPLOAD_MESSAGE' | translate"></app-drag-drop-file-multi>
+        </div>
+        @if (invalidPPn) {
+        <div class="border border-danger rounded text-danger p-4 w-100" style="white-space: pre-wrap;"
+          [innerHTML]="invalidPPn"></div>
+        }
+      </div>
+    </fieldset>
+  </div>
+  <div class="card-footer d-flex gap-2">
+    @if (purchasingDetail?.status === PurchasingEn.PROCESS) {
+    <button class="btn btn-secondary" type="button" (click)="exit()">{{ 'Exit' | translate }}</button>
+    }
+    <button class="btn btn-secondary" type="button" (click)="back.emit()">{{ 'Back' | translate }}</button>
+    <button class="btn btn-primary" type="submit">{{ 'Submit' | translate }}</button>
+  </div>
+</form>
+}

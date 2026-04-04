@@ -2,12 +2,12 @@
 	<div class="col">
 		<div ngbDropdown class="d-inline-block">
 			<button type="button" class="btn btn-outline-primary" id="dropdownBasic1" ngbDropdownToggle>
-				{{filterSelect?.value?.label ?? filterSelect?.title ?? defaultTitle}}
+				{{ (filterSelect?.value?.label ?? filterSelect?.title ?? defaultTitle) | translate }}
 			</button>
 			<div ngbDropdownMenu aria-labelledby="dropdownBasic1" class="p-0">
-				<button ngbDropdownItem class="bg-dark-subtle border-bottom border-dark-subtle" (click)="reset()">{{filterSelect?.title ?? defaultTitle}}</button>
+				<button ngbDropdownItem class="bg-dark-subtle border-bottom border-dark-subtle" (click)="reset()">{{ (filterSelect?.title ?? defaultTitle) | translate }}</button>
 				@for (option of filterSelect?.selectOptions; track $index) {
-				<button ngbDropdownItem (click)="select(option)" [ngClass]="{'text-primary':filterSelect?.value?.value===option.value}">{{option.label}}</button>
+				<button ngbDropdownItem (click)="select(option)" [ngClass]="{'text-primary':filterSelect?.value?.value===option.value}">{{ option.label | translate }}</button>
 				}
 			</div>
 		</div>
