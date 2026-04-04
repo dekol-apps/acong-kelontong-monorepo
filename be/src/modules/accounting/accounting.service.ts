@@ -294,7 +294,8 @@ export class AccountingService {
           },
         },
       ]).session(session);
-      return inventoryItems[0]?.total ?? 0;
+      const total = inventoryItems[0]?.total as { toString(): string } | undefined;
+      return total ? Number(total.toString()) : 0;
     }, sessionIn);
   }
 
@@ -304,7 +305,7 @@ export class AccountingService {
   async countTotalAssets(sessionIn?: ClientSession): Promise<number> {
     return this.global.withTransaction(async (session) => {
       const inventoryItemsValuationTotal = await this.countTotalAssetValue(session);
-      const balance = await this.countBalance(sessionIn);
+      const balance = await this.countBalance(session);
       return balance + inventoryItemsValuationTotal;
     }, sessionIn);
   }

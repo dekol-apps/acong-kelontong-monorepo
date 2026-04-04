@@ -61,9 +61,29 @@ export class ExpenseService {
       const removedAttachments = oldAttachments.filter(
         (url) => !newAttachments.includes(url),
       );
+
+      const transactionAmount = data.transaction_amount ?? expense.transaction_amount;
+      const pphType = data.pph_type ?? expense.pph_type;
+      const pphRate = pphType === PPhType.NONE
+        ? 0
+        : (data.pph_rate ?? expense.pph_rate ?? 0);
+
+      const payload: Partial<Expense> = {
+        ...data,
+        expense_attachments: newAttachments,
+        pph_type: pphType,
+        pph_rate: pphRate,
+        pph_amount: pphRate > 0
+          ? this.global.getPphAmount({
+            transaction_amount: toDecimal128(toDecimal(transactionAmount)),
+            pph_rate: pphRate,
+          })
+          : toDecimal128(new Decimal(0)),
+      };
+
       const updated = await this.expenseModel.findByIdAndUpdate(
         expense_id,
-        { $set: data },
+        { $set: payload },
         { new: true, runValidators: true, session },
       );
 

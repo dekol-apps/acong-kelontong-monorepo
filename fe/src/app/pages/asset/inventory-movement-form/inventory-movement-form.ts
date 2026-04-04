@@ -50,6 +50,7 @@ export class InventoryMovementForm implements OnInit {
     { id: 'product', label: 'COMMON_PRODUCT', customElementId: 'product' },
     { id: 'item_qty', label: 'COMMON_QUANTITY', customElementId: 'item_qty' },
     { id: 'original_price', label: 'COMMON_PRICE', customElementId: 'original_price' },
+    { id: 'landed_cost', label: 'Landed Cost', customElementId: 'landed_cost' },
     { id: 'action', label: 'COMMON_ACTION', customElementId: 'action' },
   ];
 
@@ -99,6 +100,7 @@ export class InventoryMovementForm implements OnInit {
       product_name: new FormControl(''),
       item_qty: new FormControl(1, [Validators.required, Validators.min(1)]),
       original_price: new FormControl(0, [Validators.required]),
+      landed_cost: new FormControl(0, [Validators.required]),
     });
     this.items.push(itemForm);
   }
@@ -149,6 +151,7 @@ export class InventoryMovementForm implements OnInit {
 
         if (isMoveIn) {
           baseItem.original_price = item.original_price.toString();
+          baseItem.landed_cost = item.landed_cost.toString();
         }
 
         return baseItem;

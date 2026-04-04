@@ -70,6 +70,7 @@ export class InventoryMovementService {
         // Ensure required fields have defaults before creating Flow IN records
         for (const item of dto.items) {
           item.original_price = item.original_price || toDecimal128(toDecimal(0));
+          item.landed_cost = item.landed_cost || item.original_price;
           item.receive_date = item.receive_date || new Date();
         }
 
@@ -79,7 +80,7 @@ export class InventoryMovementService {
             product: item.product,
             receive_date: item.receive_date as Date,
             original_price: item.original_price as Types.Decimal128,
-            landed_cost: item.landed_cost as Types.Decimal128,
+            landed_cost: (item.landed_cost || item.original_price) as Types.Decimal128,
           };
           // Loop and create N individual items
           for (let i = 0; i < item.item_qty; i++) {

@@ -91,6 +91,15 @@
                         </ng-template>
                     </div>
 
+                    <!-- Landed Cost Column -->
+                    <div appTableColumn customColumnId="landed_cost">
+                        <ng-template let-control let-index="index">
+                            <div [formGroup]="$any(items.at(index))">
+                                <input type="number" class="form-control" formControlName="landed_cost" min="0">
+                            </div>
+                        </ng-template>
+                    </div>
+
                     <!-- Action Column -->
                     <div appTableColumn customColumnId="action">
                         <ng-template let-control let-index="index">
