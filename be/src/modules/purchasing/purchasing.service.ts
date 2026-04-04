@@ -96,16 +96,8 @@ export class PurchasingService {
       supplier_name: supplier.supplier_name,
       due_date: data.due_date,
       status: PurchasingEn.CREATE,
-      payment_status: data.payment_status ?? PaymentStatusEn.UNPAID,
-      invoice_number: data.invoice_number,
       purchasing_attachments: data.purchasing_attachments,
-      payment_realization: data.payment_realization,
       notes: data.notes,
-      ppn_type: data.ppn_type,
-      ppn_rate: data.ppn_rate !== undefined ? Number(data.ppn_rate) : undefined,
-      ppn_amount: data.ppn_amount,
-      ppn_facture_number: data.ppn_facture_number,
-      shipping_cost: data.shipping_cost,
     }], { session });
 
     const createdPurchase = purchase[0];
@@ -648,8 +640,8 @@ export class PurchasingService {
       const edit = await this.editPurchasing(id, payload, session);
       if (!edit || !edit.detail) throw BaseResponse.unexpected({ err: 'purchasingPayment' });
       const validation = edit.detail.validation;
-      if (!validation.is_ppn_valid) {
-        const message = `PPn calculation result invalid:\n\nppn type: ${effectivePpnType}\nppn rate: ${effectivePpnRate}\nppn amount: ${effectivePpnAmount?.toString() ?? ''}\ntax base: ${totalPurchasePrice.toString()}\nexpected ppn amount (rounded): ${validation.expected_ppn_amount.toString()}\nexpected minimum payment: ${validation.expected_payable.toString()}\n`;
+      if (!validation.is_ppn_valid || !validation.is_payment_match) {
+        const message = `Payment calculation result invalid:\n\nppn type: ${effectivePpnType}\nppn rate: ${effectivePpnRate}\nppn amount: ${effectivePpnAmount?.toString() ?? ''}\ntax base: ${totalPurchasePrice.toString()}\nexpected ppn amount (rounded): ${validation.expected_ppn_amount.toString()}\nexpected minimum payment: ${validation.expected_payable.toString()}\n`;
         throw BaseResponse.invalid({ option: { message } });
       }
 

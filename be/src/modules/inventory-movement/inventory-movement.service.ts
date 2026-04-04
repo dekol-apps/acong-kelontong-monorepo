@@ -210,6 +210,7 @@ export class InventoryMovementService {
         // FIFO: pick the oldest N items for this product
         const candidates = await this.inventoryItemModel
           .find({ product: item.product })
+          .sort({ createdAt: 1, _id: 1 }) // natural order (oldest first)
           .limit(item.item_qty)
           .session(session);
 

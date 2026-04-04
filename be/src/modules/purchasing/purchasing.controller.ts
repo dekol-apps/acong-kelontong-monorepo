@@ -220,7 +220,7 @@ export class PurchasingController {
       const purchasing = await this.service.purchasingDrop(purchasingId, PurchasingEn.DROP);
       return BaseResponse.success({
         res,
-        option: { message: `Purchase order on process`, detail: purchasing },
+        option: { message: `Purchase order dropped`, detail: purchasing },
       });
     });
   }
