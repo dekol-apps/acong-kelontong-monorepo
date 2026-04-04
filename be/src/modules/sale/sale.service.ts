@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, ClientSession, Types } from 'mongoose';
+import { Model, ClientSession, HydratedDocument, Types } from 'mongoose';
 import { GlobalService } from 'src/global/global.service';
 import { BaseResponse } from 'src/utils/base-response';
 import { AccountingService } from '../accounting/accounting.service';
@@ -359,8 +359,9 @@ export class SaleService {
 
       // ─── Step 1: Revert old items back to the shelf ───────────────────────
       // We recreate SaleItem records using the data stored in the existing Sale.
+      const reintroducedByProduct = new Map<string, HydratedDocument<SaleItem>[]>();
       for (const item of existing.items) {
-        await this.saleItemModel.create([{
+        const [reintroduced] = await this.saleItemModel.create([{
           product: item.product,
           brand_name: item.brand_name,
           product_name: item.product_name,
@@ -372,18 +373,49 @@ export class SaleService {
           discount_amount: item.discount_amount,
           cogs: item.cogs,
         }], { session });
+
+        const key = item.product.toString();
+        const bucket = reintroducedByProduct.get(key) ?? [];
+        bucket.push(reintroduced);
+        reintroducedByProduct.set(key, bucket);
       }
 
       // ─── Step 2: Process new items (similar to selling() method) ───────────
       const itemSold: SaleItem[] = [];
       for (const item of dto.items) {
+        let remainingQty = item.item_qty;
+        const productKey = item.product.toString();
+        const reintroduced = reintroducedByProduct.get(productKey) ?? [];
+
+        // Preserve previous COGS ordering by consuming reintroduced units first.
+        while (remainingQty > 0 && reintroduced.length > 0) {
+          const existItem = reintroduced.shift();
+          if (!existItem) break;
+          itemSold.push({
+            product: existItem.product,
+            brand_name: existItem.brand_name,
+            product_name: existItem.product_name,
+            product_sku: existItem.product_sku || toSku(existItem.product_name),
+            barcode: existItem.barcode,
+            original_price: existItem.original_price,
+            sale_price: existItem.sale_price,
+            discount_percent: existItem.discount_percent,
+            discount_amount: existItem.discount_amount,
+            cogs: existItem.cogs,
+          });
+          await existItem.deleteOne({ session });
+          remainingQty -= 1;
+        }
+
+        if (remainingQty <= 0) continue;
+
         const toConsume = await this.saleItemModel
           .find({ product: item.product })
           .sort({ createdAt: 1, _id: 1 })
-          .limit(item.item_qty)
+          .limit(remainingQty)
           .session(session);
 
-        if (!toConsume || toConsume.length < item.item_qty) {
+        if (!toConsume || toConsume.length < remainingQty) {
           throw BaseResponse.invalid({ option: { message: `Insufficient stock for product ${item.product.toString()}` } });
         }
 

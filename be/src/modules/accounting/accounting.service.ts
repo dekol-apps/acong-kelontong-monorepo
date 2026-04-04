@@ -430,7 +430,7 @@ export class AccountingService {
 
   async checkSnapshot(date: Date): Promise<boolean> {
     const exists = await this.snapshotModel.exists({
-      snapshot_date: { $gt: date }
+      snapshot_date: { $gte: date }
     });
     return !!exists;
   }
