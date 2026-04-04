@@ -446,7 +446,7 @@ export class AccountingService {
     let customConditions = {};
     if (dto.startDate && dto.endDate) {
       customConditions = {
-        createdAt: {
+        record_date: {
           $gte: new Date(dto.startDate),
           $lte: new Date(dto.endDate)
         }
