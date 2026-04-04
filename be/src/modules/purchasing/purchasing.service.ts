@@ -427,10 +427,8 @@ export class PurchasingService {
       await Promise.all(items.map(async item => {
         await this.global.deleteData(item, session);
       }))
-
-      const detail = await this.detailPurchasing(purchasing._id);
       return {
-        detail,
+        detail: purchasing,
         removedAttachments,
       };
     }, sessionIn);
@@ -447,9 +445,9 @@ export class PurchasingService {
 
       // First filter: Delete purchasing items that is not listed in the payload of list items
       // (when user not includes the item in the payload list, it means user intends to remove it)
-      const dtoProductIds = data.map(it => it.product);
+      const dtoProductIds = new Set(data.map(it => it.product.toString()));
       const toDelete = existingItems.filter(
-        i => !dtoProductIds.includes(i.product.toString())
+        i => !dtoProductIds.has(i.product.toString())
       );
       await this.purchasingItemModel.deleteMany({
         _id: { $in: toDelete.map(i => i._id) },
@@ -726,7 +724,11 @@ export class PurchasingService {
         existingItems.map(i => [i._id.toString(), i]),
       );
 
-      const inventoryEntry = new Map<string, number>();
+      const inventoryEntries: Array<{
+        product: Types.ObjectId;
+        qty: number;
+        original_price: Decimal;
+      }> = [];
 
       // Create loops for receivedItems, to update received_qty and create inventory movement
       for (const item of dto.receivedItems) {
@@ -749,10 +751,11 @@ export class PurchasingService {
 
         if (delta <= 0) continue;
 
-        const prodKey = existing.product.toString();
-
-        const currentQty = inventoryEntry.get(prodKey) ?? 0;
-        inventoryEntry.set(prodKey, currentQty + delta);
+        inventoryEntries.push({
+          product: existing.product,
+          qty: delta,
+          original_price: toDecimal(existing.purchase_price),
+        });
       }
       const totalPurchasePrice = await this.countTotalPurchasePrice(id);
       const cost_difference = toDecimal(purchase.payment_realization).minus(toDecimal(totalPurchasePrice));
@@ -766,28 +769,20 @@ export class PurchasingService {
 
       const inventoryMovement: (InventoryMovementDto & { source_id: Types.ObjectId })[] = [];
       // Create loops for inventory movement if there are items received
-      if (inventoryEntry.size > 0) {
+      if (inventoryEntries.length > 0) {
         inventoryMovement.push({
           movement_type: FlowType.IN,
-          items: Array.from(inventoryEntry.entries()).map(
-            ([product, qty]) => {
-              // Retrieve the original purchase price from the existing items list
-              const originalItem = existingItems.find(i => i.product.toString() === product);
-              if (!originalItem) throw BaseResponse.notFound({ err: 'receiveOrder originalItem not found', option: { message: "Purchasing item for inventory movement not found, please check your purchasing list" } });
-              const original_price = toDecimal(originalItem.purchase_price);
+          items: inventoryEntries.map((entry) => {
+            const landed_cost = entry.original_price.plus(additional_cost_per_item);
 
-              // Landed cost = Purchase Price + (Additional Cost / Total Items)
-              const landed_cost = original_price.plus(additional_cost_per_item);
-
-              return {
-                product: new Types.ObjectId(product),
-                item_qty: qty,
-                receive_date: new Date(),
-                original_price: toDecimal128(original_price),
-                landed_cost: toDecimal128(landed_cost)
-              }
+            return {
+              product: new Types.ObjectId(entry.product),
+              item_qty: entry.qty,
+              receive_date: new Date(),
+              original_price: toDecimal128(entry.original_price),
+              landed_cost: toDecimal128(landed_cost)
             }
-          ),
+          }),
           order_type: OrderType.PURCHASING,
           source_id: id,
           description: `Purchasing receive order - date: ${digitShortDate(new Date())} - PO ID: ${id.toString()}`
