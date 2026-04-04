@@ -24,8 +24,8 @@ docker compose up -d --build
 ```
 
 4. Access:
-- Frontend: `http://localhost:4200`
-- Backend API: `http://localhost:3200/api`
+- Frontend: `https://ack.dekolapps.tech`
+- Backend API: `https://api.dekolapps.tech/api`
 
 ## 2) Why replica set is included
 

@@ -77,7 +77,7 @@ services:
       NODE_ENV: ${NODE_ENV:-production}
       MONGO_URI: ${MONGO_URI:-mongodb://mongo1:27017,mongo2:27017,mongo3:27017/AcongKelontongLocal?replicaSet=rs0&retryWrites=true&w=majority}
       PORT: ${BE_PORT:-3200}
-      FE_DOMAIN: ${FE_DOMAIN:-http://localhost:4200}
+      FE_DOMAIN: ${FE_DOMAIN:-https://ack.dekolapps.tech}
       JWT_SECRET: ${JWT_SECRET:-change_me}
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASS: ${SMTP_PASS:-}
@@ -93,7 +93,7 @@ services:
       context: ./fe
       dockerfile: Dockerfile
       args:
-        FE_API_URL: ${FE_API_URL:-http://localhost:3200/api}
+        FE_API_URL: https://api.dekolapps.tech/api
         FE_ENCRYPTION_KEY: ${FE_ENCRYPTION_KEY:-1234}
     container_name: acong-fe
     restart: unless-stopped
