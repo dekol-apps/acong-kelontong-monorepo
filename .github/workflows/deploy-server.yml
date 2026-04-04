@@ -1,0 +1,59 @@
+name: Deploy To Laptop Server
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy through SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT || '22' }}
+          script: |
+            set -eu
+
+            DEPLOY_PATH="${{ secrets.SERVER_DEPLOY_PATH }}"
+            REPO_URL="${{ secrets.SERVER_REPO_URL }}"
+            BRANCH="${{ github.ref_name }}"
+
+            if [ -z "$DEPLOY_PATH" ]; then
+              echo "SERVER_DEPLOY_PATH is required"
+              exit 1
+            fi
+
+            if [ ! -d "$DEPLOY_PATH/.git" ]; then
+              rm -rf "$DEPLOY_PATH"
+              git clone "$REPO_URL" "$DEPLOY_PATH"
+            fi
+
+            cd "$DEPLOY_PATH"
+            git fetch --all --prune
+            git checkout "$BRANCH"
+            git pull origin "$BRANCH"
+
+            cat > .env <<'EOF'
+            NODE_ENV=production
+            BE_PORT=${{ secrets.BE_PORT || '3200' }}
+            FE_PORT=${{ secrets.FE_PORT || '4200' }}
+            FE_API_URL=${{ secrets.FE_API_URL }}
+            FE_ENCRYPTION_KEY=${{ secrets.FE_ENCRYPTION_KEY || '1234' }}
+            FE_DOMAIN=${{ secrets.FE_DOMAIN }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            SMTP_USER=${{ secrets.SMTP_USER }}
+            SMTP_PASS=${{ secrets.SMTP_PASS }}
+            SMTP_HOST=${{ secrets.SMTP_HOST }}
+            SMTP_PORT=${{ secrets.SMTP_PORT || '587' }}
+            MONGO_URI=${{ secrets.MONGO_URI || 'mongodb://mongo1:27017,mongo2:27017,mongo3:27017/AcongKelontongLocal?replicaSet=rs0&retryWrites=true&w=majority' }}
+            EOF
+
+            docker compose up -d --build --remove-orphans
+            docker image prune -f
