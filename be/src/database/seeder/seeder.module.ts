@@ -26,6 +26,14 @@ import { Purchasing, PurchasingSchema } from 'src/modules/purchasing/purchasing.
 import { PurchasingItem, PurchasingItemSchema } from 'src/modules/purchasing-item/purchasing-item.schema';
 import { Sale, SaleSchema } from 'src/modules/sale/sale.schema';
 import { Production, ProductionSchema } from 'src/modules/production/production.schema';
+import { Accounting, AccountingSchema } from 'src/modules/accounting/accounting.schema';
+import { AccountingSnapshot, AccountingSnapshotSchema } from 'src/modules/accounting/accounting-snapshot.schema';
+import { Auth, AuthSchema } from 'src/modules/auth/auth.schema';
+import { InventoryReconcile, InventoryReconcileSchema } from 'src/modules/inventory-item/inventory-reconcile.schema';
+import { AccountingSeederService } from './accounting-seeder/accounting-seeder.service';
+import { AccountingSnapshotSeederService } from './accounting-snapshot-seeder/accounting-snapshot-seeder.service';
+import { AuthSeederService } from './auth-seeder/auth-seeder.service';
+import { InventoryReconcileSeederService } from './inventory-reconcile-seeder/inventory-reconcile-seeder.service';
 
 @Module({
   imports: [
@@ -44,6 +52,10 @@ import { Production, ProductionSchema } from 'src/modules/production/production.
       { name: PurchasingItem.name, schema: PurchasingItemSchema },
       { name: Sale.name, schema: SaleSchema },
       { name: Production.name, schema: ProductionSchema },
+      { name: Accounting.name, schema: AccountingSchema },
+      { name: AccountingSnapshot.name, schema: AccountingSnapshotSchema },
+      { name: Auth.name, schema: AuthSchema },
+      { name: InventoryReconcile.name, schema: InventoryReconcileSchema },
     ]),
   ],
   providers: [
@@ -58,6 +70,10 @@ import { Production, ProductionSchema } from 'src/modules/production/production.
     PurchasingSeederService,
     SaleSeederService,
     ProductionSeederService,
+    AccountingSeederService,
+    AccountingSnapshotSeederService,
+    AuthSeederService,
+    InventoryReconcileSeederService,
   ],
   exports: [
     MongooseModule,
@@ -72,6 +88,10 @@ import { Production, ProductionSchema } from 'src/modules/production/production.
     PurchasingSeederService,
     SaleSeederService,
     ProductionSeederService,
+    AccountingSeederService,
+    AccountingSnapshotSeederService,
+    AuthSeederService,
+    InventoryReconcileSeederService,
   ],
 })
 export class SeederModule { }

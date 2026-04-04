@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Purchasing, PurchasingDocument, PurchasingEn } from 'src/modules/purchasing/purchasing.schema';
+import { PaymentStatusEn } from 'src/modules/purchasing/purchasing.schema';
 import { PurchasingItem, PurchasingItemDocument } from 'src/modules/purchasing-item/purchasing-item.schema';
 import { Supplier, SupplierDocument } from 'src/modules/supplier/supplier.schema';
 import { Product, ProductDocument } from 'src/modules/product/product.schema';
@@ -26,30 +27,44 @@ export class PurchasingSeederService {
             return;
         }
 
-        const existing = await this.purchasingModel.findOne({ supplier: supplier._id });
-        if (existing) return;
-
-        const purchasing = await this.purchasingModel.create({
-            supplier: supplier._id,
-            supplier_name: supplier.supplier_name,
-            status: PurchasingEn.COMPLETE,
-            ppn_type: PPnType.INCLUSIVE,
-            ppn_rate: 11,
-            payment_realization: toDecimal128(toDecimal(100000)),
-            completed_date: new Date(),
-        });
+        const purchasing = await this.purchasingModel.findOneAndUpdate(
+            { supplier: supplier._id, notes: 'Seeded purchasing dummy data' },
+            {
+                $set: {
+                    supplier: supplier._id,
+                    supplier_name: supplier.supplier_name,
+                    status: PurchasingEn.COMPLETE,
+                    payment_status: PaymentStatusEn.PAID,
+                    ppn_type: PPnType.INCLUSIVE,
+                    ppn_rate: 11,
+                    ppn_amount: toDecimal128(toDecimal(29729.73)),
+                    shipping_cost: toDecimal128(toDecimal(10000)),
+                    payment_realization: toDecimal128(toDecimal(310000)),
+                    paid_total: toDecimal128(toDecimal(310000)),
+                    completed_date: new Date(),
+                    notes: 'Seeded purchasing dummy data',
+                },
+            },
+            { upsert: true, new: true }
+        );
 
         for (const product of products) {
-            await this.purchasingItemModel.create({
-                purchase_order: purchasing._id,
-                product: product._id,
-                product_name: product.product_name,
-                product_sku: product.product_sku,
-                supplier_name: supplier.supplier_name,
-                purchase_qty: 10,
-                received_qty: 10,
-                purchase_price: toDecimal128(toDecimal(10000)),
-            });
+            await this.purchasingItemModel.updateOne(
+                { purchase_order: purchasing._id, product: product._id },
+                {
+                    $set: {
+                        purchase_order: purchasing._id,
+                        product: product._id,
+                        product_name: product.product_name,
+                        product_sku: product.product_sku,
+                        supplier_name: supplier.supplier_name,
+                        purchase_qty: 10,
+                        received_qty: 10,
+                        purchase_price: toDecimal128(toDecimal(10000)),
+                    },
+                },
+                { upsert: true }
+            );
         }
 
         console.info(`🚀 Seeded Purchasing: ${String(purchasing._id)} for ${supplier.supplier_name}`);
