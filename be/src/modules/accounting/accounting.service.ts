@@ -58,8 +58,7 @@ export class AccountingService {
         .findOne({ currency: CurrencyEn.IDR })
         .session(session);
 
-      console.log({ data });
-      console.log('BEFORE:', before?.amount?.toString());
+      this.logger.debug(`createAccountingItem before=${before?.amount?.toString() ?? '0'} flow=${data.flow_type}`);
       const filter =
         flow_type === FlowType.OUT
           ? { currency: CurrencyEn.IDR, amount: { $gte: data.transaction_amount } }
@@ -113,11 +112,11 @@ export class AccountingService {
       const diff = toDecimal(data.transaction_amount ?? existing.transaction_amount).minus(toDecimal(transaction_amount));
       const amountToInc = flow_type === FlowType.OUT ? diff.negated() : diff;
 
-      console.log({ data, diff: diff.toString(), amountToInc: amountToInc.toString() });
       const before = await this.balanceModel
         .findOne({ currency: CurrencyEn.IDR })
         .session(session);
-      console.log('BEFORE:', before?.amount?.toString());
+
+      this.logger.debug(`editAccountingByOrderId before=${before?.amount?.toString() ?? '0'} diff=${diff.toString()}`);
 
       const filter: any = { currency: CurrencyEn.IDR };
       if (amountToInc.isNeg()) {
@@ -176,7 +175,6 @@ export class AccountingService {
       if (!old) {
         throw BaseResponse.notFound({ err: 'editAccountingItem !old' });
       }
-      console.log({ old })
       const record_date = new Date()
       // Reverse old
       await this.createAccountingItem(
@@ -238,7 +236,7 @@ export class AccountingService {
           },
         },
       ]).session(session);
-      return result[0]?.total ?? 0;
+      return decimalToNumber(result[0]?.total) ?? 0;
     }, sessionIn);
   }
 
@@ -265,7 +263,7 @@ export class AccountingService {
           },
         },
       ]).session(session);
-      return result[0]?.total_cogs ?? 0;
+      return decimalToNumber(result[0]?.total_cogs) ?? 0;
     }, sessionIn);
   }
 
