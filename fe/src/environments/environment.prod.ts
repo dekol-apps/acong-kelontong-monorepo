@@ -1,5 +1,6 @@
 export const environment = {
   production: true,
   apiUrl: 'https://api.dekolapps.tech/api',
-  ENCRYPTION_KEY: '1234'
+  FE_ENCRYPTION_KEY: 666666,
+  FE_PORT: 4200,
 };

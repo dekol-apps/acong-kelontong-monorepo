@@ -73,16 +73,6 @@ services:
     depends_on:
       mongo-init:
         condition: service_completed_successfully
-    environment:
-      NODE_ENV: ${NODE_ENV:-production}
-      MONGO_URI: ${MONGO_URI:-mongodb://mongo1:27017,mongo2:27017,mongo3:27017/AcongKelontongLocal?replicaSet=rs0&retryWrites=true&w=majority}
-      PORT: ${BE_PORT:-3200}
-      FE_DOMAIN: ${FE_DOMAIN:-https://ack.dekolapps.tech}
-      JWT_SECRET: ${JWT_SECRET:-change_me}
-      SMTP_USER: ${SMTP_USER:-}
-      SMTP_PASS: ${SMTP_PASS:-}
-      SMTP_HOST: ${SMTP_HOST:-}
-      SMTP_PORT: ${SMTP_PORT:-587}
     ports:
       - "${BE_PORT:-3200}:3200"
     volumes:
@@ -92,15 +82,12 @@ services:
     build:
       context: ./fe
       dockerfile: Dockerfile
-      args:
-        FE_API_URL: https://api.dekolapps.tech/api
-        FE_ENCRYPTION_KEY: ${FE_ENCRYPTION_KEY:-1234}
     container_name: acong-fe
     restart: unless-stopped
     depends_on:
       - be
     environment:
-      PORT: 4000
+      FE_PORT: 4000
       NODE_ENV: production
     ports:
       - "${FE_PORT:-4200}:4000"

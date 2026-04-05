@@ -37,7 +37,7 @@ async function bootstrap(): Promise<void> {
   // whitelist: true, will automatically remove any properties that are not defined in the DTO, make sure every controller has DTO
   app.useGlobalFilters(new ErrResFactory());
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.BE_PORT ?? 3000);
 }
 
 bootstrap().catch((error) => {
