@@ -1,7 +1,7 @@
 import CryptoJS from 'crypto-js';
 import { environment } from '../../../environments/environment';
 
-const SECRET = environment.ENCRYPTION_KEY; // better use env
+const SECRET = environment.FE_ENCRYPTION_KEY; // better use env
 
 export function encrypt(value: unknown): string {
   // put the value inside object, just in case the value is string

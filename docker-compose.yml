@@ -87,7 +87,7 @@ services:
     depends_on:
       - be
     environment:
-      PORT: 4000
+      FE_PORT: 4000
       NODE_ENV: production
     ports:
       - "${FE_PORT:-4200}:4000"
