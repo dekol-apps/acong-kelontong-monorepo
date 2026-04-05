@@ -2,6 +2,15 @@ name: Deploy To Laptop Server
 
 on:
   workflow_dispatch:
+    inputs:
+      deployment_type:
+        description: 'Deployment type'
+        required: true
+        default: 'simple'
+        type: choice
+        options:
+        - simple
+        - regular
   push:
     branches:
       - main
@@ -24,6 +33,7 @@ jobs:
             DEPLOY_PATH="${{ secrets.SERVER_DEPLOY_PATH }}"
             REPO_URL="${{ secrets.SERVER_REPO_URL }}"
             BRANCH="${{ github.ref_name }}"
+            DEPLOYMENT_TYPE="${{ github.event.inputs.deployment_type || 'simple' }}"
 
             if [ -z "$DEPLOY_PATH" ]; then
               echo "SERVER_DEPLOY_PATH is required"
@@ -40,6 +50,7 @@ jobs:
             git checkout "$BRANCH"
             git pull origin "$BRANCH"
 
+            # Create .env file for backend configuration
             cat > .env <<'EOF'
             NODE_ENV=production
             BE_PORT=${{ secrets.BE_PORT || '3200' }}
@@ -52,8 +63,18 @@ jobs:
             SMTP_PASS=${{ secrets.SMTP_PASS }}
             SMTP_HOST=${{ secrets.SMTP_HOST }}
             SMTP_PORT=${{ secrets.SMTP_PORT || '587' }}
-            MONGO_URI=${{ secrets.MONGO_URI || 'mongodb://mongo1:27017,mongo2:27017,mongo3:27017/AcongKelontongLocal?replicaSet=rs0&retryWrites=true&w=majority' }}
+            MONGO_URI=${{ secrets.MONGO_URI }}
             EOF
 
-            docker compose up -d --build --remove-orphans
+            # Choose compose file based on deployment type
+            if [ "$DEPLOYMENT_TYPE" = "simple" ]; then
+              echo "🚀 Deploying with SIMPLE setup..."
+              docker-compose -f docker-compose.simple.yml down --remove-orphans || true
+              docker-compose -f docker-compose.simple.yml up -d --build --remove-orphans
+            else
+              echo "🚀 Deploying with REGULAR setup..."
+              docker-compose -f docker-compose.yml down --remove-orphans || true
+              docker-compose -f docker-compose.yml up -d --build --remove-orphans
+            fi
+
             docker image prune -f
