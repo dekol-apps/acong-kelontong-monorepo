@@ -7,7 +7,11 @@
     "build": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:acong-kelontong-monorepo-fe": "node dist/acong-kelontong-monorepo-fe/server/server.mjs"
+    "serve:ssr:acong-kelontong-monorepo-fe": "node dist/acong-kelontong-monorepo-fe/server/server.mjs",
+    "lint": "ng lint",
+    "lint:fix": "ng lint --fix",
+    "type-check": "tsc --noEmit",
+    "check": "npm run type-check && npm run lint"
   },
   "prettier": {
     "overrides": [
@@ -48,6 +52,11 @@
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
+    "@angular-eslint/builder": "21.3.1",
+    "@angular-eslint/eslint-plugin": "21.3.1",
+    "@angular-eslint/eslint-plugin-template": "21.3.1",
+    "@angular-eslint/schematics": "21.3.1",
+    "@angular-eslint/template-parser": "21.3.1",
     "@angular/build": "^21.2.3",
     "@angular/cli": "^21.2.3",
     "@angular/compiler-cli": "^21.2.5",
@@ -56,6 +65,10 @@
     "@types/express": "^5.0.1",
     "@types/jasmine": "~5.1.0",
     "@types/node": "^20.17.19",
+    "@typescript-eslint/eslint-plugin": "^8.58.0",
+    "@typescript-eslint/parser": "^8.58.0",
+    "angular-eslint": "^21.3.1",
+    "eslint": "8.57.1",
     "jasmine-core": "~5.8.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
