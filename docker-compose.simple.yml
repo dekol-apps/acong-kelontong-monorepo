@@ -45,6 +45,16 @@ services:
     depends_on:
       mongo-init:
         condition: service_completed_successfully
+    environment:
+      NODE_ENV: ${IS_PROD}
+      MONGO_URI: ${MONGO_URI}
+      BE_PORT: ${BE_PORT}
+      FE_DOMAIN: ${FE_DOMAIN}
+      JWT_SECRET: ${JWT_SECRET}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
     ports:
       - "${BE_PORT:-3200}:3200"
     volumes:

@@ -60,16 +60,12 @@ jobs:
             git pull origin "$BRANCH"
 
             # Generate .env
-            cat > .env <<'EOF'
+            cat > .env <<EOF
             BE_PORT=${{ vars.BE_PORT }}
             FE_PORT=${{ vars.FE_PORT }}
-            EOF
-
-            cat > be/.env <<'EOF'
             IS_PROD=true
             FE_DOMAIN=${{ vars.FE_DOMAIN }}
             MONGO_URI=${{ secrets.MONGO_URI }}
-            BE_PORT=${{ vars.BE_PORT }}
             JWT_SECRET=${{ secrets.JWT_SECRET }}
             SMTP_USER=${{ vars.SMTP_USER }}
             SMTP_PASS=${{ secrets.SMTP_PASS }}
