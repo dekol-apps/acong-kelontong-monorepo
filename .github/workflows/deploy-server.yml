@@ -60,7 +60,7 @@ jobs:
             git pull origin "$BRANCH"
 
             # Generate .env
-            cat > be/.env <<EOF
+            cat > .env <<EOF
             BE_PORT=${{ vars.BE_PORT }}
             FE_PORT=${{ vars.FE_PORT }}
             EOF
