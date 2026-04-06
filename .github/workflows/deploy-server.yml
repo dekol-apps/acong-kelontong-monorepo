@@ -4,13 +4,14 @@ on:
   workflow_dispatch:
     inputs:
       deployment_type:
-        description: 'Deployment type'
+        description: "Deployment type"
         required: true
-        default: 'simple'
+        default: "simple"
         type: choice
         options:
-        - simple
-        - regular
+          - simple
+          - regular
+
   push:
     branches:
       - main
@@ -19,27 +20,35 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Deploy through SSH
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
+          host: ${{ vars.SERVER_HOST }}
+          username: ${{ vars.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT || '22' }}
+          port: ${{ vars.SERVER_PORT }}
           script: |
             set -eu
 
-            DEPLOY_PATH="${{ secrets.SERVER_DEPLOY_PATH }}"
-            REPO_URL="${{ secrets.SERVER_REPO_URL }}"
+            DEPLOY_PATH="${{ vars.SERVER_DEPLOY_PATH }}"
+            REPO_URL="${{ vars.SERVER_REPO_URL }}"
             BRANCH="${{ github.ref_name }}"
             DEPLOYMENT_TYPE="${{ github.event.inputs.deployment_type || 'simple' }}"
 
+            # Basic validation
             if [ -z "$DEPLOY_PATH" ]; then
               echo "SERVER_DEPLOY_PATH is required"
               exit 1
             fi
 
+            if [ -z "${{ secrets.MONGO_URI }}" ]; then
+              echo "MONGO_URI is required"
+              exit 1
+            fi
+
+            # Clone or update repo
             if [ ! -d "$DEPLOY_PATH/.git" ]; then
               rm -rf "$DEPLOY_PATH"
               git clone "$REPO_URL" "$DEPLOY_PATH"
@@ -50,23 +59,26 @@ jobs:
             git checkout "$BRANCH"
             git pull origin "$BRANCH"
 
-            # Create .env file for backend configuration
-            cat > .env <<'EOF'
-            NODE_ENV=production
-            BE_PORT=${{ secrets.BE_PORT || '3200' }}
-            FE_PORT=${{ secrets.FE_PORT || '4200' }}
-            FE_API_URL=${{ secrets.FE_API_URL }}
-            FE_ENCRYPTION_KEY=${{ secrets.FE_ENCRYPTION_KEY || '1234' }}
-            FE_DOMAIN=${{ secrets.FE_DOMAIN }}
-            JWT_SECRET=${{ secrets.JWT_SECRET }}
-            SMTP_USER=${{ secrets.SMTP_USER }}
-            SMTP_PASS=${{ secrets.SMTP_PASS }}
-            SMTP_HOST=${{ secrets.SMTP_HOST }}
-            SMTP_PORT=${{ secrets.SMTP_PORT || '587' }}
-            MONGO_URI=${{ secrets.MONGO_URI }}
+            # Generate .env
+            cat > be/.env <<EOF
+            BE_PORT=${{ vars.BE_PORT }}
+            FE_PORT=${{ vars.FE_PORT }}
             EOF
 
-            # Choose compose file based on deployment type
+            cat > be/.env <<EOF
+            IS_PROD=true
+            FE_DOMAIN=${{ vars.FE_DOMAIN }}
+            MONGO_URI=${{ secrets.MONGO_URI }}
+            BE_PORT=${{ vars.BE_PORT }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            SMTP_USER=${{ vars.SMTP_USER }}
+            SMTP_PASS=${{ secrets.SMTP_PASS }}
+            SMTP_HOST=${{ vars.SMTP_HOST }}
+            SMTP_PORT=${{ vars.SMTP_PORT }}
+            URL_CHANGE_PASSWORD=user-verification
+            EOF
+
+            # Deploy
             if [ "$DEPLOYMENT_TYPE" = "simple" ]; then
               echo "🚀 Deploying with SIMPLE setup..."
               docker-compose -f docker-compose.simple.yml down --remove-orphans || true
@@ -77,4 +89,8 @@ jobs:
               docker-compose -f docker-compose.yml up -d --build --remove-orphans
             fi
 
+            # Cleanup unused images
             docker image prune -f
+
+            # Optional: show running containers
+            docker ps

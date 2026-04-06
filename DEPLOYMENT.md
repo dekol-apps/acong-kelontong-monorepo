@@ -15,7 +15,7 @@ This project now includes:
 cp .env.example .env
 ```
 
-2. Edit `.env` values (at minimum `JWT_SECRET`, SMTP values, `FE_DOMAIN`, `FE_API_URL`).
+2. Edit `.env` values (at minimum `JWT_SECRET` SMTP values, `FE_DOMAIN`).
 
 3. Start all services:
 
@@ -56,7 +56,6 @@ Add these repository secrets:
 - `SERVER_REPO_URL` (HTTPS/SSH git URL reachable by the server)
 - `JWT_SECRET`
 - `FE_DOMAIN`
-- `FE_API_URL`
 - `SMTP_USER`
 - `SMTP_PASS`
 - `SMTP_HOST`
@@ -64,7 +63,6 @@ Add these repository secrets:
 - `MONGO_URI` (optional, default points to compose replica set)
 - `BE_PORT` (optional)
 - `FE_PORT` (optional)
-- `FE_ENCRYPTION_KEY` (optional)
 
 When you push to `main` (or run workflow manually), deploy workflow will:
 - SSH into your server
