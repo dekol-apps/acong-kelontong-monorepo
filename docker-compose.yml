@@ -86,9 +86,6 @@ services:
     restart: unless-stopped
     depends_on:
       - be
-    environment:
-      FE_PORT: 4000
-      NODE_ENV: production
     ports:
       - "${FE_PORT:-4200}:4000"
 

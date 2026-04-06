@@ -6,6 +6,7 @@ import {
 } from '@angular/ssr/node';
 import express from 'express';
 import { join } from 'node:path';
+import { environment } from './environments/environment';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
@@ -52,7 +53,7 @@ app.use((req, res, next) => {
  * The server listens on the port defined by the `FE_PORT` environment variable, or defaults to 4000.
  */
 if (isMainModule(import.meta.url)) {
-  const port = process.env['FE_PORT'] || 4000;
+  const port = environment.FE_PORT || 4000;
   app.listen(port, (error) => {
     if (error) {
       throw error;
