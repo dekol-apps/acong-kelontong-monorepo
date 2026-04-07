@@ -15,6 +15,7 @@ export type TModules =
     'production.view' | 'production.create' | 'production.edit' | 'production.delete' |
     'sale_cashier.view' | 'sale_cashier.create' | 'sale_cashier.edit' |
     'sale_stock.view' | 'sale_stock.create' |
+    'finance_report.view' |
     'dashboard.view'
 
 export interface IRole {

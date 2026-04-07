@@ -252,7 +252,7 @@ export const FINANCE_REPORT: IMenu = {
     url: 'finance-report',
     icon: '',
     labelKey: 'Finance Report',
-    permissions: ['cashflow.view'],
+    permissions: ['finance_report.view'],
 }
 export const EXPENSES: IMenu = {
     code: 'expenses',

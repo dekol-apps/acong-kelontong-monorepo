@@ -24,7 +24,8 @@ export const modules: TModules[] = [
   'role.view', 'role.create', 'role.edit', 'role.delete',
   'production.view', 'production.create', 'production.edit', 'production.delete',
   'sale_cashier.view', 'sale_cashier.create', 'sale_cashier.edit',
-  'sale_stock.view', 'sale_stock.create'
+  'sale_stock.view', 'sale_stock.create',
+  'finance_report.view'
 ];
 
 export const defaultPpnRate = 11;

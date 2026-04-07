@@ -32,7 +32,8 @@ export type TModules =  //This is a list of API Endpoint permission
   'role.view' | 'role.create' | 'role.edit' | 'role.delete' |
   'production.view' | 'production.create' | 'production.edit' | 'production.delete' |
   'sale_cashier.view' | 'sale_cashier.create' | 'sale_cashier.edit' |
-  'sale_stock.view' | 'sale_stock.create';
+  'sale_stock.view' | 'sale_stock.create' |
+  'finance_report.view';
 
 export type TLogoutOption = 'all' | 'other' | 'current';
 
