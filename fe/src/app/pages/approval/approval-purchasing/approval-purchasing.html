@@ -14,6 +14,7 @@
         <a [routerLink]="['./form', item._id]" [queryParams]="{type: 'view'}" class="pointer btn btn-secondary">
           <i class="fa-solid fa-eye"></i>
         </a>
+        @if (hasApprovalActionPermission) {
         <button class="pointer btn btn-danger" (click)="rejectPurchasing(item._id)"
           [disabled]="item.status !== 'REQUEST'">
           <i class="fa-solid fa-xmark"></i>
@@ -22,6 +23,7 @@
           [disabled]="item.status !== 'REQUEST'">
           <i class="fa-solid fa-check"></i>
         </button>
+        }
       </div>
     </ng-template>
   </div>

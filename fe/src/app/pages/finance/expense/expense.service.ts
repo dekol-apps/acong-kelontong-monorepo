@@ -15,6 +15,10 @@ export class ExpenseService extends BaseService {
     return this.getRequest({ url: Endpoint.EXPENSE, qParams, spinner: false });
   }
 
+  getApprovalExpenses(qParams: ITableQueryData): Observable<IResList<IExpense>> {
+    return this.getRequest({ url: Endpoint.APPROVAL_EXPENSE_LIST, qParams, spinner: false });
+  }
+
   getExpenseDetail(expenseId: string): Observable<IExpense> {
     return this.getRequest({ url: Endpoint.EXPENSE_ID(expenseId) }).pipe(
       map((res: IResDetail<IExpense>) => res.detail)
@@ -52,10 +56,23 @@ export class ExpenseService extends BaseService {
     }).pipe(map((res: IResDetail<IExpense>) => res.detail));
   }
 
+  approveExpenseByApproval(expenseId: string): Observable<IExpense> {
+    return this.putRequest({
+      url: Endpoint.APPROVAL_EXPENSE_APPROVE(expenseId),
+    }).pipe(map((res: IResDetail<IExpense>) => res.detail));
+  }
+
   rejectExpense(expenseId: string, rejectNotes: string): Observable<IExpense> {
     return this.putRequest({
       url: Endpoint.EXPENSE_APPROVAL(expenseId),
       body: { approval: ApprovalType.REJECT, reject_notes: rejectNotes }
+    }).pipe(map((res: IResDetail<IExpense>) => res.detail));
+  }
+
+  rejectExpenseByApproval(expenseId: string, rejectNotes: string): Observable<IExpense> {
+    return this.putRequest({
+      url: Endpoint.APPROVAL_EXPENSE_REJECT(expenseId),
+      body: { reject_notes: rejectNotes }
     }).pipe(map((res: IResDetail<IExpense>) => res.detail));
   }
 

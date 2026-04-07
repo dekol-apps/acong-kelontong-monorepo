@@ -173,7 +173,7 @@ export class PurchasingController {
     });
   }
 
-  @Permission(['purchasing.edit'])
+  @Permission(['approval.create'])
   @Put(':purchasing_id/approval')
   async purchaseOrderApproval(
     @Param('purchasing_id') id: string,

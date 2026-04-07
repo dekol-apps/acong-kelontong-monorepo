@@ -9,6 +9,7 @@ import { ExpenseService } from '../expense.service';
 import { FormsModule } from '@angular/forms';
 import { RupiahPipe } from '../../../../shared/pipes/rupiah.pipe';
 import { TranslateModule } from '@ngx-translate/core';
+import { AuthService } from '../../../../services/auth/auth-service';
 
 @Component({
   selector: 'app-expense-detail',
@@ -27,6 +28,7 @@ export class ExpenseDetail {
   isLoading = false;
 
   rejectNotes = '';
+  hasApprovalActionPermission = false;
 
   ExpenseEn = ExpenseEn;
   DATE_FORMAT = DATE_FORMAT;
@@ -35,9 +37,12 @@ export class ExpenseDetail {
     private route: ActivatedRoute,
     private router: Router,
     private alert: AlertService,
-    private expenseService: ExpenseService
+    private expenseService: ExpenseService,
+    private authService: AuthService,
   ) {
     this.expenseId = this.route.snapshot.paramMap.get('expense_id') || undefined;
+    const modules = this.authService.getProfile()?.role?.modules ?? [];
+    this.hasApprovalActionPermission = modules.includes('approval.create');
     if (this.expenseId) {
       this.getDetail(this.expenseId);
     }

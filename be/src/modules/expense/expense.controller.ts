@@ -146,7 +146,7 @@ export class ExpenseController {
     }
   }
 
-  @Permission(['expenses.edit'])
+  @Permission(['approval.create'])
   @Put(':expense_id/approval')
   async expenseApproval(
     @Param('expense_id') expenseId: Types.ObjectId,

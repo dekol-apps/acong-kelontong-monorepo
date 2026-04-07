@@ -15,7 +15,7 @@
     <button class="btn btn-danger" type="button" (click)="deletePurchasing()">{{ 'Delete' | translate }}</button>
     <button class="btn btn-primary" type="button" (click)="request()">{{ 'Submit PO Request' | translate }}</button>
     }
-    @if (detail?.status===PurchasingEn.REQUEST && !isReceiveOrder) {
+    @if (detail?.status===PurchasingEn.REQUEST && !isReceiveOrder && hasApprovalActionPermission) {
     <button class="btn btn-danger" type="button" (click)="reject()">{{ 'Reject PO' | translate }}</button>
     <button class="btn btn-success" type="button" (click)="approve()">{{ 'Approve PO' | translate }}</button>
     }

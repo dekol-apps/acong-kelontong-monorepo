@@ -30,6 +30,12 @@ export class PurchaseOrderService extends BaseService {
     return this.getRequest({ url: Endpoint.PURCHASING_RECEIVE_LIST, qParams, spinner: false });
   }
 
+  getApprovalPurchasings(
+    qParams: ITableQueryData
+  ): Observable<IResList<IPurchasing>> {
+    return this.getRequest({ url: Endpoint.APPROVAL_PURCHASING_LIST, qParams, spinner: false });
+  }
+
   createPurchasing(
     body: FormData | IPurchasing //refers to IPurchasingDto
   ): Observable<IPurchasing> {
@@ -130,10 +136,23 @@ export class PurchaseOrderService extends BaseService {
     });
   }
 
+  approvePOByApproval(purchasing_id: string): Observable<IPurchasing> {
+    return this.putRequest({
+      url: Endpoint.APPROVAL_PURCHASING_APPROVE(purchasing_id),
+    });
+  }
+
   rejectPO(purchasing_id: string, reject_notes: string): Observable<IPurchasing> {
     return this.putRequest({
       url: Endpoint.PURCHASING_APPROVAL(purchasing_id),
       body: { approval: ApprovalType.REJECT, reject_notes }
+    });
+  }
+
+  rejectPOByApproval(purchasing_id: string, reject_notes: string): Observable<IPurchasing> {
+    return this.putRequest({
+      url: Endpoint.APPROVAL_PURCHASING_REJECT(purchasing_id),
+      body: { reject_notes }
     });
   }
 

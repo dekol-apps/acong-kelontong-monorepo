@@ -19,7 +19,7 @@ export class ApprovalController {
         private readonly expense: ExpenseService,
     ) { }
 
-    @Permission(['approval.view'])
+    @Permission(['approval.view', 'approval.create'])
     @Get('purchasing')
     async listApprovalPurchasing(
         @Query() query: PaginationDto,
@@ -74,7 +74,7 @@ export class ApprovalController {
         }
     }
 
-    @Permission(['approval.view'])
+    @Permission(['approval.view', 'approval.create'])
     @Get('expense')
     async listApprovalExpense(
         @Query() query: PaginationDto,

@@ -346,7 +346,7 @@ export const APPROVAL: IMenu = {
     url: 'approval',
     icon: 'nav-icon bi bi-clipboard-check',
     labelKey: 'Approval',
-    permissions: ['approval.view']
+    permissions: ['approval.view', 'approval.create']
 }
 
 export const INVESTMENT: IMenu = {
