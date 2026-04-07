@@ -254,13 +254,6 @@ export const FINANCE_REPORT: IMenu = {
     labelKey: 'Finance Report',
     permissions: ['cashflow.view'],
 }
-export const SHOWCASE: IMenu = {
-    code: 'showcase',
-    url: 'showcase',
-    icon: '',
-    labelKey: 'Showcase',
-    permissions: ['product.view'],
-}
 export const EXPENSES: IMenu = {
     code: 'expenses',
     url: 'expenses',
