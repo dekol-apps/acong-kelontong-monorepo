@@ -7,10 +7,10 @@ import { ConfirmModal } from '../../../shared/components/modals/confirm-modal/co
 import { PurchaseOrderService } from '../services/purchase-order.service';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
-import { AuthService } from '../../../services/auth/auth-service';
+import { UsePermission } from '../../../shared/directives/use-permission/use-permission';
 @Component({
   selector: 'app-purchase-order-detail',
-  imports: [PurchasingDetail, ConfirmModal, FormsModule, TranslateModule],
+  imports: [PurchasingDetail, ConfirmModal, FormsModule, TranslateModule, UsePermission],
   templateUrl: './purchase-order-detail.html',
   styleUrl: './purchase-order-detail.scss'
 })
@@ -25,19 +25,15 @@ export class PurchaseOrderDetail {
   PurchasingEn = PurchasingEn;
   PaymentStatusEn = PaymentStatusEn;
   isReceiveOrder?: boolean;
-  hasApprovalActionPermission = false;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private service: PurchaseOrderService,
-    private authService: AuthService,
   ) {
     this.purchase_id = this.route.snapshot.paramMap.get('po_id') || undefined;
     // check url if it include receive-order
     this.isReceiveOrder = this.router.url.includes('receive-order');
-    const modules = this.authService.getProfile()?.role?.modules ?? [];
-    this.hasApprovalActionPermission = modules.includes('approval.create');
   }
 
   exit() {

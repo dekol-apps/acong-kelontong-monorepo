@@ -8,11 +8,11 @@ import { IPaginationInput, ISelectFilter } from '../../../types/interfaces/commo
 import { ExpenseEn, IExpense } from '../../../types/interfaces/expense.interface';
 import { ExpenseService } from '../../finance/expense/expense.service';
 import { FormsModule } from '@angular/forms';
-import { AuthService } from '../../../services/auth/auth-service';
+import { UsePermission } from '../../../shared/directives/use-permission/use-permission';
 
 @Component({
   selector: 'app-approval-expenses',
-  imports: [GenericTable, TableColumn, RouterLink, ConfirmModal, FormsModule],
+  imports: [GenericTable, TableColumn, RouterLink, ConfirmModal, FormsModule, UsePermission],
   standalone: true,
   templateUrl: './approval-expenses.html',
   styleUrl: './approval-expenses.scss'
@@ -82,19 +82,15 @@ export class ApprovalExpenses implements OnInit {
 
   rejectNotes = '';
   activeExpenseId = '';
-  hasApprovalActionPermission = false;
 
   ExpenseEn = ExpenseEn;
 
   constructor(
     private expenseService: ExpenseService,
     private alert: AlertService,
-    private authService: AuthService,
   ) {}
 
   ngOnInit(): void {
-    const modules = this.authService.getProfile()?.role?.modules ?? [];
-    this.hasApprovalActionPermission = modules.includes('approval.create');
     this.getList(this.defaultQuery);
   }
 

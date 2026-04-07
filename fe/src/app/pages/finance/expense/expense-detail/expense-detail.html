@@ -77,9 +77,9 @@
     <button class="btn btn-primary" type="button" (click)="requestExpense()">{{ 'Submit Request' | translate }}</button>
     }
 
-    @if (detail?.status === ExpenseEn.REQUEST && hasApprovalActionPermission) {
-    <button class="btn btn-danger" type="button" (click)="rejectExpense()">{{ 'Reject' | translate }}</button>
-    <button class="btn btn-success" type="button" (click)="approveExpense()">{{ 'Approve' | translate }}</button>
+    @if (detail?.status === ExpenseEn.REQUEST) {
+    <button [usePermission]="true" [permissions]="['approval.create']" class="btn btn-danger" type="button" (click)="rejectExpense()">{{ 'Reject' | translate }}</button>
+    <button [usePermission]="true" [permissions]="['approval.create']" class="btn btn-success" type="button" (click)="approveExpense()">{{ 'Approve' | translate }}</button>
     }
 
     @if (detail?.status === ExpenseEn.APPROVE) {

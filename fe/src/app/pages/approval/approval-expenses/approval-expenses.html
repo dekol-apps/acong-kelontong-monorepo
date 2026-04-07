@@ -7,16 +7,14 @@
 				<a [routerLink]="['/expenses/detail', item._id]" class="pointer btn btn-secondary">
 					<i class="fa-solid fa-eye"></i>
 				</a>
-				@if (hasApprovalActionPermission) {
-				<button class="pointer btn btn-danger" (click)="rejectExpense(item._id)"
+				<button [usePermission]="true" [permissions]="['approval.create']" class="pointer btn btn-danger" (click)="rejectExpense(item._id)"
 					[disabled]="item.status !== ExpenseEn.REQUEST">
 					<i class="fa-solid fa-xmark"></i>
 				</button>
-				<button class="pointer btn btn-success" (click)="approveExpense(item._id)"
+				<button [usePermission]="true" [permissions]="['approval.create']" class="pointer btn btn-success" (click)="approveExpense(item._id)"
 					[disabled]="item.status !== ExpenseEn.REQUEST">
 					<i class="fa-solid fa-check"></i>
 				</button>
-				}
 			</div>
 		</ng-template>
 	</div>

@@ -11,11 +11,11 @@ import { AlertService } from '../../../shared/components/alert/alert-service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RupiahPipe } from '../../../shared/pipes/rupiah.pipe';
-import { AuthService } from '../../../services/auth/auth-service';
+import { UsePermission } from '../../../shared/directives/use-permission/use-permission';
 
 @Component({
   selector: 'app-approval-purchasing',
-  imports: [CommonModule, GenericTable, TableColumn, RouterLink, ConfirmModal, FormsModule, RupiahPipe],
+  imports: [CommonModule, GenericTable, TableColumn, RouterLink, ConfirmModal, FormsModule, RupiahPipe, UsePermission],
   standalone: true,
   templateUrl: './approval-purchasing.html',
   styleUrl: './approval-purchasing.scss'
@@ -86,12 +86,10 @@ export class ApprovalPurchasing implements OnInit {
 
   rejectNotes: string = '';
   activePurchasingId: string = '';
-  hasApprovalActionPermission = false;
 
   constructor(
     private service: PurchaseOrderService,
     private alert: AlertService,
-    private authService: AuthService,
   ) { }
 
   modalOptions: NgbModalOptions = {
@@ -126,8 +124,6 @@ export class ApprovalPurchasing implements OnInit {
   }
 
   ngOnInit(): void {
-    const modules = this.authService.getProfile()?.role?.modules ?? [];
-    this.hasApprovalActionPermission = modules.includes('approval.create');
     this.getList(this.defaultQuery)
   }
 
