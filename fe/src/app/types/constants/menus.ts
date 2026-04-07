@@ -182,21 +182,21 @@ export const RECEIVE_ORDER: IMenu = {
     url: 'receive-order',
     icon: '',
     labelKey: 'Receive Order',
-    permissions: ['purchasing.view', 'inventory.create', 'purchasing.edit'],
+    permissions: ['purchasing_receive.view'],
 }
 export const RECEIVE_ORDER_DETAIL: IMenu = {
     code: 'detail',
     url: 'detail/:po_id',
     icon: '',
     labelKey: 'Purchase Order Detail',
-    permissions: ['purchasing.view'],
+    permissions: ['purchasing_receive.view'],
 }
 export const PURCHASE_ORDER_RECEIVE: IMenu = {
     code: 'receive',
     url: 'detail/:po_id/receive',
     icon: '',
     labelKey: 'Receive Purchase Order',
-    permissions: ['purchasing.edit', 'inventory.create'],
+    permissions: ['purchasing_receive.create'],
 }
 export const SUPPLIERS: IMenu = {
     code: 'supplier',

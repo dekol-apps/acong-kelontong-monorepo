@@ -117,7 +117,7 @@ export class PurchasingController {
     })
   }
 
-  @Permission(['purchasing.view'])
+  @Permission(['purchasing.view', 'purchasing_receive.view'])
   @Get(':purchasing_id')
   async detailPurchasing(
     @Param('purchasing_id') id: string,
@@ -254,7 +254,7 @@ export class PurchasingController {
     })
   }
 
-  @Permission(['purchasing.edit'])
+  @Permission(['purchasing_receive.create'])
   @Put(':purchasing_id/receive')
   async recieveOrder(
     @Param('purchasing_id') id: string,
@@ -271,7 +271,7 @@ export class PurchasingController {
     }
   }
 
-  @Permission(['purchasing.view'])
+  @Permission(['purchasing.view', 'purchasing_receive.view'])
   @Get(':purchasing_id/items')
   async listPurchasingItem(
     @Query() query: PaginationDto,

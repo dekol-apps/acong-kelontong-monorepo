@@ -1,6 +1,7 @@
 export type TModules =
     'investment.view' | 'investment.create' | 'investment.edit' | 'investment.delete' |
     'approval.view' | 'approval.create' |
+    'purchasing_receive.view' | 'purchasing_receive.create' |
     'inventory.view' | 'inventory.create' | 'inventory.edit' | 'inventory.delete' |
     'purchasing.view' | 'purchasing.create' | 'purchasing.edit' | 'purchasing.delete' |
     'product.view' | 'product.create' | 'product.edit' | 'product.delete' |
