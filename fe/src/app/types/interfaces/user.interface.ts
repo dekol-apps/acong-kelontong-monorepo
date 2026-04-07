@@ -1,6 +1,7 @@
 export type TModules =
     'investment.view' | 'investment.create' | 'investment.edit' | 'investment.delete' |
-    'approval.view' | 'approval.create' |
+    'approval_purchasing.view' | 'approval_purchasing.create' |
+    'approval_expense.view' | 'approval_expense.create' |
     'purchasing_receive.view' | 'purchasing_receive.create' |
     'inventory.view' | 'inventory.create' | 'inventory.edit' | 'inventory.delete' |
     'purchasing.view' | 'purchasing.create' | 'purchasing.edit' | 'purchasing.delete' |
@@ -12,7 +13,8 @@ export type TModules =
     'user.view' | 'user.create' | 'user.edit' | 'user.delete' |
     'role.view' | 'role.create' | 'role.edit' | 'role.delete' |
     'production.view' | 'production.create' | 'production.edit' | 'production.delete' |
-    'sale.view' | 'sale.create' | 'sale.edit' | 'sale.delete' |
+    'sale_cashier.view' | 'sale_cashier.create' | 'sale_cashier.edit' |
+    'sale_stock.view' | 'sale_stock.create' |
     'dashboard.view'
 
 export interface IRole {

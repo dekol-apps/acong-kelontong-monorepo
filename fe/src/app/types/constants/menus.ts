@@ -15,49 +15,49 @@ export const CASHIER: IMenu = {
     url: 'cashier',
     icon: '',
     labelKey: 'Cashier',
-    permissions: ['sale.view', 'sale.create', 'sale.edit', 'sale.delete'],
+    permissions: ['sale_cashier.view', 'sale_cashier.create', 'sale_cashier.edit'],
 };
 export const SALES_HISTORY: IMenu = {
     code: 'sales-history',
     url: 'sales-history',
     icon: '',
     labelKey: 'Sales History',
-    permissions: ['sale.view', 'sale.create', 'sale.edit', 'sale.delete'],
+    permissions: ['sale_cashier.view'],
 };
 export const SALES_HISTORY_DETAIL: IMenu = {
     code: 'sales-history-detail',
     url: 'sales-history/:sale_id',
     icon: '',
     labelKey: 'Sales History Detail',
-    permissions: ['sale.view'],
+    permissions: ['sale_cashier.view'],
 }
 export const SALE_STOCK: IMenu = {
     code: 'sale-stock',
     url: 'sale-stock',
     icon: '',
     labelKey: 'Sale Stock',
-    permissions: ['sale.view'],
+    permissions: ['sale_stock.view'],
 }
 export const SALE_STOCK_PRODUCT: IMenu = {
     code: 'sale-stock-product',
     url: 'sale-stock/data/:product_id',
     icon: '',
     labelKey: 'Sale Stock Product',
-    permissions: ['sale.view'],
+    permissions: ['sale_stock.view'],
 }
 export const SALE_STOCK_ITEM: IMenu = {
     code: 'sale-stock-item',
     url: 'sale-stock/data/:product_id/:sale_item_id',
     icon: '',
     labelKey: 'Sale Stock Item',
-    permissions: ['sale.view'],
+    permissions: ['sale_stock.view'],
 }
 export const SALE_STOCK_FORM: IMenu = {
     code: 'form',
     url: 'sale-stock/form',
     icon: '',
     labelKey: 'Sale Stock Form',
-    permissions: ['sale.create'],
+    permissions: ['sale_stock.create'],
 }
 
 export const SUPPLIES: IMenu = {
@@ -346,7 +346,7 @@ export const APPROVAL: IMenu = {
     url: 'approval',
     icon: 'nav-icon bi bi-clipboard-check',
     labelKey: 'Approval',
-    permissions: ['approval.view', 'approval.create']
+    permissions: ['approval_purchasing.view', 'approval_purchasing.create', 'approval_expense.view', 'approval_expense.create']
 }
 
 export const INVESTMENT: IMenu = {

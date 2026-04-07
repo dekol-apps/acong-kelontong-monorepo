@@ -15,7 +15,7 @@ export class SaleController {
     private readonly service: SaleService,
   ) { }
 
-  @Permission(['sale.create'])
+  @Permission(['sale_stock.create'])
   @Post('stock')
   async addStock(
     @Body() body: SaleDto,
@@ -29,7 +29,7 @@ export class SaleController {
     }
   }
 
-  @Permission(['sale.view'])
+  @Permission(['sale_stock.view', 'sale_cashier.view'])
   @Get('stock')
   async listStock(
     @Query() query: PaginationDto,
@@ -43,7 +43,7 @@ export class SaleController {
     }
   }
 
-  @Permission(['sale.view'])
+  @Permission(['sale_stock.view', 'sale_cashier.view'])
   @Get('stock/product/:product_id')
   async listStockByProductId(
     @Query() query: PaginationDto,
@@ -58,7 +58,7 @@ export class SaleController {
     }
   }
 
-  @Permission(['sale.view'])
+  @Permission(['sale_stock.view', 'sale_cashier.view'])
   @Get('stock/item/:sale_item_id')
   async getStockDetail(
     @Param('sale_item_id') saleItemId: string,
@@ -72,7 +72,7 @@ export class SaleController {
     }
   }
 
-  @Permission(['sale.create'])
+  @Permission(['sale_cashier.create'])
   @Post('selling')
   async selling(
     @Body() body: SellingSaleDto,
@@ -86,7 +86,7 @@ export class SaleController {
     }
   }
 
-  @Permission(['sale.edit'])
+  @Permission(['sale_cashier.edit'])
   @Post('selling/:id')
   async editSelling(
     @Body() body: SellingSaleDto,
@@ -101,7 +101,7 @@ export class SaleController {
     }
   }
 
-  @Permission(['sale.view'])
+  @Permission(['sale_cashier.view'])
   @Get('selling')
   async listSelling(
     @Query() query: PaginationDto,
@@ -115,7 +115,7 @@ export class SaleController {
     }
   }
 
-  @Permission(['sale.view'])
+  @Permission(['sale_cashier.view'])
   @Get('selling/:id')
   async getSellingDetail(
     @Param('id') id: string,
