@@ -47,28 +47,46 @@ On push/PR, CI will:
 
 ## 4) GitHub Actions deploy to your laptop server
 
-Add these repository secrets:
+This repository intentionally splits GitHub Actions configuration into:
+- **Repository Variables (`vars`)** for non-sensitive values
+- **Repository Secrets (`secrets`)** for sensitive values
+
+Set these **Repository Variables**:
 - `SERVER_HOST`
 - `SERVER_USER`
-- `SERVER_SSH_KEY`
 - `SERVER_PORT` (optional, default `22`)
 - `SERVER_DEPLOY_PATH` (example: `/opt/acong-kelontong-monorepo`)
 - `SERVER_REPO_URL` (HTTPS/SSH git URL reachable by the server)
-- `JWT_SECRET`
-- `FE_DOMAIN`
-- `SMTP_USER`
-- `SMTP_PASS`
-- `SMTP_HOST`
-- `SMTP_PORT` (optional)
-- `MONGO_URI` (optional, default points to compose replica set)
 - `BE_PORT` (optional)
 - `FE_PORT` (optional)
+- `FE_DOMAIN`
+- `SMTP_USER`
+- `SMTP_HOST`
+- `SMTP_PORT` (optional)
 
-When you push to `main` (or run workflow manually), deploy workflow will:
+Set these **Repository Secrets**:
+- `SERVER_SSH_KEY`
+- `MONGO_URI`
+- `JWT_SECRET`
+- `SMTP_PASS`
+
+When `main` / `master` is updated, deploy workflow will run automatically. This includes merges from PRs, direct pushes, and any other change that creates a push event on the branch.
+
+When that deploy workflow runs, it will:
 - SSH into your server
 - pull latest code
 - write `.env`
-- run `docker compose up -d --build --remove-orphans`
+- run `docker-compose up -d --build --remove-orphans`
+
+Manual run note:
+- `workflow_dispatch` exposes `deployment_type` with options: `simple` or `regular`.
+- Push-triggered deploy defaults to `simple`.
+
+PR checks note:
+- Pull requests run the `CI` workflow (`.github/workflows/ci.yml`) with 3 jobs only; they do not deploy to the server:
+  - `Backend Build`
+  - `Frontend Build`
+  - `Docker Build Check`
 
 ## 5) Server prerequisites (one-time)
 
