@@ -326,6 +326,14 @@ export const USER: IMenu = {
     permissions: ['user.view', 'user.create', 'user.edit', 'user.delete']
 }
 
+export const PROFILE: IMenu = {
+    code: 'profile',
+    url: 'profile',
+    icon: '',
+    labelKey: 'Profile',
+}
+
+
 export const DASHBOARD: IMenu = {
     code: 'dashboard',
     url: 'home',

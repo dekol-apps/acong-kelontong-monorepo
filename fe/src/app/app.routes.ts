@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { MainLayout } from './layout/main-layout/main-layout';
-import { BRANDS, CASHIER, EXPENSES, EXPENSES_DETAIL, EXPENSES_EDIT, EXPENSES_FORM, CASHFLOW, CASHFLOW_DETAIL, FINANCE_REPORT, PRODUCT, SUPPLIERS, USER, ROLE, DASHBOARD, ROLE_DETAIL, ROLE_CREATE, ROLE_EDIT, PURCHASE_ORDER, RECEIVE_ORDER, SALES_HISTORY, INVENTORY, PURCHASE_ORDER_NEW, PURCHASE_ORDER_EDIT, APPROVAL, INVESTMENT, PURCHASE_ORDER_DETAIL, PURCHASE_ORDER_RECEIVE, INVENTORY_PRODUCT, INVENTORY_ITEM, INVENTORY_MOVEMENT, INVENTORY_MOVEMENT_DETAIL, INVENTORY_MOVEMENT_ITEM, INVENTORY_MOVEMENT_MANUAL, SALE_STOCK, SALE_STOCK_PRODUCT, SALE_STOCK_ITEM, SALE_STOCK_FORM, SALES_HISTORY_DETAIL, PRODUCTION, PRODUCTION_FORM, PRODUCTION_DETAIL, RECEIVE_ORDER_DETAIL } from './types/constants/menus';
+import { BRANDS, CASHIER, EXPENSES, EXPENSES_DETAIL, EXPENSES_EDIT, EXPENSES_FORM, CASHFLOW, CASHFLOW_DETAIL, FINANCE_REPORT, PRODUCT, SUPPLIERS, USER, ROLE, DASHBOARD, ROLE_DETAIL, ROLE_CREATE, ROLE_EDIT, PURCHASE_ORDER, RECEIVE_ORDER, SALES_HISTORY, INVENTORY, PURCHASE_ORDER_NEW, PURCHASE_ORDER_EDIT, APPROVAL, INVESTMENT, PURCHASE_ORDER_DETAIL, PURCHASE_ORDER_RECEIVE, INVENTORY_PRODUCT, INVENTORY_ITEM, INVENTORY_MOVEMENT, INVENTORY_MOVEMENT_DETAIL, INVENTORY_MOVEMENT_ITEM, INVENTORY_MOVEMENT_MANUAL, SALE_STOCK, SALE_STOCK_PRODUCT, SALE_STOCK_ITEM, SALE_STOCK_FORM, SALES_HISTORY_DETAIL, PRODUCTION, PRODUCTION_FORM, PRODUCTION_DETAIL, RECEIVE_ORDER_DETAIL, PROFILE } from './types/constants/menus';
 import { AuthGuardService } from './services/guards/auth-guard/auth-guard-service';
 import { PageGuardService } from './services/guards/page-guard/page-guard-service';
 
@@ -15,7 +15,7 @@ export const routes: Routes = [
     component: MainLayout,
     canActivate: [AuthGuardService],
     children: [
-      // TODO: remove this dummy later
+      { path: PROFILE.url, loadComponent: () => import('./pages/profile/profile').then(c => c.Profile) },
       {
         path: DASHBOARD.url,
         data: { ...DASHBOARD },
@@ -310,7 +310,6 @@ export const routes: Routes = [
     ]
   },
   { path: 'login', loadComponent: () => import('./layout/auth-layout/login/login').then(c => c.Login) },
-  { path: 'profile', loadComponent: () => import('./pages/profile/profile').then(c => c.Profile) },
   { path: 'user-verification/:ticket', loadComponent: () => import('./pages/admin/user/user-verification/user-verification').then(c => c.UserVerification) },
   { path: '**', loadComponent: () => import('./layout/error-layout/page-not-found/page-not-found').then(c => c.PageNotFound) },
 ];
