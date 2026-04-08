@@ -13,6 +13,7 @@ on:
           - regular
 
   push:
+    # Any push to main/master triggers a real deployment on the server.
     branches:
       - main
       - master
