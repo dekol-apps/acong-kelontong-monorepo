@@ -88,6 +88,24 @@ export class UserService extends BaseService {
     );
   }
 
+  getMyProfile(): Observable<IUser> {
+    return this.getRequest({ url: Endpoint.USER_PROFILE }).pipe(
+      map((res: IResDetail<IUser>) => res.detail)
+    );
+  }
+
+  updateMyProfile(body: Pick<IUser, 'first_name' | 'last_name'>): Observable<IUser> {
+    return this.putRequest({ url: Endpoint.USER_PROFILE, body }).pipe(
+      map((res: IResDetail<IUser>) => res.detail)
+    );
+  }
+
+  changeMyPassword(body: { old_password: string; new_password: string }): Observable<IUser> {
+    return this.putRequest({ url: Endpoint.USER_PROFILE_CHANGE_PASSWORD, body }).pipe(
+      map((res: IResDetail<IUser>) => res.detail)
+    );
+  }
+
   deleteUser(user_id: string): Observable<IUser> {
     return this.deleteRequest({ url: Endpoint.USER_ID(user_id) }).pipe(
       map((res: IResDetail<IUser>) => {

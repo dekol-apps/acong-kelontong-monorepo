@@ -172,7 +172,7 @@
                         <!--end::Menu Body-->
                         <!--begin::Menu Footer-->
                         <li class="user-footer">
-                            <button type="button" class="btn btn-default btn-flat">{{ 'layout.main.profile' | translate }}</button>
+                            <a [routerLink]="['/profile']" class="btn btn-default btn-flat">{{ 'layout.main.profile' | translate }}</a>
                             <button type="button" class="btn btn-default btn-flat float-end" (click)="logout()">{{ 'layout.main.signOut' | translate }}</button>
                         </li>
                         <!--end::Menu Footer-->

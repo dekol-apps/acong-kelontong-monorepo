@@ -24,8 +24,6 @@ export class MainLayout implements OnInit {
   modules: TModules[] = [];
 
   profile?: IUser = {} as IUser;
-  userName: string = '';
-  role: string = '';
 
   constructor(private navSvc: NavigationService, private router: Router, protected activatedRoute: ActivatedRoute, private auth: AuthService) {
     this.breadcrumbs = navSvc.buildBreadCrumb();
@@ -35,8 +33,16 @@ export class MainLayout implements OnInit {
       this.pageTitle = this.breadcrumbs.length > 0 ? this.breadcrumbs.at(-1)?.labelKey || '' : '';
     });
     this.profile = this.auth?.getProfile() ?? {} as IUser;
-    this.userName = `${this.profile?.first_name ?? 'User'} ${this.profile?.last_name ?? 'Name'}`;
-    this.role = this.profile?.role?.role_name ?? 'Role' as string;
+  }
+
+  get userName(): string {
+    const profile = this.auth.getProfile() ?? this.profile;
+    return `${profile?.first_name ?? 'User'} ${profile?.last_name ?? 'Name'}`;
+  }
+
+  get role(): string {
+    const profile = this.auth.getProfile() ?? this.profile;
+    return profile?.role?.role_name ?? 'Role';
   }
 
   ngOnInit(): void {

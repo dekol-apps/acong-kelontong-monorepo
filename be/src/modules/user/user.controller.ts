@@ -3,7 +3,7 @@ import { UserService } from './user.service';
 import { UAuthGuard } from '../auth/auth.guard';
 import { BaseResponse } from 'src/utils/base-response';
 import type { Request, Response } from 'express';
-import { ChangeEmailDto, ChangePasswordDto, GetUserListDto, IEditUser, InviteUserDto } from './user.dto';
+import { ChangeEmailDto, ChangePasswordDto, GetUserListDto, IEditUser, InviteUserDto, UpdateProfileDto } from './user.dto';
 import { decodeBase64, encodeBase64 } from 'src/utils/helper';
 import { MailerService } from '@nestjs-modules/mailer';
 import { Permission } from 'src/global/permission.decoratior';
@@ -85,6 +85,55 @@ export class UserController {
         res,
         option: { message: 'Success get detail user', detail },
       });
+    } catch (err) {
+      return BaseResponse.error({ res, err });
+    }
+  }
+
+  @UseGuards(UAuthGuard)
+  @Get('profile')
+  async profile(
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    try {
+      const userId = (req as any).user.id0;
+      const detail = await this.userService.getDetailUser(userId);
+      return BaseResponse.success({ res, option: { message: 'Success get profile', detail } });
+    } catch (err) {
+      return BaseResponse.error({ res, err });
+    }
+  }
+
+  @UseGuards(UAuthGuard)
+  @Put('profile')
+  async updateProfile(
+    @Req() req: Request,
+    @Body() body: UpdateProfileDto,
+    @Res() res: Response,
+  ) {
+    try {
+      const userId = (req as any).user.id0;
+      await this.userService.editUser(userId, body);
+      const detail = await this.userService.getDetailUser(userId);
+      return BaseResponse.success({ res, option: { message: 'Success update profile', detail } });
+    } catch (err) {
+      return BaseResponse.error({ res, err });
+    }
+  }
+
+  @UseGuards(UAuthGuard)
+  @Put('profile/change-password')
+  async changeMyPassword(
+    @Req() req: Request,
+    @Body() body: ChangePasswordDto,
+    @Res() res: Response,
+  ) {
+    try {
+      const userId = (req as any).user.id0;
+      await this.userService.editUsrPasswd(userId, body);
+      const detail = await this.userService.getDetailUser(userId);
+      return BaseResponse.success({ res, option: { message: 'Success change password', detail } });
     } catch (err) {
       return BaseResponse.error({ res, err });
     }

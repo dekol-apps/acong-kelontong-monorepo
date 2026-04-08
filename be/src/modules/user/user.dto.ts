@@ -53,6 +53,16 @@ export class IEditUser {
   role?: Types.ObjectId;
 }
 
+export class UpdateProfileDto {
+  @IsString()
+  @IsNotEmpty()
+  first_name: string;
+
+  @IsString()
+  @IsNotEmpty()
+  last_name: string;
+}
+
 export class ChangeEmailDto {
   @IsNotEmpty()
   new_email: string;
