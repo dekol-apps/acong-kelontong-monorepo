@@ -310,6 +310,7 @@ export const routes: Routes = [
     ]
   },
   { path: 'login', loadComponent: () => import('./layout/auth-layout/login/login').then(c => c.Login) },
+  { path: 'profile', loadComponent: () => import('./pages/profile/profile').then(c => c.Profile) },
   { path: 'user-verification/:ticket', loadComponent: () => import('./pages/admin/user/user-verification/user-verification').then(c => c.UserVerification) },
   { path: '**', loadComponent: () => import('./layout/error-layout/page-not-found/page-not-found').then(c => c.PageNotFound) },
 ];

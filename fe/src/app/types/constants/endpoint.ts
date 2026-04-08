@@ -21,6 +21,8 @@ export const Endpoint = {
   USER_ID: (id: string) => {
     return `${api}user/detail/${id}`
   },
+  USER_PROFILE: `${api}user/profile`,
+  USER_PROFILE_CHANGE_PASSWORD: `${api}user/profile/change-password`,
   USER_ID_REINVITE: (id: string) => {
     return `${api}user/detail/${id}/re-invite`
   },

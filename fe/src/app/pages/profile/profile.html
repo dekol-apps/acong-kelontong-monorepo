@@ -1,0 +1,118 @@
+<section class="profile-page container-fluid py-3 py-lg-4">
+  @if (isLoading) {
+  <app-page-spinner />
+  } @else if (!isAuthenticated) {
+  <div class="alert alert-info" role="alert">
+    <div class="d-flex align-items-center">
+      <div class="flex-grow-1">
+        <h4 class="alert-heading mb-1">Sign in required</h4>
+        <p class="mb-0">Please sign in to view and edit your profile.</p>
+      </div>
+      <button (click)="loginRedirect()" class="btn btn-info ms-3 flex-shrink-0">Sign in</button>
+    </div>
+  </div>
+  } @else {
+  <div class="profile-hero card border-0 shadow-sm mb-4">
+    <div class="card-body p-4 p-lg-5">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-auto">
+          <div class="profile-avatar">
+            {{ profileInitials }}
+          </div>
+        </div>
+        <div class="col-lg">
+          <p class="text-uppercase text-muted mb-1 small fw-semibold">My Account</p>
+          <h1 class="display-6 mb-2">{{ profile?.first_name }} {{ profile?.last_name }}</h1>
+          <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+            <span class="badge rounded-pill text-bg-light border">{{ roleName }}</span>
+            <span class="badge rounded-pill" [class.text-bg-success]="profile?.verified" [class.text-bg-warning]="!profile?.verified">
+              {{ profile?.verified ? 'Verified' : 'Pending verification' }}
+            </span>
+          </div>
+          <p class="text-muted mb-0 profile-summary-text">
+            Update your display name and password from one place. The name change will reflect in the header immediately.
+          </p>
+        </div>
+        <div class="col-lg-auto">
+          <div class="profile-meta card border-0 shadow-none bg-transparent">
+            <div class="meta-item">
+              <span class="meta-label">Email</span>
+              <span class="meta-value">{{ profile?.email || '-' }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Role</span>
+              <span class="meta-value">{{ roleName }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 align-items-start">
+    <div class="col-xl-6">
+      <div class="card profile-card border-0 shadow-sm h-100">
+        <div class="card-header bg-transparent border-0 pt-4 px-4 px-lg-4 pb-0">
+          <h2 class="h5 mb-1">Profile details</h2>
+          <p class="text-muted mb-0">Edit the public name shown across the app.</p>
+        </div>
+        <div class="card-body p-4">
+          <form [formGroup]="profileForm" appFormValidation (ngSubmit)="saveProfile()" class="d-grid gap-3">
+            <div>
+              <label for="profileFirstName" class="form-label required">First name</label>
+              <input id="profileFirstName" type="text" class="form-control" formControlName="first_name" />
+            </div>
+            <div>
+              <label for="profileLastName" class="form-label required">Last name</label>
+              <input id="profileLastName" type="text" class="form-control" formControlName="last_name" />
+            </div>
+            <div>
+              <label for="profileEmail" class="form-label">Email</label>
+              <input id="profileEmail" type="email" class="form-control" [value]="profile?.email || '-'" readonly />
+              <div class="form-text">Email changes are handled separately.</div>
+            </div>
+            <div class="d-flex justify-content-end">
+              <button type="submit" class="btn btn-primary" [disabled]="isSavingProfile">
+                {{ isSavingProfile ? 'Saving...' : 'Save profile' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-6">
+      <div class="card profile-card border-0 shadow-sm h-100">
+        <div class="card-header bg-transparent border-0 pt-4 px-4 px-lg-4 pb-0">
+          <h2 class="h5 mb-1">Change password</h2>
+          <p class="text-muted mb-0">Use a new password you do not use anywhere else.</p>
+        </div>
+        <div class="card-body p-4">
+          <form [formGroup]="passwordForm" appFormValidation (ngSubmit)="changePassword()" class="d-grid gap-3">
+            <div>
+              <label for="oldPassword" class="form-label required">Current password</label>
+              <input id="oldPassword" type="password" class="form-control" formControlName="old_password" />
+            </div>
+            <div>
+              <label for="newPassword" class="form-label required">New password</label>
+              <input id="newPassword" type="password" class="form-control" formControlName="new_password" />
+            </div>
+            <div>
+              <label for="confirmPassword" class="form-label required">Confirm new password</label>
+              <input id="confirmPassword" type="password" class="form-control" formControlName="confirm_password" />
+              @if (passwordMismatch) {
+              <div class="text-danger small mt-1">Passwords do not match.</div>
+              }
+            </div>
+            <div class="d-flex justify-content-end">
+              <button type="submit" class="btn btn-outline-primary" [disabled]="isSavingPassword">
+                {{ isSavingPassword ? 'Updating...' : 'Change password' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+</section>
