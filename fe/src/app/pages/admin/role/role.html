@@ -2,7 +2,7 @@
   <div class="card-header mb-4">
     <div class="d-flex flex-row justify-content-between gap-4">
       <h3 class="card-title">Role List</h3>
-      <a class="btn btn-primary pointer" routerLink="./form">Add Role</a>
+      <a class="btn btn-primary pointer" routerLink="./form" [queryParams]="{type: 'new'}" >Add Role</a>
     </div>
   </div>
   <app-generic-table ngSkipHydration [columns]="columns" [data]="listRoles" [usePagination]="true" [useSearch]="true"
