@@ -9,10 +9,11 @@ import { ExpenseService } from '../expense.service';
 import { FormsModule } from '@angular/forms';
 import { RupiahPipe } from '../../../../shared/pipes/rupiah.pipe';
 import { TranslateModule } from '@ngx-translate/core';
+import { UsePermission } from '../../../../shared/directives/use-permission/use-permission';
 
 @Component({
   selector: 'app-expense-detail',
-  imports: [DatePipe, ConfirmModal, FormsModule, RupiahPipe, TranslateModule],
+  imports: [DatePipe, ConfirmModal, FormsModule, RupiahPipe, TranslateModule, UsePermission],
   templateUrl: './expense-detail.html',
   styleUrl: './expense-detail.scss'
 })
@@ -35,7 +36,7 @@ export class ExpenseDetail {
     private route: ActivatedRoute,
     private router: Router,
     private alert: AlertService,
-    private expenseService: ExpenseService
+    private expenseService: ExpenseService,
   ) {
     this.expenseId = this.route.snapshot.paramMap.get('expense_id') || undefined;
     if (this.expenseId) {

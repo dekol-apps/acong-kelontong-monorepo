@@ -11,10 +11,11 @@ import { AlertService } from '../../../shared/components/alert/alert-service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RupiahPipe } from '../../../shared/pipes/rupiah.pipe';
+import { UsePermission } from '../../../shared/directives/use-permission/use-permission';
 
 @Component({
   selector: 'app-approval-purchasing',
-  imports: [CommonModule, GenericTable, TableColumn, RouterLink, ConfirmModal, FormsModule, RupiahPipe],
+  imports: [CommonModule, GenericTable, TableColumn, RouterLink, ConfirmModal, FormsModule, RupiahPipe, UsePermission],
   standalone: true,
   templateUrl: './approval-purchasing.html',
   styleUrl: './approval-purchasing.scss'
@@ -86,7 +87,10 @@ export class ApprovalPurchasing implements OnInit {
   rejectNotes: string = '';
   activePurchasingId: string = '';
 
-  constructor(private service: PurchaseOrderService, private alert: AlertService) { }
+  constructor(
+    private service: PurchaseOrderService,
+    private alert: AlertService,
+  ) { }
 
   modalOptions: NgbModalOptions = {
     size: 'xl'
@@ -102,7 +106,7 @@ export class ApprovalPurchasing implements OnInit {
       search: evt.search,
       status: evt.filterSelectVal?.value,
     };
-    this.service.getPurchasings(qParams).subscribe({
+    this.service.getApprovalPurchasings(qParams).subscribe({
       next: (res) => {
         console.log({ res })
         this.listPurchasing = res.list ?? [];
@@ -124,7 +128,7 @@ export class ApprovalPurchasing implements OnInit {
   }
 
   approvePurchasing(purchasing_id: string) {
-    this.service.approvePO(purchasing_id).subscribe(() => {
+    this.service.approvePOByApproval(purchasing_id).subscribe(() => {
       this.alert.success('Purchasing approved successfully');
       this.getList(this.defaultQuery);
     });
@@ -135,7 +139,7 @@ export class ApprovalPurchasing implements OnInit {
     this.rejectNotes = '';
     this.confirmReject?.show().then((res: any) => {
       if (!res) return;
-      this.service.rejectPO(this.activePurchasingId, this.rejectNotes).subscribe(() => {
+      this.service.rejectPOByApproval(this.activePurchasingId, this.rejectNotes).subscribe(() => {
         this.alert.success('Purchasing rejected successfully');
         this.getList(this.defaultQuery);
       });

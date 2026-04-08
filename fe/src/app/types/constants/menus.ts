@@ -15,49 +15,49 @@ export const CASHIER: IMenu = {
     url: 'cashier',
     icon: '',
     labelKey: 'Cashier',
-    permissions: ['sale.view', 'sale.create', 'sale.edit', 'sale.delete'],
+    permissions: ['sale_cashier.view', 'sale_cashier.create', 'sale_cashier.edit'],
 };
 export const SALES_HISTORY: IMenu = {
     code: 'sales-history',
     url: 'sales-history',
     icon: '',
     labelKey: 'Sales History',
-    permissions: ['sale.view', 'sale.create', 'sale.edit', 'sale.delete'],
+    permissions: ['sale_cashier.view'],
 };
 export const SALES_HISTORY_DETAIL: IMenu = {
     code: 'sales-history-detail',
     url: 'sales-history/:sale_id',
     icon: '',
     labelKey: 'Sales History Detail',
-    permissions: ['sale.view'],
+    permissions: ['sale_cashier.view'],
 }
 export const SALE_STOCK: IMenu = {
     code: 'sale-stock',
     url: 'sale-stock',
     icon: '',
     labelKey: 'Sale Stock',
-    permissions: ['sale.view'],
+    permissions: ['sale_stock.view'],
 }
 export const SALE_STOCK_PRODUCT: IMenu = {
     code: 'sale-stock-product',
     url: 'sale-stock/data/:product_id',
     icon: '',
     labelKey: 'Sale Stock Product',
-    permissions: ['sale.view'],
+    permissions: ['sale_stock.view'],
 }
 export const SALE_STOCK_ITEM: IMenu = {
     code: 'sale-stock-item',
     url: 'sale-stock/data/:product_id/:sale_item_id',
     icon: '',
     labelKey: 'Sale Stock Item',
-    permissions: ['sale.view'],
+    permissions: ['sale_stock.view'],
 }
 export const SALE_STOCK_FORM: IMenu = {
     code: 'form',
     url: 'sale-stock/form',
     icon: '',
     labelKey: 'Sale Stock Form',
-    permissions: ['sale.create'],
+    permissions: ['sale_stock.create'],
 }
 
 export const SUPPLIES: IMenu = {
@@ -182,21 +182,21 @@ export const RECEIVE_ORDER: IMenu = {
     url: 'receive-order',
     icon: '',
     labelKey: 'Receive Order',
-    permissions: ['purchasing.view', 'inventory.create', 'purchasing.edit'],
+    permissions: ['purchasing_receive.view'],
 }
 export const RECEIVE_ORDER_DETAIL: IMenu = {
     code: 'detail',
     url: 'detail/:po_id',
     icon: '',
     labelKey: 'Purchase Order Detail',
-    permissions: ['purchasing.view'],
+    permissions: ['purchasing_receive.view'],
 }
 export const PURCHASE_ORDER_RECEIVE: IMenu = {
     code: 'receive',
     url: 'detail/:po_id/receive',
     icon: '',
     labelKey: 'Receive Purchase Order',
-    permissions: ['purchasing.edit', 'inventory.create'],
+    permissions: ['purchasing_receive.create'],
 }
 export const SUPPLIERS: IMenu = {
     code: 'supplier',
@@ -252,14 +252,7 @@ export const FINANCE_REPORT: IMenu = {
     url: 'finance-report',
     icon: '',
     labelKey: 'Finance Report',
-    permissions: ['cashflow.view'],
-}
-export const SHOWCASE: IMenu = {
-    code: 'showcase',
-    url: 'showcase',
-    icon: '',
-    labelKey: 'Showcase',
-    permissions: ['product.view'],
+    permissions: ['finance_report.view'],
 }
 export const EXPENSES: IMenu = {
     code: 'expenses',
@@ -346,7 +339,7 @@ export const APPROVAL: IMenu = {
     url: 'approval',
     icon: 'nav-icon bi bi-clipboard-check',
     labelKey: 'Approval',
-    permissions: ['approval.view']
+    permissions: ['approval_purchasing.view', 'approval_purchasing.create', 'approval_expense.view', 'approval_expense.create']
 }
 
 export const INVESTMENT: IMenu = {

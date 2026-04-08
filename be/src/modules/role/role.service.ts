@@ -3,8 +3,14 @@ import { Role } from './role.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { GlobalService } from 'src/global/global.service';
-import { IListRes } from 'src/types/interfaces';
+import { IListRes, TModules } from 'src/types/interfaces';
 import { BaseResponse } from 'src/utils/base-response';
+
+type RoleUpsertPayload = {
+  role_name: string;
+  modules: TModules[];
+  active?: boolean;
+};
 
 @Injectable()
 export class RoleService {
@@ -23,7 +29,7 @@ export class RoleService {
     active?: boolean
   ): Promise<IListRes<Role>> {
     const searchFields: string[] = ['role_name'];
-    let filter;
+    let filter: { column: string; value: boolean } | undefined;
     if (active) {
       filter = { column: 'active', value: true }
     }
@@ -42,7 +48,7 @@ export class RoleService {
     )
   }
 
-  async createRole(body: Role): Promise<Role> {
+  async createRole(body: RoleUpsertPayload): Promise<Role> {
     const role_name = body.role_name;
     const modules = body.modules;
 
@@ -62,7 +68,7 @@ export class RoleService {
     return role || undefined;
   }
 
-  async editRole(role_id: Types.ObjectId, data: Role): Promise<Role | undefined> {
+  async editRole(role_id: Types.ObjectId, data: RoleUpsertPayload): Promise<Role | undefined> {
     const {
       role_name,
       modules,
@@ -85,7 +91,8 @@ export class RoleService {
       ).exec();
       return uptatedRole || undefined;
     } catch (e) {
-      throw BaseResponse.unexpected({ err: { text: 'editRole', err: e.message } })
+      const message = e instanceof Error ? e.message : 'Unknown error';
+      throw BaseResponse.unexpected({ err: { text: 'editRole', err: message } })
     }
   }
 

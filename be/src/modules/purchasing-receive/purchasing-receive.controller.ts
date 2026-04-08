@@ -12,7 +12,7 @@ import { PurchasingEn } from '../purchasing/purchasing.schema';
 export class PurchasingReceiveController {
   constructor(private readonly purchasing: PurchasingService) { }
 
-  @Permission(['purchasing.view'])
+  @Permission(['purchasing_receive.view'])
   @Get('')
   async listPurchasingReceive(
     @Query() query: PaginationDto,

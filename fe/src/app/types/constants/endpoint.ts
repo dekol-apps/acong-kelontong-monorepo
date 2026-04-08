@@ -66,6 +66,9 @@ export const Endpoint = {
   PURCHASING_PAYMENT: (id: string) => `${api}purchasing/${id}/payment`,
   PURCHASING_RECEIVE: (id: string) => `${api}purchasing/${id}/receive`,
   PURCHASING_RECEIVE_LIST: `${api}purchasing-receive`,
+  APPROVAL_PURCHASING_LIST: `${api}approval/purchasing`,
+  APPROVAL_PURCHASING_APPROVE: (id: string) => `${api}approval/purchasing/${id}/approve`,
+  APPROVAL_PURCHASING_REJECT: (id: string) => `${api}approval/purchasing/${id}/reject`,
   PURCHASING_ITEM: `${api}purchasing-item`,
   PURCHASING_ITEM_ID: (id: string) => {
     return `${api}purchasing-item/${id}`
@@ -76,6 +79,9 @@ export const Endpoint = {
   EXPENSE_REQUEST: (id: string) => `${api}expense/${id}/request`,
   EXPENSE_APPROVAL: (id: string) => `${api}expense/${id}/approval`,
   EXPENSE_EXECUTE: (id: string) => `${api}expense/${id}/execute`,
+  APPROVAL_EXPENSE_LIST: `${api}approval/expense`,
+  APPROVAL_EXPENSE_APPROVE: (id: string) => `${api}approval/expense/${id}/approve`,
+  APPROVAL_EXPENSE_REJECT: (id: string) => `${api}approval/expense/${id}/reject`,
 
   // Inventory Item Endpoint
   INVENTORY_ITEM: `${api}inventory-item`,

@@ -8,10 +8,11 @@ import { IPaginationInput, ISelectFilter } from '../../../types/interfaces/commo
 import { ExpenseEn, IExpense } from '../../../types/interfaces/expense.interface';
 import { ExpenseService } from '../../finance/expense/expense.service';
 import { FormsModule } from '@angular/forms';
+import { UsePermission } from '../../../shared/directives/use-permission/use-permission';
 
 @Component({
   selector: 'app-approval-expenses',
-  imports: [GenericTable, TableColumn, RouterLink, ConfirmModal, FormsModule],
+  imports: [GenericTable, TableColumn, RouterLink, ConfirmModal, FormsModule, UsePermission],
   standalone: true,
   templateUrl: './approval-expenses.html',
   styleUrl: './approval-expenses.scss'
@@ -84,7 +85,10 @@ export class ApprovalExpenses implements OnInit {
 
   ExpenseEn = ExpenseEn;
 
-  constructor(private expenseService: ExpenseService, private alert: AlertService) {}
+  constructor(
+    private expenseService: ExpenseService,
+    private alert: AlertService,
+  ) {}
 
   ngOnInit(): void {
     this.getList(this.defaultQuery);
@@ -101,7 +105,7 @@ export class ApprovalExpenses implements OnInit {
       status: evt.filterSelectVal?.value ?? ExpenseEn.REQUEST,
     };
 
-    this.expenseService.getExpenses(qParams).subscribe({
+    this.expenseService.getApprovalExpenses(qParams).subscribe({
       next: (res) => {
         this.listExpense = res.list ?? [];
         this.pagination = {
@@ -119,7 +123,7 @@ export class ApprovalExpenses implements OnInit {
   }
 
   approveExpense(expenseId: string) {
-    this.expenseService.approveExpense(expenseId).subscribe(() => {
+    this.expenseService.approveExpenseByApproval(expenseId).subscribe(() => {
       this.alert.success('Expense approved successfully');
       this.getList(this.defaultQuery);
     });
@@ -130,7 +134,7 @@ export class ApprovalExpenses implements OnInit {
     this.rejectNotes = '';
     this.confirmReject?.show().then((res: any) => {
       if (!res) return;
-      this.expenseService.rejectExpense(this.activeExpenseId, this.rejectNotes).subscribe(() => {
+      this.expenseService.rejectExpenseByApproval(this.activeExpenseId, this.rejectNotes).subscribe(() => {
         this.alert.success('Expense rejected successfully');
         this.getList(this.defaultQuery);
       });

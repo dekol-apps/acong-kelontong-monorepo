@@ -14,11 +14,11 @@
         <a [routerLink]="['./form', item._id]" [queryParams]="{type: 'view'}" class="pointer btn btn-secondary">
           <i class="fa-solid fa-eye"></i>
         </a>
-        <button class="pointer btn btn-danger" (click)="rejectPurchasing(item._id)"
+        <button [usePermission]="true" [permissions]="['approval_purchasing.create']" class="pointer btn btn-danger" (click)="rejectPurchasing(item._id)"
           [disabled]="item.status !== 'REQUEST'">
           <i class="fa-solid fa-xmark"></i>
         </button>
-        <button class="pointer btn btn-success" (click)="approvePurchasing(item._id)"
+        <button [usePermission]="true" [permissions]="['approval_purchasing.create']" class="pointer btn btn-success" (click)="approvePurchasing(item._id)"
           [disabled]="item.status !== 'REQUEST'">
           <i class="fa-solid fa-check"></i>
         </button>

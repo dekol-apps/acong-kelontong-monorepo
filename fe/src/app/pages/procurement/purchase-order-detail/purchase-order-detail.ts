@@ -7,9 +7,10 @@ import { ConfirmModal } from '../../../shared/components/modals/confirm-modal/co
 import { PurchaseOrderService } from '../services/purchase-order.service';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
+import { UsePermission } from '../../../shared/directives/use-permission/use-permission';
 @Component({
   selector: 'app-purchase-order-detail',
-  imports: [PurchasingDetail, ConfirmModal, FormsModule, TranslateModule],
+  imports: [PurchasingDetail, ConfirmModal, FormsModule, TranslateModule, UsePermission],
   templateUrl: './purchase-order-detail.html',
   styleUrl: './purchase-order-detail.scss'
 })
@@ -24,7 +25,12 @@ export class PurchaseOrderDetail {
   PurchasingEn = PurchasingEn;
   PaymentStatusEn = PaymentStatusEn;
   isReceiveOrder?: boolean;
-  constructor(private route: ActivatedRoute, private router: Router, private service: PurchaseOrderService) {
+
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private service: PurchaseOrderService,
+  ) {
     this.purchase_id = this.route.snapshot.paramMap.get('po_id') || undefined;
     // check url if it include receive-order
     this.isReceiveOrder = this.router.url.includes('receive-order');

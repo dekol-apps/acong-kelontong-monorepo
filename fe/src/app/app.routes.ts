@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { MainLayout } from './layout/main-layout/main-layout';
-import { BRANDS, CASHIER, EXPENSES, EXPENSES_DETAIL, EXPENSES_EDIT, EXPENSES_FORM, CASHFLOW, CASHFLOW_DETAIL, FINANCE_REPORT, PRODUCT, SUPPLIERS, USER, ROLE, DASHBOARD, ROLE_DETAIL, ROLE_CREATE, ROLE_EDIT, PURCHASE_ORDER, RECEIVE_ORDER, SALES_HISTORY, INVENTORY, SHOWCASE, PURCHASE_ORDER_NEW, PURCHASE_ORDER_EDIT, APPROVAL, INVESTMENT, PURCHASE_ORDER_DETAIL, PURCHASE_ORDER_RECEIVE, INVENTORY_PRODUCT, INVENTORY_ITEM, INVENTORY_MOVEMENT, INVENTORY_MOVEMENT_DETAIL, INVENTORY_MOVEMENT_ITEM, INVENTORY_MOVEMENT_MANUAL, SALE_STOCK, SALE_STOCK_PRODUCT, SALE_STOCK_ITEM, SALE_STOCK_FORM, SALES_HISTORY_DETAIL, PRODUCTION, PRODUCTION_FORM, PRODUCTION_DETAIL, RECEIVE_ORDER_DETAIL } from './types/constants/menus';
+import { BRANDS, CASHIER, EXPENSES, EXPENSES_DETAIL, EXPENSES_EDIT, EXPENSES_FORM, CASHFLOW, CASHFLOW_DETAIL, FINANCE_REPORT, PRODUCT, SUPPLIERS, USER, ROLE, DASHBOARD, ROLE_DETAIL, ROLE_CREATE, ROLE_EDIT, PURCHASE_ORDER, RECEIVE_ORDER, SALES_HISTORY, INVENTORY, PURCHASE_ORDER_NEW, PURCHASE_ORDER_EDIT, APPROVAL, INVESTMENT, PURCHASE_ORDER_DETAIL, PURCHASE_ORDER_RECEIVE, INVENTORY_PRODUCT, INVENTORY_ITEM, INVENTORY_MOVEMENT, INVENTORY_MOVEMENT_DETAIL, INVENTORY_MOVEMENT_ITEM, INVENTORY_MOVEMENT_MANUAL, SALE_STOCK, SALE_STOCK_PRODUCT, SALE_STOCK_ITEM, SALE_STOCK_FORM, SALES_HISTORY_DETAIL, PRODUCTION, PRODUCTION_FORM, PRODUCTION_DETAIL, RECEIVE_ORDER_DETAIL } from './types/constants/menus';
 import { AuthGuardService } from './services/guards/auth-guard/auth-guard-service';
 import { PageGuardService } from './services/guards/page-guard/page-guard-service';
 
@@ -131,12 +131,6 @@ export const routes: Routes = [
         canActivate: [PageGuardService],
         data: { ...INVENTORY_MOVEMENT_ITEM },
         loadComponent: () => import('./pages/asset/inventory-movement-item-detail/inventory-movement-item-detail').then(c => c.InventoryMovementItemDetail)
-      },
-      {
-        path: SHOWCASE.url,
-        canActivate: [PageGuardService],
-        data: { ...SHOWCASE },
-        loadComponent: () => import('./pages/catalogue/product/product').then(c => c.Product)
       },
       {
         path: PRODUCTION.url,
@@ -317,6 +311,5 @@ export const routes: Routes = [
   },
   { path: 'login', loadComponent: () => import('./layout/auth-layout/login/login').then(c => c.Login) },
   { path: 'user-verification/:ticket', loadComponent: () => import('./pages/admin/user/user-verification/user-verification').then(c => c.UserVerification) },
-  { path: 'error/404', loadComponent: () => import('./layout/error-layout/page-not-found/page-not-found').then(c => c.PageNotFound) },
-  // { path: '**', redirectTo: 'error/404' },
+  { path: '**', loadComponent: () => import('./layout/error-layout/page-not-found/page-not-found').then(c => c.PageNotFound) },
 ];

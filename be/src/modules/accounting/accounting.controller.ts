@@ -15,7 +15,7 @@ export class AccountingController {
     private readonly service: AccountingService,
   ) { }
 
-  @Permission(['cashflow.view'])
+  @Permission(['finance_report.view'])
   @Get('')
   async getPortofolio(
     @Res() res: Response
