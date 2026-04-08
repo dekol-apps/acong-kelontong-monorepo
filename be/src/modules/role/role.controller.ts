@@ -2,9 +2,8 @@ import { Body, Controller, Delete, Get, Param, Post, Put, Query, Res, UseGuards 
 import { RoleService } from './role.service';
 import { BaseResponse } from 'src/utils/base-response';
 import type { Response } from 'express';
-import type { RoleDocument } from './role.schema';
 import { UAuthGuard } from '../auth/auth.guard';
-import { GetRolesDTO } from './role.dto';
+import { GetRolesDTO, RoleUpsertDto } from './role.dto';
 import { Permission } from 'src/global/permission.decoratior';
 import { Types } from 'mongoose';
 
@@ -35,7 +34,7 @@ export class RoleController {
   @Permission(['role.create'])
   @Post('')
   async createRole(
-    @Body() body: RoleDocument,
+    @Body() body: RoleUpsertDto,
     @Res() res: Response,
   ) {
     try {
@@ -68,7 +67,7 @@ export class RoleController {
   @Put(':role_id')
   async edit(
     @Param('role_id') role_id: Types.ObjectId,
-    @Body() body: RoleDocument,
+    @Body() body: RoleUpsertDto,
     @Res() res: Response,
   ) {
     try {

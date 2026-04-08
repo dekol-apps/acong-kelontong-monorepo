@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, map, catchError, of } from 'rxjs';
 import { Endpoint } from '../../../types/constants/endpoint';
-import { IRole, TModules } from '../../../types/interfaces/user.interface';
+import { IRole, IRoleUpsertDto, TModules } from '../../../types/interfaces/user.interface';
 import { BaseService } from '../../../services/rest-api/base-service';
 import { AlertService } from '../../../shared/components/alert/alert-service';
 import { IResDetail, IResList } from '../../../types/interfaces/http.interface';
@@ -34,7 +34,7 @@ export class RoleService extends BaseService {
   }
 
   createRole(
-    body: IRole
+    body: IRoleUpsertDto
   ): Observable<IRole> {
     return this.postRequest({ url: Endpoint.ROLE, body }).pipe(
       map((res: IResDetail<IRole>) => {
@@ -45,7 +45,7 @@ export class RoleService extends BaseService {
 
   editRole(
     id: string,
-    body: IRole
+    body: IRoleUpsertDto
   ): Observable<IRole> {
     return this.putRequest({ url: Endpoint.ROLE_ID(id), body }).pipe(
       map((res: IResDetail<IRole>) => {

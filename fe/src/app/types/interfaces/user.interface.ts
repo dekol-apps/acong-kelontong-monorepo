@@ -25,6 +25,8 @@ export interface IRole {
     modules: TModules[]
 }
 
+export type IRoleUpsertDto = Pick<IRole, 'role_name' | 'active' | 'modules'>;
+
 export interface IUser {
     _id?: string;
     first_name: string;

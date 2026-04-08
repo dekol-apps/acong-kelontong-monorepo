@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { RoleService } from '../role-service';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { IRole } from '../../../../types/interfaces/user.interface';
+import { IRoleUpsertDto, TModules } from '../../../../types/interfaces/user.interface';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ROLE } from '../../../../types/constants/menus';
 import { FormValidation } from '../../../../shared/directives/form-validation/form-validation';
@@ -135,17 +135,16 @@ export class RoleForm implements OnInit {
 
   submit() {
     if (this.form.invalid) return this.alert.error('Please check your inputs');
-    const results: any[] = []
+    const results: TModules[] = []
     this.modules.value.forEach(item => {
       const { module, ...rest } = item;
-      const values = Object.keys(rest).map(tem => {
-        if (item[tem]) return `${module}.${tem}`;
-        return
-      })
-      results.push(...values.filter(Boolean))
+      const values = Object.keys(rest)
+        .map((tem) => (item[tem] ? `${module}.${tem}` : undefined))
+        .filter((value): value is TModules => Boolean(value));
+      results.push(...values);
     })
 
-    const body: IRole = {
+    const body: IRoleUpsertDto = {
       role_name: this.form.value.role_name as string,
       modules: results,
       active: this.form.value.active
