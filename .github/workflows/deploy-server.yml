@@ -73,194 +73,22 @@ jobs:
           # Deploy using registry images
           if [ "$DEPLOYMENT_TYPE" = "simple" ]; then
             echo "Deploying with SIMPLE setup..."
-            docker-compose -f docker-compose.simple.yml down --remove-orphans || true
             
-            # Create temporary docker-compose with registry images
-            cat > docker-compose.simple.registry.yml <<EOF
-          services:
-            mongo:
-              image: mongo:4.4
-              container_name: acong-mongo
-              command: ["--replSet", "rs0", "--bind_ip_all"]
-              volumes:
-                - mongo_data:/data/db
-              healthcheck:
-                test: ["CMD", "mongo", "--quiet", "--eval", "db.adminCommand('ping').ok"]
-                interval: 10s
-                timeout: 5s
-                retries: 10
-              ports:
-                - "27017:27017"
-
-            mongo-init:
-              image: mongo:4.4
-              container_name: acong-mongo-init
-              depends_on:
-                mongo:
-                  condition: service_healthy
-              restart: "no"
-              command: >
-                bash -c "
-                mongo --host mongo:27017 --eval '
-                try {
-                  rs.status();
-                  print(\"Replica set already initialized\");
-                } catch (e) {
-                  rs.initiate({
-                    _id: \"rs0\",
-                    members: [
-                      { _id: 0, host: \"mongo:27017\" }
-                    ]
-                  });
-                }'
-                "
-
-            be:
-              image: ${REGISTRY_PREFIX}/acong-be:${IMAGE_TAG}
-              container_name: acong-be
-              restart: unless-stopped
-              depends_on:
-                mongo-init:
-                  condition: service_completed_successfully
-              environment:
-                NODE_ENV: \${IS_PROD}
-                MONGO_URI: \${MONGO_URI}
-                BE_PORT: \${BE_PORT}
-                FE_DOMAIN: \${FE_DOMAIN}
-                JWT_SECRET: \${JWT_SECRET}
-                SMTP_USER: \${SMTP_USER}
-                SMTP_PASS: \${SMTP_PASS}
-                SMTP_HOST: \${SMTP_HOST}
-                SMTP_PORT: \${SMTP_PORT}
-              ports:
-                - "\${BE_PORT:-3200}:3200"
-              volumes:
-                - ./be/uploads:/app/uploads
-
-            fe:
-              image: ${REGISTRY_PREFIX}/acong-fe:${IMAGE_TAG}
-              container_name: acong-fe
-              restart: unless-stopped
-              depends_on:
-                - be
-              ports:
-                - "\${FE_PORT:-4200}:4200"
-
-          volumes:
-            mongo_data:
-          EOF
+            # Update docker-compose.simple.yml to use registry images
+            sed -i 's|build:|image: '"${REGISTRY_PREFIX}"'/acong-be:'"${IMAGE_TAG}"'\n    # build:|' docker-compose.simple.yml
+            sed -i '/fe:/,/container_name: acong-fe/{s|build:|image: '"${REGISTRY_PREFIX}"'/acong-fe:'"${IMAGE_TAG}"'\n    # build:|}' docker-compose.simple.yml
             
-            docker-compose -f docker-compose.simple.registry.yml up -d --remove-orphans
+            # Deploy with updated images (preserves volumes)
+            docker-compose -f docker-compose.simple.yml up -d --remove-orphans
           else
             echo "Deploying with REGULAR setup..."
-            docker-compose -f docker-compose.yml down --remove-orphans || true
             
-            # Create temporary docker-compose with registry images
-            cat > docker-compose.registry.yml <<EOF
-          services:
-            mongo1:
-              image: mongo:4.4
-              container_name: acong-mongo1
-              command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
-              volumes:
-                - mongo1_data:/data/db
-              healthcheck:
-                test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
-                interval: 10s
-                timeout: 5s
-                retries: 10
-
-            mongo2:
-              image: mongo:4.4
-              container_name: acong-mongo2
-              command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
-              volumes:
-                - mongo2_data:/data/db
-              healthcheck:
-                test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
-                interval: 10s
-                timeout: 5s
-                retries: 10
-
-            mongo3:
-              image: mongo:4.4
-              container_name: acong-mongo3
-              command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
-              volumes:
-                - mongo3_data:/data/db
-              healthcheck:
-                test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
-                interval: 10s
-                timeout: 5s
-                retries: 10
-
-            mongo-init:
-              image: mongo:4.4
-              container_name: acong-mongo-init
-              depends_on:
-                mongo1:
-                  condition: service_healthy
-                mongo2:
-                  condition: service_healthy
-                mongo3:
-                  condition: service_healthy
-              restart: "no"
-              command: >
-                bash -c "
-                mongosh --host mongo1:27017 --eval '
-                try {
-                  rs.status();
-                  print(\"Replica set already initialized\");
-                } catch (e) {
-                  rs.initiate({
-                    _id: \"rs0\",
-                    members: [
-                      { _id: 0, host: \"mongo1:27017\" },
-                      { _id: 1, host: \"mongo2:27017\" },
-                      { _id: 2, host: \"mongo3:27017\" }
-                    ]
-                  });
-                }'
-                "
-
-            be:
-              image: ${REGISTRY_PREFIX}/acong-be:${IMAGE_TAG}
-              container_name: acong-be
-              restart: unless-stopped
-              depends_on:
-                mongo-init:
-                  condition: service_completed_successfully
-              environment:
-                NODE_ENV: \${IS_PROD}
-                MONGO_URI: \${MONGO_URI}
-                BE_PORT: \${BE_PORT}
-                FE_DOMAIN: \${FE_DOMAIN}
-                JWT_SECRET: \${JWT_SECRET}
-                SMTP_USER: \${SMTP_USER}
-                SMTP_PASS: \${SMTP_PASS}
-                SMTP_HOST: \${SMTP_HOST}
-                SMTP_PORT: \${SMTP_PORT}
-              ports:
-                - "\${BE_PORT}"
-              volumes:
-                - ./be/uploads:/app/uploads
-
-            fe:
-              image: ${REGISTRY_PREFIX}/acong-fe:${IMAGE_TAG}
-              container_name: acong-fe
-              restart: unless-stopped
-              depends_on:
-                - be
-              ports:
-                - "\${FE_PORT}"
-
-          volumes:
-            mongo1_data:
-            mongo2_data:
-            mongo3_data:
-          EOF
+            # Update docker-compose.yml to use registry images
+            sed -i 's|build:|image: '"${REGISTRY_PREFIX}"'/acong-be:'"${IMAGE_TAG}"'\n    # build:|' docker-compose.yml
+            sed -i '/fe:/,/container_name: acong-fe/{s|build:|image: '"${REGISTRY_PREFIX}"'/acong-fe:'"${IMAGE_TAG}"'\n    # build:|}' docker-compose.yml
             
-            docker-compose -f docker-compose.registry.yml up -d --remove-orphans
+            # Deploy with updated images (preserves volumes)
+            docker-compose -f docker-compose.yml up -d --remove-orphans
           fi
 
           # Wait for services to be healthy
@@ -286,6 +114,9 @@ jobs:
             echo "Frontend health check failed"
             exit 1
           fi
+
+          # Restore original docker-compose files
+          git checkout -- docker-compose.simple.yml docker-compose.yml || true
 
           # Cleanup unused images (keep last 5 versions)
           docker image prune -f --filter "until=24h"
