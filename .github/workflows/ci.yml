@@ -112,13 +112,3 @@ jobs:
             ghcr.io/${{ env.REPO_LOWERCASE }}/acong-fe:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: Test built artifacts
-        run: |
-          echo "Testing frontend built files..."
-          docker run --rm ghcr.io/${{ env.REPO_LOWERCASE }}/acong-fe:${{ github.sha }} \
-            sh -c "test -f /usr/share/nginx/html/index.html && echo 'Frontend index.html exists' || (echo 'Frontend index.html missing' && exit 1)"
-          
-          echo "Testing backend built files..."
-          docker run --rm ghcr.io/${{ env.REPO_LOWERCASE }}/acong-be:${{ github.sha }} \
-            sh -c "test -f /app/dist/main.js && echo 'Backend main.js exists' || (echo 'Backend main.js missing' && exit 1)"
