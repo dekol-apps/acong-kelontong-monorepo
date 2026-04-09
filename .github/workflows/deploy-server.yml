@@ -44,7 +44,8 @@ jobs:
 
           DEPLOYMENT_TYPE="${{ github.event.inputs.deployment_type || 'simple' }}"
           REGISTRY_PREFIX="ghcr.io/${{ env.REPO_LOWERCASE }}"
-          IMAGE_TAG="${{ github.event.workflow_run.head_sha }}"
+          # Use the same SHA that CI workflow used
+          IMAGE_TAG="${{ github.event.workflow_run.head_commit.id }}"
 
           # Basic validation
           if [ -z "${{ secrets.MONGO_URI }}" ]; then
@@ -73,6 +74,9 @@ jobs:
           # Deploy using registry images
           if [ "$DEPLOYMENT_TYPE" = "simple" ]; then
             echo "Deploying with SIMPLE setup..."
+            echo "Using IMAGE_TAG: ${IMAGE_TAG}"
+            echo "Full backend image: ${REGISTRY_PREFIX}/acong-be:${IMAGE_TAG}"
+            echo "Full frontend image: ${REGISTRY_PREFIX}/acong-fe:${IMAGE_TAG}"
             
             # Update docker-compose.simple.yml to use registry images
             sed -i 's|build:|image: '"${REGISTRY_PREFIX}"'/acong-be:'"${IMAGE_TAG}"'\n    # build:|' docker-compose.simple.yml
@@ -82,6 +86,9 @@ jobs:
             docker-compose -f docker-compose.simple.yml up -d --remove-orphans
           else
             echo "Deploying with REGULAR setup..."
+            echo "Using IMAGE_TAG: ${IMAGE_TAG}"
+            echo "Full backend image: ${REGISTRY_PREFIX}/acong-be:${IMAGE_TAG}"
+            echo "Full frontend image: ${REGISTRY_PREFIX}/acong-fe:${IMAGE_TAG}"
             
             # Update docker-compose.yml to use registry images
             sed -i 's|build:|image: '"${REGISTRY_PREFIX}"'/acong-be:'"${IMAGE_TAG}"'\n    # build:|' docker-compose.yml
@@ -121,5 +128,8 @@ jobs:
           # Cleanup unused images (keep last 5 versions)
           docker image prune -f --filter "until=24h"
 
-          # Show running containers
+          # Show running containers and images
+          echo "=== Running containers ==="
           docker ps
+          echo "=== Images pulled ==="
+          docker images | grep acong
