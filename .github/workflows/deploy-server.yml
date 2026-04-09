@@ -34,12 +34,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set lowercase repository name
+        run: |
+          echo "REPO_LOWERCASE=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
       - name: Deploy Application
         run: |
           set -euo pipefail
 
           DEPLOYMENT_TYPE="${{ github.event.inputs.deployment_type || 'simple' }}"
-          REGISTRY_PREFIX="ghcr.io/${{ github.repository }}"
+          REGISTRY_PREFIX="ghcr.io/${{ env.REPO_LOWERCASE }}"
           IMAGE_TAG="${{ github.event.workflow_run.head_sha }}"
 
           # Basic validation
