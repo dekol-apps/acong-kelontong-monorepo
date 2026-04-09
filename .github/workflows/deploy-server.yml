@@ -1,7 +1,7 @@
 name: Deploy To Laptop Server
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: # Manual trigger
     inputs:
       deployment_type:
         description: "Deployment type"
@@ -13,12 +13,12 @@ on:
           - regular
 
   workflow_run:
-    workflows: ["CI"]
+    workflows: ["CI"] # Triggers after CI completes
     types:
       - completed
     branches:
-      - main
-      - master
+      - main # Only for main branch
+      - master # Only for master branch
 
 # Concurrency control to prevent overlapping deployments
 concurrency:

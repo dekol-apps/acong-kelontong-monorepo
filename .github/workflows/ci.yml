@@ -1,11 +1,15 @@
 name: CI
 
 on:
-  pull_request:
+  pull_request:     # Runs when PR is opened/updated
   push:
     branches:
-      - main
-      - master
+      - main        # Runs when pushed to main
+      - master      # Runs when pushed to master
+
+permissions:
+  contents: read
+  packages: write
 
 jobs:
   backend:
