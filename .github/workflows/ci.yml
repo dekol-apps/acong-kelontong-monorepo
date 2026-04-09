@@ -10,7 +10,7 @@ on:
 jobs:
   backend:
     name: Backend Build
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, x200-ghaction]
     defaults:
       run:
         working-directory: be
@@ -37,7 +37,7 @@ jobs:
 
   frontend:
     name: Frontend Build
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, x200-ghaction]
     defaults:
       run:
         working-directory: fe
@@ -63,8 +63,8 @@ jobs:
         run: npm run build
 
   docker-build:
-    name: Docker Build Check
-    runs-on: ubuntu-latest
+    name: Docker Build & Push
+    runs-on: [self-hosted, x200-ghaction]
     needs: [backend, frontend]
 
     steps:
@@ -74,8 +74,40 @@ jobs:
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build backend image
-        run: docker build -f be/Dockerfile -t acong-be:ci ./be
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build frontend image
-        run: docker build -f fe/Dockerfile -t acong-fe:ci ./fe
+      - name: Build and push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./be
+          file: ./be/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/acong-be:${{ github.sha }}
+            ghcr.io/${{ github.repository }}/acong-be:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./fe
+          file: ./fe/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/acong-fe:${{ github.sha }}
+            ghcr.io/${{ github.repository }}/acong-fe:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Test images
+        run: |
+          echo "Testing backend image..."
+          docker run --rm ghcr.io/${{ github.repository }}/acong-be:${{ github.sha }} npm --version
+          echo "Testing frontend image..."
+          docker run --rm ghcr.io/${{ github.repository }}/acong-fe:${{ github.sha }} ng --version

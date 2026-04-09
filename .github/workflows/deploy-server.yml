@@ -12,82 +12,279 @@ on:
           - simple
           - regular
 
-  push:
-    # Any push to main/master triggers a real deployment on the server.
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
     branches:
       - main
       - master
 
+# Concurrency control to prevent overlapping deployments
+concurrency:
+  group: deployment
+  cancel-in-progress: true
+
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, x200-ghaction]
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
-      - name: Deploy through SSH
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ vars.SERVER_HOST }}
-          username: ${{ vars.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ vars.SERVER_PORT }}
-          script: |
-            set -eu
+      - name: Checkout
+        uses: actions/checkout@v4
 
-            DEPLOY_PATH="${{ vars.SERVER_DEPLOY_PATH }}"
-            REPO_URL="${{ vars.SERVER_REPO_URL }}"
-            BRANCH="${{ github.ref_name }}"
-            DEPLOYMENT_TYPE="${{ github.event.inputs.deployment_type || 'simple' }}"
+      - name: Deploy Application
+        run: |
+          set -euo pipefail
 
-            # Basic validation
-            if [ -z "$DEPLOY_PATH" ]; then
-              echo "SERVER_DEPLOY_PATH is required"
-              exit 1
-            fi
+          DEPLOYMENT_TYPE="${{ github.event.inputs.deployment_type || 'simple' }}"
+          REGISTRY_PREFIX="ghcr.io/${{ github.repository }}"
+          IMAGE_TAG="${{ github.event.workflow_run.head_sha }}"
 
-            if [ -z "${{ secrets.MONGO_URI }}" ]; then
-              echo "MONGO_URI is required"
-              exit 1
-            fi
+          # Basic validation
+          if [ -z "${{ secrets.MONGO_URI }}" ]; then
+            echo "MONGO_URI is required"
+            exit 1
+          fi
 
-            # Clone or update repo
-            if [ ! -d "$DEPLOY_PATH/.git" ]; then
-              rm -rf "$DEPLOY_PATH"
-              git clone "$REPO_URL" "$DEPLOY_PATH"
-            fi
+          # Log in to GitHub Container Registry
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-            cd "$DEPLOY_PATH"
-            git fetch --all --prune
-            git checkout "$BRANCH"
-            git pull origin "$BRANCH"
+          # Generate .env
+          cat > .env <<EOF
+          BE_PORT=${{ vars.BE_PORT }}
+          FE_PORT=${{ vars.FE_PORT }}
+          IS_PROD=true
+          FE_DOMAIN=${{ vars.FE_DOMAIN }}
+          MONGO_URI=${{ secrets.MONGO_URI }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          SMTP_USER=${{ vars.SMTP_USER }}
+          SMTP_PASS=${{ secrets.SMTP_PASS }}
+          SMTP_HOST=${{ vars.SMTP_HOST }}
+          SMTP_PORT=${{ vars.SMTP_PORT }}
+          URL_CHANGE_PASSWORD=user-verification
+          EOF
 
-            # Generate .env
-            cat > .env <<EOF
-            BE_PORT=${{ vars.BE_PORT }}
-            FE_PORT=${{ vars.FE_PORT }}
-            IS_PROD=true
-            FE_DOMAIN=${{ vars.FE_DOMAIN }}
-            MONGO_URI=${{ secrets.MONGO_URI }}
-            JWT_SECRET=${{ secrets.JWT_SECRET }}
-            SMTP_USER=${{ vars.SMTP_USER }}
-            SMTP_PASS=${{ secrets.SMTP_PASS }}
-            SMTP_HOST=${{ vars.SMTP_HOST }}
-            SMTP_PORT=${{ vars.SMTP_PORT }}
-            URL_CHANGE_PASSWORD=user-verification
-            EOF
+          # Deploy using registry images
+          if [ "$DEPLOYMENT_TYPE" = "simple" ]; then
+            echo "Deploying with SIMPLE setup..."
+            docker-compose -f docker-compose.simple.yml down --remove-orphans || true
+            
+            # Create temporary docker-compose with registry images
+            cat > docker-compose.simple.registry.yml <<EOF
+          services:
+            mongo:
+              image: mongo:4.4
+              container_name: acong-mongo
+              command: ["--replSet", "rs0", "--bind_ip_all"]
+              volumes:
+                - mongo_data:/data/db
+              healthcheck:
+                test: ["CMD", "mongo", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+                interval: 10s
+                timeout: 5s
+                retries: 10
+              ports:
+                - "27017:27017"
 
-            # Deploy
-            if [ "$DEPLOYMENT_TYPE" = "simple" ]; then
-              echo "🚀 Deploying with SIMPLE setup..."
-              docker-compose -f docker-compose.simple.yml down --remove-orphans || true
-              docker-compose -f docker-compose.simple.yml up -d --build --remove-orphans
-            else
-              echo "🚀 Deploying with REGULAR setup..."
-              docker-compose -f docker-compose.yml down --remove-orphans || true
-              docker-compose -f docker-compose.yml up -d --build --remove-orphans
-            fi
+            mongo-init:
+              image: mongo:4.4
+              container_name: acong-mongo-init
+              depends_on:
+                mongo:
+                  condition: service_healthy
+              restart: "no"
+              command: >
+                bash -c "
+                mongo --host mongo:27017 --eval '
+                try {
+                  rs.status();
+                  print(\"Replica set already initialized\");
+                } catch (e) {
+                  rs.initiate({
+                    _id: \"rs0\",
+                    members: [
+                      { _id: 0, host: \"mongo:27017\" }
+                    ]
+                  });
+                }'
+                "
 
-            # Cleanup unused images
-            docker image prune -f
+            be:
+              image: ${REGISTRY_PREFIX}/acong-be:${IMAGE_TAG}
+              container_name: acong-be
+              restart: unless-stopped
+              depends_on:
+                mongo-init:
+                  condition: service_completed_successfully
+              environment:
+                NODE_ENV: \${IS_PROD}
+                MONGO_URI: \${MONGO_URI}
+                BE_PORT: \${BE_PORT}
+                FE_DOMAIN: \${FE_DOMAIN}
+                JWT_SECRET: \${JWT_SECRET}
+                SMTP_USER: \${SMTP_USER}
+                SMTP_PASS: \${SMTP_PASS}
+                SMTP_HOST: \${SMTP_HOST}
+                SMTP_PORT: \${SMTP_PORT}
+              ports:
+                - "\${BE_PORT:-3200}:3200"
+              volumes:
+                - ./be/uploads:/app/uploads
 
-            # Optional: show running containers
-            docker ps
+            fe:
+              image: ${REGISTRY_PREFIX}/acong-fe:${IMAGE_TAG}
+              container_name: acong-fe
+              restart: unless-stopped
+              depends_on:
+                - be
+              ports:
+                - "\${FE_PORT:-4200}:4200"
+
+          volumes:
+            mongo_data:
+          EOF
+            
+            docker-compose -f docker-compose.simple.registry.yml up -d --remove-orphans
+          else
+            echo "Deploying with REGULAR setup..."
+            docker-compose -f docker-compose.yml down --remove-orphans || true
+            
+            # Create temporary docker-compose with registry images
+            cat > docker-compose.registry.yml <<EOF
+          services:
+            mongo1:
+              image: mongo:4.4
+              container_name: acong-mongo1
+              command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
+              volumes:
+                - mongo1_data:/data/db
+              healthcheck:
+                test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+                interval: 10s
+                timeout: 5s
+                retries: 10
+
+            mongo2:
+              image: mongo:4.4
+              container_name: acong-mongo2
+              command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
+              volumes:
+                - mongo2_data:/data/db
+              healthcheck:
+                test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+                interval: 10s
+                timeout: 5s
+                retries: 10
+
+            mongo3:
+              image: mongo:4.4
+              container_name: acong-mongo3
+              command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
+              volumes:
+                - mongo3_data:/data/db
+              healthcheck:
+                test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+                interval: 10s
+                timeout: 5s
+                retries: 10
+
+            mongo-init:
+              image: mongo:4.4
+              container_name: acong-mongo-init
+              depends_on:
+                mongo1:
+                  condition: service_healthy
+                mongo2:
+                  condition: service_healthy
+                mongo3:
+                  condition: service_healthy
+              restart: "no"
+              command: >
+                bash -c "
+                mongosh --host mongo1:27017 --eval '
+                try {
+                  rs.status();
+                  print(\"Replica set already initialized\");
+                } catch (e) {
+                  rs.initiate({
+                    _id: \"rs0\",
+                    members: [
+                      { _id: 0, host: \"mongo1:27017\" },
+                      { _id: 1, host: \"mongo2:27017\" },
+                      { _id: 2, host: \"mongo3:27017\" }
+                    ]
+                  });
+                }'
+                "
+
+            be:
+              image: ${REGISTRY_PREFIX}/acong-be:${IMAGE_TAG}
+              container_name: acong-be
+              restart: unless-stopped
+              depends_on:
+                mongo-init:
+                  condition: service_completed_successfully
+              environment:
+                NODE_ENV: \${IS_PROD}
+                MONGO_URI: \${MONGO_URI}
+                BE_PORT: \${BE_PORT}
+                FE_DOMAIN: \${FE_DOMAIN}
+                JWT_SECRET: \${JWT_SECRET}
+                SMTP_USER: \${SMTP_USER}
+                SMTP_PASS: \${SMTP_PASS}
+                SMTP_HOST: \${SMTP_HOST}
+                SMTP_PORT: \${SMTP_PORT}
+              ports:
+                - "\${BE_PORT}"
+              volumes:
+                - ./be/uploads:/app/uploads
+
+            fe:
+              image: ${REGISTRY_PREFIX}/acong-fe:${IMAGE_TAG}
+              container_name: acong-fe
+              restart: unless-stopped
+              depends_on:
+                - be
+              ports:
+                - "\${FE_PORT}"
+
+          volumes:
+            mongo1_data:
+            mongo2_data:
+            mongo3_data:
+          EOF
+            
+            docker-compose -f docker-compose.registry.yml up -d --remove-orphans
+          fi
+
+          # Wait for services to be healthy
+          echo "Waiting for services to be healthy..."
+          sleep 30
+
+          # Health checks
+          BE_PORT=${{ vars.BE_PORT }}
+          FE_PORT=${{ vars.FE_PORT }}
+          
+          echo "Checking backend health..."
+          if curl -f http://localhost:${BE_PORT:-3200}/health || curl -f http://localhost:${BE_PORT:-3200}/; then
+            echo "Backend is healthy"
+          else
+            echo "Backend health check failed"
+            exit 1
+          fi
+
+          echo "Checking frontend health..."
+          if curl -f http://localhost:${FE_PORT:-4200} || curl -f http://localhost:${FE_PORT:-4200}/; then
+            echo "Frontend is healthy"
+          else
+            echo "Frontend health check failed"
+            exit 1
+          fi
+
+          # Cleanup unused images (keep last 5 versions)
+          docker image prune -f --filter "until=24h"
+
+          # Show running containers
+          docker ps
