@@ -118,4 +118,4 @@ jobs:
           echo "Testing backend image..."
           docker run --rm ghcr.io/${{ env.REPO_LOWERCASE }}/acong-be:${{ github.sha }} npm --version
           echo "Testing frontend image..."
-          docker run --rm ghcr.io/${{ env.REPO_LOWERCASE }}/acong-fe:${{ github.sha }} ng --version
+          docker run --rm ghcr.io/${{ env.REPO_LOWERCASE }}/acong-fe:${{ github.sha }} npx ng --version
