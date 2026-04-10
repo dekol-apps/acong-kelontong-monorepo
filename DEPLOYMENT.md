@@ -1,3 +1,6 @@
+# Remove existing docker build if you want fresh database
+docker-compose -f [docker-compose file you chose] up -d --remove-orphans
+
 # CI/CD + Docker Setup
 
 This project now includes:
