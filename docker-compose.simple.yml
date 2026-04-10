@@ -56,7 +56,7 @@ services:
       SMTP_HOST: ${SMTP_HOST}
       SMTP_PORT: ${SMTP_PORT}
     ports:
-      - "${BE_PORT:-3200}:3200"
+      - "${BE_PORT:-3200}:${BE_PORT:-3200}"
     volumes:
       - ./be/uploads:/app/uploads
 
