@@ -12,12 +12,6 @@ import { Brand, BrandSchema } from 'src/modules/brand/brand.schema';
 import { BalanceSeederService } from './balance-seeder/balance-seeder.service';
 import { AccountingBalance, AccountingBalanceSchema } from 'src/modules/accounting/accounting-balance.schema';
 
-import { InventorySeederService } from './inventory-seeder/inventory-seeder.service';
-import { InvestmentSeederService } from './investment-seeder/investment-seeder.service';
-import { ExpenseSeederService } from './expense-seeder/expense-seeder.service';
-import { PurchasingSeederService } from './purchasing-seeder/purchasing-seeder.service';
-import { SaleSeederService } from './sale-seeder/sale-seeder.service';
-import { ProductionSeederService } from './production-seeder/production-seeder.service';
 import { InventoryItem, InventoryItemSchema } from 'src/modules/inventory-item/inventory-item.schema';
 import { InventoryMovement, InventoryMovementSchema } from 'src/modules/inventory-movement/inventory-movement.schema';
 import { Investment, InvestmentSchema } from 'src/modules/investment/investment.schema';
@@ -31,9 +25,6 @@ import { AccountingSnapshot, AccountingSnapshotSchema } from 'src/modules/accoun
 import { Auth, AuthSchema } from 'src/modules/auth/auth.schema';
 import { InventoryReconcile, InventoryReconcileSchema } from 'src/modules/inventory-item/inventory-reconcile.schema';
 import { AccountingSeederService } from './accounting-seeder/accounting-seeder.service';
-import { AccountingSnapshotSeederService } from './accounting-snapshot-seeder/accounting-snapshot-seeder.service';
-import { AuthSeederService } from './auth-seeder/auth-seeder.service';
-import { InventoryReconcileSeederService } from './inventory-reconcile-seeder/inventory-reconcile-seeder.service';
 
 @Module({
   imports: [
@@ -64,16 +55,7 @@ import { InventoryReconcileSeederService } from './inventory-reconcile-seeder/in
     ProductSeederService,
     SupplierSeederService,
     BalanceSeederService,
-    InventorySeederService,
-    InvestmentSeederService,
-    ExpenseSeederService,
-    PurchasingSeederService,
-    SaleSeederService,
-    ProductionSeederService,
     AccountingSeederService,
-    AccountingSnapshotSeederService,
-    AuthSeederService,
-    InventoryReconcileSeederService,
   ],
   exports: [
     MongooseModule,
@@ -82,16 +64,7 @@ import { InventoryReconcileSeederService } from './inventory-reconcile-seeder/in
     ProductSeederService,
     SupplierSeederService,
     BalanceSeederService,
-    InventorySeederService,
-    InvestmentSeederService,
-    ExpenseSeederService,
-    PurchasingSeederService,
-    SaleSeederService,
-    ProductionSeederService,
     AccountingSeederService,
-    AccountingSnapshotSeederService,
-    AuthSeederService,
-    InventoryReconcileSeederService,
   ],
 })
 export class SeederModule { }
