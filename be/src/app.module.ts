@@ -71,6 +71,7 @@ import { PurchasingReceiveController } from './modules/purchasing-receive/purcha
   imports: [
     ConfigModule.forRoot({
       isGlobal: true, // makes .env accessible everywhere
+      envFilePath: ['.env', '../.env'],
     }),
     MongooseModule.forRootAsync({
       inject: [ConfigService],
