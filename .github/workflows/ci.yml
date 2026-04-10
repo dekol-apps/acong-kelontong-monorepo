@@ -15,6 +15,7 @@ jobs:
   backend:
     name: Backend Build
     runs-on: [self-hosted, x200-ghaction]
+    if: github.event_name == 'pull_request'
     defaults:
       run:
         working-directory: be
@@ -42,6 +43,7 @@ jobs:
   frontend:
     name: Frontend Build
     runs-on: [self-hosted, x200-ghaction]
+    if: github.event_name == 'pull_request'
     defaults:
       run:
         working-directory: fe
@@ -69,7 +71,6 @@ jobs:
   docker-build:
     name: Docker Build & Push
     runs-on: [self-hosted, x200-ghaction]
-    needs: [backend, frontend]
     if: github.event_name == 'push'
 
     steps:
