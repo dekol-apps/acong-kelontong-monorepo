@@ -23,7 +23,7 @@ export class AccountingSeederService {
 
     const deposit = await this.investmentModel.create({
       investment_type: InvestmentType.DEPOSIT,
-      transaction_amount: toDecimal128(toDecimal(250000)),
+      transaction_amount: toDecimal128(toDecimal(25000000)),
       description: 'seeder deposit',
     });
 
@@ -32,7 +32,7 @@ export class AccountingSeederService {
       order_type: OrderType.DEPOSIT,
       order_id: new Types.ObjectId(),
       order_data: deposit,
-      transaction_amount: toDecimal128(toDecimal(250000)),
+      transaction_amount: toDecimal128(toDecimal(25000000)),
       record_date: new Date(),
     });
 
