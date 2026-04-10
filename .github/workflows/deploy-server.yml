@@ -53,6 +53,11 @@ jobs:
         run: |
           set -euo pipefail
 
+          echo "Runner host: $(hostname)"
+          echo "Runner user: $(whoami)"
+          echo "Working directory: $(pwd)"
+          ls -la
+
           dc() {
             if docker compose version >/dev/null 2>&1; then
               docker compose "$@"
@@ -134,6 +139,7 @@ jobs:
           # Pull and deploy
           dc -f "$COMPOSE_FILE" -f docker-compose.ci.override.yml pull be fe
           dc -f "$COMPOSE_FILE" -f docker-compose.ci.override.yml up -d --remove-orphans
+          dc -f "$COMPOSE_FILE" -f docker-compose.ci.override.yml ps
 
           # Wait for services to be healthy
           echo "Waiting for services to be healthy..."
@@ -148,7 +154,7 @@ jobs:
           check_health() {
             local ok=0
             for _ in $(seq 1 20); do
-              if curl -fsS "http://localhost:${BE_PORT}/health" >/dev/null || curl -fsS "http://localhost:${BE_PORT}/" >/dev/null; then
+              if curl -fsS "http://localhost:${BE_PORT}/api" >/dev/null || curl -fsS "http://localhost:${BE_PORT}/health" >/dev/null || curl -fsS "http://localhost:${BE_PORT}/" >/dev/null; then
                 if curl -fsS "http://localhost:${FE_PORT}/" >/dev/null; then
                   ok=1
                   break
@@ -163,6 +169,8 @@ jobs:
             echo "Deployment health checks passed"
           else
             echo "Deployment health checks failed, starting rollback..."
+            dc -f "$COMPOSE_FILE" -f docker-compose.ci.override.yml ps || true
+            dc -f "$COMPOSE_FILE" -f docker-compose.ci.override.yml logs --tail=200 be || true
             if [ -n "${CURRENT_BE_IMAGE}" ] && [ -n "${CURRENT_FE_IMAGE}" ]; then
               cat > docker-compose.ci.rollback.yml <<EOF
               services:
@@ -179,6 +187,8 @@ jobs:
                 echo "Rollback successful"
               else
                 echo "Rollback failed: services are still unhealthy"
+                dc -f "$COMPOSE_FILE" -f docker-compose.ci.rollback.yml ps || true
+                dc -f "$COMPOSE_FILE" -f docker-compose.ci.rollback.yml logs --tail=200 be || true
                 exit 1
               fi
             else
