@@ -70,6 +70,7 @@ jobs:
     name: Docker Build & Push
     runs-on: [self-hosted, x200-ghaction]
     needs: [backend, frontend]
+    if: github.event_name == 'push'
 
     steps:
       - name: Checkout
@@ -79,15 +80,16 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Set lowercase repository name
+        id: repo_meta
         run: |
-          echo "REPO_LOWERCASE=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+          echo "repo_lowercase=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ github.token }}
 
       - name: Build and push backend image
         uses: docker/build-push-action@v5
@@ -96,8 +98,8 @@ jobs:
           file: ./be/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ env.REPO_LOWERCASE }}/acong-be:${{ github.sha }}
-            ghcr.io/${{ env.REPO_LOWERCASE }}/acong-be:latest
+            ghcr.io/${{ steps.repo_meta.outputs.repo_lowercase }}/acong-be:${{ github.sha }}
+            ghcr.io/${{ steps.repo_meta.outputs.repo_lowercase }}/acong-be:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -108,7 +110,7 @@ jobs:
           file: ./fe/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ env.REPO_LOWERCASE }}/acong-fe:${{ github.sha }}
-            ghcr.io/${{ env.REPO_LOWERCASE }}/acong-fe:latest
+            ghcr.io/${{ steps.repo_meta.outputs.repo_lowercase }}/acong-fe:${{ github.sha }}
+            ghcr.io/${{ steps.repo_meta.outputs.repo_lowercase }}/acong-fe:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
