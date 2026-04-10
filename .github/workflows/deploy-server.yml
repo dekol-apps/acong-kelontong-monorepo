@@ -70,6 +70,8 @@ jobs:
           REGISTRY_PREFIX="ghcr.io/${{ steps.repo_meta.outputs.repo_lowercase }}"
           MONGO_URI_VALUE="${{ secrets.MONGO_URI }}"
           BE_PORT_VALUE="${{ vars.BE_PORT }}"
+          BE_PUBLIC_URL_VALUE="${{ vars.FE_API_URL }}"
+          FE_PUBLIC_URL_VALUE="${{ vars.FE_DOMAIN }}"
 
           IMAGE_TAG="${{ github.event.inputs.image_tag || github.event.workflow_run.head_sha || github.sha }}"
           if [ -z "${IMAGE_TAG}" ]; then
@@ -165,14 +167,39 @@ jobs:
           BE_PORT=${BE_PORT:-3200}
           FE_PORT=${FE_PORT:-4200}
 
+          check_containers() {
+            if [ "$(docker inspect --format='{{.State.Running}}' acong-be 2>/dev/null || echo false)" != "true" ]; then
+              echo "Backend container is not running"
+              return 1
+            fi
+            if [ "$(docker inspect --format='{{.State.Running}}' acong-fe 2>/dev/null || echo false)" != "true" ]; then
+              echo "Frontend container is not running"
+              return 1
+            fi
+            if ! docker port acong-be 2>/dev/null | grep -q ":${BE_PORT}$"; then
+              echo "Backend container is not bound to expected host port ${BE_PORT}"
+              docker port acong-be || true
+              return 1
+            fi
+            return 0
+          }
+
           check_health() {
             local ok=0
             for _ in $(seq 1 20); do
-              if curl -fsS "http://localhost:${BE_PORT}/api" >/dev/null || curl -fsS "http://localhost:${BE_PORT}/health" >/dev/null || curl -fsS "http://localhost:${BE_PORT}/" >/dev/null; then
-                if curl -fsS "http://localhost:${FE_PORT}/" >/dev/null; then
-                  ok=1
-                  break
+              if check_containers \
+                && (curl -fsS "http://localhost:${BE_PORT}/api" >/dev/null || curl -fsS "http://localhost:${BE_PORT}/health" >/dev/null || curl -fsS "http://localhost:${BE_PORT}/" >/dev/null) \
+                && curl -fsS "http://localhost:${FE_PORT}/" >/dev/null; then
+                if [ -n "${BE_PUBLIC_URL_VALUE}" ] && ! curl -fsS "${BE_PUBLIC_URL_VALUE}" >/dev/null; then
+                  sleep 5
+                  continue
                 fi
+                if [ -n "${FE_PUBLIC_URL_VALUE}" ] && ! curl -fsS "${FE_PUBLIC_URL_VALUE}" >/dev/null; then
+                  sleep 5
+                  continue
+                fi
+                ok=1
+                break
               fi
               sleep 5
             done
@@ -185,6 +212,7 @@ jobs:
             echo "Deployment health checks failed, starting rollback..."
             dc -f "$COMPOSE_FILE" -f docker-compose.ci.override.yml ps || true
             dc -f "$COMPOSE_FILE" -f docker-compose.ci.override.yml logs --tail=200 be || true
+            dc -f "$COMPOSE_FILE" -f docker-compose.ci.override.yml logs --tail=100 fe || true
             if [ -n "${CURRENT_BE_IMAGE}" ] && [ -n "${CURRENT_FE_IMAGE}" ]; then
               cat > docker-compose.ci.rollback.yml <<EOF
               services:
