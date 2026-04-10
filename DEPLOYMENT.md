@@ -1,5 +1,5 @@
 # Remove existing docker build if you want fresh database
-docker-compose -f [docker-compose file you chose] up -d --remove-orphans
+docker-compose -f docker-compose.simple.yml down --remove-orphans || true
 
 # CI/CD + Docker Setup
 
