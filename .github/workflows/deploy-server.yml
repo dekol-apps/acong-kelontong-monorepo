@@ -11,6 +11,10 @@ on:
         options:
           - simple
           - regular
+      image_tag:
+        description: "Optional image tag (commit SHA). Leave empty to auto-detect."
+        required: false
+        type: string
 
   workflow_run:
     workflows: ["CI"] # Triggers after CI completes
@@ -25,36 +29,78 @@ concurrency:
   group: deployment
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  packages: read
+
 jobs:
   deploy:
     runs-on: [self-hosted, x200-ghaction]
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
 
       - name: Set lowercase repository name
+        id: repo_meta
         run: |
-          echo "REPO_LOWERCASE=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+          echo "repo_lowercase=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
 
       - name: Deploy Application
         run: |
           set -euo pipefail
 
+          dc() {
+            if docker compose version >/dev/null 2>&1; then
+              docker compose "$@"
+            else
+              docker-compose "$@"
+            fi
+          }
+
           DEPLOYMENT_TYPE="${{ github.event.inputs.deployment_type || 'simple' }}"
-          REGISTRY_PREFIX="ghcr.io/${{ env.REPO_LOWERCASE }}"
-          # Use the same SHA that CI workflow used
-          IMAGE_TAG="${{ github.event.workflow_run.head_commit.id }}"
+          REGISTRY_PREFIX="ghcr.io/${{ steps.repo_meta.outputs.repo_lowercase }}"
+
+          IMAGE_TAG="${{ github.event.inputs.image_tag || github.event.workflow_run.head_sha || github.sha }}"
+          if [ -z "${IMAGE_TAG}" ]; then
+            echo "IMAGE_TAG could not be resolved"
+            exit 1
+          fi
+
+          case "$DEPLOYMENT_TYPE" in
+            simple)
+              COMPOSE_FILE="docker-compose.simple.yml"
+              ;;
+            regular)
+              COMPOSE_FILE="docker-compose.yml"
+              ;;
+            *)
+              echo "Invalid deployment type: $DEPLOYMENT_TYPE"
+              exit 1
+              ;;
+          esac
 
           # Basic validation
           if [ -z "${{ secrets.MONGO_URI }}" ]; then
             echo "MONGO_URI is required"
             exit 1
           fi
+          if [ -z "${{ secrets.JWT_SECRET }}" ]; then
+            echo "JWT_SECRET is required"
+            exit 1
+          fi
 
           # Log in to GitHub Container Registry
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          echo "${{ github.token }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+          # Save currently running images for rollback
+          CURRENT_BE_IMAGE=$(docker inspect --format='{{.Config.Image}}' acong-be 2>/dev/null || true)
+          CURRENT_FE_IMAGE=$(docker inspect --format='{{.Config.Image}}' acong-fe 2>/dev/null || true)
+          echo "Current backend image: ${CURRENT_BE_IMAGE:-none}"
+          echo "Current frontend image: ${CURRENT_FE_IMAGE:-none}"
 
           # Generate .env
           cat > .env <<EOF
@@ -71,32 +117,23 @@ jobs:
           URL_CHANGE_PASSWORD=user-verification
           EOF
 
-          # Deploy using registry images
-          if [ "$DEPLOYMENT_TYPE" = "simple" ]; then
-            echo "Deploying with SIMPLE setup..."
-            echo "Using IMAGE_TAG: ${IMAGE_TAG}"
-            echo "Full backend image: ${REGISTRY_PREFIX}/acong-be:${IMAGE_TAG}"
-            echo "Full frontend image: ${REGISTRY_PREFIX}/acong-fe:${IMAGE_TAG}"
-            
-            # Update docker-compose.simple.yml to use registry images
-            sed -i 's|build:|image: '"${REGISTRY_PREFIX}"'/acong-be:'"${IMAGE_TAG}"'\n    # build:|' docker-compose.simple.yml
-            sed -i '/fe:/,/container_name: acong-fe/{s|build:|image: '"${REGISTRY_PREFIX}"'/acong-fe:'"${IMAGE_TAG}"'\n    # build:|}' docker-compose.simple.yml
-            
-            # Deploy with updated images (preserves volumes)
-            docker-compose -f docker-compose.simple.yml up -d --remove-orphans
-          else
-            echo "Deploying with REGULAR setup..."
-            echo "Using IMAGE_TAG: ${IMAGE_TAG}"
-            echo "Full backend image: ${REGISTRY_PREFIX}/acong-be:${IMAGE_TAG}"
-            echo "Full frontend image: ${REGISTRY_PREFIX}/acong-fe:${IMAGE_TAG}"
-            
-            # Update docker-compose.yml to use registry images
-            sed -i 's|build:|image: '"${REGISTRY_PREFIX}"'/acong-be:'"${IMAGE_TAG}"'\n    # build:|' docker-compose.yml
-            sed -i '/fe:/,/container_name: acong-fe/{s|build:|image: '"${REGISTRY_PREFIX}"'/acong-fe:'"${IMAGE_TAG}"'\n    # build:|}' docker-compose.yml
-            
-            # Deploy with updated images (preserves volumes)
-            docker-compose -f docker-compose.yml up -d --remove-orphans
-          fi
+          # Pin target images via temporary override (avoid mutating base compose files)
+          cat > docker-compose.ci.override.yml <<EOF
+          services:
+            be:
+              image: ${REGISTRY_PREFIX}/acong-be:${IMAGE_TAG}
+            fe:
+              image: ${REGISTRY_PREFIX}/acong-fe:${IMAGE_TAG}
+          EOF
+
+          echo "Deploying with ${DEPLOYMENT_TYPE^^} setup..."
+          echo "Using IMAGE_TAG: ${IMAGE_TAG}"
+          echo "Full backend image: ${REGISTRY_PREFIX}/acong-be:${IMAGE_TAG}"
+          echo "Full frontend image: ${REGISTRY_PREFIX}/acong-fe:${IMAGE_TAG}"
+
+          # Pull and deploy
+          dc -f "$COMPOSE_FILE" -f docker-compose.ci.override.yml pull be fe
+          dc -f "$COMPOSE_FILE" -f docker-compose.ci.override.yml up -d --remove-orphans
 
           # Wait for services to be healthy
           echo "Waiting for services to be healthy..."
@@ -105,25 +142,52 @@ jobs:
           # Health checks
           BE_PORT=${{ vars.BE_PORT }}
           FE_PORT=${{ vars.FE_PORT }}
-          
-          echo "Checking backend health..."
-          if curl -f http://localhost:${BE_PORT:-3200}/health || curl -f http://localhost:${BE_PORT:-3200}/; then
-            echo "Backend is healthy"
+          BE_PORT=${BE_PORT:-3200}
+          FE_PORT=${FE_PORT:-4200}
+
+          check_health() {
+            local ok=0
+            for _ in $(seq 1 20); do
+              if curl -fsS "http://localhost:${BE_PORT}/health" >/dev/null || curl -fsS "http://localhost:${BE_PORT}/" >/dev/null; then
+                if curl -fsS "http://localhost:${FE_PORT}/" >/dev/null; then
+                  ok=1
+                  break
+                fi
+              fi
+              sleep 5
+            done
+            return $((1 - ok))
+          }
+
+          if check_health; then
+            echo "Deployment health checks passed"
           else
-            echo "Backend health check failed"
-            exit 1
+            echo "Deployment health checks failed, starting rollback..."
+            if [ -n "${CURRENT_BE_IMAGE}" ] && [ -n "${CURRENT_FE_IMAGE}" ]; then
+              cat > docker-compose.ci.rollback.yml <<EOF
+              services:
+                be:
+                  image: ${CURRENT_BE_IMAGE}
+                fe:
+                  image: ${CURRENT_FE_IMAGE}
+              EOF
+
+              dc -f "$COMPOSE_FILE" -f docker-compose.ci.rollback.yml up -d --remove-orphans
+              rm -f docker-compose.ci.rollback.yml
+
+              if check_health; then
+                echo "Rollback successful"
+              else
+                echo "Rollback failed: services are still unhealthy"
+                exit 1
+              fi
+            else
+              echo "Rollback skipped: previous container images not found"
+              exit 1
+            fi
           fi
 
-          echo "Checking frontend health..."
-          if curl -f http://localhost:${FE_PORT:-4200} || curl -f http://localhost:${FE_PORT:-4200}/; then
-            echo "Frontend is healthy"
-          else
-            echo "Frontend health check failed"
-            exit 1
-          fi
-
-          # Restore original docker-compose files
-          git checkout -- docker-compose.simple.yml docker-compose.yml || true
+          rm -f docker-compose.ci.override.yml
 
           # Cleanup unused images (keep last 5 versions)
           docker image prune -f --filter "until=24h"
