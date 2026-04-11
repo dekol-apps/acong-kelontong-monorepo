@@ -20,25 +20,28 @@ services:
       mongo:
         condition: service_healthy
     restart: "no"
-    command: >
-      bash -c "
-      mongo --host mongo:27017 --eval '
-      try {
-        rs.status();
-        print(\"Replica set already initialized\");
-      } catch (e) {
-        rs.initiate({
-          _id: \"rs0\",
-          members: [
-            { _id: 0, host: \"mongo:27017\" }
-          ]
-        });
-      }'
-      while [ \"$(mongo --quiet --host mongo:27017 --eval 'db.isMaster().ismaster' | tr -d '\n' | tr -d '\r')\" != \"true\" ]; do
-        sleep 2
-      done
-      echo \"Replica set primary is ready\"
-      "
+    command:
+      - bash
+      - -ec
+      - |
+        mongo --quiet --host mongo:27017 --eval '
+        try {
+          rs.status();
+          print("Replica set already initialized");
+        } catch (e) {
+          rs.initiate({
+            _id: "rs0",
+            members: [
+              { _id: 0, host: "mongo:27017" }
+            ]
+          });
+        }'
+
+        until [ "$(mongo --quiet --host mongo:27017 --eval 'db.adminCommand({ hello: 1 }).isWritablePrimary' | tr -d '\r\n')" = "true" ]; do
+          sleep 2
+        done
+
+        echo "Replica set primary is ready"
 
   be:
     build:
