@@ -36,12 +36,8 @@ services:
             ]
           });
         }'
-
-        until [ "$(mongo --quiet --host mongo:27017 --eval 'db.adminCommand({ hello: 1 }).isWritablePrimary' | tr -d '\r\n')" = "true" ]; do
-          sleep 2
-        done
-
-        echo "Replica set primary is ready"
+        sleep 5
+        echo "Replica set initialized"
 
   be:
     build:
