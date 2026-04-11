@@ -6,6 +6,24 @@ on:
     branches:
       - main        # Runs when pushed to main
       - master      # Runs when pushed to master
+  workflow_dispatch:
+    inputs:
+      deployment_type:
+        description: "Deployment type"
+        required: true
+        default: "simple"
+        type: choice
+        options:
+          - simple
+          - regular
+      image_tag:
+        description: "Optional image tag (commit SHA). Leave empty to use current commit SHA."
+        required: false
+        type: string
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -70,7 +88,7 @@ jobs:
     name: Docker Build & Push
     runs-on: [self-hosted, x200-ghaction]
     needs: [backend, frontend]
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.image_tag == '')
 
     steps:
       - name: Checkout
@@ -114,3 +132,87 @@ jobs:
             ghcr.io/${{ steps.repo_meta.outputs.repo_lowercase }}/acong-fe:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  deploy:
+    name: Deploy
+    runs-on: [self-hosted, x200-ghaction]
+    needs: [docker-build]
+    if: |
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
+      (needs.docker-build.result == 'success' || needs.docker-build.result == 'skipped')
+    concurrency:
+      group: deployment
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set lowercase repository name
+        id: repo_meta
+        run: |
+          echo "repo_lowercase=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
+      - name: Resolve deployment variables
+        id: deploy_vars
+        run: |
+          set -euo pipefail
+
+          DEPLOYMENT_TYPE_INPUT="${{ github.event.inputs.deployment_type }}"
+          IMAGE_TAG_INPUT="${{ github.event.inputs.image_tag }}"
+
+          if [ -z "${DEPLOYMENT_TYPE_INPUT}" ]; then
+            DEPLOYMENT_TYPE_INPUT="simple"
+          fi
+
+          if [ -z "${IMAGE_TAG_INPUT}" ]; then
+            IMAGE_TAG_INPUT="${{ github.sha }}"
+          fi
+
+          echo "deployment_type=${DEPLOYMENT_TYPE_INPUT}" >> "$GITHUB_OUTPUT"
+          echo "image_tag=${IMAGE_TAG_INPUT}" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Deploy application
+        env:
+          DEPLOYMENT_TYPE: ${{ steps.deploy_vars.outputs.deployment_type }}
+          REGISTRY_PREFIX: ghcr.io/${{ steps.repo_meta.outputs.repo_lowercase }}
+          IMAGE_TAG: ${{ steps.deploy_vars.outputs.image_tag }}
+          MONGO_URI_VALUE: ${{ secrets.MONGO_URI }}
+          JWT_SECRET_VALUE: ${{ secrets.JWT_SECRET }}
+          BE_PORT_VALUE: ${{ vars.BE_PORT }}
+          FE_PORT_VALUE: ${{ vars.FE_PORT }}
+          FE_PUBLIC_URL_VALUE: ${{ vars.FE_DOMAIN }}
+          BE_PUBLIC_URL_VALUE: ${{ vars.FE_API_URL }}
+          FE_DOMAIN_VALUE: ${{ vars.FE_DOMAIN }}
+          SMTP_USER_VALUE: ${{ vars.SMTP_USER }}
+          SMTP_PASS_VALUE: ${{ secrets.SMTP_PASS }}
+          SMTP_HOST_VALUE: ${{ vars.SMTP_HOST }}
+          SMTP_PORT_VALUE: ${{ vars.SMTP_PORT }}
+        run: ./scripts/deploy-ci.sh
+
+      - name: Cleanup old GHCR backend images
+        uses: actions/delete-package-versions@v5
+        continue-on-error: true
+        with:
+          package-name: ${{ github.event.repository.name }}/acong-be
+          package-type: container
+          min-versions-to-keep: 2
+          delete-only-untagged-versions: false
+          token: ${{ github.token }}
+
+      - name: Cleanup old GHCR frontend images
+        uses: actions/delete-package-versions@v5
+        continue-on-error: true
+        with:
+          package-name: ${{ github.event.repository.name }}/acong-fe
+          package-type: container
+          min-versions-to-keep: 2
+          delete-only-untagged-versions: false
+          token: ${{ github.token }}

@@ -1,7 +1,9 @@
 # Remove existing docker build if you want fresh
 docker compose -f docker-compose.simple.yml down --remove-orphans || docker-compose -f docker-compose.simple.yml down --remove-orphans || true
 
-# WARNING: Use Docker Compose version higher than 1 (Compose v2 required)
+# WARNING: Use Docker Compose v2 or newer, not Compose v1
+
+Builds can still pass while BE stays down if the server is still using Compose v1.
 
 # CI/CD + Docker Setup
 
@@ -9,8 +11,8 @@ This project now includes:
 - Dockerfile for backend (`be/Dockerfile`)
 - Dockerfile for frontend SSR (`fe/Dockerfile`)
 - Docker Compose stack with MongoDB replica set (`docker-compose.yml`)
-- CI workflow (`.github/workflows/ci.yml`)
-- Deploy workflow for a laptop server over SSH (`.github/workflows/deploy-server.yml`)
+- Unified CI + deploy workflow (`.github/workflows/ci.yml`)
+- Self-hosted deployment script (`scripts/deploy-ci.sh`)
 
 ## 1) Local Docker run
 
@@ -52,47 +54,42 @@ On push/PR, CI will:
 
 ## 4) GitHub Actions deploy to your laptop server
 
+Deployment runs directly on your self-hosted runner machine (label `x200-ghaction`).
+It does not SSH into another host.
+
 This repository intentionally splits GitHub Actions configuration into:
 - **Repository Variables (`vars`)** for non-sensitive values
 - **Repository Secrets (`secrets`)** for sensitive values
 
 Set these **Repository Variables**:
-- `SERVER_HOST`
-- `SERVER_USER`
-- `SERVER_PORT` (optional, default `22`)
-- `SERVER_DEPLOY_PATH` (example: `/opt/acong-kelontong-monorepo`)
-- `SERVER_REPO_URL` (HTTPS/SSH git URL reachable by the server)
 - `BE_PORT` (optional)
 - `FE_PORT` (optional)
 - `FE_DOMAIN`
+- `FE_API_URL` (optional; public backend URL for post-deploy health check)
 - `SMTP_USER`
 - `SMTP_HOST`
 - `SMTP_PORT` (optional)
 
 Set these **Repository Secrets**:
-- `SERVER_SSH_KEY`
 - `MONGO_URI`
 - `JWT_SECRET`
 - `SMTP_PASS`
 
-When `main` / `master` is updated, deploy workflow will run automatically. This includes merges from PRs, direct pushes, and any other change that creates a push event on the branch.
+When `main` / `master` is updated, the unified workflow builds and deploys automatically.
 
-When that deploy workflow runs, it will:
-- SSH into your server
-- pull latest code
+When deploy runs, it will:
+- build and push container images to GHCR (or use manual `image_tag` when provided)
 - write `.env`
-- run Compose up command for selected deployment type 
-<!-- example (`docker-compose up -d --build --remove-orphans`) -->
+- run Compose up for selected deployment type
+- run health checks and rollback to previous images on failure
 
 Manual run note:
 - `workflow_dispatch` exposes `deployment_type` with options: `simple` or `regular`.
+- `workflow_dispatch` also supports optional `image_tag` to deploy an existing image tag.
 - Push-triggered deploy defaults to `simple`.
 
 PR checks note:
-- Pull requests run the `CI` workflow (`.github/workflows/ci.yml`) with 3 jobs only; they do not deploy to the server:
-  - `Backend Build`
-  - `Frontend Build`
-  - `Docker Build Check`
+- Pull requests run build validation only (`Backend Build`, `Frontend Build`) and do not deploy.
 
 ## 5) Server prerequisites (one-time)
 
@@ -164,7 +161,7 @@ When that happens, backend may disappear even though Mongo and FE are still up.
 
 ## 6) Notes
 
-- If your repo is private, ensure `SERVER_REPO_URL` can be cloned from the server (deploy key or PAT).
+- Ensure your self-hosted runner is online and has Docker Engine + Compose v2 installed.
 - If you terminate TLS on reverse proxy (Nginx/Caddy), set `FE_DOMAIN` to your public frontend URL.
 - For production hardening, consider enabling Mongo auth and adding firewall rules.
 
