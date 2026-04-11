@@ -24,7 +24,6 @@ import { Accounting, AccountingSchema } from 'src/modules/accounting/accounting.
 import { AccountingSnapshot, AccountingSnapshotSchema } from 'src/modules/accounting/accounting-snapshot.schema';
 import { Auth, AuthSchema } from 'src/modules/auth/auth.schema';
 import { InventoryReconcile, InventoryReconcileSchema } from 'src/modules/inventory-item/inventory-reconcile.schema';
-import { AccountingSeederService } from './accounting-seeder/accounting-seeder.service';
 
 @Module({
   imports: [
@@ -55,7 +54,6 @@ import { AccountingSeederService } from './accounting-seeder/accounting-seeder.s
     ProductSeederService,
     SupplierSeederService,
     BalanceSeederService,
-    AccountingSeederService,
   ],
   exports: [
     MongooseModule,
@@ -64,7 +62,6 @@ import { AccountingSeederService } from './accounting-seeder/accounting-seeder.s
     ProductSeederService,
     SupplierSeederService,
     BalanceSeederService,
-    AccountingSeederService,
   ],
 })
 export class SeederModule { }

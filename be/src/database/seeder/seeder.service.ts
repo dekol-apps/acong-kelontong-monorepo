@@ -4,8 +4,6 @@ import { SupplierSeederService } from './supplier-seeder/supplier-seeder.service
 import { ProductSeederService } from './product-seeder/product-seeder.service';
 import { BalanceSeederService } from './balance-seeder/balance-seeder.service';
 
-import { AccountingSeederService } from './accounting-seeder/accounting-seeder.service';
-
 @Injectable()
 export class SeederService {
     constructor(
@@ -13,7 +11,6 @@ export class SeederService {
         private product: ProductSeederService,
         private supplier: SupplierSeederService,
         private balance: BalanceSeederService,
-        private accounting: AccountingSeederService,
     ) { }
 
     async seedAll() {
@@ -22,7 +19,6 @@ export class SeederService {
         await this.balance.run();
         await this.supplier.run();
         await this.product.run();
-        await this.accounting.run();
         console.info('✅ Seed Database Finished');
     }
 }
