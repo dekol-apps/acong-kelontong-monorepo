@@ -1,8 +1,19 @@
-# Remove existing docker build if you want to restart everything
-go to server laptop, use docker desktop, remove existing images.
-or try to run this via ssh:
-docker compose -f docker-compose.yml down --remove-orphans || docker-compose -f docker-compose.yml down --remove-orphans || true
+# DOCKER v2 or above is required!
 
+# Command to remove existing docker build if you want to wipe everything first
+## 1) Go to server and execute these
+PROJECT="$(basename "$PWD" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-')"
+docker compose -f docker-compose.yml down --volumes --remove-orphans || true
+docker ps -aq --filter "label=com.docker.compose.project=$PROJECT" | xargs -r docker rm -f
+docker network ls -q --filter "label=com.docker.compose.project=$PROJECT" | xargs -r docker network rm
+docker volume ls -q --filter "label=com.docker.compose.project=$PROJECT" | xargs -r docker volume rm
+docker volume ls -q --filter "name=^${PROJECT}_" | xargs -r docker volume rm
+
+## 2) VERIFY
+
+docker ps -a --format '{{.Names}}' | grep -E "$PROJECT|acong" || echo "No repo containers"
+docker volume ls --format '{{.Name}}' | grep -E "^${PROJECT}_" || echo "No repo volumes"
+docker network ls --format '{{.Name}}' | grep -E "^${PROJECT}_" || echo "No repo networks"
 
 # CI/CD + Docker Setup
 
