@@ -95,30 +95,6 @@ docker compose -f "${COMPOSE_FILE}" -f docker-compose.ci.override.yml pull be fe
 docker compose -f "${COMPOSE_FILE}" -f docker-compose.ci.override.yml up -d --remove-orphans
 docker compose -f "${COMPOSE_FILE}" -f docker-compose.ci.override.yml ps
 
-wait_for_mongo_primary() {
-  local ok=0
-
-  for _ in $(seq 1 30); do
-    if docker exec acong-mongo mongo --quiet --eval 'db.isMaster().ismaster' 2>/dev/null | tr -d '\r\n' | grep -q '^true$'; then
-      ok=1
-      break
-    fi
-    sleep 2
-  done
-
-  if [ "$ok" -ne 1 ]; then
-    echo "Mongo primary readiness check timed out"
-    docker logs --tail=120 acong-mongo || true
-    return 1
-  fi
-
-  return 0
-}
-
-if ! wait_for_mongo_primary; then
-  exit 1
-fi
-
 check_containers() {
   if [ "$(docker inspect --format='{{.State.Running}}' acong-be 2>/dev/null || echo false)" != "true" ]; then
     echo "Backend container is not running"
@@ -142,7 +118,7 @@ check_containers() {
 check_health() {
   local ok=0
 
-  for _ in $(seq 1 20); do
+  for _ in $(seq 1 12); do
     if check_containers \
       && (curl -fsS "http://localhost:${BE_PORT_VALUE}/api" >/dev/null || curl -fsS "http://localhost:${BE_PORT_VALUE}/health" >/dev/null || curl -fsS "http://localhost:${BE_PORT_VALUE}/" >/dev/null) \
       && curl -fsS "http://localhost:${FE_PORT_VALUE}/" >/dev/null; then

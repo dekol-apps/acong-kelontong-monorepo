@@ -15,6 +15,9 @@ docker ps -a --format '{{.Names}}' | grep -E "$PROJECT|acong" || echo "No repo c
 docker volume ls --format '{{.Name}}' | grep -E "^${PROJECT}_" || echo "No repo volumes"
 docker network ls --format '{{.Name}}' | grep -E "^${PROJECT}_" || echo "No repo networks"
 
+# If you want a full machine wipe (not repo scooped) [BECAREFUL!]
+docker system prune -a --volumes -f
+
 # CI/CD + Docker Setup
 
 This repository now uses one deployment path:

@@ -25,19 +25,38 @@ services:
       - -ec
       - |
         mongo --quiet --host mongo:27017 --eval '
+        var initialized = false;
+
         try {
-          rs.status();
-          print("Replica set already initialized");
+          var st = rs.status();
+          initialized = st && st.ok === 1;
         } catch (e) {
+          initialized = false;
+        }
+
+        if (!initialized) {
           rs.initiate({
             _id: "rs0",
             members: [
               { _id: 0, host: "mongo:27017" }
             ]
           });
-        }'
-        sleep 5
-        echo "Replica set initialized"
+          print("Replica set initiated");
+        } else {
+          print("Replica set already initialized");
+        }
+        '
+
+        for _ in $(seq 1 30); do
+          if [ "$(mongo --quiet --host mongo:27017 --eval 'db.isMaster().ismaster' | tr -d '\r\n')" = "true" ]; then
+            echo "Replica set primary is ready"
+            exit 0
+          fi
+          sleep 2
+        done
+
+        echo "Replica set primary readiness timeout"
+        exit 1
 
   be:
     build:
