@@ -20,11 +20,10 @@ docker system prune -a --volumes -f
 
 # CI/CD + Docker Setup
 
-This repository now uses one deployment path:
+This repository uses one deployment path:
 
 - [docker-compose.yml](docker-compose.yml) with a single MongoDB container running as replica set `rs0`
-- [scripts/deploy-ci.sh](scripts/deploy-ci.sh) for deploy, health checks, and rollback
-- [.github/workflows/ci.yml](.github/workflows/ci.yml) for build and deploy on the self-hosted runner
+- [.github/workflows/ci.yml](.github/workflows/ci.yml) for image build, deploy, health checks, and rollback on the self-hosted runner
 
 ## Local run
 
@@ -72,7 +71,13 @@ On push to `main` or `master`, the workflow also deploys on the self-hosted runn
 The workflow uses repository variables and secrets for runtime config:
 
 - Variables: `BE_PORT`, `FE_PORT`, `FE_DOMAIN`, `FE_API_URL`, `SMTP_USER`, `SMTP_HOST`, `SMTP_PORT`
-- Secrets: `MONGO_URI`, `JWT_SECRET`, `SMTP_PASS`
+- Secrets: `JWT_SECRET`, `SMTP_PASS`
+
+Mongo URI is fixed in the workflow to the single-host internal Docker value:
+
+```env
+mongodb://mongo:27017/AcongKelontongLocal?retryWrites=true&w=majority&replicaSet=rs0
+```
 
 ## Deployment behavior
 
