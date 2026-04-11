@@ -85,3 +85,42 @@ Expected result:
 - BE shows `Up` in Compose status.
 - Logs show Nest app start and seeder completion.
 - API responds `HTTP/1.1 200 OK`.
+
+
+# Connect to database remotely (via ssh cloudflare tunnel)
+## 1) Make sure the server db exposed
+remote-laptop:~$ ssh x200
+heri@ssh.dekolapps.tech's password: 
+Welcome to Pop!_OS 22.04 LTS (GNU/Linux 6.17.9-76061709-generic x86_64)
+
+ * Homepage: https://pop.system76.com
+ * Support:  https://support.system76.com
+
+Last login: Sat Apr 11 09:38:08 2026 from ::1
+heri@pop-os:~$ ss -tulnp | grep 27017
+tcp   LISTEN 0      4096                             0.0.0.0:27017      0.0.0.0:*                                                
+tcp   LISTEN 0      4096                                [::]:27017         [::]:*                                                
+heri@pop-os:~$ ^C
+heri@pop-os:~$ exit
+logout
+Connection to ssh.dekolapps.tech closed.
+
+## 2) Forward and re-route x200 27017 to remote-laptop as 27018
+remote-laptop:~$ ssh -L 27018:localhost:27017 x200
+heri@ssh.dekolapps.tech's password: 
+Welcome to Pop!_OS 22.04 LTS (GNU/Linux 6.17.9-76061709-generic x86_64)
+
+ * Homepage: https://pop.system76.com
+ * Support:  https://support.system76.com
+
+Last login: Sat Apr 11 11:20:27 2026 from ::1
+heri@pop-os:~$ ss -tulnp | grep 27018
+
+## 3) Test if database accessible as 27018 port
+greatdekol@greatdekol-ThinkPad-T440p:~$ ss -tulnp | grep 27018
+tcp   LISTEN 0      128                             127.0.0.1:27018      0.0.0.0:*    users:(("ssh",pid=9209,fd=6))  
+tcp   LISTEN 0      128                                 [::1]:27018         [::]:*    users:(("ssh",pid=9209,fd=3))  
+greatdekol@greatdekol-ThinkPad-T440p:~$ mongosh mongodb://localhost:27018
+
+## 3) Open mongo compas and create new connection (27018)
+mongodb://localhost:27018/?directConnection=true
