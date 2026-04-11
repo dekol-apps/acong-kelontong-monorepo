@@ -84,7 +84,7 @@ services:
       SMTP_HOST: ${SMTP_HOST}
       SMTP_PORT: ${SMTP_PORT}
     ports:
-      - "${BE_PORT}"
+      - "${BE_PORT:-3200}:${BE_PORT:-3200}"
     volumes:
       - ./be/uploads:/app/uploads
 
@@ -97,7 +97,7 @@ services:
     depends_on:
       - be
     ports:
-      - "${FE_PORT}"
+      - "${FE_PORT:-4200}:4200"
 
 volumes:
   mongo1_data:
