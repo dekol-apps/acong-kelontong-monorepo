@@ -118,18 +118,18 @@ check_containers() {
 check_health() {
   local ok=0
 
-  for _ in $(seq 1 20); do
+  for _ in $(seq 1 12); do
     if check_containers \
       && (curl -fsS "http://localhost:${BE_PORT_VALUE}/api" >/dev/null || curl -fsS "http://localhost:${BE_PORT_VALUE}/health" >/dev/null || curl -fsS "http://localhost:${BE_PORT_VALUE}/" >/dev/null) \
       && curl -fsS "http://localhost:${FE_PORT_VALUE}/" >/dev/null; then
 
       if [ -n "${BE_PUBLIC_URL_VALUE:-}" ] && ! curl -fsS "${BE_PUBLIC_URL_VALUE}" >/dev/null; then
-        sleep 5
+        sleep 3
         continue
       fi
 
       if [ -n "${FE_PUBLIC_URL_VALUE:-}" ] && ! curl -fsS "${FE_PUBLIC_URL_VALUE}" >/dev/null; then
-        sleep 5
+        sleep 3
         continue
       fi
 
@@ -137,7 +137,7 @@ check_health() {
       break
     fi
 
-    sleep 5
+    sleep 3
   done
 
   return $((1 - ok))

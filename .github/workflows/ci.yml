@@ -22,65 +22,10 @@ permissions:
   packages: write
 
 jobs:
-  backend:
-    name: Backend Build
-    runs-on: [self-hosted, x200-ghaction]
-    defaults:
-      run:
-        working-directory: be
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: be/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-
-      # - name: Run tests
-      #   run: npm test --if-present
-
-      - name: Build
-        run: npm run build
-
-  frontend:
-    name: Frontend Build
-    runs-on: [self-hosted, x200-ghaction]
-    defaults:
-      run:
-        working-directory: fe
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: fe/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-
-      # - name: Run tests
-      #   run: npm test --if-present
-
-      - name: Build
-        run: npm run build
-
   docker-build:
-    name: Docker Build & Push
+    name: Build Images
     runs-on: [self-hosted, x200-ghaction]
-    needs: [backend, frontend]
-    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.image_tag == '')
+    if: github.event_name == 'push' || github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.image_tag == '')
 
     steps:
       - name: Checkout
@@ -106,7 +51,7 @@ jobs:
         with:
           context: ./be
           file: ./be/Dockerfile
-          push: true
+          push: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
           tags: |
             ghcr.io/${{ steps.repo_meta.outputs.repo_lowercase }}/acong-be:${{ github.sha }}
             ghcr.io/${{ steps.repo_meta.outputs.repo_lowercase }}/acong-be:latest
@@ -118,7 +63,7 @@ jobs:
         with:
           context: ./fe
           file: ./fe/Dockerfile
-          push: true
+          push: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
           tags: |
             ghcr.io/${{ steps.repo_meta.outputs.repo_lowercase }}/acong-fe:${{ github.sha }}
             ghcr.io/${{ steps.repo_meta.outputs.repo_lowercase }}/acong-fe:latest
@@ -185,6 +130,7 @@ jobs:
       - name: Cleanup old GHCR backend images
         uses: actions/delete-package-versions@v5
         continue-on-error: true
+        if: github.event_name == 'push'
         with:
           package-name: ${{ github.event.repository.name }}/acong-be
           package-type: container
@@ -195,6 +141,7 @@ jobs:
       - name: Cleanup old GHCR frontend images
         uses: actions/delete-package-versions@v5
         continue-on-error: true
+        if: github.event_name == 'push'
         with:
           package-name: ${{ github.event.repository.name }}/acong-fe
           package-type: container
