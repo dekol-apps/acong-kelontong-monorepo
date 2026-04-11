@@ -1,54 +1,28 @@
 services:
-  mongo1:
+  mongo:
     image: mongo:4.4
-    container_name: acong-mongo1
-    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
+    container_name: acong-mongo
+    command: ["--replSet", "rs0", "--bind_ip_all"]
     volumes:
-      - mongo1_data:/data/db
+      - mongo_data:/data/db
     healthcheck:
-      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      test: ["CMD", "mongo", "--quiet", "--eval", "db.adminCommand('ping').ok"]
       interval: 10s
       timeout: 5s
       retries: 10
-
-  mongo2:
-    image: mongo:4.4
-    container_name: acong-mongo2
-    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
-    volumes:
-      - mongo2_data:/data/db
-    healthcheck:
-      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-
-  mongo3:
-    image: mongo:4.4
-    container_name: acong-mongo3
-    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
-    volumes:
-      - mongo3_data:/data/db
-    healthcheck:
-      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
+    ports:
+      - "27017:27017"
 
   mongo-init:
     image: mongo:4.4
     container_name: acong-mongo-init
     depends_on:
-      mongo1:
-        condition: service_healthy
-      mongo2:
-        condition: service_healthy
-      mongo3:
+      mongo:
         condition: service_healthy
     restart: "no"
     command: >
       bash -c "
-      mongosh --host mongo1:27017 --eval '
+      mongo --host mongo:27017 --eval '
       try {
         rs.status();
         print(\"Replica set already initialized\");
@@ -56,9 +30,7 @@ services:
         rs.initiate({
           _id: \"rs0\",
           members: [
-            { _id: 0, host: \"mongo1:27017\" },
-            { _id: 1, host: \"mongo2:27017\" },
-            { _id: 2, host: \"mongo3:27017\" }
+            { _id: 0, host: \"mongo:27017\" }
           ]
         });
       }'
@@ -84,7 +56,7 @@ services:
       SMTP_HOST: ${SMTP_HOST}
       SMTP_PORT: ${SMTP_PORT}
     ports:
-      - "${BE_PORT:-3200}:${BE_PORT:-3200}"
+      - "${BE_PORT}:3200"
     volumes:
       - ./be/uploads:/app/uploads
 
@@ -97,9 +69,7 @@ services:
     depends_on:
       - be
     ports:
-      - "${FE_PORT:-4200}:4200"
+      - "${FE_PORT}:4200"
 
 volumes:
-  mongo1_data:
-  mongo2_data:
-  mongo3_data:
+  mongo_data:

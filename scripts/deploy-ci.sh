@@ -11,7 +11,6 @@ if ! docker compose version >/dev/null 2>&1; then
   exit 1
 fi
 
-: "${DEPLOYMENT_TYPE:=simple}"
 : "${IMAGE_TAG:?IMAGE_TAG is required}"
 : "${REGISTRY_PREFIX:?REGISTRY_PREFIX is required}"
 : "${MONGO_URI_VALUE:?MONGO_URI is required}"
@@ -40,6 +39,12 @@ if [[ "${MONGO_URI_VALUE}" == *"localhost"* ]] || [[ "${MONGO_URI_VALUE}" == *"1
   exit 1
 fi
 
+if [[ "${MONGO_URI_VALUE}" == *"mongo1:"* ]] || [[ "${MONGO_URI_VALUE}" == *"mongo2:"* ]] || [[ "${MONGO_URI_VALUE}" == *"mongo3:"* ]]; then
+  echo "MONGO_URI points to a replica-set topology that is no longer used in this repository."
+  echo "Use the single-host URI for docker-compose.yml: mongodb://mongo:27017/...&replicaSet=rs0"
+  exit 1
+fi
+
 if ! [[ "${BE_PORT_VALUE}" =~ ^[0-9]+$ ]]; then
   echo "Invalid BE_PORT: ${BE_PORT_VALUE}. Must be numeric."
   exit 1
@@ -50,18 +55,7 @@ if ! [[ "${FE_PORT_VALUE}" =~ ^[0-9]+$ ]]; then
   exit 1
 fi
 
-case "${DEPLOYMENT_TYPE}" in
-  simple)
-    COMPOSE_FILE="docker-compose.simple.yml"
-    ;;
-  regular)
-    COMPOSE_FILE="docker-compose.yml"
-    ;;
-  *)
-    echo "Invalid deployment type: ${DEPLOYMENT_TYPE}"
-    exit 1
-    ;;
-esac
+COMPOSE_FILE="docker-compose.yml"
 
 CURRENT_BE_IMAGE=$(docker inspect --format='{{.Config.Image}}' acong-be 2>/dev/null || true)
 CURRENT_FE_IMAGE=$(docker inspect --format='{{.Config.Image}}' acong-fe 2>/dev/null || true)
@@ -94,7 +88,6 @@ EOF
 TARGET_BE_IMAGE="${REGISTRY_PREFIX}/acong-be:${IMAGE_TAG}"
 TARGET_FE_IMAGE="${REGISTRY_PREFIX}/acong-fe:${IMAGE_TAG}"
 
-echo "Deploying with ${DEPLOYMENT_TYPE^^} setup"
 echo "Backend image: ${TARGET_BE_IMAGE}"
 echo "Frontend image: ${TARGET_FE_IMAGE}"
 

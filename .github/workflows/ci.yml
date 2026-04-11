@@ -8,14 +8,6 @@ on:
       - master      # Runs when pushed to master
   workflow_dispatch:
     inputs:
-      deployment_type:
-        description: "Deployment type"
-        required: true
-        default: "simple"
-        type: choice
-        options:
-          - simple
-          - regular
       image_tag:
         description: "Optional image tag (commit SHA). Leave empty to use current commit SHA."
         required: false
@@ -158,18 +150,12 @@ jobs:
         run: |
           set -euo pipefail
 
-          DEPLOYMENT_TYPE_INPUT="${{ github.event.inputs.deployment_type }}"
           IMAGE_TAG_INPUT="${{ github.event.inputs.image_tag }}"
-
-          if [ -z "${DEPLOYMENT_TYPE_INPUT}" ]; then
-            DEPLOYMENT_TYPE_INPUT="simple"
-          fi
 
           if [ -z "${IMAGE_TAG_INPUT}" ]; then
             IMAGE_TAG_INPUT="${{ github.sha }}"
           fi
 
-          echo "deployment_type=${DEPLOYMENT_TYPE_INPUT}" >> "$GITHUB_OUTPUT"
           echo "image_tag=${IMAGE_TAG_INPUT}" >> "$GITHUB_OUTPUT"
 
       - name: Log in to GitHub Container Registry
@@ -181,7 +167,6 @@ jobs:
 
       - name: Deploy application
         env:
-          DEPLOYMENT_TYPE: ${{ steps.deploy_vars.outputs.deployment_type }}
           REGISTRY_PREFIX: ghcr.io/${{ steps.repo_meta.outputs.repo_lowercase }}
           IMAGE_TAG: ${{ steps.deploy_vars.outputs.image_tag }}
           MONGO_URI_VALUE: ${{ secrets.MONGO_URI }}

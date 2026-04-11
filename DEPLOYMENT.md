@@ -1,229 +1,87 @@
-# Remove existing docker build if you want fresh
-docker compose -f docker-compose.simple.yml down --remove-orphans || docker-compose -f docker-compose.simple.yml down --remove-orphans || true
-
-# WARNING: Use Docker Compose v2 or newer, not Compose v1
-
-Builds can still pass while BE stays down if the server is still using Compose v1.
-
 # CI/CD + Docker Setup
 
-This project now includes:
-- Dockerfile for backend (`be/Dockerfile`)
-- Dockerfile for frontend SSR (`fe/Dockerfile`)
-- Docker Compose stack with MongoDB replica set (`docker-compose.yml`)
-- Unified CI + deploy workflow (`.github/workflows/ci.yml`)
-- Self-hosted deployment script (`scripts/deploy-ci.sh`)
+This repository now uses one deployment path:
 
-## 1) Local Docker run
+- [docker-compose.yml](docker-compose.yml) with a single MongoDB container running as replica set `rs0`
+- [scripts/deploy-ci.sh](scripts/deploy-ci.sh) for deploy, health checks, and rollback
+- [.github/workflows/ci.yml](.github/workflows/ci.yml) for build and deploy on the self-hosted runner
 
-1. Copy env template:
+## Local run
+
+1. Copy the env template:
 
 ```bash
 cp .env.example .env
 ```
 
-2. Edit `.env` values (at minimum `JWT_SECRET` SMTP values, `FE_DOMAIN`).
+1. Update `.env` values, especially `JWT_SECRET`, SMTP values, and `FE_DOMAIN`.
 
-3. Start all services:
+1. Start the stack:
 
 ```bash
 docker compose up -d --build
 ```
 
-4. Access:
+1. Access:
+
 - Frontend: `https://ack.dekolapps.tech`
 - Backend API: `https://api.dekolapps.tech/api`
 
-## 2) Why replica set is included
+## MongoDB topology
 
-Your backend uses MongoDB transactions; Mongo transactions require replica set mode.
-The Compose stack launches 3 MongoDB containers and initializes replica set `rs0` automatically.
+The app uses MongoDB transactions, so Mongo runs with replica set mode even though there is only one Mongo container.
 
-Default URI in `.env.example`:
+Why one container is enough here:
+
+- It satisfies transaction requirements.
+- It keeps the local and CI/CD setup simple.
+- It avoids extra moving parts that do not add real fault tolerance on a single-host runner.
+
+The default URI is:
 
 ```env
-MONGO_URI=mongodb://mongo1:27017,mongo2:27017,mongo3:27017/AcongKelontongLocal?replicaSet=rs0&retryWrites=true&w=majority
+MONGO_URI=mongodb://mongo:27017/AcongKelontongLocal?retryWrites=true&w=majority&replicaSet=rs0
 ```
 
-## 3) GitHub Actions CI
+## GitHub Actions
 
-On push/PR, CI will:
-- build backend
-- build frontend
-- build both Docker images as a validation step
+On push/PR, CI builds backend and frontend.
 
-## 4) GitHub Actions deploy to your laptop server
+On push to `main` or `master`, the workflow also deploys on the self-hosted runner.
 
-Deployment runs directly on your self-hosted runner machine (label `x200-ghaction`).
-It does not SSH into another host.
+The workflow uses repository variables and secrets for runtime config:
 
-This repository intentionally splits GitHub Actions configuration into:
-- **Repository Variables (`vars`)** for non-sensitive values
-- **Repository Secrets (`secrets`)** for sensitive values
+- Variables: `BE_PORT`, `FE_PORT`, `FE_DOMAIN`, `FE_API_URL`, `SMTP_USER`, `SMTP_HOST`, `SMTP_PORT`
+- Secrets: `MONGO_URI`, `JWT_SECRET`, `SMTP_PASS`
 
-Set these **Repository Variables**:
-- `BE_PORT` (optional)
-- `FE_PORT` (optional)
-- `FE_DOMAIN`
-- `FE_API_URL` (optional; public backend URL for post-deploy health check)
-- `SMTP_USER`
-- `SMTP_HOST`
-- `SMTP_PORT` (optional)
-
-Set these **Repository Secrets**:
-- `MONGO_URI`
-- `JWT_SECRET`
-- `SMTP_PASS`
-
-When `main` / `master` is updated, the unified workflow builds and deploys automatically.
+## Deployment behavior
 
 When deploy runs, it will:
-- build and push container images to GHCR (or use manual `image_tag` when provided)
-- write `.env`
-- run Compose up for selected deployment type
-- run health checks and rollback to previous images on failure
 
-Manual run note:
-- `workflow_dispatch` exposes `deployment_type` with options: `simple` or `regular`.
-- `workflow_dispatch` also supports optional `image_tag` to deploy an existing image tag.
-- Push-triggered deploy defaults to `simple`.
+- build and push container images to GHCR when needed
+- generate `.env` on the runner
+- start the single compose stack
+- run health checks and rollback to the previous images if startup fails
 
-PR checks note:
-- Pull requests run build validation only (`Backend Build`, `Frontend Build`) and do not deploy.
+## Server prerequisites
 
-## 5) Server prerequisites (one-time)
+Install Docker Engine, the Compose v2 plugin, and Git on the self-hosted runner machine.
 
-Install Docker + Compose plugin and Git on your laptop server.
+The workflow does not support Compose v1 anymore.
 
-Ubuntu example:
+## Recovery
+
+If you need to restart the backend manually on the runner:
 
 ```bash
-sudo apt update
-sudo apt install -y ca-certificates curl gnupg git
-sudo install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-sudo chmod a+r /etc/apt/keyrings/docker.gpg
-
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-  $(. /etc/os-release && echo $VERSION_CODENAME) stable" | \
-  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-sudo apt update
-sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-sudo usermod -aG docker $USER
-```
-
-Then log out and log in again.
-
-### Compose command compatibility check
-
-Run this once on server:
-
-```bash
-docker compose version || true
-docker-compose version || true
-```
-
-- If `docker compose version` works, use `docker compose` (recommended).
-- If only `docker-compose version` works, you are still on Compose v1.
-
-### Pop!_OS fallback when `docker-compose-plugin` is unavailable
-
-Some Pop!_OS repositories do not provide `docker-compose-plugin` package directly.
-If `sudo apt install docker-compose-plugin` fails with `Unable to locate package`, install Compose v2 standalone plugin:
-
-```bash
-mkdir -p ~/.docker/cli-plugins
-curl -SL https://github.com/docker/compose/releases/download/v2.29.7/docker-compose-linux-x86_64 -o ~/.docker/cli-plugins/docker-compose
-chmod +x ~/.docker/cli-plugins/docker-compose
-docker compose version
-```
-
-If needed for all users on server, install globally:
-
-```bash
-sudo mkdir -p /usr/local/lib/docker/cli-plugins
-sudo curl -SL https://github.com/docker/compose/releases/download/v2.29.7/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
-sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
-docker compose version
-```
-
-### Why this matters
-
-Compose v1 (`docker-compose 1.29.2`) can fail container recreation on modern Docker images with errors like:
-
-```text
-KeyError: 'ContainerConfig'
-```
-
-When that happens, backend may disappear even though Mongo and FE are still up.
-
-## 6) Notes
-
-- Ensure your self-hosted runner is online and has Docker Engine + Compose v2 installed.
-- If you terminate TLS on reverse proxy (Nginx/Caddy), set `FE_DOMAIN` to your public frontend URL.
-- For production hardening, consider enabling Mongo auth and adding firewall rules.
-
-## 7) BE down quick recovery (x200)
-
-If FE and Mongo are up but BE container is missing/down:
-
-```bash
-cd ~/Documents/repos/acong/acong-kelontong-monorepo
-docker-compose -f docker-compose.simple.yml rm -sf be
-docker-compose -f docker-compose.simple.yml up -d --no-deps --build be
-docker-compose -f docker-compose.simple.yml ps
-docker logs --tail=120 $(docker-compose -f docker-compose.simple.yml ps -q be)
-curl -i http://localhost:3200/api
+docker compose -f docker-compose.yml rm -sf be
+docker compose -f docker-compose.yml up -d --no-deps --build be
+docker compose -f docker-compose.yml ps
+docker logs --tail=120 $(docker compose -f docker-compose.yml ps -q be)
 ```
 
 Expected result:
+
 - BE shows `Up` in Compose status.
 - Logs show Nest app start and seeder completion.
 - API responds `HTTP/1.1 200 OK`.
-
-Mongo replica-set health check (mongo 4.4 image uses `mongo` shell):
-
-```bash
-docker exec -it acong-mongo mongo --quiet --eval "rs.status().ok"
-```
-
-Expected result: `1`.
-
-# Connect to database remotely
-## 1) Make sure the server db exposed and bridge via ssh as 27018
-remote-laptop:~$ ssh x200
-heri@ssh.dekolapps.tech's password: 
-Welcome to Pop!_OS 22.04 LTS (GNU/Linux 6.17.9-76061709-generic x86_64)
-
- * Homepage: https://pop.system76.com
- * Support:  https://support.system76.com
-
-Last login: Sat Apr 11 09:38:08 2026 from ::1
-heri@pop-os:~$ ss -tulnp | grep 27017
-tcp   LISTEN 0      4096                             0.0.0.0:27017      0.0.0.0:*                                                
-tcp   LISTEN 0      4096                                [::]:27017         [::]:*                                                
-heri@pop-os:~$ ^C
-heri@pop-os:~$ exit
-logout
-Connection to ssh.dekolapps.tech closed.
-remote-laptop:~$ ssh -L 27018:localhost:27017 x200
-heri@ssh.dekolapps.tech's password: 
-Welcome to Pop!_OS 22.04 LTS (GNU/Linux 6.17.9-76061709-generic x86_64)
-
- * Homepage: https://pop.system76.com
- * Support:  https://support.system76.com
-
-Last login: Sat Apr 11 11:20:27 2026 from ::1
-heri@pop-os:~$ ss -tulnp | grep 27018
-heri@pop-os:~$ 
-
-## 2) Test if database accessible as 27018 port
-greatdekol@greatdekol-ThinkPad-T440p:~$ ss -tulnp | grep 27018
-tcp   LISTEN 0      128                             127.0.0.1:27018      0.0.0.0:*    users:(("ssh",pid=9209,fd=6))  
-tcp   LISTEN 0      128                                 [::1]:27018         [::]:*    users:(("ssh",pid=9209,fd=3))  
-greatdekol@greatdekol-ThinkPad-T440p:~$ mongosh mongodb://localhost:27018
-
-## 3) Open mongo compas and create new connection
-mongodb://localhost:27018/?directConnection=true
