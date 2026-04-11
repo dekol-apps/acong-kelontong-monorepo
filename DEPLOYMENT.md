@@ -1,3 +1,9 @@
+# Remove existing docker build if you want to restart everything
+go to server laptop, use docker desktop, remove existing images.
+or try to run this via ssh:
+docker compose -f docker-compose.yml down --remove-orphans || docker-compose -f docker-compose.yml down --remove-orphans || true
+
+
 # CI/CD + Docker Setup
 
 This repository now uses one deployment path:
