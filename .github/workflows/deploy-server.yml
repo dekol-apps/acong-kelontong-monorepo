@@ -31,7 +31,7 @@ concurrency:
 
 permissions:
   contents: read
-  packages: read
+  packages: write
 
 jobs:
   deploy:
@@ -151,6 +151,8 @@ jobs:
           echo "Using IMAGE_TAG: ${IMAGE_TAG}"
           echo "Full backend image: ${REGISTRY_PREFIX}/acong-be:${IMAGE_TAG}"
           echo "Full frontend image: ${REGISTRY_PREFIX}/acong-fe:${IMAGE_TAG}"
+          TARGET_BE_IMAGE="${REGISTRY_PREFIX}/acong-be:${IMAGE_TAG}"
+          TARGET_FE_IMAGE="${REGISTRY_PREFIX}/acong-fe:${IMAGE_TAG}"
 
           # Pull and deploy
           dc -f "$COMPOSE_FILE" -f docker-compose.ci.override.yml pull be fe
@@ -241,11 +243,50 @@ jobs:
 
           rm -f docker-compose.ci.override.yml
 
-          # Cleanup unused images (keep last 5 versions)
-          docker image prune -f --filter "until=24h"
+          # Keep only deployed + previous images locally for rollback safety
+          cleanup_repo_images() {
+            local repository="$1"
+            local keep_one="$2"
+            local keep_two="$3"
+
+            docker image ls "${repository}" --format '{{.Repository}}:{{.Tag}}' | while read -r img; do
+              [ -z "${img}" ] && continue
+              [ "${img}" = "${repository}:<none>" ] && continue
+              if [ "${img}" = "${keep_one}" ] || [ "${img}" = "${keep_two}" ]; then
+                continue
+              fi
+              docker rmi "${img}" || true
+            done
+          }
+
+          cleanup_repo_images "${REGISTRY_PREFIX}/acong-be" "${TARGET_BE_IMAGE}" "${CURRENT_BE_IMAGE}"
+          cleanup_repo_images "${REGISTRY_PREFIX}/acong-fe" "${TARGET_FE_IMAGE}" "${CURRENT_FE_IMAGE}"
+
+          # Cleanup dangling layers left by builds/pulls
+          docker image prune -f
 
           # Show running containers and images
           echo "=== Running containers ==="
           docker ps
           echo "=== Images pulled ==="
           docker images | grep acong
+
+      - name: Cleanup old GHCR backend images
+        uses: actions/delete-package-versions@v5
+        continue-on-error: true
+        with:
+          package-name: ${{ github.event.repository.name }}/acong-be
+          package-type: container
+          min-versions-to-keep: 2
+          delete-only-untagged-versions: false
+          token: ${{ github.token }}
+
+      - name: Cleanup old GHCR frontend images
+        uses: actions/delete-package-versions@v5
+        continue-on-error: true
+        with:
+          package-name: ${{ github.event.repository.name }}/acong-fe
+          package-type: container
+          min-versions-to-keep: 2
+          delete-only-untagged-versions: false
+          token: ${{ github.token }}
