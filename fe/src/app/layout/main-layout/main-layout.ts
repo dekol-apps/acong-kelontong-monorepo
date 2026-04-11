@@ -73,4 +73,6 @@ export class MainLayout implements OnInit {
   logout() {
     this.auth.logout('current');
   }
+
+  thisYear = new Date().getFullYear();
 }
