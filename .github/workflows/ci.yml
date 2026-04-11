@@ -173,29 +173,29 @@ jobs:
           echo "Current backend image: ${CURRENT_BE_IMAGE:-none}"
           echo "Current frontend image: ${CURRENT_FE_IMAGE:-none}"
 
-          cat > .env <<EOF
-          BE_PORT=${BE_PORT_VALUE}
-          FE_PORT=${FE_PORT_VALUE}
-          IS_PROD=true
-          FE_DOMAIN=${FE_PUBLIC_URL_VALUE}
-          MONGO_URI=${MONGO_URI_VALUE}
-          JWT_SECRET=${JWT_SECRET_VALUE}
-          SMTP_USER=${SMTP_USER_VALUE}
-          SMTP_PASS=${SMTP_PASS_VALUE}
-          SMTP_HOST=${SMTP_HOST_VALUE}
-          SMTP_PORT=${SMTP_PORT_VALUE}
-          URL_CHANGE_PASSWORD=user-verification
-          EOF
+          printf '%s\n' \
+            "BE_PORT=${BE_PORT_VALUE}" \
+            "FE_PORT=${FE_PORT_VALUE}" \
+            'IS_PROD=true' \
+            "FE_DOMAIN=${FE_PUBLIC_URL_VALUE}" \
+            "MONGO_URI=${MONGO_URI_VALUE}" \
+            "JWT_SECRET=${JWT_SECRET_VALUE}" \
+            "SMTP_USER=${SMTP_USER_VALUE}" \
+            "SMTP_PASS=${SMTP_PASS_VALUE}" \
+            "SMTP_HOST=${SMTP_HOST_VALUE}" \
+            "SMTP_PORT=${SMTP_PORT_VALUE}" \
+            'URL_CHANGE_PASSWORD=user-verification' \
+            > .env
 
-          cat > docker-compose.ci.override.yml <<EOF
-          services:
-            be:
-              image: ${REGISTRY_PREFIX}/acong-be:${IMAGE_TAG}
-              build: null
-            fe:
-              image: ${REGISTRY_PREFIX}/acong-fe:${IMAGE_TAG}
-              build: null
-          EOF
+          printf '%s\n' \
+            'services:' \
+            '  be:' \
+            "    image: ${REGISTRY_PREFIX}/acong-be:${IMAGE_TAG}" \
+            '    build: null' \
+            '  fe:' \
+            "    image: ${REGISTRY_PREFIX}/acong-fe:${IMAGE_TAG}" \
+            '    build: null' \
+            > docker-compose.ci.override.yml
 
           TARGET_BE_IMAGE="${REGISTRY_PREFIX}/acong-be:${IMAGE_TAG}"
           TARGET_FE_IMAGE="${REGISTRY_PREFIX}/acong-fe:${IMAGE_TAG}"
@@ -263,13 +263,13 @@ jobs:
             docker compose -f "${COMPOSE_FILE}" -f docker-compose.ci.override.yml logs --tail=100 fe || true
 
             if [ -n "${CURRENT_BE_IMAGE}" ] && [ -n "${CURRENT_FE_IMAGE}" ]; then
-              cat > docker-compose.ci.rollback.yml <<EOF
-              services:
-                be:
-                  image: ${CURRENT_BE_IMAGE}
-                fe:
-                  image: ${CURRENT_FE_IMAGE}
-              EOF
+              printf '%s\n' \
+                'services:' \
+                '  be:' \
+                "    image: ${CURRENT_BE_IMAGE}" \
+                '  fe:' \
+                "    image: ${CURRENT_FE_IMAGE}" \
+                > docker-compose.ci.rollback.yml
 
               docker compose -f "${COMPOSE_FILE}" -f docker-compose.ci.rollback.yml up -d --remove-orphans
 
