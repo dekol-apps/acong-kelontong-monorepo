@@ -34,6 +34,10 @@ services:
           ]
         });
       }'
+      while [ \"$(mongo --quiet --host mongo:27017 --eval 'db.isMaster().ismaster' | tr -d '\n' | tr -d '\r')\" != \"true\" ]; do
+        sleep 2
+      done
+      echo \"Replica set primary is ready\"
       "
 
   be:
