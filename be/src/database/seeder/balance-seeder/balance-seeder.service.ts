@@ -7,6 +7,8 @@ import { Investment, InvestmentDocument } from 'src/modules/investment/investmen
 import { CurrencyEn, FlowType, InvestmentType, OrderType } from 'src/types/interfaces';
 import { toDecimal, toDecimal128 } from 'src/utils/helper';
 
+const INITIAL_BALANCE_SEED_TAG = 'SEED_ACCOUNTING_INITIAL_BALANCE';
+
 @Injectable()
 export class BalanceSeederService {
   constructor(
@@ -18,7 +20,7 @@ export class BalanceSeederService {
   async run() {
     const existing = await this.accountingModel.findOne({
       order_type: OrderType.DEPOSIT,
-      'order_data.seed_tag': 'SEED_ACCOUNTING',
+      'order_data.seed_tag': INITIAL_BALANCE_SEED_TAG,
     });
 
     if (existing) return;
@@ -32,8 +34,11 @@ export class BalanceSeederService {
     await this.accountingModel.create({
       flow_type: FlowType.IN,
       order_type: OrderType.DEPOSIT,
-      order_id: new Types.ObjectId(),
-      order_data: deposit,
+      order_id: deposit._id as Types.ObjectId,
+      order_data: {
+        ...deposit.toObject(),
+        seed_tag: INITIAL_BALANCE_SEED_TAG,
+      },
       transaction_amount: toDecimal128(toDecimal(25000000)),
       record_date: new Date(),
     });
