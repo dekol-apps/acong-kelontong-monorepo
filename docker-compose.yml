@@ -20,24 +20,23 @@ services:
       mongo:
         condition: service_healthy
     restart: "no"
-    command:
-      - bash
-      - -ec
-      - |
-        mongo --quiet --host mongo:27017 --eval '
-        try {
-          rs.status();
-          print("Replica set already initialized");
-        } catch (e) {
-          rs.initiate({
-            _id: "rs0",
-            members: [
-              { _id: 0, host: "mongo:27017" }
-            ]
-          });
-        }'
-        sleep 5
-        echo "Replica set initialized"
+    command: >
+      bash -c "
+      mongo --host mongo:27017 --eval '
+      try {
+        rs.status();
+        print(\"Replica set already initialized\");
+      } catch (e) {
+        rs.initiate({
+          _id: \"rs0\",
+          members: [
+            { _id: 0, host: \"mongo:27017\" }
+          ]
+        });
+      }'
+      "
+      sleep 5
+      echo "Replica set initialized"
 
   be:
     build:
