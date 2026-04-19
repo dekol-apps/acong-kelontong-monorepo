@@ -280,29 +280,6 @@ jobs:
 
           fail_if_non_docker_process_uses_port() {
             local port="$1"
-            local allowed_one="$2"
-            local allowed_two="$3"
-            local ids
-
-            ids=$(docker ps -q --filter "publish=${port}" || true)
-
-            if [ -n "${ids}" ]; then
-              local all_allowed=1
-
-              for cid in ${ids}; do
-                local cname
-                cname=$(docker inspect --format '{{.Name}}' "${cid}" 2>/dev/null | sed 's#^/##' || true)
-
-                if [ "${cname}" != "${allowed_one}" ] && [ "${cname}" != "${allowed_two}" ]; then
-                  all_allowed=0
-                  break
-                fi
-              done
-
-              if [ "${all_allowed}" -eq 1 ]; then
-                return 0
-              fi
-            fi
 
             if command -v ss >/dev/null 2>&1 && ss -ltn "( sport = :${port} )" | tail -n +2 | grep -q .; then
               echo "Host port ${port} is still in use by a non-Docker process or inaccessible owner."
@@ -313,8 +290,8 @@ jobs:
 
           free_port_from_other_containers "${BE_PORT_VALUE}" "acong-be" "acong-fe"
           free_port_from_other_containers "${FE_PORT_VALUE}" "acong-be" "acong-fe"
-          fail_if_non_docker_process_uses_port "${BE_PORT_VALUE}" "acong-be" "acong-fe"
-          fail_if_non_docker_process_uses_port "${FE_PORT_VALUE}" "acong-be" "acong-fe"
+          fail_if_non_docker_process_uses_port "${BE_PORT_VALUE}"
+          fail_if_non_docker_process_uses_port "${FE_PORT_VALUE}"
 
           docker compose -f "${COMPOSE_FILE}" -f docker-compose.ci.override.yml pull be fe
           docker compose -f "${COMPOSE_FILE}" -f docker-compose.ci.override.yml up -d --remove-orphans --no-build
