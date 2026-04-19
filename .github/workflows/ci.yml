@@ -255,12 +255,25 @@ jobs:
           echo "Backend image: ${TARGET_BE_IMAGE}"
           echo "Frontend image: ${TARGET_FE_IMAGE}"
 
+          stop_existing_container_in_context() {
+            local ctx="$1"
+            local cname="$2"
+
+            if ! docker context inspect "${ctx}" >/dev/null 2>&1; then
+              return 0
+            fi
+
+            if docker --context "${ctx}" inspect "${cname}" >/dev/null 2>&1; then
+              echo "Stopping existing ${cname} in context ${ctx} before deployment"
+              docker --context "${ctx}" rm -f "${cname}" || true
+            fi
+          }
+
           stop_existing_acong_app_containers() {
-            for cname in acong-be acong-fe; do
-              if docker inspect "${cname}" >/dev/null 2>&1; then
-                echo "Stopping existing ${cname} before deployment"
-                docker rm -f "${cname}" || true
-              fi
+            for ctx in default desktop-linux; do
+              for cname in acong-be acong-fe; do
+                stop_existing_container_in_context "${ctx}" "${cname}"
+              done
             done
           }
 
@@ -270,6 +283,15 @@ jobs:
             if command -v ss >/dev/null 2>&1 && ss -ltn "( sport = :${port} )" | tail -n +2 | grep -q .; then
               echo "Host port ${port} is still in use after stopping acong-be/acong-fe."
               echo "This indicates a non-acong process/container (or another Docker context) is holding the port."
+              echo "Current docker context: $(docker context show 2>/dev/null || echo unknown)"
+
+              for ctx in default desktop-linux; do
+                if docker context inspect "${ctx}" >/dev/null 2>&1; then
+                  echo "Containers publishing host port ${port} in context ${ctx}:"
+                  docker --context "${ctx}" ps --filter "publish=${port}" --format 'table {{.ID}}\t{{.Names}}\t{{.Ports}}' || true
+                fi
+              done
+
               ss -ltnp "( sport = :${port} )" || true
               exit 1
             fi
