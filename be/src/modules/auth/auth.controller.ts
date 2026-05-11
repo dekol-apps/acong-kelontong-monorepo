@@ -24,16 +24,14 @@ export class AuthController {
         @Res() res: Response,
     ) {
         try {
-            const user = await this.userModel.findOne({ email: body.email }).select('+password').populate('role');
+            const username = body.username.trim().toLowerCase();
+            const user = await this.userModel.findOne({ username }).select('+password').populate('role');
             if (!user) {
-                throw BaseResponse.invalid({ res, option: { message: 'Invalid email or password' } });
-            }
-            if (!user.verified) {
-                throw BaseResponse.invalid({ res, option: { message: 'Invalid email or password' } });
+                throw BaseResponse.invalid({ res, option: { message: 'Invalid username or password' } });
             }
             const passwordIsValid = await bcrypt.compare(body.password, user.password);
             if (!passwordIsValid) {
-                throw BaseResponse.invalid({ res, option: { message: 'Invalid email or password' } });
+                throw BaseResponse.invalid({ res, option: { message: 'Invalid username or password' } });
             }
 
             const userAgent: string = req.headers['user-agent'] as string;
@@ -48,8 +46,10 @@ export class AuthController {
             });
             const resData = {
                 access_token, profile: {
+                    username: user.username,
                     first_name: user.first_name,
                     last_name: user.last_name,
+                    email: user.email,
                     role: user.role,
                 }
             }

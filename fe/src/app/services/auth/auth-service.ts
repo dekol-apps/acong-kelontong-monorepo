@@ -46,7 +46,7 @@ export class AuthService extends BaseService {
     return this.storage.getItem('profile');
   }
 
-  login(body: { email: string, password: string }) {
+  login(body: { username: string, password: string }) {
     this.postRequest({ url: Endpoint.LOGIN, body }).pipe(
       tap((res: { detail: IAuth }) => {
         try {

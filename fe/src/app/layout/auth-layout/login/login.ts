@@ -5,7 +5,6 @@ import { PageSpinner } from '../../../shared/components/page-spinner/page-spinne
 import { AuthService } from '../../../services/auth/auth-service';
 import { AlertService } from '../../../shared/components/alert/alert-service';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { IAuth } from '../../../types/interfaces/common.interface';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageToggle } from '../../../shared/components/language-toggle/language-toggle';
 
@@ -16,16 +15,16 @@ import { LanguageToggle } from '../../../shared/components/language-toggle/langu
   styleUrl: './login.scss'
 })
 export class Login implements OnInit {
-  @Output() loginUser!: EventEmitter<{ email: string; password: string }>;
+  @Output() loginUser!: EventEmitter<{ username: string; password: string }>;
   loginForm: FormGroup = new FormGroup({
-    email: new FormControl(null, [Validators.required, Validators.email]),
+    username: new FormControl(null, [Validators.required]),
     password: new FormControl(null, [Validators.required])
   });
   constructor(private authServices: AuthService, private router: Router, private alert: AlertService) {
-    this.loginUser = new EventEmitter<{ email: string; password: string }>();
+    this.loginUser = new EventEmitter<{ username: string; password: string }>();
   }
   ngOnInit() {
-    this.loginForm.setValue({ email: 'master@admin.com', password: 'master@admin.123' });
+    this.loginForm.setValue({ username: 'superadmin', password: 'superadmin' });
   }
   onSubmit() {
     this.authServices.login(this.loginForm.value);

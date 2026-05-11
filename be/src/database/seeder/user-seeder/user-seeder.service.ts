@@ -14,7 +14,7 @@ export class UserSeederService {
     ) { }
 
     async run() {
-        const hashedPassword = await bcrypt.hash('master@admin.123', salts);
+        const hashedPassword = await bcrypt.hash('superadmin', salts);
 
         let master;
 
@@ -32,21 +32,22 @@ export class UserSeederService {
         }
 
         // check for existing master user
-        const existing = await this.userModel.findOne({ email: 'master@admin.com' });
+        const existing = await this.userModel.findOne({ $or: [{ username: 'superadmin' }, { email: 'superadmin@admin.com' }] });
         if (existing) {
-            console.error('Master user already exists');
+            console.error('Superadmin user already exists');
             return;
         }
         
         await this.userModel.create({
-            first_name: 'Acong',
-            last_name: 'Kelontong',
+            username: 'superadmin',
+            first_name: 'Super',
+            last_name: 'Admin',
             password: hashedPassword,
-            email: 'master@admin.com',
+            email: 'superadmin@admin.com',
             role: master._id,
             verified: true,
         });
 
-        console.info('🚀 Master user seeded successfully');
+        console.info('🚀 Superadmin user seeded successfully');
     }
 }

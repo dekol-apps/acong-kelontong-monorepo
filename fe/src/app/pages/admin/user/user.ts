@@ -55,15 +55,16 @@ export class User implements OnInit {
       extraHeaderClass: 'uppercase-text',
     },
     {
+      label: 'Username',
+      id: 'username',
+      extraHeaderClass: 'uppercase-text',
+      backendPropName: 'username',
+      sort: true,
+    },
+    {
       label: 'Email',
       id: 'email',
       extraHeaderClass: 'uppercase-text',
-    },
-    {
-      label: 'Status',
-      id: 'verified',
-      extraHeaderClass: 'uppercase-text',
-      customElementId: 'status',
     },
     {
       label: 'Action',
@@ -143,23 +144,6 @@ export class User implements OnInit {
     this.service.deleteUser(role_id).subscribe(() => {
       this.alert.success('User deleted')
       this.getList(this.defaultTableParam);
-    });
-  }
-
-  resendVerification(role_id: string) {
-    const customText = 'Do you want to re-send invitation email?'
-    this.confrimModal?.show({ type: 'action', customText }).then((res: any) => {
-      console.log({ res })
-      if (res) {
-        this.execResendVerification(role_id);
-      }
-    })
-  }
-
-  execResendVerification(role_id) {
-    console.log('Resend Verification', role_id)
-    this.service.resendInvitationEmail(role_id).subscribe((res) => {
-      this.alert.success('Confirmation email sent')
     });
   }
 }

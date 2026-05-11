@@ -15,11 +15,11 @@
                 <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
                     <div class="input-group mb-1">
                         <div class="form-floating">
-                            <input id="loginEmail" type="email" class="form-control" formControlName="email"
+                            <input id="loginUsername" type="text" class="form-control" formControlName="username"
                                 placeholder="" />
-                            <label for="loginEmail">{{ 'layout.auth.email' | translate }}</label>
+                            <label for="loginUsername">Username</label>
                         </div>
-                        <div class="input-group-text"><span class="bi bi-envelope"></span></div>
+                        <div class="input-group-text"><span class="bi bi-person-badge"></span></div>
                     </div>
                     <div class="input-group mb-1">
                         <div class="form-floating">

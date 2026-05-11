@@ -14,6 +14,7 @@ import { UAuthGuard } from './modules/auth/auth.guard';
 import { UserController } from './modules/user/user.controller';
 import { UserService } from './modules/user/user.service';
 import { User, UserSchema } from './modules/user/user.schema';
+import { ProfileController } from './modules/profile/profile.controller';
 import { BrandService } from './modules/brand/brand.service';
 import { BrandController } from './modules/brand/brand.controller';
 import { Brand, BrandSchema } from './modules/brand/brand.schema';
@@ -144,6 +145,7 @@ import { PurchasingReceiveController } from './modules/purchasing-receive/purcha
     AppController,
     AuthController,
     UserController,
+    ProfileController,
     BrandController,
     RoleController,
     SupplierController,

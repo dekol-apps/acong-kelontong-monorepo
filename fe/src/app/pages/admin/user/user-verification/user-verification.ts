@@ -17,14 +17,19 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 export class UserVerification {
 
   form: FormGroup = new FormGroup({
-    ticket: new FormControl(null, [Validators.required]),
     new_password: new FormControl(null, [Validators.required]),
     confirm_password: new FormControl(null, [Validators.required]),
   });
 
+  invitationToken: string | null = null;
+
   constructor(private service: UserService, private route: ActivatedRoute, private alert: AlertService, private translate: TranslateService) {
     const ticket = this.route.snapshot.paramMap.get('ticket') || undefined;
-    if (ticket) this.form.controls.ticket.patchValue(ticket);
+    if (ticket) {
+      this.invitationToken = ticket;
+    } else {
+      this.alert.error(this.translate.instant('Invalid verification link'));
+    }
   }
 
   passwordMatch() {
@@ -41,16 +46,26 @@ export class UserVerification {
       });
       return
     }
-    this.service.verifyUser(this.form.value).subscribe({
+    if (this.passwordMismatch()) {
+      this.alert.error(this.translate.instant('Passwords do not match'));
+      return;
+    }
+    const { new_password } = this.form.value;
+    this.service.changePasswordViaEmail({ token: this.invitationToken as string, new_password }).subscribe({
       next: (res) => {
-        this.alert.success(this.translate.instant('Verification success'));
+        this.alert.success(this.translate.instant('Password updated successfully'));
         setTimeout(() => {
           window.location.href = "/login"
         }, 1000)
       },
       error: (err) => {
-        this.alert.error(this.translate.instant('Verification failed'))
+        this.alert.error(this.translate.instant('Failed to update password'))
       }
     })
+  }
+
+  passwordMismatch(): boolean {
+    const val = this.form.value;
+    return !!val.new_password && !!val.confirm_password && val.new_password !== val.confirm_password;
   }
 }

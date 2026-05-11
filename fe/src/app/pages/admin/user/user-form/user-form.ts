@@ -27,7 +27,9 @@ export class UserForm implements OnInit, AfterViewInit {
   form: FormGroup = new FormGroup({
     first_name: new FormControl(null, [Validators.required]),
     last_name: new FormControl(null, [Validators.required]),
+    username: new FormControl(null, [Validators.required]),
     email: new FormControl(null, [Validators.required, Validators.email]),
+    password: new FormControl(null),
     role: new FormControl(null, [Validators.required]),
   });
 
@@ -40,9 +42,10 @@ export class UserForm implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     if (this.id) {
       this.userService.getUserDetail(this.id).subscribe((res) => {
-        const { email, first_name, last_name } = res
+        const { email, first_name, last_name, username } = res
         const role_id = res.role._id
         this.form.patchValue({
+          username,
           email,
           first_name,
           last_name,
@@ -62,9 +65,16 @@ export class UserForm implements OnInit, AfterViewInit {
 
   submit() {
     if (this.form.invalid) return this.alert.error('Please check your inputs');
-    const body = this.form.value;
+    const body = {
+      username: this.form.value.username ?? '',
+      email: this.form.value.email ?? '',
+      first_name: this.form.value.first_name ?? '',
+      last_name: this.form.value.last_name ?? '',
+      role: this.form.value.role ?? '',
+      ...(this.form.value.password ? { password: this.form.value.password } : {}),
+    };
     let serviceArgs = this.userService.inviteUser(body);
-    if (this.type === 'edit' && this.id) serviceArgs = this.userService.editUserRole(this.id, body);
+    if (this.type === 'edit' && this.id) serviceArgs = this.userService.editUser(this.id, body);
     serviceArgs.subscribe((res) => {
       this.alert.success(`Success ${this.type == 'edit' ? 'edit' : 'invite'} user!`);
       this.close.emit(true);

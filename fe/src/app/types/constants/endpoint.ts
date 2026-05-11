@@ -17,19 +17,21 @@ export const Endpoint = {
   LOGOUT: `${api}auth/logout`,
   REFRESH: `${api}auth/refresh`,
 
+  /* Profile endpoints */
+  PROFILE: `${api}profile`,
+  PROFILE_CHANGE_PASSWORD: `${api}profile/change-password`,
+  PROFILE_CHANGE_EMAIL_REQUEST: `${api}profile/change-email-request`,
+  PROFILE_CONFIRM_NEW_EMAIL: `${api}profile/confirm-new-email`,
+  PROFILE_CHANGE_PASSWORD_VIA_EMAIL: `${api}profile/change-password-via-email`,
+
+  /* User admin endpoints */
   USER: `${api}user`,
   USER_ID: (id: string) => {
     return `${api}user/detail/${id}`
   },
-  USER_PROFILE: `${api}user/profile`,
-  USER_PROFILE_CHANGE_PASSWORD: `${api}user/profile/change-password`,
-  USER_ID_REINVITE: (id: string) => {
-    return `${api}user/detail/${id}/re-invite`
-  },
   USER_ID_ROLE: (id: string) => {
     return `${api}user/detail/${id}/role`
   },
-  USER_VERIFY: `${api}user/verify`,
 
   ROLE: `${api}role`,
   ROLE_ID: (id: string) => {

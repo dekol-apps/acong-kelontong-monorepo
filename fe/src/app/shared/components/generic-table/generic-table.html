@@ -90,7 +90,7 @@
                 <!-- Show loading state -->
                 @for (_ of [].constructor(size); track $index) {
                 <tr>
-                    @for (_ of [].constructor(columns.length??0+2); let i = $index; track $index) {
+                    @for (_ of [].constructor((columns.length??0)+1); let i = $index; track $index) {
                     <td>
                         <div class="badge-loading"></div>
                     </td>
@@ -150,7 +150,7 @@
                 <ng-content></ng-content>
                 } @else {
                 <tr>
-                    <td [attr.colspan]="columns.length??0+2">
+                    <td [attr.colspan]="(columns.length??0)+1">
                         <div class="w-100 py-5 my-5 text-center">{{ 'COMMON_NO_DATA' | translate }}</div>
                     </td>
                 </tr>

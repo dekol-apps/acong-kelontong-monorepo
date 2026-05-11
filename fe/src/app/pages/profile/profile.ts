@@ -20,6 +20,7 @@ export class Profile implements OnInit {
   isLoading = false;
   isSavingProfile = false;
   isSavingPassword = false;
+  isSavingEmail = false;
   isAuthenticated = false;
 
   profile?: IUser;
@@ -33,6 +34,10 @@ export class Profile implements OnInit {
     old_password: new FormControl('', [Validators.required]),
     new_password: new FormControl('', [Validators.required]),
     confirm_password: new FormControl('', [Validators.required]),
+  });
+
+  emailForm = new FormGroup({
+    new_email: new FormControl('', [Validators.required, Validators.email]),
   });
 
   constructor(
@@ -58,6 +63,9 @@ export class Profile implements OnInit {
           first_name: profile.first_name,
           last_name: profile.last_name,
         });
+        this.emailForm.patchValue({
+          new_email: '',
+        });
         this.isLoading = false;
       },
       error: () => {
@@ -79,6 +87,10 @@ export class Profile implements OnInit {
 
   get roleName(): string {
     return this.profile?.role?.role_name ?? 'Role';
+  }
+
+  get username(): string {
+    return this.profile?.username ?? '-';
   }
 
   get passwordMismatch(): boolean {
@@ -134,6 +146,28 @@ export class Profile implements OnInit {
       error: () => {
         this.isSavingPassword = false;
         this.alert.error('Failed to change password');
+      },
+    });
+  }
+
+  changeEmail() {
+    if (this.emailForm.invalid) {
+      this.emailForm.markAllAsTouched();
+      return;
+    }
+
+    this.isSavingEmail = true;
+    this.userService.changeEmailRequest({
+      new_email: this.emailForm.value.new_email ?? '',
+    }).subscribe({
+      next: () => {
+        this.isSavingEmail = false;
+        this.emailForm.reset();
+        this.alert.success('Verification email sent to your new address');
+      },
+      error: () => {
+        this.isSavingEmail = false;
+        this.alert.error('Failed to request email change');
       },
     });
   }
