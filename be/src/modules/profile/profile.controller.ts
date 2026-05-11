@@ -1,9 +1,11 @@
-import { Body, Controller, Get, Put, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Put, Req, Res, UseGuards, UploadedFile } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { UAuthGuard } from '../auth/auth.guard';
 import { BaseResponse } from 'src/utils/base-response';
 import type { Request, Response } from 'express';
 import { ChangeEmailDto, ChangePasswordDto, UpdateProfileDto } from '../user/user.dto';
+import { UploadUserPhotoInterceptor } from '../user/user-photo.interceptor';
+import * as fs from 'fs';
 import { decodeBase64, encodeBase64 } from 'src/utils/helper';
 import { MailerService } from '@nestjs-modules/mailer';
 import * as jwt from 'jsonwebtoken';
@@ -135,6 +137,41 @@ export class ProfileController {
       const detail = await this.userService.changePasswordViaEmail(decoded.email, body.new_password);
       return BaseResponse.success({ res, option: { message: "Password updated successfully", detail } });
     } catch (err) {
+      return BaseResponse.error({ res, err });
+    }
+  }
+
+  @UseGuards(UAuthGuard)
+  @Put('photo')
+  @UploadUserPhotoInterceptor()
+  async uploadPhoto(
+    @Req() req: Request,
+    @UploadedFile() file: Express.Multer.File,
+    @Res() res: Response,
+  ) {
+    try {
+      const userId = (req as any).user.id0;
+      if (file) {
+        const folder = (req as any).uuidFolder;
+        const filePath = `/uploads/users/photo/${folder}/${file.filename}`;
+        const fullUrl = `${req.protocol}://${req.get('host')}${filePath}`;
+        const { user, photoToRemove } = await this.userService.editUser(userId, { user_photo: fullUrl });
+        if (photoToRemove) {
+          try {
+            fs.rmSync(`.${photoToRemove}`, { recursive: true, force: true });
+          } catch (err) {
+            console.warn('Failed to delete old user photo:', err.message);
+          }
+        }
+        return BaseResponse.success({ res, option: { message: 'Success upload photo', detail: user } });
+      }
+      throw BaseResponse.unexpected({ err: 'uploadPhoto !no_file' });
+    } catch (err) {
+      if (file) {
+        const folder = (req as any).uuidFolder;
+        const filePath = `/uploads/users/photo/${folder}/`;
+        fs.rmSync(`.${filePath}`, { recursive: true, force: true });
+      }
       return BaseResponse.error({ res, err });
     }
   }

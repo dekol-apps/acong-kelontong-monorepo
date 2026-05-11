@@ -17,7 +17,19 @@
       <div class="row align-items-center g-4">
         <div class="col-lg-auto">
           <div class="profile-avatar">
+            @if (profile?.user_photo) {
+            <img src="{{ profile?.user_photo }}" alt="avatar" class="avatar-img" />
+            } @else {
             {{ profileInitials }}
+            }
+          </div>
+          <div class="mt-2">
+            <input type="file" accept="image/*" (change)="onPhotoSelected($event)" />
+            <div class="mt-2">
+              <button type="button" class="btn btn-sm btn-outline-primary" [disabled]="isUploadingPhoto">
+                {{ isUploadingPhoto ? 'Uploading...' : 'Upload photo' }}
+              </button>
+            </div>
           </div>
         </div>
         <div class="col-lg">

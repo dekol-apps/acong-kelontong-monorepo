@@ -22,6 +22,7 @@ export class Profile implements OnInit {
   isSavingPassword = false;
   isSavingEmail = false;
   isAuthenticated = false;
+  isUploadingPhoto = false;
 
   profile?: IUser;
 
@@ -168,6 +169,28 @@ export class Profile implements OnInit {
       error: () => {
         this.isSavingEmail = false;
         this.alert.error('Failed to request email change');
+      },
+    });
+  }
+
+  onPhotoSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+    const file = input.files[0];
+    const form = new FormData();
+    form.append('user_photo', file);
+
+    this.isUploadingPhoto = true;
+    this.userService.uploadMyPhoto(form).subscribe({
+      next: (profile) => {
+        this.profile = profile;
+        this.auth.setProfile(profile);
+        this.isUploadingPhoto = false;
+        this.alert.success('Profile photo updated');
+      },
+      error: () => {
+        this.isUploadingPhoto = false;
+        this.alert.error('Failed to upload photo');
       },
     });
   }

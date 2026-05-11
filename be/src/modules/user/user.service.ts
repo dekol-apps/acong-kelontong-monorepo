@@ -214,7 +214,7 @@ export class UserService {
       email,
       role,
       password: hashedPassword,
-      verified: true,
+      verified: false,
     });
 
     return tmpUser;

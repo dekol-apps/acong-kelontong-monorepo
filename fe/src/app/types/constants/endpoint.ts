@@ -19,6 +19,7 @@ export const Endpoint = {
 
   /* Profile endpoints */
   PROFILE: `${api}profile`,
+  PROFILE_PHOTO: `${api}profile/photo`,
   PROFILE_CHANGE_PASSWORD: `${api}profile/change-password`,
   PROFILE_CHANGE_EMAIL_REQUEST: `${api}profile/change-email-request`,
   PROFILE_CONFIRM_NEW_EMAIL: `${api}profile/confirm-new-email`,

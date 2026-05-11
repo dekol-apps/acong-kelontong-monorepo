@@ -132,6 +132,12 @@ export class UserService extends BaseService {
     );
   }
 
+  uploadMyPhoto(data: FormData): Observable<IUser> {
+    return this.putRequest({ url: Endpoint.PROFILE_PHOTO, body: data }).pipe(
+      map((res: IResDetail<IUser>) => res.detail)
+    );
+  }
+
   changeEmailRequest(body: { new_email: string }): Observable<IUser> {
     return this.putRequest({ url: Endpoint.PROFILE_CHANGE_EMAIL_REQUEST, body }).pipe(
       map((res: IResDetail<IUser>) => res.detail)

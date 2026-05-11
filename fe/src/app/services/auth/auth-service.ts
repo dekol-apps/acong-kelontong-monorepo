@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BaseService } from '../rest-api/base-service';
-import { Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { Endpoint } from '../../types/constants/endpoint';
 import { IUser } from '../../types/interfaces/user.interface';
 import { Router } from '@angular/router';
@@ -12,6 +12,8 @@ import { StorageService } from '../tools/storage-service';
   providedIn: 'root'
 })
 export class AuthService extends BaseService {
+  private profileSubject: BehaviorSubject<IUser | undefined>;
+  public profile$: Observable<IUser | undefined>;
 
   constructor(
     private router: Router,
@@ -19,6 +21,8 @@ export class AuthService extends BaseService {
     private storage: StorageService,
   ) {
     super();
+    this.profileSubject = new BehaviorSubject<IUser | undefined>(this.storage.getItem('profile'));
+    this.profile$ = this.profileSubject.asObservable();
   }
 
   /** ✅ Auth check works in SSR and browser */
@@ -40,6 +44,7 @@ export class AuthService extends BaseService {
 
   setProfile(profile: IUser) {
     this.storage.setItem('profile', profile);
+    this.profileSubject.next(profile);
   }
 
   getProfile(): IUser | undefined {
@@ -86,6 +91,7 @@ export class AuthService extends BaseService {
 
   logout(option?: TLogoutOption) {
     this.storage.clear();
+    this.profileSubject.next(undefined);
     this.router.navigateByUrl('/login').then(() => {
       this.postRequest({ url: Endpoint.LOGOUT, qParams: { option } }).subscribe();
     });

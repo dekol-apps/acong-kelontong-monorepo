@@ -15,8 +15,7 @@
       "sales": "Penjualan",
       "friends": "Teman",
       "profile": "Profil",
-      "signOut": "Keluar",
-      "footerTagline": "Apa pun yang Anda inginkan"
+      "signOut": "Keluar"
     },
     "auth": {
       "signInMessage": "Masuk untuk memulai sesi Anda",

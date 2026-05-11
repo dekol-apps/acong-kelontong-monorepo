@@ -11,6 +11,7 @@ import { IUser, TModules } from '../../types/interfaces/user.interface';
 import { Menus } from '../../types/constants/menus';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageToggle } from '../../shared/components/language-toggle/language-toggle';
+import { UserService } from '../../pages/admin/user/user-service';
 @Component({
   selector: 'app-main-layout',
   imports: [CommonModule, RouterModule, Alert, PageSpinner, TranslateModule, LanguageToggle],
@@ -24,8 +25,9 @@ export class MainLayout implements OnInit {
   modules: TModules[] = [];
 
   profile?: IUser = {} as IUser;
+  profilePhoto: string = 'adminlte/img/user2-160x160.jpg';
 
-  constructor(private navSvc: NavigationService, private router: Router, protected activatedRoute: ActivatedRoute, private auth: AuthService) {
+  constructor(private navSvc: NavigationService, private router: Router, protected activatedRoute: ActivatedRoute, private auth: AuthService, private userService: UserService) {
     this.breadcrumbs = navSvc.buildBreadCrumb();
     this.navSvc.breadcrumbs.subscribe((val) => {
       this.breadcrumbs = val;
@@ -33,6 +35,17 @@ export class MainLayout implements OnInit {
       this.pageTitle = this.breadcrumbs.length > 0 ? this.breadcrumbs.at(-1)?.labelKey || '' : '';
     });
     this.profile = this.auth?.getProfile() ?? {} as IUser;
+    this.updateProfilePhoto();
+    
+    // Subscribe to profile changes from auth service
+    this.auth.profile$.subscribe((profile) => {
+      this.profile = profile ?? {} as IUser;
+      this.updateProfilePhoto();
+    });
+  }
+
+  private updateProfilePhoto() {
+    this.profilePhoto = this.profile?.user_photo ?? 'adminlte/img/user2-160x160.jpg';
   }
 
   get userName(): string {
@@ -50,6 +63,18 @@ export class MainLayout implements OnInit {
     // TODO: remove this dummy later
     this.modules = modules.concat('dashboard.view')
     this.updateMenus();
+    
+    // Fetch profile from API to get latest user_photo
+    this.userService.getMyProfile().subscribe({
+      next: (profile) => {
+        this.profile = profile;
+        this.updateProfilePhoto();
+        this.auth.setProfile(profile); // Update auth service profile too
+      },
+      error: (err) => {
+        console.error('Failed to fetch profile:', err);
+      }
+    });
   }
 
   updateMenus() {

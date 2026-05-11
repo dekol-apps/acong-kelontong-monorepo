@@ -15,8 +15,7 @@
       "sales": "Sales",
       "friends": "Friends",
       "profile": "Profile",
-      "signOut": "Sign out",
-      "footerTagline": "Anything you want"
+      "signOut": "Sign out"
     },
     "auth": {
       "signInMessage": "Sign in to start your session",
