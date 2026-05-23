@@ -12,6 +12,7 @@ export class InventoryMovementItemDto {
   product: Types.ObjectId;
 
   @IsInt()
+  @Type(() => Number)
   @Min(1)
   item_qty: number;
 
@@ -58,6 +59,7 @@ export class ManualInventoryMovementItemDto {
   product: Types.ObjectId;
 
   @IsInt()
+  @Type(() => Number)
   @Min(1)
   item_qty: number;
 

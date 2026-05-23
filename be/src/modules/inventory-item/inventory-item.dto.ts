@@ -24,6 +24,7 @@ export class InventoryItemDto {
 }
 
 export class GInventoryItemDto extends InventoryItemDto {
+  @Type(() => Number)
   @IsInt()
   @Min(1)
   item_qty: number;

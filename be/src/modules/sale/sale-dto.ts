@@ -25,6 +25,7 @@ export class SaleItemDto {
    * Number of physical units to pull from inventory via FIFO.
    */
   @IsInt()
+  @Type(() => Number)
   @Min(1)
   item_qty: number;
 
@@ -44,6 +45,7 @@ export class SaleItemDto {
   original_price: Types.Decimal128;
 
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   discount_percent?: number;
 
@@ -63,6 +65,7 @@ export class SellingSaleItemDto {
   product: Types.ObjectId;
 
   @IsInt()
+  @Type(() => Number)
   @Min(1)
   item_qty: number;
 }
