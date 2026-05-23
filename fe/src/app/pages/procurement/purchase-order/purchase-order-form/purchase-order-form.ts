@@ -57,7 +57,7 @@ export class PurchaseOrderForm {
     ppn_facture_number: new FormControl(null),
     purchasing_attachments: new FormControl(null),
     notes: new FormControl(null),
-    payment_status: new FormControl(PaymentStatusEn.UNPAID),
+    payment_status: new FormControl(null),
     ppn_type: new FormControl(null),
     ppn_rate: new FormControl(defaultPpnRate),
     ppn_amount: new FormControl(null),
@@ -184,10 +184,10 @@ export class PurchaseOrderForm {
         Object.keys(this.form.controls).forEach(element => {
           if (!allowed.includes(element)) this.form.controls[element].disable();
         });
-        if (res.status !== PurchasingEn.DROP && res.status !== PurchasingEn.EXPIRED) {
+        if (res.status !== PurchasingEn.DROP && res.status !== PurchasingEn.EXPIRED && res.status !== PurchasingEn.CREATE) {
           this.form.controls.invoice_number.addValidators([Validators.required]);
           this.form.controls.invoice_number.updateValueAndValidity();
-          this.form.controls.payment_realization.addValidators([Validators.min(0)]);
+          this.form.controls.payment_realization.addValidators([Validators.min(100)]);
           this.form.controls.payment_realization.updateValueAndValidity();
           this.cdr.detectChanges();
         }

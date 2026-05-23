@@ -1,4 +1,5 @@
 import { IsNotEmpty, IsNumber, IsOptional, Min, IsInt } from 'class-validator';
+import { Type } from 'class-transformer';
 import { IsObjectId } from 'src/global/is-object-id.decorator';
 import { Types } from 'mongoose';
 import { IsMoney } from 'src/global/is-money.decorator';
@@ -7,6 +8,7 @@ export class ReceiveOrderItemDto {
   @IsNotEmpty()
   _id: string;
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   received_qty?: number;
 }
@@ -18,6 +20,7 @@ export class PurchasingItemDto {
   @IsNotEmpty()
   product: string;
   @IsInt()
+  @Type(() => Number)
   @Min(1)
   purchase_qty: number;
   @IsMoney()

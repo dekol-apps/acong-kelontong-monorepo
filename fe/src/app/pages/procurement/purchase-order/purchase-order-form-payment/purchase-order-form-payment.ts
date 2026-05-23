@@ -104,12 +104,10 @@ export class PurchaseOrderFormPayment implements OnInit {
   }
 
   submit() {
-    const value = this.form?.getRawValue();
+    const value = this.form?.value;
     if (!this.form || this.form.invalid) return this.alert.error('Please check your inputs');
 
-    const paymentStatus = this.isPaymentLocked
-      ? PaymentStatusEn.PAID
-      : (value.payment_status ?? PaymentStatusEn.UNPAID);
+    const paymentStatus = this.isPaymentLocked ? PaymentStatusEn.PAID : value.payment_status;
 
     const body: Record<string, unknown> = {
       invoice_number: value.invoice_number,

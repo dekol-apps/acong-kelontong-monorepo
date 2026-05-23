@@ -3,7 +3,7 @@
     <div class="card-title text-capitalize">{{ 'Purchase Order' | translate }}</div>
   </div>
   <ul ngbNav #nav="ngbNav" [(activeId)]="activeStep" [destroyOnHide]="false" class="nav-tabs mt-4">
-    <li [ngbNavItem]="1" [destroyOnHide]="true">
+    <li [disabled]="true" [ngbNavItem]="1" [destroyOnHide]="true">
       <button ngbNavLink>{{ 'Supplier' | translate }}</button>
       <ng-template ngbNavContent>
         <div class="nav-tabs m-2">
@@ -12,7 +12,7 @@
         </div>
       </ng-template>
     </li>
-    <li [ngbNavItem]="2" [destroyOnHide]="true">
+    <li [disabled]="true" [ngbNavItem]="2" [destroyOnHide]="true">
       <button ngbNavLink>{{ 'Items' | translate }}</button>
       <ng-template ngbNavContent>
         <div class="nav-tabs m-2">
@@ -21,7 +21,7 @@
         </div>
       </ng-template>
     </li>
-    <li [ngbNavItem]="3" [destroyOnHide]="true">
+    <li [disabled]="true" [ngbNavItem]="3" [destroyOnHide]="true">
       <button ngbNavLink>{{ 'Payment' | translate }}</button>
       <ng-template ngbNavContent>
         <div class="nav-tabs m-2">

@@ -117,6 +117,7 @@ export class PurchasingService {
         [PurchasingEn.DROP]: [''],
         [PurchasingEn.COMPLETE]: [
           'status',
+          'payment_status',
           'invoice_number',
           'ppn_facture_number',
           'purchasing_attachments',
@@ -127,6 +128,7 @@ export class PurchasingService {
         ],
         [PurchasingEn.RECEIVE]: [
           'status',
+          'payment_status',
           'invoice_number',
           'ppn_facture_number',
           'purchasing_attachments',
@@ -153,6 +155,7 @@ export class PurchasingService {
           'supplier',
           'due_date',
           'status',
+          'payment_status',
           'notes',
           'invoice_number',
           'ppn_facture_number',
@@ -168,6 +171,7 @@ export class PurchasingService {
           'due_date',
           'status',
           'payment_status',
+          'payment_status',
           'notes',
           'invoice_number',
           'ppn_facture_number',
@@ -181,12 +185,14 @@ export class PurchasingService {
         ],
         [PurchasingEn.REQUEST]: [
           'status',
+          'payment_status',
           'reject_notes',
         ],
         [PurchasingEn.CREATE]: [
           'supplier',
           'due_date',
           'status',
+          'payment_status',
           'notes',
           'invoice_number',
           'ppn_facture_number',
@@ -638,7 +644,7 @@ export class PurchasingService {
       const edit = await this.editPurchasing(id, payload, session);
       if (!edit || !edit.detail) throw BaseResponse.unexpected({ err: 'purchasingPayment' });
       const validation = edit.detail.validation;
-      if (!validation.is_ppn_valid || !validation.is_payment_match) {
+      if (edit.detail.payment_status !== PaymentStatusEn.UNPAID && (!validation.is_ppn_valid || !validation.is_payment_match)) {
         const message = `Payment calculation result invalid:\n\nppn type: ${effectivePpnType}\nppn rate: ${effectivePpnRate}\nppn amount: ${effectivePpnAmount?.toString() ?? ''}\ntax base: ${totalPurchasePrice.toString()}\nexpected ppn amount (rounded): ${validation.expected_ppn_amount.toString()}\nexpected minimum payment: ${validation.expected_payable.toString()}\n`;
         throw BaseResponse.invalid({ option: { message } });
       }
