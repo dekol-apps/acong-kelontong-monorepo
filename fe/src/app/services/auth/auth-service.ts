@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { BaseService } from '../rest-api/base-service';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { Endpoint } from '../../types/constants/endpoint';
-import { IUser } from '../../types/interfaces/user.interface';
+import { IUser, TModules } from '../../types/interfaces/user.interface';
 import { Router } from '@angular/router';
 import { AlertService } from '../../shared/components/alert/alert-service';
 import { IAuth, TLogoutOption } from '../../types/interfaces/common.interface';
@@ -99,5 +99,11 @@ export class AuthService extends BaseService {
 
   isImmediateChangePassword() {
     return false;
+  }
+
+  permissions(modules: TModules[]): boolean {
+    const profileModules = this.getProfile()?.role?.modules ?? [];
+    const isAllowed = modules.length === 0 || modules.some((module) => profileModules.includes(module));
+    return isAllowed;
   }
 }

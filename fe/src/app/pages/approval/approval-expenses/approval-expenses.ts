@@ -9,6 +9,7 @@ import { ExpenseEn, IExpense } from '../../../types/interfaces/expense.interface
 import { ExpenseService } from '../../finance/expense/expense.service';
 import { FormsModule } from '@angular/forms';
 import { UsePermission } from '../../../shared/directives/use-permission/use-permission';
+import { TModules } from '../../../types/interfaces/user.interface';
 
 @Component({
   selector: 'app-approval-expenses',
@@ -19,7 +20,7 @@ import { UsePermission } from '../../../shared/directives/use-permission/use-per
 })
 export class ApprovalExpenses implements OnInit {
   @ViewChild('RejectModal') confirmReject?: ConfirmModal;
-
+  TModules = TModules;
   isLoading = false;
   listExpense: IExpense[] = [];
   pagination: IPaginationInput = {

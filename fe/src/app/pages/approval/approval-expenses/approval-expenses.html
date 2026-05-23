@@ -7,11 +7,11 @@
 				<a [routerLink]="['/expenses/detail', item._id]" class="pointer btn btn-secondary">
 					<i class="fa-solid fa-eye"></i>
 				</a>
-				<button [usePermission]="true" [permissions]="['approval_expense.create']" class="pointer btn btn-danger" (click)="rejectExpense(item._id)"
+				<button [usePermission]="true" [permissions]="[TModules.APPROVAL_EXPENSE_CREATE]" class="pointer btn btn-danger" (click)="rejectExpense(item._id)"
 					[disabled]="item.status !== ExpenseEn.REQUEST">
 					<i class="fa-solid fa-xmark"></i>
 				</button>
-				<button [usePermission]="true" [permissions]="['approval_expense.create']" class="pointer btn btn-success" (click)="approveExpense(item._id)"
+				<button [usePermission]="true" [permissions]="[TModules.APPROVAL_EXPENSE_CREATE]" class="pointer btn btn-success" (click)="approveExpense(item._id)"
 					[disabled]="item.status !== ExpenseEn.REQUEST">
 					<i class="fa-solid fa-check"></i>
 				</button>

@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { RupiahPipe } from '../../../../shared/pipes/rupiah.pipe';
 import { TranslateModule } from '@ngx-translate/core';
 import { UsePermission } from '../../../../shared/directives/use-permission/use-permission';
+import { TModules } from '../../../../types/interfaces/user.interface';
 
 @Component({
   selector: 'app-expense-detail',
@@ -22,7 +23,7 @@ export class ExpenseDetail {
   @ViewChild('RequestModal') confirmRequest?: ConfirmModal;
   @ViewChild('ExecuteModal') confirmExecute?: ConfirmModal;
   @ViewChild('RejectModal') confirmReject?: ConfirmModal;
-
+  TModules = TModules;
   expenseId?: string;
   detail?: IExpense;
   isLoading = false;

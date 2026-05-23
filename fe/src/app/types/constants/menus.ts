@@ -1,4 +1,5 @@
 import { IMenu } from "../interfaces/menu.interface";
+import { TModules } from '../interfaces/user.interface';
 
 // IMPORTANT NOTES: 
 // UI management of Menu is managed by FE, whether it'd be child or independent, its up to FE.
@@ -15,49 +16,49 @@ export const CASHIER: IMenu = {
     url: 'cashier',
     icon: '',
     labelKey: 'Cashier',
-    permissions: ['sale_cashier.view', 'sale_cashier.create', 'sale_cashier.edit'],
+    permissions: [TModules.SALE_CASHIER_VIEW, TModules.SALE_CASHIER_CREATE, TModules.SALE_CASHIER_EDIT],
 };
 export const SALES_HISTORY: IMenu = {
     code: 'sales-history',
     url: 'sales-history',
     icon: '',
     labelKey: 'Sales History',
-    permissions: ['sale_cashier.view'],
+    permissions: [TModules.SALE_CASHIER_VIEW],
 };
 export const SALES_HISTORY_DETAIL: IMenu = {
     code: 'sales-history-detail',
     url: 'sales-history/:sale_id',
     icon: '',
     labelKey: 'Sales History Detail',
-    permissions: ['sale_cashier.view'],
+    permissions: [TModules.SALE_CASHIER_VIEW],
 }
 export const SALE_STOCK: IMenu = {
     code: 'sale-stock',
     url: 'sale-stock',
     icon: '',
     labelKey: 'Sale Stock',
-    permissions: ['sale_stock.view'],
+    permissions: [TModules.SALE_STOCK_VIEW],
 }
 export const SALE_STOCK_PRODUCT: IMenu = {
     code: 'sale-stock-product',
     url: 'sale-stock/data/:product_id',
     icon: '',
     labelKey: 'Sale Stock Product',
-    permissions: ['sale_stock.view'],
+    permissions: [TModules.SALE_STOCK_VIEW],
 }
 export const SALE_STOCK_ITEM: IMenu = {
     code: 'sale-stock-item',
     url: 'sale-stock/data/:product_id/:sale_item_id',
     icon: '',
     labelKey: 'Sale Stock Item',
-    permissions: ['sale_stock.view'],
+    permissions: [TModules.SALE_STOCK_VIEW],
 }
 export const SALE_STOCK_FORM: IMenu = {
     code: 'form',
     url: 'sale-stock/form',
     icon: '',
     labelKey: 'Sale Stock Form',
-    permissions: ['sale_stock.create'],
+    permissions: [TModules.SALE_STOCK_CREATE],
 }
 
 export const SUPPLIES: IMenu = {
@@ -71,56 +72,56 @@ export const INVENTORY: IMenu = {
     url: 'inventory',
     icon: '',
     labelKey: 'Inventory',
-    permissions: ['inventory.view', 'inventory.create', 'inventory.edit', 'inventory.delete'],
+    permissions: [TModules.INVENTORY_VIEW, TModules.INVENTORY_CREATE, TModules.INVENTORY_EDIT, TModules.INVENTORY_DELETE],
 }
 export const INVENTORY_PRODUCT: IMenu = {
     code: 'inventory-product',
     url: 'inventory/:product_id',
     icon: '',
     labelKey: 'Inventory Product',
-    permissions: ['inventory.view', 'inventory.create', 'inventory.edit', 'inventory.delete'],
+    permissions: [TModules.INVENTORY_VIEW, TModules.INVENTORY_CREATE, TModules.INVENTORY_EDIT, TModules.INVENTORY_DELETE],
 }
 export const INVENTORY_ITEM: IMenu = {
     code: 'inventory-item',
     url: 'inventory/:product_id/:inventory_item_id',
     icon: '',
     labelKey: 'Inventory Item',
-    permissions: ['inventory.view', 'inventory.create', 'inventory.edit', 'inventory.delete'],
+    permissions: [TModules.INVENTORY_VIEW, TModules.INVENTORY_CREATE, TModules.INVENTORY_EDIT, TModules.INVENTORY_DELETE],
 }
 export const INVENTORY_MOVEMENT: IMenu = {
     code: 'inventory-movement',
     url: 'inventory-movement',
     icon: '',
     labelKey: 'Inventory Movement',
-    permissions: ['inventory.view'],
+    permissions: [TModules.INVENTORY_VIEW],
 }
 export const INVENTORY_MOVEMENT_MANUAL: IMenu = {
     code: 'form',
     url: 'form',
     icon: '',
     labelKey: 'Manual Inventory Movement',
-    permissions: ['inventory.create'],
+    permissions: [TModules.INVENTORY_CREATE],
 }
 export const INVENTORY_MOVEMENT_FORM: IMenu = {
     code: 'form',
     url: 'inventory-movement/form',
     icon: '',
     labelKey: 'Inventory Movement Form',
-    permissions: ['inventory.create'],
+    permissions: [TModules.INVENTORY_CREATE],
 }
 export const INVENTORY_MOVEMENT_DETAIL: IMenu = {
     code: 'inventory-movement-detail',
     url: 'inventory-movement/:inventory_movement_id',
     icon: '',
     labelKey: 'Inventory Movement Detail',
-    permissions: ['inventory.view'],
+    permissions: [TModules.INVENTORY_VIEW],
 }
 export const INVENTORY_MOVEMENT_ITEM: IMenu = {
     code: 'inventory-movement-item',
     url: 'inventory-movement/:inventory_movement_id/:inventory_item_id',
     icon: '',
     labelKey: 'Inventory Movement Item',
-    permissions: ['inventory.view'],
+    permissions: [TModules.INVENTORY_VIEW],
 }
 export const CATALOGUE: IMenu = {
     code: 'catalogue',
@@ -133,14 +134,14 @@ export const PRODUCT: IMenu = {
     url: 'product',
     icon: '',
     labelKey: 'Product',
-    permissions: ['product.view', 'product.create', 'product.edit', 'product.delete'],
+    permissions: [TModules.PRODUCT_VIEW, TModules.PRODUCT_CREATE, TModules.PRODUCT_EDIT, TModules.PRODUCT_DELETE],
 }
 export const BRANDS: IMenu = {
     code: 'brand',
     url: 'brand',
     icon: '',
     labelKey: 'Brand',
-    permissions: ['brand.view', 'brand.create', 'brand.edit', 'brand.delete'],
+    permissions: [TModules.BRAND_VIEW, TModules.BRAND_CREATE, TModules.BRAND_EDIT, TModules.BRAND_DELETE],
 }
 
 export const PROCUREMENT: IMenu = {
@@ -154,77 +155,77 @@ export const PURCHASE_ORDER: IMenu = {
     url: 'purchase-order',
     icon: '',
     labelKey: 'Purchase Order',
-    permissions: ['purchasing.view', 'purchasing.create', 'purchasing.edit', 'purchasing.delete'],
+    permissions: [TModules.PURCHASING_VIEW, TModules.PURCHASING_CREATE, TModules.PURCHASING_EDIT, TModules.PURCHASING_DELETE],
 }
 export const PURCHASE_ORDER_NEW: IMenu = {
     code: 'form',
     url: 'form/:step',
     icon: '',
     labelKey: 'New Purchase Order',
-    permissions: ['purchasing.create', 'purchasing.edit'],
+    permissions: [TModules.PURCHASING_CREATE, TModules.PURCHASING_EDIT],
 }
 export const PURCHASE_ORDER_EDIT: IMenu = {
     code: 'form',
     url: 'form/:step/:po_id',
     icon: '',
     labelKey: 'Edit Purchase Order',
-    permissions: ['purchasing.create', 'purchasing.edit'],
+    permissions: [TModules.PURCHASING_CREATE, TModules.PURCHASING_EDIT],
 }
 export const PURCHASE_ORDER_DETAIL: IMenu = {
     code: 'detail',
     url: 'detail/:po_id',
     icon: '',
     labelKey: 'Purchase Order Detail',
-    permissions: ['purchasing.view'],
+    permissions: [TModules.PURCHASING_VIEW],
 }
 export const RECEIVE_ORDER: IMenu = {
     code: 'receive-order',
     url: 'receive-order',
     icon: '',
     labelKey: 'Receive Order',
-    permissions: ['purchasing_receive.view'],
+    permissions: [TModules.PURCHASING_RECEIVE_VIEW],
 }
 export const RECEIVE_ORDER_DETAIL: IMenu = {
     code: 'detail',
     url: 'detail/:po_id',
     icon: '',
     labelKey: 'Purchase Order Detail',
-    permissions: ['purchasing_receive.view'],
+    permissions: [TModules.PURCHASING_RECEIVE_VIEW],
 }
 export const PURCHASE_ORDER_RECEIVE: IMenu = {
     code: 'receive',
     url: 'detail/:po_id/receive',
     icon: '',
     labelKey: 'Receive Purchase Order',
-    permissions: ['purchasing_receive.create'],
+    permissions: [TModules.PURCHASING_RECEIVE_CREATE],
 }
 export const SUPPLIERS: IMenu = {
     code: 'supplier',
     url: 'supplier',
     icon: '',
     labelKey: 'Suppliers',
-    permissions: ['supplier.view', 'supplier.create', 'supplier.edit', 'supplier.delete'],
+    permissions: [TModules.SUPPLIER_VIEW, TModules.SUPPLIER_CREATE, TModules.SUPPLIER_EDIT, TModules.SUPPLIER_DELETE],
 }
 export const PRODUCTION: IMenu = {
     code: 'production',
     url: 'production',
     icon: '',
     labelKey: 'Production',
-    permissions: ['production.view', 'production.create', 'production.edit', 'production.delete'],
+    permissions: [TModules.PRODUCTION_VIEW, TModules.PRODUCTION_CREATE, TModules.PRODUCTION_EDIT, TModules.PRODUCTION_DELETE],
 }
 export const PRODUCTION_FORM: IMenu = {
     code: 'form',
     url: 'production/form',
     icon: '',
     labelKey: 'Production Form',
-    permissions: ['production.create', 'production.edit'],
+    permissions: [TModules.PRODUCTION_CREATE, TModules.PRODUCTION_EDIT],
 }
 export const PRODUCTION_DETAIL: IMenu = {
     code: 'production-detail',
     url: 'production/detail/:id',
     icon: '',
     labelKey: 'Production Detail',
-    permissions: ['production.view'],
+    permissions: [TModules.PRODUCTION_VIEW],
 }
 
 export const FINANCE: IMenu = {
@@ -238,49 +239,49 @@ export const CASHFLOW: IMenu = {
     url: 'cashflow',
     icon: '',
     labelKey: 'Cashflow',
-    permissions: ['cashflow.view'],
+    permissions: [TModules.CASHFLOW_VIEW],
 }
 export const CASHFLOW_DETAIL: IMenu = {
     code: 'cashflow-detail',
     url: 'cashflow/:accounting_id',
     icon: '',
     labelKey: 'Cashflow Detail',
-    permissions: ['cashflow.view'],
+    permissions: [TModules.CASHFLOW_VIEW],
 }
 export const FINANCE_REPORT: IMenu = {
     code: 'finance-report',
     url: 'finance-report',
     icon: '',
     labelKey: 'Finance Report',
-    permissions: ['finance_report.view'],
+    permissions: [TModules.FINANCE_REPORT_VIEW],
 }
 export const EXPENSES: IMenu = {
     code: 'expenses',
     url: 'expenses',
     icon: '',
     labelKey: 'Expenses',
-    permissions: ['expenses.view', 'expenses.create', 'expenses.edit', 'expenses.delete'],
+    permissions: [TModules.EXPENSES_VIEW, TModules.EXPENSES_CREATE, TModules.EXPENSES_EDIT, TModules.EXPENSES_DELETE],
 }
 export const EXPENSES_FORM: IMenu = {
     code: 'form',
     url: 'form',
     icon: '',
     labelKey: 'Expense Form',
-    permissions: ['expenses.create', 'expenses.edit'],
+    permissions: [TModules.EXPENSES_CREATE, TModules.EXPENSES_EDIT],
 }
 export const EXPENSES_EDIT: IMenu = {
     code: 'form',
     url: 'form/:expense_id',
     icon: '',
     labelKey: 'Expense Edit',
-    permissions: ['expenses.edit'],
+    permissions: [TModules.EXPENSES_EDIT],
 }
 export const EXPENSES_DETAIL: IMenu = {
     code: 'detail',
     url: 'detail/:expense_id',
     icon: '',
     labelKey: 'Expense Detail',
-    permissions: ['expenses.view'],
+    permissions: [TModules.EXPENSES_VIEW],
 }
 
 export const ADMIN: IMenu = {
@@ -294,28 +295,28 @@ export const ROLE: IMenu = {
     url: 'role',
     icon: '',
     labelKey: 'Role',
-    permissions: ['role.view', 'role.create', 'role.edit', 'role.delete']
+    permissions: [TModules.ROLE_VIEW, TModules.ROLE_CREATE, TModules.ROLE_EDIT, TModules.ROLE_DELETE]
 }
 export const ROLE_DETAIL: IMenu = {
     code: 'form',
     url: 'form/:role_id',
     icon: '',
     labelKey: 'Role Detail',
-    permissions: ['role.view'],
+    permissions: [TModules.ROLE_VIEW],
 }
 export const ROLE_CREATE: IMenu = {
     code: 'form',
     url: 'form',
     icon: '',
     labelKey: 'Role Create',
-    permissions: ['role.view', 'role.create'],
+    permissions: [TModules.ROLE_VIEW, TModules.ROLE_CREATE],
 }
 export const ROLE_EDIT: IMenu = {
     code: 'form',
     url: 'form/:role_id',
     icon: '',
     labelKey: 'Role Edit',
-    permissions: ['role.view', 'role.edit'],
+    permissions: [TModules.ROLE_VIEW, TModules.ROLE_EDIT],
 }
 
 export const USER: IMenu = {
@@ -323,7 +324,7 @@ export const USER: IMenu = {
     url: 'user',
     icon: '',
     labelKey: 'User',
-    permissions: ['user.view', 'user.create', 'user.edit', 'user.delete']
+    permissions: [TModules.USER_VIEW, TModules.USER_CREATE, TModules.USER_EDIT, TModules.USER_DELETE]
 }
 
 export const PROFILE: IMenu = {
@@ -339,7 +340,6 @@ export const DASHBOARD: IMenu = {
     url: 'home',
     icon: 'nav-icon bi bi-speedometer',
     labelKey: 'Dashboard',
-    permissions: ['dashboard.view']
 }
 
 export const APPROVAL: IMenu = {
@@ -347,7 +347,7 @@ export const APPROVAL: IMenu = {
     url: 'approval',
     icon: 'nav-icon bi bi-clipboard-check',
     labelKey: 'Approval',
-    permissions: ['approval_purchasing.view', 'approval_purchasing.create', 'approval_expense.view', 'approval_expense.create']
+    permissions: [TModules.APPROVAL_PURCHASING_VIEW, TModules.APPROVAL_EXPENSE_VIEW, TModules.APPROVAL_EXPENSE_CREATE]
 }
 
 export const INVESTMENT: IMenu = {
@@ -355,7 +355,7 @@ export const INVESTMENT: IMenu = {
     url: 'investment',
     icon: 'nav-icon bi bi-bank',
     labelKey: 'Investment',
-    permissions: ['investment.view']
+    permissions: [TModules.INVESTMENT_VIEW]
 }
 
 // This is to manage menu UI, please make sure routers are matched

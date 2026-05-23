@@ -14,6 +14,7 @@ export class UsePermission implements OnInit, OnChanges {
     private readonly authService: AuthService,
     private readonly elementRef: ElementRef,
     private readonly renderer: Renderer2,
+    private readonly auth: AuthService
   ) { }
 
   ngOnInit(): void {
@@ -29,8 +30,7 @@ export class UsePermission implements OnInit, OnChanges {
       this.renderer.setProperty(this.elementRef.nativeElement, 'hidden', false);
       return;
     }
-    const modules = this.authService.getProfile()?.role?.modules ?? [];
-    const isAllowed = this.permissions.length === 0 || this.permissions.some((permission) => modules.includes(permission));
+    const isAllowed = this.auth.permissions(this.permissions);
     this.renderer.setProperty(this.elementRef.nativeElement, 'hidden', !isAllowed);
   }
 }

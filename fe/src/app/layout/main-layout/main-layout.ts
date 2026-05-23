@@ -59,9 +59,7 @@ export class MainLayout implements OnInit {
   }
 
   ngOnInit(): void {
-    const modules = this.auth.getProfile()?.role.modules || [];
-    // TODO: remove this dummy later
-    this.modules = modules.concat('dashboard.view')
+    this.modules = this.auth.getProfile()?.role.modules || [];
     this.updateMenus();
     
     // Fetch profile from API to get latest user_photo
@@ -82,12 +80,12 @@ export class MainLayout implements OnInit {
     Menus.forEach((menu: IMenu) => {
       if (menu.children && menu.children.length > 0) {
         menu.children = menu.children.filter((child: IMenu) => {
-          return this.modules.find(item => child.permissions?.includes(item))
+          return !menu.permissions?.length || this.modules.find(item => child.permissions?.includes(item))
         });
         if (menu.children.length > 0) {
           permitted.push(menu)
         }
-      } else if (this.modules?.find(item => menu.permissions?.includes(item))) {
+      } else if (!menu.permissions?.length || this.modules?.find(item => menu.permissions?.includes(item))) {
         permitted.push(menu)
       }
     })

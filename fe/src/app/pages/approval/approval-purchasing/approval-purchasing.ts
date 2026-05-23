@@ -12,6 +12,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RupiahPipe } from '../../../shared/pipes/rupiah.pipe';
 import { UsePermission } from '../../../shared/directives/use-permission/use-permission';
+import { TModules } from '../../../types/interfaces/user.interface';
 
 @Component({
   selector: 'app-approval-purchasing',
@@ -21,7 +22,7 @@ import { UsePermission } from '../../../shared/directives/use-permission/use-per
   styleUrl: './approval-purchasing.scss'
 })
 export class ApprovalPurchasing implements OnInit {
-
+  TModules = TModules;
   @ViewChild('RejectModal') confirmReject?: ConfirmModal;
   isLoading: boolean = false;
   listPurchasing: IPurchasing[] = [];

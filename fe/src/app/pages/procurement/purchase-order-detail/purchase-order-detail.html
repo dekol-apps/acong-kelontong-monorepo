@@ -16,8 +16,8 @@
     <button class="btn btn-primary" type="button" (click)="request()">{{ 'Submit PO Request' | translate }}</button>
     }
     @if (detail?.status===PurchasingEn.REQUEST && !isReceiveOrder) {
-    <button [usePermission]="true" [permissions]="['approval_purchasing.create']" class="btn btn-danger" type="button" (click)="reject()">{{ 'Reject PO' | translate }}</button>
-    <button [usePermission]="true" [permissions]="['approval_purchasing.create']" class="btn btn-success" type="button" (click)="approve()">{{ 'Approve PO' | translate }}</button>
+    <button [usePermission]="true" [permissions]="[TModules.APPROVAL_PURCHASING_CREATE]" class="btn btn-danger" type="button" (click)="reject()">{{ 'Reject PO' | translate }}</button>
+    <button [usePermission]="true" [permissions]="[TModules.APPROVAL_PURCHASING_CREATE]" class="btn btn-success" type="button" (click)="approve()">{{ 'Approve PO' | translate }}</button>
     }
     @if (detail?.status===PurchasingEn.APPROVE && !isReceiveOrder) {
     <button class="btn btn-primary" type="button" (click)="process()">{{ 'Process PO' | translate }}</button>

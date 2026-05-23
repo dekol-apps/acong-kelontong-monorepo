@@ -1,0 +1,12 @@
+{
+  "translationFiles": [
+    {
+      "lang": "en",
+      "uri": "fe/dist/acong-kelontong-monorepo-fe/browser/assets/i18n/en.json"
+    },
+    {
+      "lang": "id",
+      "uri": "fe/dist/acong-kelontong-monorepo-fe/browser/assets/i18n/id.json"
+    }
+  ]
+}
