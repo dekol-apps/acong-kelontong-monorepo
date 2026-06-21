@@ -3,12 +3,13 @@ import { UserService } from './user.service';
 import { UAuthGuard } from '../auth/auth.guard';
 import { BaseResponse } from 'src/utils/base-response';
 import type { Request, Response } from 'express';
-import { ChangeEmailDto, ChangePasswordDto, GetUserListDto, IEditUser, InviteUserDto, UpdateProfileDto } from './user.dto';
-import { decodeBase64, encodeBase64 } from 'src/utils/helper';
+import { InviteUserDto, GetUserListDto, IEditUser, ChangePasswordDto } from './user.dto';
+import * as jwt from 'jsonwebtoken';
 import { MailerService } from '@nestjs-modules/mailer';
 import { Permission } from 'src/global/permission.decoratior';
 import { Types } from 'mongoose';
 import { UploadUserPhotoInterceptor } from './user-photo.interceptor';
+import { sessionDays } from 'src/types/constants';
 import * as fs from 'fs';
 
 @Controller('user')
@@ -44,16 +45,19 @@ export class UserController {
     @Res() res: Response,
   ) {
     try {
-      const invite = await this.userService.inviteUser(body)
-      if (!invite) throw BaseResponse.forbidden({ option: { message: 'User Exist' } })
-      const ticket = { pass1: invite.tmpUser._id, pass2: invite.tmpPassword }
-      const base64 = encodeBase64(JSON.stringify(ticket))
-      const linkChangePassword = `${process.env.FE_DOMAIN}/${process.env.URL_CHANGE_PASSWORD as string}/${base64}?type=password`;
+      const user = await this.userService.inviteUser(body)
+      if (!user) throw BaseResponse.forbidden({ option: { message: 'User Exist' } })
+      
+      // Generate JWT token for password change link
+      const payload = { email: user.email, type: 'pwd_change' };
+      const invitationToken = jwt.sign(payload, process.env.JWT_SECRET as string, { expiresIn: sessionDays + 'd' });
+      const linkChangePassword = `${process.env.FE_DOMAIN}/${process.env.URL_CHANGE_PASSWORD as string}/${invitationToken}`;
+      
       const mailOptions = {
         from: `"Acong Kelontong" <${process.env.SMTP_USER as string}>`,
-        to: invite.tmpUser.email,
-        subject: "Verify Account",
-        html: `Hello <b>${invite.tmpUser.first_name}</b>! \nPlease click the link below to verify your account: \n${linkChangePassword}`,
+        to: user.email,
+        subject: "Your Account Has Been Created",
+        html: `Hello <b>${user.first_name}</b>! <br/><br/>Your account has been created. You can now login with the following credentials:<br/><br/>Username: ${user.username}<br/>Initial password: <code>${user.username}</code><br/><br/>You have two options:<br/>1. Login directly with your username and password<br/>2. <a href="${linkChangePassword}">Click here to set a new password</a> (expires in ${sessionDays} days)<br/><br/>Regards,<br/>Acong Kelontong`,
       };
       this.mailerService
         .sendMail({
@@ -65,7 +69,7 @@ export class UserController {
         .catch((err) => {
           console.error(err)
         });
-      return BaseResponse.success({ res, option: { message: "Success to invite user", detail: { url: linkChangePassword } } });
+      return BaseResponse.success({ res, option: { message: "Success to create user", detail: user } });
     }
     catch (err) {
       return BaseResponse.error({ res, err });
@@ -85,55 +89,6 @@ export class UserController {
         res,
         option: { message: 'Success get detail user', detail },
       });
-    } catch (err) {
-      return BaseResponse.error({ res, err });
-    }
-  }
-
-  @UseGuards(UAuthGuard)
-  @Get('profile')
-  async profile(
-    @Req() req: Request,
-    @Res() res: Response,
-  ) {
-    try {
-      const userId = (req as any).user.id0;
-      const detail = await this.userService.getDetailUser(userId);
-      return BaseResponse.success({ res, option: { message: 'Success get profile', detail } });
-    } catch (err) {
-      return BaseResponse.error({ res, err });
-    }
-  }
-
-  @UseGuards(UAuthGuard)
-  @Put('profile')
-  async updateProfile(
-    @Req() req: Request,
-    @Body() body: UpdateProfileDto,
-    @Res() res: Response,
-  ) {
-    try {
-      const userId = (req as any).user.id0;
-      await this.userService.editUser(userId, body);
-      const detail = await this.userService.getDetailUser(userId);
-      return BaseResponse.success({ res, option: { message: 'Success update profile', detail } });
-    } catch (err) {
-      return BaseResponse.error({ res, err });
-    }
-  }
-
-  @UseGuards(UAuthGuard)
-  @Put('profile/change-password')
-  async changeMyPassword(
-    @Req() req: Request,
-    @Body() body: ChangePasswordDto,
-    @Res() res: Response,
-  ) {
-    try {
-      const userId = (req as any).user.id0;
-      await this.userService.editUsrPasswd(userId, body);
-      const detail = await this.userService.getDetailUser(userId);
-      return BaseResponse.success({ res, option: { message: 'Success change password', detail } });
     } catch (err) {
       return BaseResponse.error({ res, err });
     }
@@ -193,41 +148,6 @@ export class UserController {
 
   @UseGuards(UAuthGuard)
   @Permission(['user.create', 'user.edit'])
-  @Post('detail/:user_id/re-invite')
-  async resendVerification(
-    @Param('user_id') user_id: Types.ObjectId,
-    @Res() res: Response,
-  ) {
-    try {
-      const invite = await this.userService.resendVerification(user_id)
-      const ticket = { pass1: invite.tmpUser._id, pass2: invite.tmpPassword }
-      const base64 = encodeBase64(JSON.stringify(ticket))
-      const linkChangePassword = `${process.env.FE_DOMAIN}/${process.env.URL_CHANGE_PASSWORD as string}/${base64}?type=password`;
-      const mailOptions = {
-        from: `"Acong Kelontong <No Reply>" <${process.env.SMTP_USER as string}>`,
-        to: invite.tmpUser.email,
-        subject: "Verify Account",
-        html: `Hello <b>${invite.tmpUser.first_name}</b>! \nPlease click the link below to verify your account: \n${linkChangePassword}`,
-      };
-      this.mailerService
-        .sendMail({
-          ...mailOptions,
-        })
-        .then((res) => {
-          console.info("Email sent: " + JSON.stringify(res))
-        })
-        .catch((err) => {
-          console.error(err)
-        });
-      return BaseResponse.success({ res, option: { message: "Success to resend verification", detail: { url: linkChangePassword } } });
-    }
-    catch (err) {
-      return BaseResponse.error({ res, err });
-    }
-  }
-
-  @UseGuards(UAuthGuard)
-  @Permission(['user.create', 'user.edit'])
   @Put('detail/:user_id/role')
   async editRole(
     @Param('user_id') user_id: Types.ObjectId,
@@ -255,74 +175,6 @@ export class UserController {
     try {
       const detail = await this.userService.editUsrPasswd(user_id, body);
       return BaseResponse.success({ res, option: { message: 'Success change password', detail } })
-    } catch (err) {
-      return BaseResponse.error({ res, err });
-    }
-  }
-
-
-  @UseGuards(UAuthGuard)
-  @Permission(['user.edit'])
-  @Put('detail/:user_id/change-email-request')
-  async changeEmail(
-    @Param('user_id') user_id: Types.ObjectId,
-    @Body() body: ChangeEmailDto,
-    @Res() res: Response,
-  ) {
-    try {
-      const detail = await this.userService.editUsrEmailReq(user_id, body);
-      if (!detail.req_change_email) throw BaseResponse.unexpected({ err: 'changeEmail !detail.req_change_email' });
-      const base64 = encodeBase64(detail.req_change_email)
-      const linkChangePassword = `${process.env.FE_DOMAIN}/${process.env.URL_CHANGE_PASSWORD as string}/${base64}?type=email`;
-      const mailOptions = {
-        from: `"Acong Kelontong <No Reply>" <${process.env.SMTP_USER as string}>`,
-        to: detail.req_change_email,
-        subject: "Verify New Email",
-        html: `Hello <b>${detail.first_name}</b>! \nPlease click the link below to verify your new email: \n${linkChangePassword}`,
-      };
-      this.mailerService
-        .sendMail({
-          ...mailOptions,
-        })
-        .then((res) => {
-          console.info("Email sent: " + JSON.stringify(res))
-        })
-        .catch((err) => {
-          console.error(err)
-        });
-      return BaseResponse.success({ res, option: { message: 'Verification email sent', detail } })
-    } catch (err) {
-      return BaseResponse.error({ res, err });
-    }
-  }
-
-  @Put('confirm-new-email')
-  async confirmNewEmail(
-    @Body() body: { ticket: string },
-    @Res() res: Response,
-  ) {
-    try {
-      const base64 = decodeBase64(body.ticket);
-      const detail = await this.userService.editUsrEmailConfirm(base64);
-      return BaseResponse.success({ res, option: { message: "Success update user email", detail } });
-    } catch (err) {
-      return BaseResponse.error({ res, err });
-    }
-  }
-
-  @Put('verify')
-  async verifyUser(
-    @Body() body: { ticket: string, new_password: string },
-    @Res() res: Response,
-  ) {
-    const { ticket, new_password } = body;
-    try {
-      const isVerified = await this.userService.verifyUser(ticket, new_password);
-      if (isVerified) {
-        return BaseResponse.success({ res, option: { message: "User verified successfully" } });
-      } else {
-        throw BaseResponse.invalid({ res, option: { message: "Invalid or expired verification token" } });
-      }
     } catch (err) {
       return BaseResponse.error({ res, err });
     }

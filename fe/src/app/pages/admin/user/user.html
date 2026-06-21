@@ -8,17 +8,6 @@
     <app-generic-table ngSkipHydration [columns]="columns" [data]="listUser" [usePagination]="true" [useSearch]="true"
         [filterSelect]="filterSelect" [total]="pagination.total" (OnDataRefresh)="getList($event)"
         [isLoading]="isLoading">
-        <div appTableColumn customColumnId="status">
-            <ng-template let-item>
-                @if(item.verified){
-                Verified
-                } @else {
-                <a (click)="resendVerification(item._id)" class="text-primary pointer">
-                    Unverified
-                </a>
-                }
-            </ng-template>
-        </div>
         <div appTableColumn customColumnId="action">
             <ng-template let-item>
                 <div class="d-flex flex-row gap-1 justify-content-end">

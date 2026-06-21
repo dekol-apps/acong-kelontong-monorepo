@@ -8,6 +8,7 @@ import { PurchaseOrderService } from '../services/purchase-order.service';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { UsePermission } from '../../../shared/directives/use-permission/use-permission';
+import { TModules } from '../../../types/interfaces/user.interface';
 @Component({
   selector: 'app-purchase-order-detail',
   imports: [PurchasingDetail, ConfirmModal, FormsModule, TranslateModule, UsePermission],
@@ -15,6 +16,7 @@ import { UsePermission } from '../../../shared/directives/use-permission/use-per
   styleUrl: './purchase-order-detail.scss'
 })
 export class PurchaseOrderDetail {
+  TModules = TModules;
   @ViewChild('DeleteModal') confrimDelete?: ConfirmModal;
   @ViewChild('ApproveModal') confrimApprove?: ConfirmModal;
   @ViewChild('RejectModal') confrimReject?: ConfirmModal;

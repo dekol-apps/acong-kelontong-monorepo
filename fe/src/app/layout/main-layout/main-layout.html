@@ -106,7 +106,7 @@
                 </li>
                 <!--end::Messages Dropdown Menu-->
                 <!--begin::Notifications Dropdown Menu-->
-                <li class="nav-item dropdown">
+                <!-- <li class="nav-item dropdown">
                     <button type="button" class="nav-link border-0 bg-transparent" data-bs-toggle="dropdown">
                         <i class="bi bi-bell-fill"></i>
                         <span class="navbar-badge badge text-bg-warning">15</span>
@@ -131,7 +131,7 @@
                         <div class="dropdown-divider"></div>
                         <button type="button" class="dropdown-item dropdown-footer">{{ 'layout.main.seeAllNotifications' | translate }}</button>
                     </div>
-                </li>
+                </li> -->
                 <!--end::Notifications Dropdown Menu-->
                 <!--begin::Fullscreen Toggle-->
                 <li class="nav-item">
@@ -144,14 +144,14 @@
                 <!--begin::User Menu Dropdown-->
                 <li class="nav-item dropdown user-menu">
                     <button type="button" class="nav-link dropdown-toggle border-0 bg-transparent" data-bs-toggle="dropdown">
-                        <img src="adminlte/img/user2-160x160.jpg" class="user-image rounded-circle shadow"
+                        <img [src]="profilePhoto" class="user-image rounded-circle shadow"
                             alt="User Image" />
                         <span class="d-none d-md-inline">{{userName}}</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
                         <!--begin::User Image-->
                         <li class="user-header text-bg-primary">
-                            <img src="adminlte/img/user2-160x160.jpg" class="rounded-circle shadow"
+                            <img [src]="profilePhoto" class="rounded-circle shadow"
                                 alt="User Image" />
                             <p>
                                 {{userName}}
@@ -162,11 +162,11 @@
                         <!--begin::Menu Body-->
                         <li class="user-body">
                             <!--begin::Row-->
-                            <div class="row">
+                            <!-- <div class="row">
                                 <div class="col-4 text-center"><button type="button" class="btn btn-link p-0 align-baseline">{{ 'layout.main.followers' | translate }}</button></div>
                                 <div class="col-4 text-center"><button type="button" class="btn btn-link p-0 align-baseline">{{ 'layout.main.sales' | translate }}</button></div>
                                 <div class="col-4 text-center"><button type="button" class="btn btn-link p-0 align-baseline">{{ 'layout.main.friends' | translate }}</button></div>
-                            </div>
+                            </div> -->
                             <!--end::Row-->
                         </li>
                         <!--end::Menu Body-->
@@ -292,12 +292,12 @@
     <!--begin::Footer-->
     <footer class="app-footer">
         <!--begin::To the end-->
-        <div class="float-end d-none d-sm-inline">{{ 'layout.main.footerTagline' | translate }}</div>
+        <!-- <div class="float-end d-none d-sm-inline">{{ 'layout.main.footerTagline' | translate }}</div> -->
         <!--end::To the end-->
         <!--begin::Copyright-->
         <strong>
-            Copyright &copy; 2014-2025&nbsp;
-            <a href="https://adminlte.io" class="text-decoration-none">AdminLTE.io</a>.
+            Copyright &copy; 2020-{{ thisYear }}&nbsp;
+            <a href="https://herirudini.github.io" class="text-decoration-none">Heri Rudini</a>.
         </strong>
         All rights reserved.
         <!--end::Copyright-->

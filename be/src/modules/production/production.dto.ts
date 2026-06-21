@@ -12,6 +12,7 @@ export class ProductionDto {
   product: Types.ObjectId; // Product being made
 
   @IsInt()
+  @Type(() => Number)
   @Min(1)
   item_qty: number; // Product being made qty
 
@@ -36,6 +37,7 @@ export class ProductionIngredientItemDto {
   product: Types.ObjectId;
 
   @IsInt()
+  @Type(() => Number)
   @Min(1)
   item_qty: number;
 }

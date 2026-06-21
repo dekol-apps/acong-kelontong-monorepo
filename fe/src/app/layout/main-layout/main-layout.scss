@@ -16,3 +16,20 @@
   overflow-y: auto;
   text-overflow: ellipsis;
 }
+
+.user-menu .user-image {
+  width: 34px;
+  height: 34px;
+  object-fit: cover;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.user-header img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+  margin: 0 auto 0.75rem auto;
+}

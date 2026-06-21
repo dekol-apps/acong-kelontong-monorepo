@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { RoleService } from '../role-service';
 import { FormArray, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IRoleUpsertDto, TModules } from '../../../../types/interfaces/user.interface';
@@ -8,40 +8,36 @@ import { FormValidation } from '../../../../shared/directives/form-validation/fo
 import { AlertService } from '../../../../shared/components/alert/alert-service';
 import { formType } from '../../../../types/interfaces/common.interface';
 import { TranslateModule } from '@ngx-translate/core';
+import { AuthService } from '../../../../services/auth/auth-service';
 
 const permissionSections = [
   {
-    label: 'Dashboard',
-    rows: [
-      { label: 'Dashboard', module: 'dashboard', actions: ['view'] as const },
-    ],
-  },
-  {
     label: 'Approval',
     rows: [
-      { label: 'Purchasing Approval', module: 'approval_purchasing', actions: ['view', 'create'] as const },
-      { label: 'Expense Approval', module: 'approval_expense', actions: ['view', 'create'] as const },
+      { label: 'Purchasing Approval', module: 'approval_purchasing', actions: ['view', 'create', 'edit', 'delete'] as const },
+      { label: 'Expense Approval', module: 'approval_expense', actions: ['view', 'create', 'edit', 'delete'] as const },
     ],
   },
   {
     label: 'Investment',
     rows: [
-      { label: 'Investment', module: 'investment', actions: ['view'] as const },
+      { label: 'Investment', module: 'investment', actions: ['view', 'create', 'edit', 'delete'] as const },
     ],
   },
   {
     label: 'Sales',
     rows: [
-      { label: 'Cashier / Sales History', module: 'sale_cashier', actions: ['view', 'create', 'edit'] as const },
-      { label: 'Sale Stock', module: 'sale_stock', actions: ['view', 'create'] as const },
+      { label: 'Cashier / Sales History', module: 'sale_cashier', actions: ['view', 'create', 'edit', 'delete'] as const },
+      { label: 'Sale Stock', module: 'sale_stock', actions: ['view', 'create', 'edit', 'delete'] as const },
     ],
   },
   {
     label: 'Supplies',
     rows: [
+      { label: 'Suppliers', module: 'supplier', actions: ['view', 'create', 'edit', 'delete'] as const },
       { label: 'Inventory', module: 'inventory', actions: ['view', 'create', 'edit', 'delete'] as const },
       { label: 'Purchase Order', module: 'purchasing', actions: ['view', 'create', 'edit', 'delete'] as const },
-      { label: 'Receive Order', module: 'purchasing_receive', actions: ['view', 'create'] as const },
+      { label: 'Receive Order', module: 'purchasing_receive', actions: ['view', 'create', 'edit', 'delete'] as const },
       { label: 'Production', module: 'production', actions: ['view', 'create', 'edit', 'delete'] as const },
     ],
   },
@@ -55,8 +51,8 @@ const permissionSections = [
   {
     label: 'Finance',
     rows: [
-      { label: 'Finance Report', module: 'finance_report', actions: ['view'] as const },
-      { label: 'Cashflow', module: 'cashflow', actions: ['view'] as const },
+      { label: 'Finance Report', module: 'finance_report', actions: ['view', 'create', 'edit', 'delete'] as const },
+      { label: 'Cashflow', module: 'cashflow', actions: ['view', 'create', 'edit', 'delete'] as const },
       { label: 'Expenses', module: 'expenses', actions: ['view', 'create', 'edit', 'delete'] as const },
     ],
   },
@@ -91,14 +87,21 @@ interface PermissionSectionConfig {
   styleUrl: './role-form.scss'
 })
 export class RoleForm implements OnInit {
+  private readonly roleService = inject(RoleService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly alert = inject(AlertService);
+  private readonly auth = inject(AuthService);
+
   isLoading = false;
   searchTerm = '';
   selectedOnly = false;
-  @Input() type: formType = 'new';
-  @Input() id?: string;
+  @Input() type: formType = this.resolveType();
+  @Input() id?: string = this.route.snapshot.paramMap.get('role_id') || undefined;
 
   permissionSections: PermissionSectionConfig[] = [];
   permissionRows: PermissionRowConfig[] = [];
+  private lastSelectedPermissions = new Set<string>();
   actionColumns: Array<{ id: PermissionAction; label: string }> = [
     { id: 'view', label: 'View' },
     { id: 'create', label: 'Create' },
@@ -114,6 +117,29 @@ export class RoleForm implements OnInit {
 
   get modules(): FormArray<FormGroup> {
     return this.form.get('modules') as FormArray<FormGroup>;
+  }
+
+  get totalSelectablePermissions(): number {
+    return this.permissionRows.reduce((total, row) => total + row.actions.length, 0);
+  }
+
+  get selectedPermissionsCount(): number {
+    return this.permissionRows.reduce((total, row) => {
+      const group = this.modules.at(row.formIndex) as FormGroup | undefined;
+      if (!group) {
+        return total;
+      }
+
+      return total + row.actions.reduce((rowTotal, action) => rowTotal + (group.get(action)?.value ? 1 : 0), 0);
+    }, 0);
+  }
+
+  get allPermissionsChecked(): boolean {
+    return this.totalSelectablePermissions > 0 && this.selectedPermissionsCount === this.totalSelectablePermissions;
+  }
+
+  get somePermissionsChecked(): boolean {
+    return this.selectedPermissionsCount > 0 && !this.allPermissionsChecked;
   }
 
   get visibleSections(): PermissionSectionConfig[] {
@@ -133,12 +159,13 @@ export class RoleForm implements OnInit {
       .filter((section) => section.rows.length > 0);
   }
 
-  constructor(private roleService: RoleService, private route: ActivatedRoute, private router: Router, private alert: AlertService) {
-    this.id = this.route.snapshot.paramMap.get('role_id') || undefined;
+  private resolveType(): formType {
     const type = this.route.snapshot.queryParamMap.get('type') || undefined;
     if (type && ['new', 'edit', 'view'].includes(type)) {
-      this.type = type as formType;
+      return type as formType;
     }
+
+    return 'new';
   }
 
   private buildModuleGroup(row: PermissionRowConfig, selectedPermissions: Set<string>): FormGroup {
@@ -190,6 +217,41 @@ export class RoleForm implements OnInit {
     this.permissionRows = rows;
   }
 
+  private applyPermissionSelection(permissions: Set<string>) {
+    this.permissionRows.forEach((row) => {
+      const group = this.modules.at(row.formIndex) as FormGroup | undefined;
+      if (!group) {
+        return;
+      }
+
+      row.actions.forEach((action) => {
+        const control = group.get(action);
+        if (control && !control.disabled) {
+          control.setValue(permissions.has(`${row.module}.${action}`));
+        }
+      });
+    });
+  }
+
+  private captureCurrentPermissions(): Set<string> {
+    const selectedPermissions = new Set<string>();
+
+    this.permissionRows.forEach((row) => {
+      const group = this.modules.at(row.formIndex) as FormGroup | undefined;
+      if (!group) {
+        return;
+      }
+
+      row.actions.forEach((action) => {
+        if (group.get(action)?.value) {
+          selectedPermissions.add(`${row.module}.${action}`);
+        }
+      });
+    });
+
+    return selectedPermissions;
+  }
+
   getModules() {
     this.isLoading = true;
     this.roleService.getModules().subscribe({
@@ -214,18 +276,8 @@ export class RoleForm implements OnInit {
       next: (res) => {
         this.form.controls.role_name.patchValue(res.role_name);
         this.form.controls.active.patchValue(res.active);
-        const formArray = this.modules;
-        res.modules.forEach((item) => {
-          const [module, action] = item.split('.');
-          const row = this.permissionRows.find((permissionRow) => permissionRow.module === module);
-          if (!row || !action) {
-            return;
-          }
-          const group = formArray.at(row.formIndex) as FormGroup | undefined;
-          if (group?.get(action)) {
-            group.get(action)?.setValue(true);
-          }
-        });
+        this.lastSelectedPermissions = new Set(res.modules);
+        this.applyPermissionSelection(this.lastSelectedPermissions);
         this.isLoading = false;
       },
       error: () => {
@@ -249,6 +301,18 @@ export class RoleForm implements OnInit {
 
   sectionSelectedCount(section: PermissionSectionConfig) {
     return section.rows.reduce((total, row) => total + (this.rowHasSelection(row.formIndex) ? 1 : 0), 0);
+  }
+
+  toggleAllPermissions(event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+
+    if (checked) {
+      this.lastSelectedPermissions = this.captureCurrentPermissions();
+      this.applyPermissionSelection(new Set(this.permissionRows.flatMap((row) => row.actions.map((action) => `${row.module}.${action}`))));
+      return;
+    }
+
+    this.applyPermissionSelection(this.lastSelectedPermissions);
   }
 
   submit() {
@@ -276,7 +340,7 @@ export class RoleForm implements OnInit {
     serviceArg.subscribe({
       next: () => {
         this.alert.success(`Success ${this.type == 'edit' ? 'edit' : 'create'} role!`);
-        this.exit();
+        this.auth.logout();
       }
     });
   }

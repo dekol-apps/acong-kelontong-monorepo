@@ -25,6 +25,8 @@ jobs:
   docker-build:
     name: Build Images
     runs-on: [self-hosted, x200-ghaction]
+    env:
+      DOCKER_CONFIG: ${{ github.workspace }}/.docker-ci
     if: github.event_name == 'push' || github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.image_tag == '')
 
     steps:
@@ -35,6 +37,11 @@ jobs:
         id: repo_meta
         run: |
           echo "repo_lowercase=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
+      - name: Prepare Docker config for CI
+        run: |
+          mkdir -p "${DOCKER_CONFIG}"
+          printf '%s\n' '{}' > "${DOCKER_CONFIG}/config.json"
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
@@ -70,6 +77,8 @@ jobs:
   deploy:
     name: Deploy
     runs-on: [self-hosted, x200-ghaction]
+    env:
+      DOCKER_CONFIG: ${{ github.workspace }}/.docker-ci
     needs: [docker-build]
     if: |
       (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
@@ -99,6 +108,11 @@ jobs:
           fi
 
           echo "image_tag=${IMAGE_TAG_INPUT}" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare Docker config for CI
+        run: |
+          mkdir -p "${DOCKER_CONFIG}"
+          printf '%s\n' '{}' > "${DOCKER_CONFIG}/config.json"
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
@@ -203,6 +217,43 @@ jobs:
           echo "Backend image: ${TARGET_BE_IMAGE}"
           echo "Frontend image: ${TARGET_FE_IMAGE}"
 
+          remove_acong_app_containers_in_context() {
+            local ctx="$1"
+
+            if ! docker context inspect "${ctx}" >/dev/null 2>&1; then
+              return 0
+            fi
+
+            for cname in acong-be acong-fe; do
+              if docker --context "${ctx}" inspect "${cname}" >/dev/null 2>&1; then
+                echo "Removing existing ${cname} in context ${ctx} before deployment"
+                docker --context "${ctx}" rm -f "${cname}" || true
+              fi
+            done
+          }
+
+          fail_if_port_still_in_use() {
+            local port="$1"
+
+            if command -v ss >/dev/null 2>&1 && ss -ltn "( sport = :${port} )" | tail -n +2 | grep -q .; then
+              echo "Host port ${port} is still in use after removing acong-be/acong-fe."
+              echo "This indicates another process/container is holding the port."
+              for ctx in default desktop-linux; do
+                if docker context inspect "${ctx}" >/dev/null 2>&1; then
+                  echo "Context ${ctx} containers publishing ${port}:"
+                  docker --context "${ctx}" ps --filter "publish=${port}" --format 'table {{.ID}}\t{{.Names}}\t{{.Ports}}' || true
+                fi
+              done
+              ss -ltnp "( sport = :${port} )" || true
+              exit 1
+            fi
+          }
+
+          remove_acong_app_containers_in_context default
+          remove_acong_app_containers_in_context desktop-linux
+          fail_if_port_still_in_use "${BE_PORT_VALUE}"
+          fail_if_port_still_in_use "${FE_PORT_VALUE}"
+
           docker compose -f "${COMPOSE_FILE}" -f docker-compose.ci.override.yml pull be fe
           docker compose -f "${COMPOSE_FILE}" -f docker-compose.ci.override.yml up -d --remove-orphans --no-build
           docker compose -f "${COMPOSE_FILE}" -f docker-compose.ci.override.yml ps
@@ -271,6 +322,7 @@ jobs:
                 "    image: ${CURRENT_FE_IMAGE}" \
                 > docker-compose.ci.rollback.yml
 
+              docker compose -f "${COMPOSE_FILE}" -f docker-compose.ci.rollback.yml pull be fe
               docker compose -f "${COMPOSE_FILE}" -f docker-compose.ci.rollback.yml up -d --remove-orphans
 
               if check_health; then

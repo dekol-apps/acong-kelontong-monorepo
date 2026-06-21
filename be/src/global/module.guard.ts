@@ -19,7 +19,7 @@ export class ModuleGuard implements CanActivate {
 
     const havePermission = requiredPermission.some(permission => user.role.modules.includes(permission));
 
-    console.log({havePermission, modules: user.role.modules})
+    console.log({havePermission, modules: user.role.modules, request: request.url, requiredPermission});
 
     if (!havePermission) throw BaseResponse.forbidden({ err: 'ModuleGuard !havePermission', option: { message: "You don't have permission for this access" } });;
     return true;

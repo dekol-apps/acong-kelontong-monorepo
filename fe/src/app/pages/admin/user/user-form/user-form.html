@@ -10,20 +10,37 @@
       <div class="d-flex flex-row flex-wrap justify-content-between gap-2">
         <div class="w-100">
           <label for="first_name" class="form-label required">{{ 'First name' | translate }}</label>
-          <input type="text" class="form-control" id="first_name" formControlName="first_name"
-            [readOnly]="type==='edit'" />
+          <input type="text" class="form-control" id="first_name" formControlName="first_name" />
         </div>
 
         <div class="w-100">
           <label for="last_name" class="form-label required">{{ 'Last name' | translate }}</label>
-          <input type="text" class="form-control" id="last_name" formControlName="last_name"
-            [readOnly]="type==='edit'" />
+          <input type="text" class="form-control" id="last_name" formControlName="last_name" />
+        </div>
+
+        <div class="w-100">
+          <label for="username" class="form-label required">{{ 'Username' | translate }}</label>
+          <input type="text" class="form-control" id="username" formControlName="username" />
         </div>
 
         <div class="w-100">
           <label for="email" class="form-label required">{{ 'Email' | translate }}</label>
-          <input type="text" class="form-control" id="email" formControlName="email" [readOnly]="type==='edit'" />
+          <input type="email" class="form-control" id="email" formControlName="email" />
         </div>
+
+        @if (type === 'new') {
+        <div class="w-100">
+          <div class="form-text mb-2">Initial password will be the same as the username.</div>
+        </div>
+        }
+
+        @if (type === 'edit') {
+        <div class="w-100">
+          <label for="password" class="form-label">{{ 'Password' | translate }}</label>
+          <input type="password" class="form-control" id="password" formControlName="password"
+            placeholder="Leave blank to keep current password" />
+        </div>
+        }
 
         <div class="w-100">
           <label for="role" class="form-label required">{{ 'Role' | translate }}</label>

@@ -1,11 +1,11 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength, IsOptional, IsEnum } from 'class-validator';
+import { IsNotEmpty, IsString, MinLength, IsOptional, IsEnum } from 'class-validator';
 import { logoutOption } from 'src/types/enums';
 import type { TLogoutOption } from 'src/types/interfaces';
 
 export class LoginDto {
-  @IsEmail()
+  @IsString()
   @IsNotEmpty()
-  email: string;
+  username: string;
 
   @IsString()
   @IsNotEmpty()

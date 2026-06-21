@@ -14,10 +14,21 @@ interface IParamsUser extends ITableQueryData {
 }
 
 interface IBodyInviteUser {
+  username: string;
   first_name: string;
   last_name: string;
   email: string;
   role: string; // role._id
+}
+
+interface IBodyEditUser {
+  username?: string;
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  password?: string;
+  role?: string;
+  user_photo?: string;
 }
 
 interface IGetRoles extends ITableQueryData {
@@ -61,11 +72,12 @@ export class UserService extends BaseService {
     );
   }
 
-  resendInvitationEmail(user_id: string): Observable<IUser> {
-    return this.postRequest({ url: Endpoint.USER_ID_REINVITE(user_id) }).pipe(
-      map((res: IResDetail<IUser>) => {
-        return res.detail;
-      })
+  editUser(
+    user_id: string,
+    body: IBodyEditUser
+  ): Observable<IUser> {
+    return this.putRequest({ url: Endpoint.USER_ID(user_id), body }).pipe(
+      map((res: IResDetail<IUser>) => res.detail)
     );
   }
 
@@ -89,19 +101,19 @@ export class UserService extends BaseService {
   }
 
   getMyProfile(): Observable<IUser> {
-    return this.getRequest({ url: Endpoint.USER_PROFILE }).pipe(
+    return this.getRequest({ url: Endpoint.PROFILE }).pipe(
       map((res: IResDetail<IUser>) => res.detail)
     );
   }
 
   updateMyProfile(body: Pick<IUser, 'first_name' | 'last_name'>): Observable<IUser> {
-    return this.putRequest({ url: Endpoint.USER_PROFILE, body }).pipe(
+    return this.putRequest({ url: Endpoint.PROFILE, body }).pipe(
       map((res: IResDetail<IUser>) => res.detail)
     );
   }
 
   changeMyPassword(body: { old_password: string; new_password: string }): Observable<IUser> {
-    return this.putRequest({ url: Endpoint.USER_PROFILE_CHANGE_PASSWORD, body }).pipe(
+    return this.putRequest({ url: Endpoint.PROFILE_CHANGE_PASSWORD, body }).pipe(
       map((res: IResDetail<IUser>) => res.detail)
     );
   }
@@ -114,8 +126,28 @@ export class UserService extends BaseService {
     );
   }
 
-  verifyUser(body: { ticket: string, new_password }): Observable<IUser> {
-    return this.putRequest({ url: Endpoint.USER_VERIFY, body });
+  changePasswordViaEmail(body: { token: string; new_password: string }): Observable<IUser> {
+    return this.putRequest({ url: Endpoint.PROFILE_CHANGE_PASSWORD_VIA_EMAIL, body }).pipe(
+      map((res: IResDetail<IUser>) => res.detail)
+    );
+  }
+
+  uploadMyPhoto(data: FormData): Observable<IUser> {
+    return this.putRequest({ url: Endpoint.PROFILE_PHOTO, body: data }).pipe(
+      map((res: IResDetail<IUser>) => res.detail)
+    );
+  }
+
+  changeEmailRequest(body: { new_email: string }): Observable<IUser> {
+    return this.putRequest({ url: Endpoint.PROFILE_CHANGE_EMAIL_REQUEST, body }).pipe(
+      map((res: IResDetail<IUser>) => res.detail)
+    );
+  }
+
+  confirmNewEmail(body: { ticket: string }): Observable<IUser> {
+    return this.putRequest({ url: Endpoint.PROFILE_CONFIRM_NEW_EMAIL, body }).pipe(
+      map((res: IResDetail<IUser>) => res.detail)
+    );
   }
 
   getRoles(qParams: IGetRoles): Observable<IResList<IRole>> {

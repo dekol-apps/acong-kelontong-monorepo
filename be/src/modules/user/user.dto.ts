@@ -23,6 +23,9 @@ export class GetUserListDto extends PaginationDto {
 }
 
 export class InviteUserDto {
+  @IsString()
+  @IsNotEmpty()
+  username: string;
   @IsEmail()
   @IsNotEmpty()
   email: string;
@@ -43,6 +46,12 @@ export class ChangePasswordDto {
 
 export class IEditUser {
   @IsOptional()
+  @IsString()
+  username?: string;
+  @IsOptional()
+  @IsEmail()
+  email?: string;
+  @IsOptional()
   first_name?: string;
   @IsOptional()
   last_name?: string;
@@ -51,6 +60,9 @@ export class IEditUser {
   user_photo?: string;
   @IsOptional()
   role?: Types.ObjectId;
+  @IsOptional()
+  @IsString()
+  password?: string;
 }
 
 export class UpdateProfileDto {

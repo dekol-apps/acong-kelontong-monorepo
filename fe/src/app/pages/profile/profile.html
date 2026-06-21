@@ -17,27 +17,43 @@
       <div class="row align-items-center g-4">
         <div class="col-lg-auto">
           <div class="profile-avatar">
+            @if (profile?.user_photo) {
+            <img src="{{ profile?.user_photo }}" alt="avatar" class="avatar-img" />
+            } @else {
             {{ profileInitials }}
+            }
+          </div>
+          <div class="mt-2">
+            <input type="file" accept="image/*" (change)="onPhotoSelected($event)" />
+            <div class="mt-2">
+              <button type="button" class="btn btn-sm btn-outline-primary" [disabled]="isUploadingPhoto">
+                {{ isUploadingPhoto ? 'Uploading...' : 'Upload photo' }}
+              </button>
+            </div>
           </div>
         </div>
         <div class="col-lg">
           <p class="text-uppercase text-muted mb-1 small fw-semibold">My Account</p>
           <h1 class="display-6 mb-2">{{ profile?.first_name }} {{ profile?.last_name }}</h1>
-          <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
-            <span class="badge rounded-pill text-bg-light border">{{ roleName }}</span>
-            <span class="badge rounded-pill" [class.text-bg-success]="profile?.verified" [class.text-bg-warning]="!profile?.verified">
-              {{ profile?.verified ? 'Verified' : 'Pending verification' }}
-            </span>
-          </div>
-          <p class="text-muted mb-0 profile-summary-text">
-            Update your display name and password from one place. The name change will reflect in the header immediately.
+          <span class="badge rounded-pill text-bg-light border">{{ roleName }}</span>
+          <p class="text-muted mb-0 profile-summary-text mt-3">
+            Update your display name, email, and password from one place. Name changes reflect in the header immediately.
           </p>
         </div>
         <div class="col-lg-auto">
           <div class="profile-meta card border-0 shadow-none bg-transparent">
             <div class="meta-item">
+              <span class="meta-label">Username</span>
+              <span class="meta-value">{{ username }}</span>
+            </div>
+            <div class="meta-item">
               <span class="meta-label">Email</span>
               <span class="meta-value">{{ profile?.email || '-' }}</span>
+              @if (profile?.email) {
+              <span class="badge rounded-pill" [class.text-bg-success]="profile?.verified" [class.text-bg-warning]="!profile?.verified">
+                {{ profile?.verified ? 'Verified' : 'Not Verified' }}
+              </span>
+              }
             </div>
             <div class="meta-item">
               <span class="meta-label">Role</span>
@@ -107,6 +123,31 @@
             <div class="d-flex justify-content-end">
               <button type="submit" class="btn btn-outline-primary" [disabled]="isSavingPassword">
                 {{ isSavingPassword ? 'Updating...' : 'Change password' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mt-0">
+    <div class="col-12">
+      <div class="card profile-card border-0 shadow-sm">
+        <div class="card-header bg-transparent border-0 pt-4 px-4 px-lg-4 pb-0">
+          <h2 class="h5 mb-1">Change email</h2>
+          <p class="text-muted mb-0">Request a verification link to move this account to a new email address.</p>
+        </div>
+        <div class="card-body p-4">
+          <form [formGroup]="emailForm" appFormValidation (ngSubmit)="changeEmail()" class="d-grid gap-3">
+            <div>
+              <label for="newEmail" class="form-label required">New email</label>
+              <input id="newEmail" type="email" class="form-control" formControlName="new_email" />
+              <div class="form-text">A verification link will be sent to the new address before the change is applied.</div>
+            </div>
+            <div class="d-flex justify-content-end">
+              <button type="submit" class="btn btn-outline-primary" [disabled]="isSavingEmail">
+                {{ isSavingEmail ? 'Sending...' : 'Request email change' }}
               </button>
             </div>
           </form>

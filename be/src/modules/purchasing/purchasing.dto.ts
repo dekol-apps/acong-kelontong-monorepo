@@ -75,6 +75,7 @@ export class PurchaseOrderDto {
   shipping_cost?: Types.Decimal128;
 
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   ppn_rate?: number;
 }

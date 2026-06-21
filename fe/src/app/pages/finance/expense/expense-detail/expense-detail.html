@@ -78,8 +78,8 @@
     }
 
     @if (detail?.status === ExpenseEn.REQUEST) {
-    <button [usePermission]="true" [permissions]="['approval_expense.create']" class="btn btn-danger" type="button" (click)="rejectExpense()">{{ 'Reject' | translate }}</button>
-    <button [usePermission]="true" [permissions]="['approval_expense.create']" class="btn btn-success" type="button" (click)="approveExpense()">{{ 'Approve' | translate }}</button>
+    <button [usePermission]="true" [permissions]="[TModules.APPROVAL_EXPENSE_CREATE]" class="btn btn-danger" type="button" (click)="rejectExpense()">{{ 'Reject' | translate }}</button>
+    <button [usePermission]="true" [permissions]="[TModules.APPROVAL_EXPENSE_CREATE]" class="btn btn-success" type="button" (click)="approveExpense()">{{ 'Approve' | translate }}</button>
     }
 
     @if (detail?.status === ExpenseEn.APPROVE) {
