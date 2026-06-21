@@ -24,6 +24,10 @@ import { Accounting, AccountingSchema } from 'src/modules/accounting/accounting.
 import { AccountingSnapshot, AccountingSnapshotSchema } from 'src/modules/accounting/accounting-snapshot.schema';
 import { Auth, AuthSchema } from 'src/modules/auth/auth.schema';
 import { InventoryReconcile, InventoryReconcileSchema } from 'src/modules/inventory-item/inventory-reconcile.schema';
+import { Trash, TrashSchema } from 'src/global/global.schema';
+import { GlobalService } from 'src/global/global.service';
+import { AccountingService } from 'src/modules/accounting/accounting.service';
+import { InvestmentService } from 'src/modules/investment/investment.service';
 
 @Module({
   imports: [
@@ -46,6 +50,7 @@ import { InventoryReconcile, InventoryReconcileSchema } from 'src/modules/invent
       { name: AccountingSnapshot.name, schema: AccountingSnapshotSchema },
       { name: Auth.name, schema: AuthSchema },
       { name: InventoryReconcile.name, schema: InventoryReconcileSchema },
+      { name: Trash.name, schema: TrashSchema },
     ]),
   ],
   providers: [
@@ -54,6 +59,9 @@ import { InventoryReconcile, InventoryReconcileSchema } from 'src/modules/invent
     ProductSeederService,
     SupplierSeederService,
     BalanceSeederService,
+    GlobalService,
+    AccountingService,
+    InvestmentService,
   ],
   exports: [
     MongooseModule,
@@ -62,6 +70,9 @@ import { InventoryReconcile, InventoryReconcileSchema } from 'src/modules/invent
     ProductSeederService,
     SupplierSeederService,
     BalanceSeederService,
+    GlobalService,
+    AccountingService,
+    InvestmentService,
   ],
 })
 export class SeederModule { }

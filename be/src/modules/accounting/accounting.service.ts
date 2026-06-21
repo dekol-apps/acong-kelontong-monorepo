@@ -232,7 +232,7 @@ export class AccountingService {
         {
           $group: {
             _id: null,
-            total: { $sum: "$transaction_amount" },
+            total: { $sum: { $toDecimal: "$transaction_amount" } },
           },
         },
       ]).session(session);
