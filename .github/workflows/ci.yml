@@ -25,6 +25,10 @@ jobs:
   docker-build:
     name: Build Images
     runs-on: self-hosted
+    # This forces all steps inside this job to use Bash on Windows 11 IoT
+    defaults:
+      run:
+        shell: bash
     env:
       DOCKER_CONFIG: ${{ github.workspace }}/.docker-ci
     if: github.event_name == 'push' || github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.image_tag == '')
@@ -77,6 +81,10 @@ jobs:
   deploy:
     name: Deploy
     runs-on: self-hosted
+    # This forces all steps inside this job to use Bash on Windows 11 IoT
+    defaults:
+      run:
+        shell: bash
     env:
       DOCKER_CONFIG: ${{ github.workspace }}/.docker-ci
     needs: [docker-build]
