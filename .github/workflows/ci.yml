@@ -28,7 +28,8 @@ jobs:
     # This forces all steps inside this job to use Bash on Windows 11 IoT
     defaults:
       run:
-        shell: bash
+      # bash 0 to force using git bash
+        shell: bash {0}
     env:
       DOCKER_CONFIG: ${{ github.workspace }}/.docker-ci
     if: github.event_name == 'push' || github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.image_tag == '')
@@ -84,7 +85,7 @@ jobs:
     # This forces all steps inside this job to use Bash on Windows 11 IoT
     defaults:
       run:
-        shell: bash
+        shell: bash {0}
     env:
       DOCKER_CONFIG: ${{ github.workspace }}/.docker-ci
     needs: [docker-build]
