@@ -94,7 +94,7 @@ services:
     depends_on:
       - be
     ports:
-      - "${FE_PORT}:4200"
+      - "${FE_PORT}:80"
 
 volumes:
   mongo_data:
