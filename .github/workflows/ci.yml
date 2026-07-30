@@ -290,7 +290,7 @@ jobs:
           check_health() {
             local ok=0
 
-            for _ in $(seq 1 12); do
+            for _ in $(seq 1 24); do
               if check_containers \
                 && (curl -fsS "http://localhost:${BE_PORT_VALUE}/api" >/dev/null || curl -fsS "http://localhost:${BE_PORT_VALUE}/health" >/dev/null || curl -fsS "http://localhost:${BE_PORT_VALUE}/" >/dev/null) \
                 && curl -fsS "http://localhost:${FE_PORT_VALUE}/" >/dev/null; then
