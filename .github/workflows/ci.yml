@@ -270,6 +270,17 @@ jobs:
           # Wait for nginx to start
           sleep 100
 
+          # Verify ports are actually bound to containers before health checks
+          for _ in $(seq 1 30); do
+            if docker port acong-be 2>/dev/null | grep -q ":${BE_PORT_VALUE}$" && \
+               docker port acong-fe 2>/dev/null | grep -q ":${FE_PORT_VALUE}$"; then
+              echo "Ports are properly bound to containers"
+              break
+            fi
+            echo "Waiting for ports to be bound to containers..."
+            sleep 2
+          done
+
           check_containers() {
             if [ "$(docker inspect --format='{{.State.Running}}' acong-be 2>/dev/null || echo false)" != "true" ]; then
               echo "Backend container is not running"
