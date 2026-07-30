@@ -48,12 +48,7 @@
               "node_modules/bootstrap/dist/js/bootstrap.min.js",
               "node_modules/overlayscrollbars/browser/overlayscrollbars.browser.es6.min.js",
               "node_modules/apexcharts/dist/apexcharts.min.js"
-            ],
-            "server": "src/main.server.ts",
-            "outputMode": "server",
-            "ssr": {
-              "entry": "src/server.ts"
-            }
+            ]
           },
           "configurations": {
             "production": {
