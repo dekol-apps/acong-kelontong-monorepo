@@ -268,7 +268,7 @@ jobs:
           docker compose -f "${COMPOSE_FILE}" -f docker-compose.ci.override.yml ps
 
           # Wait for nginx to start
-          sleep 10
+          sleep 100
 
           check_containers() {
             if [ "$(docker inspect --format='{{.State.Running}}' acong-be 2>/dev/null || echo false)" != "true" ]; then
